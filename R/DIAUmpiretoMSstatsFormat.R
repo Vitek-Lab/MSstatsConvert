@@ -1,23 +1,28 @@
-
-## raw.frag : FragSummary
-## raw.pep : PeptideSummary with selected_fragmnet
-## raw.pro : ProteinSummary with selected_peptide
-
-## useUniquePeptide : remove peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-## summaryforMultipleRows : max or sum - when there are multiple measurements for certain feature and certain fun, use highest or sum of all.
-## fewMeasurements : if 1 or 2 measurements across runs per feature, 'remove' will remove those featuares. It can affected for unequal variance analysis.
-
+#' Import DIA-Umpire files 
+#' 
+#' @inheritParams .documentFunction
+#' @param raw.frag name of FragSummary_date.xls data, which includes feature-level data.
+#' @param raw.pep name of PeptideSummary_date.xls data, which includes selected fragments information.
+#' @param raw.pro name of ProteinSummary_date.xls data, which includes selected peptides information.
+#' @param annotation name of annotation data which includes Condition, BioReplicate, Run information.
+#' @param useSelectedFrag TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.
+#' @param useSelectedPep TRUE will use the selected peptide for each protein. 'Selected_peptides' column is required.
+#' 
+#' @return data.frame with the required format of MSstats.
+#'
+#' @author Meena Choi, Olga Vitek 
+#'
 #' @export
+#' 
 #' @importFrom dplyr %>% left_join semi_join group_by summarise
 #' @importFrom tidyr separate_rows
 #' @import stringr
-DIAUmpiretoMSstatsFormat <- function(raw.frag, raw.pep, raw.pro, 
-                                annotation,
-                                useSelectedFrag = TRUE,
-                                useSelectedPep = TRUE,
-                                fewMeasurements="remove",
-                                removeProtein_with1Feature = FALSE,
-                                summaryforMultipleRows=max){
+#'
+
+DIAUmpiretoMSstatsFormat <- function(
+    raw.frag, raw.pep, raw.pro, annotation, useSelectedFrag = TRUE,
+    useSelectedPep = TRUE, fewMeasurements="remove",
+    removeProtein_with1Feature = FALSE, summaryforMultipleRows=max) {
 	
     if (is.null(fewMeasurements)) {
         stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')

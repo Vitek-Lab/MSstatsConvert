@@ -6,10 +6,12 @@ Authors@R: c(
   person("Tsung-Heng", "Tsai", email = "tsai.tsungheng@gmail.com", role = "aut"), 
   person("Cyril", "Galitzine", email = "cyrildgg@gmail.com", role = "aut"), 
   person("Ting", "Huang", email = "thuang0703@gmail.com", role = "aut"),
-  person("Mateusz", "Staniak", email = "staniak@math.uni.wroc.pl", role = "aut")
+  person("Mateusz", "Staniak", email = "staniak@math.uni.wroc.pl", role = "aut"),
   person("Olga", "Vitek", , email = "o.vitek@northeastern.edu", role = "aut")) 
 Description: MSstatsConvert provides tools for importing results of Mass Spectrometry data analysis
     into R format suitable for statistical analysis using the MSstats package.
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.0.2

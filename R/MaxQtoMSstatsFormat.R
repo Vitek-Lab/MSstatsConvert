@@ -1,26 +1,25 @@
-
-## evidence : evidence.txt
-## annotation : annotation.txt - Raw.file, Condition, BioReplicate, Run, (IsotopeLabelType)
-## proteinGroups : proteinGroups.txt . if proteinGroups=NULL, use 'Proteins'. if not, use proteinGroups information for matching Protein group ID
-
-## proteinID : Proteins or Leading.razor.protein
-## useUniquePeptide : remove peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-## summaryforMultipleRows : max or sum - when there are multiple measurements for certain feature and certain fun, use highest or sum of all.
-## fewMeasurements : if 1 or 2 measurements across runs per feature, 'remove' will remove those featuares. It can affected for unequal variance analysis.
-## remove_m_sequencepeptides : remove the peptides including 'M' sequence
-## experiment : "DDA" or "SILAC"
-
+#' Import MaxQuant files
+#' 
+#' @inheritParams .documentFunction
+#' @param evidence name of 'evidence.txt' data, which includes feature-level data.
+#' @param annotation name of 'annotation.txt' data which includes Raw.file, Condition, BioReplicate, Run, IsotopeLabelType information.
+#' @param proteinGroups name of 'proteinGroups.txt' data. It needs to matching protein group ID. If proteinGroups=NULL, use 'Proteins' column in 'evidence.txt'.
+#' @param proteinID 'Proteins'(default) or 'Leading.razor.protein' for Protein ID.
+#' 
+#' @return data.frame with the required format of MSstats.
+#' 
+#' @note Warning: MSstats does not support for metabolic labeling or iTRAQ experiments.
+#' 
+#' @author Meena Choi, Olga Vitek. 
+#' 
 #' @export
-MaxQtoMSstatsFormat <- function(evidence, 
-                                annotation,
-                                proteinGroups, 
-                                proteinID="Proteins", 
-                                useUniquePeptide=TRUE, 
-                                summaryforMultipleRows=max, 
-                                fewMeasurements="remove", 
-                                removeMpeptides=FALSE,
-                                removeOxidationMpeptides=FALSE,
-                                removeProtein_with1Peptide=FALSE){
+#' 
+
+MaxQtoMSstatsFormat <- function(
+    evidence, annotation, proteinGroups, proteinID = "Proteins", 
+    useUniquePeptide = TRUE, summaryforMultipleRows=max, 
+    fewMeasurements = "remove", removeMpeptides = FALSE,
+    removeOxidationMpeptides = FALSE, removeProtein_with1Peptide = FALSE) {
 	
     if (is.null(fewMeasurements)) {
         stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')

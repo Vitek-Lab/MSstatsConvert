@@ -1,9 +1,19 @@
-
-## Converter for Proteome discoverer output
-
-## output from Proteome discoverer : PSM sheet
-
+#' Import Proteome Discoverer files
+#' 
+#' @inheritParams .documentFunction
+#' @param annotation name of 'annotation.txt' or 'annotation.csv' data which includes Condition, BioReplicate, 
+#' Run information. 'Run' will be matched with 'Spectrum.File'.
+#' @param useNumProteinsColumn TRUE removes peptides which have more than 1 in # Proteins column of PD output.
+#' @param which.quantification Use 'Precursor.Area'(default) column for quantified intensities. 'Intensity' or 'Area' can be used instead.
+#' @param which.proteinid Use 'Protein.Accessions'(default) column for protein name. 'Master.Protein.Accessions' can be used instead.
+#' @param which.sequence Use 'Sequence'(default) column for peptide sequence. 'Annotated.Sequence' can be used instead.
+#' 
+#' @return data.frame with the required format of MSstats.
+#' 
+#' @author Meena Choi, Olga Vitek
+#' 
 #' @export
+#' 
 PDtoMSstatsFormat <- function(input,
                               annotation,
                               useNumProteinsColumn=FALSE,
@@ -15,7 +25,7 @@ PDtoMSstatsFormat <- function(input,
                               which.quantification = 'Precursor.Area',
                               which.proteinid = 'Protein.Group.Accessions',
                               which.sequence = 'Sequence'){
-
+    
     ## check annotation
     required.annotation <- c('Condition', 'BioReplicate', 'Run')
     
@@ -31,7 +41,7 @@ PDtoMSstatsFormat <- function(input,
     ## check annotation information
     ## get annotation
     annotinfo <- unique(annotation[, c("Run", "Condition", 'BioReplicate')])	
-
+    
     ## Each Run should has unique information about condition and bioreplicate
     check.annot <- xtabs(~Run, annotinfo)
     if ( any(check.annot > 1) ) {
@@ -78,7 +88,7 @@ PDtoMSstatsFormat <- function(input,
     }
     
     if (!is.element(which.quant, colnames(input))) {
-       stop('** Please select which columns should be used for quantified intensities, among three options (Intensity, Area, Precursor.Area).')
+        stop('** Please select which columns should be used for quantified intensities, among three options (Intensity, Area, Precursor.Area).')
     }
     
     ################################################
@@ -149,26 +159,26 @@ PDtoMSstatsFormat <- function(input,
     ################################################
     ## 1. get subset of columns
     ################################################
-  
+    
     input <- input[, which(colnames(input) %in% c(which.pro, "X..Proteins",
-                                                which.seq, "Modifications", "Charge",
-                                                "Spectrum.File", which.quant))]
+                                                  which.seq, "Modifications", "Charge",
+                                                  "Spectrum.File", which.quant))]
     
     colnames(input)[colnames(input) == which.pro] <- 'ProteinName'
     
     colnames(input)[colnames(input) == 'X..Proteins'] <- 'numProtein'
     colnames(input)[colnames(input) == which.seq] <- 'PeptideSequence'
-
+    
     colnames(input)[colnames(input) == 'Spectrum.File'] <- 'Run'
     
     colnames(input)[colnames(input) == which.quant] <- 'Intensity'
-
-  
+    
+    
     ################################################
     ## 2. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
     ################################################
-  
+    
     if (useNumProteinsColumn) {
         
         ## remove rows with #proteins is not 1
@@ -178,7 +188,7 @@ PDtoMSstatsFormat <- function(input,
     }
     
     if (useUniquePeptide) {
-
+        
         ## double check
         pepcount <- unique(input[, c("ProteinName", "PeptideSequence")]) 
         pepcount$PeptideSequence <- factor(pepcount$PeptideSequence)
@@ -186,7 +196,7 @@ PDtoMSstatsFormat <- function(input,
         ## count how many proteins are assigned for each peptide
         structure <- aggregate(ProteinName ~ ., data=pepcount, length)
         remove_peptide <- structure[structure$ProteinName != 1, ]
-    
+        
         ## remove the peptides which are used in more than one protein
         if (length(remove_peptide$Proteins != 1) != 0) {
             input <- input[-which(input$Sequence %in% remove_peptide$Sequence), ]
@@ -194,21 +204,21 @@ PDtoMSstatsFormat <- function(input,
             message('** Peptides, that are used in more than one proteins, are removed.')
         }
     }
-  
+    
     ################################################
     ## 3. remove the peptides including oxidation (M) sequence
     ################################################
-  
+    
     if (removeOxidationMpeptides) {
         remove_m_sequence <- unique(input[grep("Oxidation", input$Modifications), "Modifications"])
-    
+        
         if (length(remove_m_sequence) > 0) {
             input <- input[-which(input$Modifications %in% remove_m_sequence), ]
         }
-    
+        
         message('Peptides including oxidation(M) in the Modifications are removed.')
     }
- 
+    
     ##############################
     ## 4. remove multiple measurements per feature and run
     ##############################
@@ -217,15 +227,15 @@ PDtoMSstatsFormat <- function(input,
                         value.var='Intensity', 
                         fun.aggregate=summaryforMultipleRows, 
                         fill=NA_real_) 
- 
+    
     ## reformat for long format
     input_sub <- melt(input_sub, id=c('ProteinName', 'PeptideSequence', 'Modifications', 'Charge'))
     colnames(input_sub)[which(colnames(input_sub) %in% c('variable','value'))] <- c("Run", "Intensity")
-  
+    
     message('** Multiple measurements in a feature and a run are summarized by summaryforMultipleRows.')
-  
+    
     input <- input_sub
-
+    
     ##############################
     ## 5. add annotation
     ##############################
@@ -238,14 +248,14 @@ PDtoMSstatsFormat <- function(input,
     }
     
     input <- merge(input, annotation, by="Run", all=TRUE)
-  
+    
     ## add other required information
     input$FragmentIon <- NA
     input$ProductCharge <- NA
     input$IsotopeLabelType <- "L"
-  
+    
     input$PeptideModifiedSequence <- paste(input$PeptideSequence, input$Modifications, sep="_")
-  
+    
     input.final <- data.frame("ProteinName" = input$ProteinName,
                               "PeptideModifiedSequence" = input$PeptideModifiedSequence,
                               "PrecursorCharge" = input$Charge,
@@ -256,7 +266,7 @@ PDtoMSstatsFormat <- function(input,
                               "BioReplicate" = input$BioReplicate,
                               "Run" = input$Run,
                               "Intensity" = input$Intensity)
-  
+    
     if (any(is.element(colnames(input), 'Fraction'))) {
         input.final <- data.frame(input.final,
                                   "Fraction" = input$Fraction)
@@ -305,52 +315,52 @@ PDtoMSstatsFormat <- function(input,
         xtmp <- input[!is.na(input$Intensity) & input$Intensity > 0, ]
         xtmp$feature <- paste(xtmp$PeptideModifiedSequence, xtmp$PrecursorCharge, sep="_")
         count_measure <- xtabs( ~feature, xtmp)
-    
+        
         remove_feature_name <- count_measure[count_measure < 3]
-    
+        
         input$feature <- paste(input$PeptideModifiedSequence, input$PrecursorCharge, sep="_")
-    
+        
         if (length(remove_feature_name) > 0) {
             input <- input[-which(input$feature %in% names(remove_feature_name)), ]
         }
-    
+        
         input <- input[, -which(colnames(input) %in% c('feature'))]
     }
-  
+    
     ##############################
     ##  8. remove proteins with only one peptide and charge per protein
     ##############################
-	
-	if (removeProtein_with1Peptide) {
-	  
-	    ## remove protein which has only one peptide
-	    input$feature <- paste(input$PeptideModifiedSequence, 
-	                           input$PrecursorCharge, 
-	                           input$FragmentIon, 
-	                           input$ProductCharge, 
-	                           sep="_")
-	  
-	    tmp <- unique(input[, c("ProteinName", 'feature')])
-	    tmp$ProteinName <- factor(tmp$ProteinName)
-	    count <- xtabs( ~ ProteinName, data=tmp)
-        lengthtotalprotein <- length(count)
     
-	    removepro <- names(count[count <= 1])
-	  
-	    if (length(removepro) > 0) {
-	    
-	        input <- input[-which(input$ProteinName %in% removepro), ]
-	        message(paste0("** ", length(removepro), 
-	                       ' proteins, which have only one feature in a protein, are removed among ', 
-	                       lengthtotalprotein, ' proteins.'))
-	    }
-	  
-	    input <- input[, -which(colnames(input) %in% c('feature'))]
-	}
-  
+    if (removeProtein_with1Peptide) {
+        
+        ## remove protein which has only one peptide
+        input$feature <- paste(input$PeptideModifiedSequence, 
+                               input$PrecursorCharge, 
+                               input$FragmentIon, 
+                               input$ProductCharge, 
+                               sep="_")
+        
+        tmp <- unique(input[, c("ProteinName", 'feature')])
+        tmp$ProteinName <- factor(tmp$ProteinName)
+        count <- xtabs( ~ ProteinName, data=tmp)
+        lengthtotalprotein <- length(count)
+        
+        removepro <- names(count[count <= 1])
+        
+        if (length(removepro) > 0) {
+            
+            input <- input[-which(input$ProteinName %in% removepro), ]
+            message(paste0("** ", length(removepro), 
+                           ' proteins, which have only one feature in a protein, are removed among ', 
+                           lengthtotalprotein, ' proteins.'))
+        }
+        
+        input <- input[, -which(colnames(input) %in% c('feature'))]
+    }
+    
     input$ProteinName <- input$ProteinName
-  
-	return(input)
+    
+    return(input)
 }
 
 

@@ -1,10 +1,16 @@
-
-## Converter for Progenesis output
-## Thanks Ulrich Omasits : use R scripts by Ulrich Omasits, 2015, version 2.1
-
-## output from Progenesis : wide format 
-
+#' Import Progenesis files
+#' 
+#' @inheritParams .documentFunction
+#' @param input name of Progenesis output, which is wide-format. 'Accession', 'Sequence', 'Modification', 'Charge' and one column for each run are required.
+#' @param annotation name of 'annotation.txt' or 'annotation.csv' data which includes Condition, BioReplicate, Run information. It will be matched with the column name of input for MS runs.
+#'
+#' @return data.frame with the required format of MSstats.
+#' 
+#' @author Meena Choi, Olga Vitek, Ulrich Omasits
+#' 
 #' @export
+#' 
+
 ProgenesistoMSstatsFormat <- function(input, 
                                       annotation,
                                       useUniquePeptide=TRUE,

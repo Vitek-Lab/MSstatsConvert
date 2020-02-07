@@ -1,20 +1,23 @@
-
-## Pre-processing for Skyline output
-## columns from Skyline : ProteinName, PeptideSequence, PeptideModifiedSequence,
-##                        PrecursorCharge, PrecursorMz, FragmentIon, ProductCharge, ProductMz, IsotopeLabelType,   
-##                        Condition, BioReplicate, FileName, Area, StandardType, Truncated, DetectionQValue 
-
+#' Import Skyline files
+#'
+#' @inheritParams .documentFunction
+#' @param input name of MSstats input report from Skyline, which includes feature-level data.
+#' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Skyline, use annotation=NULL (default). It will use the annotation information from input.
+#' @param removeiRT TRUE (default) will remove the proteins or peptides which are labeld 'iRT' in 'StandardType' column. FALSE will keep them.
+#' @param filter_with_Qvalue TRUE(default) will filter out the intensities that have greater than qvalue_cutoff in DetectionQValue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.
+#' @param qvalue_cutoff Cutoff for DetectionQValue. default is 0.01.
+#' 
+#' @return data.frame with the required format of MSstats.
+#' 
+#' @author Meena Choi, Olga Vitek
+#' 
 #' @export
-SkylinetoMSstatsFormat <- function(input, 
-                                   annotation = NULL,
-                                   removeiRT = TRUE, 
-                                   filter_with_Qvalue = TRUE,
-                                   qvalue_cutoff = 0.01,
-                                   useUniquePeptide = TRUE,
-                                   fewMeasurements="remove",
-                                   removeOxidationMpeptides = FALSE,
-                                   removeProtein_with1Feature = FALSE){
-  
+#' 
+SkylinetoMSstatsFormat <- function(
+    input, annotation = NULL, removeiRT = TRUE, filter_with_Qvalue = TRUE,
+    qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements="remove",
+    removeOxidationMpeptides = FALSE, removeProtein_with1Feature = FALSE) {
+    
     if (is.null(fewMeasurements)) {
         stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
     }
@@ -26,10 +29,10 @@ SkylinetoMSstatsFormat <- function(input,
     ##############################
     ## 1. Rename column names
     ##############################
-  
+    
     ## replace '.' between words with no spzce
     colnames(input) <- gsub('\\.', '', colnames(input))
-
+    
     ## use PeptideModifiedSequence for PeptideSequence,
     ## if there are both peptidesequence and peptidemodifiedsequence,
     ## use peptidemodifiedsequence.
@@ -66,102 +69,102 @@ SkylinetoMSstatsFormat <- function(input,
     ##############################
     ## 2. Remove decoy protein name
     ##############################
-  
+    
     proname <- unique(input$ProteinName)
     decoy1 <- proname[grep('DECOY', proname)] 
     decoy2 <- proname[grep('Decoys', proname)] 
     decoy <- c(as.character(decoy1), decoy2)
-  
+    
     if (length(decoy) > 0) {
-    
+        
         input <- input[-which(input$ProteinName %in% decoy), ]
-    
+        
         message('** Proteins, which names include DECOY, are removed.')
     }
-
+    
     ##############################
     ## 3. Remove iRT proteins
     ##############################
-  
+    
     if (removeiRT) {
         irt <- unique(input$StandardType)
-  
+        
         if (sum(is.element(irt, 'iRT')) > 0) {
-    
+            
             input <- input[-which(input$StandardType %in% c("iRT")), ]
             message('** iRT proteins/peptides are removed.')
         }
     }
-
+    
     ################################################
     ## 4. remove the peptides including M sequence
     ################################################
-
+    
     if (removeOxidationMpeptides) {
         remove_oxim_sequence <- unique(input[grep("+16", input$PeptideSequence), "PeptideSequence"])
-    
+        
         if (length(remove_oxim_sequence) > 0) {
             input <- input[-which(input$PeptideSequence %in% remove_oxim_sequence), ]
         }
-    
+        
         message('** Peptides including M[+16] in the sequence are removed.')
     }
-  
+    
     ################################################
     ## 5. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
     ################################################
     if (useUniquePeptide) {
-    
+        
         pepcount <- unique(input[, c("ProteinName", "PeptideSequence")]) ## Protein.group.IDs or Sequence
         pepcount$PeptideSequence <- factor(pepcount$PeptideSequence)
-    
+        
         ## count how many proteins are assigned for each peptide
         structure <- pepcount %>% group_by(PeptideSequence) %>% summarise(length=length(ProteinName))
         
         remove_peptide <- structure[structure$length != 1, ]
-    
+        
         ## remove the peptides which are used in more than one protein
         if (nrow(remove_peptide) != 0){
             input <- input[-which(input$PeptideSequence %in% remove_peptide$PeptideSequence), ]
         }
-    
+        
         message('** Peptides, that are used in more than one proteins, are removed.')
     }
-  
+    
     ##############################
     ## 6. class of intensity is factor, change it as numeric
     ##############################
-
+    
     input$Intensity <- as.numeric(as.character(input$Intensity))
-  
+    
     ##############################
     ##  7. remove truncated peaks with NA
     ##############################
-  
+    
     if (is.element('True', input$Truncated)) {
         if (sum(!is.na(input$Truncated) & input$Truncated == 'True') > 0) {
-      
+            
             input[!is.na(input$Truncated) & input$Truncated == "True", "Intensity"] <- NA
             message('** Truncated peaks are replaced with NA.')
         }
     }
-  
+    
     if (is.element(TRUE, input$Truncated)) {
-    
+        
         if (sum(!is.na(input$Truncated) & input$Truncated) > 0) {
-    
+            
             input[!is.na(input$Truncated) & input$Truncated, "Intensity"] <- NA
             message('** Truncated peaks are replaced with NA.')
         }
     }
-  
+    
     ##############################
     ##  8. DDA : Sum for isotopic peaks per peptide and precursor charge for DDA
     ##############################
-
+    
     DDA <- FALSE
-  
+    
     ## check whether the dataset for DDA or not
     input$FragmentIon <- factor(input$FragmentIon)
     checkDDA <- setdiff(c('precursor', 'precursor [M+1]', 'precursor [M+2]'), levels(input$FragmentIon))
@@ -176,7 +179,7 @@ SkylinetoMSstatsFormat <- function(input,
     }
     
     if (length(checkDDA) < 3) {
-    
+        
         DDA <- TRUE
         ## add the column for unique peptide and precursor
         input$pepprecursor <- paste(input$PeptideSequence, input$PrecursorCharge, sep="_")
@@ -193,27 +196,27 @@ SkylinetoMSstatsFormat <- function(input,
                         value.var='Intensity', 
                         fun.aggregate=function(x) sum(x, na.rm=TRUE), 
                         fill=NA_real_) 
-    
+        
         ## make long format
         newdata <- melt(data_w, id.vars=c('pepprecursor'))
         colnames(newdata)[colnames(newdata) %in% c("variable","value")] <- c('Run','Intensity')
-    
+        
         ## assignn protein name
         uniinfo <- unique(input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", "pepprecursor")])	
-    
+        
         ## get annotation
         if (is.null(annotation)) {
             annotinfo <- unique(input[, c("Run", "Condition", 'BioReplicate')])	
         } else {
             annotinfo <- annotation
         }
-    	
+        
         input <- merge(newdata, uniinfo, by="pepprecursor")
-    
+        
         ## assign the annotation
         ## merge it by Run
         input <- merge(input, annotinfo, by="Run")
-    
+        
         ## add other required information
         input$FragmentIon <- "sum"
         input$ProductCharge <- NA
@@ -241,11 +244,11 @@ SkylinetoMSstatsFormat <- function(input,
         
         input <- input.final
         rm(input.final)
-    
+        
         message('** For DDA datasets, three isotopic peaks per feature and run are summed.')
-    
+        
     }
-  
+    
     
     ##############################
     ## 9. DIA : filter by Qvalue
@@ -316,35 +319,35 @@ SkylinetoMSstatsFormat <- function(input,
                            ' features have 1 or 2 intensities across runs and are removed.'))
         }
     }
-
+    
     ##############################
     ##  12. remove proteins with only one feature per protein
     ##############################
-	
-	if (removeProtein_with1Feature) {
-	    
-	    ## remove protein which has only one peptide
-	    tmp <- unique(input[, c("ProteinName", 'fea')])
-	    tmp$ProteinName <- factor(tmp$ProteinName)
-	    count <- xtabs( ~ ProteinName, data=tmp)
-        lengthtotalprotein <- length(count)
     
-	    removepro <- names(count[count <= 1])
-	  
-	    if (length(removepro) > 0) {
-	    
-	        input <- input[-which(input$ProteinName %in% removepro), ]
-	        
-	        message(paste0("** ", length(removepro), 
-	                       ' proteins, which have only one feature in a protein, are removed among ', 
-	                       lengthtotalprotein, ' proteins.'))
-	    } else {
-	        message("** All proteins have at least two features.")
-	    }
-	}
+    if (removeProtein_with1Feature) {
+        
+        ## remove protein which has only one peptide
+        tmp <- unique(input[, c("ProteinName", 'fea')])
+        tmp$ProteinName <- factor(tmp$ProteinName)
+        count <- xtabs( ~ ProteinName, data=tmp)
+        lengthtotalprotein <- length(count)
+        
+        removepro <- names(count[count <= 1])
+        
+        if (length(removepro) > 0) {
+            
+            input <- input[-which(input$ProteinName %in% removepro), ]
+            
+            message(paste0("** ", length(removepro), 
+                           ' proteins, which have only one feature in a protein, are removed among ', 
+                           lengthtotalprotein, ' proteins.'))
+        } else {
+            message("** All proteins have at least two features.")
+        }
+    }
     
     input <- input[, -which(colnames(input) %in% c('fea'))]
-  
+    
     ##############################
     ##  13. if annotation is missing,
     ##############################
@@ -385,9 +388,9 @@ SkylinetoMSstatsFormat <- function(input,
         input <- input.final
         rm(input.final)
     }
-  
+    
     input$ProteinName <- factor(input$ProteinName)
-  
-	return(input)
+    
+    return(input)
 }
 
