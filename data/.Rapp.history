@@ -1,0 +1,529 @@
+i=1
+sub <- data[data$Label == levels(data$Label)[i], ]#
+      		if (logBase.pvalue == 2) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 2^(-y.limUp)] <- 2^(-y.limUp)#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 10^(-y.limUp)] <- 10^(-y.limUp)#
+      		}
+if (logBase.pvalue == 2) {#
+      		y.limUp  <- 30#
+    	}#
+    	if (logBase.pvalue == 10) {#
+     	 	y.limUp  <- 10#
+    	}#
+    	if (is.numeric(ylimUp)) y.limUp <- ylimUp
+sub <- data[data$Label == levels(data$Label)[i], ]#
+      		if (logBase.pvalue == 2) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 2^(-y.limUp)] <- 2^(-y.limUp)#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 10^(-y.limUp)] <- 10^(-y.limUp)#
+      		}#
+      		sub <- as.data.frame(sub)
+if (logBase.pvalue == 2) {#
+        		y.limup <- ceiling(max(-log2(sub[!is.na(sub$adj.pvalue), "adj.pvalue"])))#
+        		if (y.limup < (-log2(sig))) {#
+        			y.limup <- (-log2(sig) + 1) ## for too small y.lim#
+        		}#
+      		}#
+     	 	if (logBase.pvalue == 10) {#
+        		y.limup <- ceiling(max(-log10(sub[!is.na(sub$adj.pvalue), "adj.pvalue"])))#
+        		if (y.limup < (-log10(sig))) {#
+        			y.limup <- (-log10(sig) + 1) ## for too small y.lim#
+        		}#
+      		}#
+      		## ylimDown#
+      		y.limdown <- 0 ## default is zero#
+      		if (is.numeric(ylimDown)) {#
+      			y.limdown <- ylimDown#
+      		}#
+      		## x.lim#
+      		x.lim <- ceiling(max(abs(sub[!is.na(sub[, 3]), 3]))) ## log2FC or log10FC#
+      		if (x.lim < 3) {#
+      			x.lim <- 3#
+      		}#
+      		if (is.numeric(xlimUp)) {#
+      			x.lim <- xlimUp#
+      		}
+subtemp <- sub#
+      		colnames(subtemp)[3] <- "logFC"#
+      		if (logBase.pvalue == 2) {#
+        		subtemp$log2adjp <- (-log2(subtemp$adj.pvalue))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		subtemp$log10adjp <- (-log10(subtemp$adj.pvalue))#
+        	}
+subtemp
+## Plotting#
+      		if (logBase.pvalue == 2) {#
+        		ptemp <- ggplot()+#
+        				geom_point(aes_string(x='logFC', y='log2adjp', color='colgroup', label='Protein'), size=dot.size, data=subtemp)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log2 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		ptemp <- ggplot(aes_string(x='logFC', y='log10adjp', color='colgroup', label='Protein'), data=subtemp)+#
+        				geom_point(size=dot.size)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log10 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+        	}
+library(ggplot2)
+## Plotting#
+      		if (logBase.pvalue == 2) {#
+        		ptemp <- ggplot()+#
+        				geom_point(aes_string(x='logFC', y='log2adjp', color='colgroup', label='Protein'), size=dot.size, data=subtemp)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log2 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		ptemp <- ggplot(aes_string(x='logFC', y='log10adjp', color='colgroup', label='Protein'), data=subtemp)+#
+        				geom_point(size=dot.size)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log10 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+        	}
+## x-axis labeling#
+      		if (colnames(sub)[3] == "log2FC") {#
+      			ptemp <- ptemp+scale_x_continuous('Log2 fold change', limit=c(-x.lim, x.lim))#
+      		}#
+      		if (colnames(sub)[3] == "log10FC") {#
+      			ptemp <- ptemp+scale_x_continuous('Log10 fold change', limit=c(-x.lim, x.lim))#
+      		}
+ptemp
+subtemp
+length(unique(colgroup))
+length(unique(subtemp$colgroup))
+message(paste("The volcano plot for ", unique(subtemp$Label), "does not show the protein names because none of them is significant.", sep="_"))
+message(paste("The volcano plot for ", unique(subtemp$Label), " does not show the protein names because none of them is significant.", sep=""))
+ProteinName
+if (ProteinName) {#
+      			if(length(unique(subtemp$colgroup))>1){#
+      				ptemp <- ptemp + geom_text_repel(data=filter(subtemp, colgroup!="black"), aes(label=Protein), size=text.size, col='black')#
+      			} else {#
+          			message(paste("The volcano plot for ", unique(subtemp$Label), " does not show the protein names because none of them is significant.", sep=""))#
+          		}#
+      		}
+ptemp
+if (ProteinName) {#
+      			if(length(unique(subtemp$colgroup))>1){#
+      				ptemp <- ptemp + geom_text_repel(data=filter(subtemp, colgroup!="black"), aes(label=Protein), size=text.size, col='black')#
+      			} else {#
+          			message(paste("The volcano plot for ", unique(subtemp$Label), " does not show the protein names because none of them is significant.", sep=""))#
+          		}#
+      		}
+ltypes <- c("type1"="twodash", "type2"="dotted")
+if (!FCcutoff) { #
+        		if (logBase.pvalue == 2) {#
+          			sigcut <- data.frame(logFC=seq(-x.lim, x.lim, length.out=20), log2adjp=(-log2(sig)), line='twodash')#
+          			pfinal <- ptemp + geom_line(data=sigcut, aes_string(x='logFC', y='log2adjp', linetype='line'), colour="darkgrey", size=0.6, show.legend=T)+#
+            			    scale_linetype_manual(values=c('twodash'=6), labels=c(paste("Adj p-value cutoff(", sig, ")", sep="")))+#
+            			    guides(colour=guide_legend(override.aes=list(linetype=0)),#
+            			    		linetype=guide_legend())#
+       	 		}#
+        		if (logBase.pvalue == 10) {#
+          			sigcut <- data.frame(Protein='sigline', logFC=seq(-x.lim, x.lim, length.out=20), log10adjp=(-log10(sig)), line='twodash')#
+         	 		pfinal <- ptemp + geom_line(data=sigcut, aes_string(x='logFC', y='log10adjp', linetype='line'), colour="darkgrey", size=0.6, show.legend=T)+#
+            			    scale_linetype_manual(values=c('twodash'=6), labels=c(paste("Adj p-value cutoff(", sig, ")", sep="")))+#
+            			    guides(colour=guide_legend(override.aes=list(linetype=0)),#
+            			    		linetype=guide_legend())#
+				}				#
+      		}
+pfinal
+is.numeric(FCcutoff)
+i=2
+sub <- data[data$Label == levels(data$Label)[i], ]#
+      		if (logBase.pvalue == 2) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 2^(-y.limUp)] <- 2^(-y.limUp)#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 10^(-y.limUp)] <- 10^(-y.limUp)#
+      		}
+sub <- as.data.frame(sub)#
+      		## ylimUp#
+      		if (logBase.pvalue == 2) {#
+        		y.limup <- ceiling(max(-log2(sub[!is.na(sub$adj.pvalue), "adj.pvalue"])))#
+        		if (y.limup < (-log2(sig))) {#
+        			y.limup <- (-log2(sig) + 1) ## for too small y.lim#
+        		}#
+      		}#
+     	 	if (logBase.pvalue == 10) {#
+        		y.limup <- ceiling(max(-log10(sub[!is.na(sub$adj.pvalue), "adj.pvalue"])))#
+        		if (y.limup < (-log10(sig))) {#
+        			y.limup <- (-log10(sig) + 1) ## for too small y.lim#
+        		}#
+      		}#
+      		## ylimDown#
+      		y.limdown <- 0 ## default is zero#
+      		if (is.numeric(ylimDown)) {#
+      			y.limdown <- ylimDown#
+      		}#
+      		## x.lim#
+      		x.lim <- ceiling(max(abs(sub[!is.na(sub[, 3]), 3]))) ## log2FC or log10FC#
+      		if (x.lim < 3) {#
+      			x.lim <- 3#
+      		}#
+      		if (is.numeric(xlimUp)) {#
+      			x.lim <- xlimUp#
+      		}#
+      		## for assigning x in ggplot2#
+      		subtemp <- sub#
+      		colnames(subtemp)[3] <- "logFC"#
+      		if (logBase.pvalue == 2) {#
+        		subtemp$log2adjp <- (-log2(subtemp$adj.pvalue))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		subtemp$log10adjp <- (-log10(subtemp$adj.pvalue))#
+        	}#
+      		## Plotting#
+      		if (logBase.pvalue == 2) {#
+        		ptemp <- ggplot()+#
+        				geom_point(aes_string(x='logFC', y='log2adjp', color='colgroup', label='Protein'), size=dot.size, data=subtemp)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log2 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		ptemp <- ggplot(aes_string(x='logFC', y='log10adjp', color='colgroup', label='Protein'), data=subtemp)+#
+        				geom_point(size=dot.size)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log10 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+        	}#
+     		## x-axis labeling#
+      		if (colnames(sub)[3] == "log2FC") {#
+      			ptemp <- ptemp+scale_x_continuous('Log2 fold change', limit=c(-x.lim, x.lim))#
+      		}#
+      		if (colnames(sub)[3] == "log10FC") {#
+      			ptemp <- ptemp+scale_x_continuous('Log10 fold change', limit=c(-x.lim, x.lim))#
+      		}
+ptemp
+subtemp
+ProteinName
+length(unique(subtemp$colgroup)) > 1
+ptemp <- ptemp + geom_text_repel(data=filter(subtemp, colgroup!="black"), aes(label=Protein), size=text.size, col='black')
+library(ggrepel)
+ptemp <- ptemp + geom_text_repel(data=filter(subtemp, colgroup!="black"), aes(label=Protein), size=text.size, col='black')
+subtemp
+sub <- data[data$Label == levels(data$Label)[i], ]
+sub
+if (logBase.pvalue == 2) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 2^(-y.limUp)] <- 2^(-y.limUp)#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		sub$adj.pvalue[sub$adj.pvalue < 10^(-y.limUp)] <- 10^(-y.limUp)#
+      		}#
+      		sub <- as.data.frame(sub)#
+      		## ylimUp#
+      		if (logBase.pvalue == 2) {#
+        		y.limup <- ceiling(max(-log2(sub[!is.na(sub$adj.pvalue), "adj.pvalue"])))#
+        		if (y.limup < (-log2(sig))) {#
+        			y.limup <- (-log2(sig) + 1) ## for too small y.lim#
+        		}#
+      		}#
+     	 	if (logBase.pvalue == 10) {#
+        		y.limup <- ceiling(max(-log10(sub[!is.na(sub$adj.pvalue), "adj.pvalue"])))#
+        		if (y.limup < (-log10(sig))) {#
+        			y.limup <- (-log10(sig) + 1) ## for too small y.lim#
+        		}#
+      		}#
+      		## ylimDown#
+      		y.limdown <- 0 ## default is zero#
+      		if (is.numeric(ylimDown)) {#
+      			y.limdown <- ylimDown#
+      		}#
+      		## x.lim#
+      		x.lim <- ceiling(max(abs(sub[!is.na(sub[, 3]), 3]))) ## log2FC or log10FC#
+      		if (x.lim < 3) {#
+      			x.lim <- 3#
+      		}#
+      		if (is.numeric(xlimUp)) {#
+      			x.lim <- xlimUp#
+      		}#
+      		## for assigning x in ggplot2#
+      		subtemp <- sub#
+      		colnames(subtemp)[3] <- "logFC"#
+      		if (logBase.pvalue == 2) {#
+        		subtemp$log2adjp <- (-log2(subtemp$adj.pvalue))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		subtemp$log10adjp <- (-log10(subtemp$adj.pvalue))#
+        	}#
+      		## Plotting#
+      		if (logBase.pvalue == 2) {#
+        		ptemp <- ggplot(aes_string(x='logFC', y='log2adjp', color='colgroup', label='Protein'), data=subtemp)+#
+        				geom_point(size=dot.size)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log2 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+      		}#
+      		if (logBase.pvalue == 10) {#
+        		ptemp <- ggplot(aes_string(x='logFC', y='log10adjp', color='colgroup', label='Protein'), data=subtemp)+#
+        				geom_point(size=dot.size)+#
+        				scale_colour_manual(values=c("gray65", "blue", "red"), limits=c("black", "blue", "red"), breaks=c("black", "blue", "red"), labels=c("No regulation", "Down-regulated", "Up-regulated"))+#
+        				scale_y_continuous('-Log10 (adjusted p-value)', limit=c(y.limdown, y.limup))+#
+        				labs(title=unique(sub$Label))#
+        	}#
+     		## x-axis labeling#
+      		if (colnames(sub)[3] == "log2FC") {#
+      			ptemp <- ptemp+scale_x_continuous('Log2 fold change', limit=c(-x.lim, x.lim))#
+      		}#
+      		if (colnames(sub)[3] == "log10FC") {#
+      			ptemp <- ptemp+scale_x_continuous('Log10 fold change', limit=c(-x.lim, x.lim))#
+      		}
+if (ProteinName) {#
+      			if(length(unique(subtemp$colgroup)) > 1){#
+      				ptemp <- ptemp + geom_text_repel(data=filter(subtemp, colgroup!="black"), aes(label=Protein), size=text.size, col='black')#
+      			} else {#
+          			message(paste("The volcano plot for ", unique(subtemp$Label), " does not show the protein names because none of them is significant.", sep=""))#
+          		}#
+      		}
+subtemp
+filter(subtemp, colgroup!="black")
+subtemp$colgroup
+ptemp + geom_text_repel(data=subtemp[subtemp$colgroup!="black", ]), aes(label=Protein), size=text.size, col='black')
+ptemp + geom_text_repel(data=subtemp[subtemp$colgroup!="black", ], aes(label=Protein), size=text.size, col='black')
+ptemp
+ltypes <- c("type1"="twodash", "type2"="dotted")
+!FCcutoff
+if (logBase.pvalue == 2) {#
+          			sigcut <- data.frame(logFC=seq(-x.lim, x.lim, length.out=20), log2adjp=(-log2(sig)), line='twodash')#
+          			pfinal <- ptemp + geom_line(data=sigcut, aes_string(x='logFC', y='log2adjp', linetype='line'), colour="darkgrey", size=0.6, show.legend=T)+#
+            			    scale_linetype_manual(values=c('twodash'=6), labels=c(paste("Adj p-value cutoff(", sig, ")", sep="")))+#
+            			    guides(colour=guide_legend(override.aes=list(linetype=0)),#
+            			    		linetype=guide_legend())#
+       	 		}
+sigcut <- data.frame(Protein='sigline', logFC=seq(-x.lim, x.lim, length.out=20), log2adjp=(-log2(sig)), line='twodash')#
+          			pfinal <- ptemp + geom_line(data=sigcut, aes_string(x='logFC', y='log2adjp', linetype='line'), colour="darkgrey", size=0.6, show.legend=T)+#
+            			    scale_linetype_manual(values=c('twodash'=6), labels=c(paste("Adj p-value cutoff(", sig, ")", sep="")))+#
+            			    guides(colour=guide_legend(override.aes=list(linetype=0)),#
+            			    		linetype=guide_legend())
+pfinal
+pfinal <- pfinal+theme(#
+        		panel.background = element_rect(fill='white', colour="black"),#
+        		panel.grid.minor = element_blank(),#
+        		axis.text.x = element_text(size=x.axis.size, colour="black"),#
+        		axis.text.y = element_text(size=y.axis.size, colour="black"),#
+        		axis.ticks = element_line(colour="black"),#
+        		axis.title.x = element_text(size=x.axis.size+5, vjust=-0.4),#
+        		axis.title.y = element_text(size=y.axis.size+5, vjust=0.3),#
+        		title = element_text(size=x.axis.size+8, vjust=1.5),#
+        		legend.position="bottom",#
+        		legend.key = element_rect(fill='white', colour='white'),#
+        		legend.text = element_text(size=legend.size),#
+        		legend.title = element_blank()#
+        		)#
+      		print(pfinal)
+library(MSstats)
+quant<-dataProcess(DDARawData)
+names(quant)
+head(quant$RunlevelData)
+test<-quantification(DDARawData)
+test<-quantification(DDARawData$ProcessedData)
+test<-quantification(quant$ProcessedData)
+head(test)
+data <- quant$RunlevelData
+hdad(data)
+head(data)
+data1<-dcast(LogIntensities~Protein+GROUP_ORIGINAL_SUBJECT_ORIGINAL, data)
+data1<-dcast(LogIntensities~Protein+GROUP_ORIGINAL+SUBJECT_ORIGINAL, data)
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities')
+data1
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median, keep=TRUE)
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=mean, keep=TRUE)
+data1
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=function(x) median(x, rm=na(x)), keep=TRUE)
+mean(c(1,2,3))
+median(c(1,2,3))
+class(data$LogIntensities)
+data$LogIntensities <- as.double(data$LogIntensities)
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=function(x) median(x, rm=na(x)), keep=TRUE)
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median, keep=TRUE)
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+data1
+data <- quant$RunlevelData
+head(data)
+data1<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+data1
+data_l <- melt(datam, id.vars=c('Protein', 'GROUP_ORIGINAL', 'SUBJECT_ORIGINAL'))
+datam<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+data_l <- melt(datam, id.vars=c('Protein', 'GROUP_ORIGINAL', 'SUBJECT_ORIGINAL'))
+data_l <- melt(datam, id.vars=c('Protein'))
+data_l
+tmp<-DDARawData
+head(tmp)
+tmp <- tmp[tmp$ProteinName!='chicken' & tmp$Run!='2', ]
+quant <- dataProcess(tmp)
+names(quant)
+head(quant$RunlevelData)
+test<-quantification(quant$ProcessedData)
+head(test)
+tmp<-DDARawData
+head(tmp)
+dim(tmp)
+tmp <- tmp[-which(tmp$ProteinName=='chicken' & tmp$Run=='2'), ]
+dim(tmp)
+quant <- dataProcess(tmp)
+names(quant)
+head(quant$RunlevelData)
+test<-quantification(quant$ProcessedData)
+head(test)
+unique(tmp[, c("ProteinName", 'Run')])
+quant <- dataProcess(tmp, MBimpute=FALSE)
+names(quant)
+head(quant$RunlevelData)
+test<-quantification(quant$ProcessedData)
+head(test)
+tmp<-DDARawData
+head(tmp)
+dim(tmp)
+tmp <- tmp[-which(tmp$ProteinName=='chicken' & tmp$Condition=='C2'), ]
+unique(tmp[, c("ProteinName", 'Run')])
+quant <- dataProcess(tmp, MBimpute=FALSE)
+names(quant)
+head(quant$RunlevelData)
+test<-quantification(quant$ProcessedData)
+head(test)
+data <- quant$RunlevelData
+head(data)
+datam<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+datam
+data_l <- melt(datam, id.vars=c('Protein'))
+colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Group_Subject', 'Intensity')
+data_l
+test<-quantification(quant$ProcessedData, format='long')
+test
+data <- quant$RunlevelData
+head(data)
+datam<-dcast(Protein~GROUP_ORIGINAL+SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+datam
+datam<-dcast(Protein + GROUP_ORIGINAL ~ SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+datam
+datam2  <- melt(datam, id.vars=c('Protein', "GROUP_ORIGINAL"))
+datam2
+colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Subject', 'LogIntensity')
+datam2  <- melt(datam, id.vars=c('Protein', "GROUP_ORIGINAL"))
+colnames(datam2)[colnames(datam2) %in% c("variable", "value")] <- c('Subject', 'LogIntensity')
+datam2
+datam3 <- dcast(Protein ~ GROUP_ORIGINAL , data=data, value.var='LogIntensities', fun.aggregate=median)
+datam3
+datam <- dcast(Protein + GROUP_ORIGINAL ~ SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+datam
+datam2  <- melt(datam, id.vars=c('Protein', "GROUP_ORIGINAL"))
+colnames(datam2)[colnames(datam2) %in% c("variable", "value")] <- c('Subject', 'LogIntensity')
+datam2
+datam3 <- dcast(Protein ~ GROUP_ORIGINAL , data=datam2, value.var='LogIntensities', fun.aggregate=median)
+datam3 <- dcast(Protein ~ GROUP_ORIGINAL , data=datam2, value.var='LogIntensity', fun.aggregate=median)
+datam3
+rm(c(datam, datam2))
+rm(c("datam", "datam2"))
+rm(ls("datam", "datam2"))
+rm(ls(datam, datam2))
+rm(datam)
+rm(datam2)
+datam3
+data_l <- melt(datam3, id.vars=c('Protein'))
+data_l
+colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Group', 'LogIntensity')
+data_l
+tmp<-SRMRawData
+head(tmp)
+dim(tmp)
+quant <- dataProcess(tmp, MBimpute=FALSE)
+names(quant)
+head(quant$RunlevelData)
+test<-quantification(quant$ProcessedData)
+test
+data <- quant$RunlevelData
+head(data)
+datarun <- data$RunlevelData#
+    	datarun$Protein <- factor(datarun$Protein)#
+   		datarun <- datarun[!is.na(data$LogIntensities), ]#
+   	 	datam <- dcast(Protein ~ GROUP_ORIGINAL + SUBJECT_ORIGINAL, data=datarun, value.var='LogIntensities', fun.aggregate=median)
+datarun <- data$RunlevelData
+datarun
+data <- quant
+datarun <- data$RunlevelData
+datarun
+datarun$Protein <- factor(datarun$Protein)#
+   		datarun <- datarun[!is.na(data$LogIntensities), ]#
+   	 	datam <- dcast(Protein ~ GROUP_ORIGINAL + SUBJECT_ORIGINAL, data=datarun, value.var='LogIntensities', fun.aggregate=median)
+datarun <- datarun[!is.na(data$LogIntensities), ]
+datarun <- datarun[!is.na(datarun$LogIntensities), ]
+datarun
+datarun <- data$RunlevelData
+datarun$Protein <- factor(datarun$Protein)
+datarun
+datarun <- datarun[!is.na(datarun$LogIntensities), ]
+datarun
+datam <- dcast(Protein ~ GROUP_ORIGINAL + SUBJECT_ORIGINAL, data=datarun, value.var='LogIntensities', fun.aggregate=median)
+datam
+data_l <- melt(datam, id.vars=c('Protein'))
+colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Group_Subject', 'LogIntensity')
+data_l
+datarun <- data$RunlevelData
+datarun$Protein <- factor(datarun$Protein)
+datarun <- datarun[!is.na(datarun$LogIntensities), ]
+datam <- dcast(Protein + GROUP_ORIGINAL ~ SUBJECT_ORIGINAL, data=data, value.var='LogIntensities', fun.aggregate=median)
+datam <- dcast(Protein + GROUP_ORIGINAL ~ SUBJECT_ORIGINAL, data=datarun, value.var='LogIntensities', fun.aggregate=median)
+datam
+datam2  <- melt(datam, id.vars=c('Protein', "GROUP_ORIGINAL"))
+colnames(datam2)[colnames(datam2) %in% c("variable", "value")] <- c('Subject', 'LogIntensity')
+datam2
+datam3 <- dcast(Protein ~ GROUP_ORIGINAL , data=datam2, value.var='LogIntensity', fun.aggregate=median)
+datam3
+datam
+rm(datam)
+rm(datam2)
+data_l <- melt(datam3, id.vars=c('Protein'))
+colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Group', 'LogIntensity')
+data_l
+datam3
+datal
+data_l
+?groupComparison
+quant <- dataProcess(SRMRawData)
+data<-quant
+rawinput <- c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition", "BioReplicate", "Run", "Intensity")
+rawinput
+length(setdiff(toupper(rawinput),toupper(colnames(data))))==0
+toupper(rawinput)
+toupper(colnames(data))
+toupper(colnames(data$ProcessedData))
+setdiff(toupper(rawinput),toupper(colnames(data$ProcessedData))
+)
+length(setdiff(toupper(rawinput),toupper(colnames(data$ProcessedData))))==0
+names(data)
+data$SummaryMethod
+library(MSstats)
+?MSstats
+install.packages(pkgs="/Users/Meena/Dropbox/MSstats_GitHub_private/MSstats_3.3.2.tar.gz",repos=NULL,type="source")
+setwd("/Users/Meena/Dropbox/MSstats_Project/bug_check/course/rat")
+raw<-read.csv("MSstats_Input_rat.csv")#
+head(raw)#
+#
+colnames(raw)<- c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition", "BioReplicate", "Run", "Intensity", "StandardType", "Truncated")#
+#
+raw <- raw[raw$Truncated!='True', ]#
+#
+library(MSstats)
+quant <- dataProcess(raw, normalization=FALSE, featureSubset='highQuality', skylineReport=TRUE)
+quant1 <- dataProcess(raw, normalization=FALSE, featureSubset='highQuality', remove_proteins_with_interference=TRUE, skylineReport=TRUE)
+raw<-DDARawData
+quant <- dataProcess(raw, normalization=FALSE, featureSubset='highQuality', skylineReport=TRUE)
+head(raw)
+raw$PrecursorCharge <- raw$FragmentIon
+head(raw$PrecursorCharge)
+head(raw)
+raw$FragmentIon <- 'NA'
+head(raw)
+quant <- dataProcess(raw, normalization=FALSE, featureSubset='highQuality', skylineReport=TRUE)
+quantkeep <- dataProcess(raw, normalization=FALSE, skylineReport=TRUE)
+setwd("/Users/Meena/Dropbox/MSstats_GitHub_private/MSstats/data")
+DDARawData <- raw
+head(DDARawData)
+save(DDARawData, file='DDARawData.RData')
+install.packages(pkgs="/Users/Meena/Dropbox/MSstats_GitHub_private/MSstats_3.3.3.tar.gz",repos=NULL,type="source")
