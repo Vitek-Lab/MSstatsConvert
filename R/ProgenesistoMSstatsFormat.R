@@ -105,16 +105,7 @@ ProgenesistoMSstatsFormat <- function(input,
     ## 4. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
     if (useUniquePeptide) {
-        pepcount <- unique(input[, c("Protein", "Sequence")]) 
-        pepcount$Sequence <- factor(pepcount$Sequence)
-        ## count how many proteins are assigned for each peptide
-        structure <- aggregate(Protein ~ ., data=pepcount, length)
-        remove_peptide <- structure[structure$Protein!=1, ]
-        ## remove the peptides which are used in more than one protein
-        if (length(remove_peptide$Protein != 1) != 0) {
-            input <- input[-which(input$Sequence %in% remove_peptide$Sequence), ]
-        }
-        message('** Peptides, that are used in more than one proteins, are removed.')
+        input = .removeSharedPeptides(input, "Protein", "Sequence")
     }
   
     ## 5. remove multiple measurements per feature and run
@@ -209,5 +200,3 @@ ProgenesistoMSstatsFormat <- function(input,
   
     return(x)
 }
-
-

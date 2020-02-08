@@ -86,17 +86,8 @@ SkylinetoMSstatsFormat <- function(
     
     ## 5. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
-    if (useUniquePeptide) {
-        pepcount <- unique(input[, c("ProteinName", "PeptideSequence")]) ## Protein.group.IDs or Sequence
-        pepcount$PeptideSequence <- factor(pepcount$PeptideSequence)
-        ## count how many proteins are assigned for each peptide
-        structure <- pepcount %>% group_by(PeptideSequence) %>% summarise(length=length(ProteinName))
-        remove_peptide <- structure[structure$length != 1, ]
-        ## remove the peptides which are used in more than one protein
-        if (nrow(remove_peptide) != 0){
-            input <- input[-which(input$PeptideSequence %in% remove_peptide$PeptideSequence), ]
-        }
-        message('** Peptides, that are used in more than one proteins, are removed.')
+    if(useUniquePeptide) {
+        input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
     }
     
     ## 6. class of intensity is factor, change it as numeric
@@ -105,7 +96,6 @@ SkylinetoMSstatsFormat <- function(
     ##  7. remove truncated peaks with NA
     if (is.element('True', input$Truncated)) {
         if (sum(!is.na(input$Truncated) & input$Truncated == 'True') > 0) {
-            
             input[!is.na(input$Truncated) & input$Truncated == "True", "Intensity"] <- NA
             message('** Truncated peaks are replaced with NA.')
         }
@@ -147,7 +137,7 @@ SkylinetoMSstatsFormat <- function(
                         fill=NA_real_) 
         ## make long format
         newdata <- melt(data_w, id.vars=c('pepprecursor'))
-        colnames(newdata)[colnames(newdata) %in% c("variable","value")] <- c('Run','Intensity')
+        colnames(newdata) = .updateColnames(newdata, c("variable" = "Run", "value" = "Intensity"))
         ## assignn protein name
         uniinfo <- unique(input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", "pepprecursor")])	
         ## get annotation
@@ -286,4 +276,3 @@ SkylinetoMSstatsFormat <- function(
     input$ProteinName <- factor(input$ProteinName)
     return(input)
 }
-

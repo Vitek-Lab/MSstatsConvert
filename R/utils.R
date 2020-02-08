@@ -12,12 +12,40 @@
 #' @keywords internal
 #' 
 
-.documentFunction <- function(fewMeasurements, 
-                              useUniquePeptide,
-                              summaryforMultipleRows, 
-                              removeProtein_with1Feature,
-                              removeProtein_with1Protein,
-                              removeOxidationMpeptides,
-                              removeMpeptides) {
+.documentFunction = function(fewMeasurements, 
+                             useUniquePeptide,
+                             summaryforMultipleRows, 
+                             removeProtein_with1Feature,
+                             removeProtein_with1Protein,
+                             removeOxidationMpeptides,
+                             removeMpeptides) {
     
+}
+
+.updateColnames = function(data_frame, column_update) {
+    columns <- colnames(data_frame)
+    not_changing <- setdiff(columns, names(column_update))
+    column_update[not_changing] <- not_changing
+    unname(column_update[columns])
+}
+
+
+# ALL DATA CHECKS!!
+
+
+# COMMON DATA PREPROCESSING
+
+.removeSharedPeptides = function(data_frame, proteins_column, peptides_column) {
+    unique_pairs = unique(data_frame[, c(proteins_column, peptides_column)])
+    protein_counts = aggregate(x = unique_pairs[[proteins_column]], 
+              by = list(peptide = unique_pairs[[peptides_column]]),
+              length)
+    counts = protein_counts[["x"]]
+    names(counts) = protein_counts[["peptide"]]
+    if(length(counts) == 0) {
+        data_frame
+    } else {
+        data_frame[counts[data_frame[[peptides_column]]] == 1, ]    
+    }
+    # TODO: message for the user / log
 }

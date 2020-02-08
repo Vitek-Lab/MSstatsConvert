@@ -133,9 +133,9 @@ MaxQtoMSstatsFormat <- function(
         infile <- infile[, get.column]
     }
     if (proteinID == 'Proteins') {
-        colnames(infile)[colnames(infile) == "uniqueProteins"] <- "Proteins"
+        colnames(infile) = .updateColnames(infile, "uniqueProteins" = "Proteins")
     } else {
-        colnames(infile)[colnames(infile) == "Leading.razor.protein"] <- "Proteins"
+        colnames(infile) = .updateColnames(infile, "Leading.razor.protein" = "Proteins")
     }
     ## remove "_" at the beginning and end
     infile$Modified.sequence <- gsub("_", "", infile$Modified.sequence)
@@ -158,21 +158,10 @@ MaxQtoMSstatsFormat <- function(
         
     }
     
-    ################################################
     ## 2. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
-    ################################################
-    if (useUniquePeptide) {
-        pepcount <- unique(infile[, c("Proteins","Modified.sequence")]) ## Protein.group.IDs or Sequence
-        pepcount$Modified.sequence <- factor(pepcount$Modified.sequence)
-        ## count how many proteins are assigned for each peptide
-        structure <- aggregate(Proteins ~ ., data=pepcount, length)
-        remove_peptide <- structure[structure$Proteins != 1, ]
-        ## remove the peptides which are used in more than one protein
-        if (length(remove_peptide$Proteins != 1) != 0) {
-            infile <- infile[-which(infile$Modified.sequence %in% remove_peptide$Modified.sequence), ]
-            message('** Peptides, that are used in more than one proteins, are removed.')
-        }
+    if(useUniquePeptide) {
+        infile = .removeSharedPeptides(infile, "Proteins", "Modified.sequence")
     }
     
     ## 3. duplicated(multiple) rows for certain feature and certain runs
@@ -195,10 +184,8 @@ MaxQtoMSstatsFormat <- function(
         ## *** remove features which has less than 2 measurements across runs
         ## !!! for MSstats v3, we don't need to remove them.
         ## good to remove before reformatting to long-format
-        
         if (fewMeasurements == "remove") {
             infile_w <- .remove_feature_with_few(infile_w)
-            
             message('** Peptide and charge, that have 1 or 2 measurements across runs, are removed.')
         }
         ## then, go back to long-format
@@ -221,16 +208,12 @@ MaxQtoMSstatsFormat <- function(
         ## take the highest intensity among duplicated or sum of intensities 
         ## summaryforMultipleRows="max" or "sum
         infile_w <- .cast_maxquant_to_wide_silac(infile, aggregateFun=summaryforMultipleRows)
-        
         ## *** remove features which has less than 2 measurements across runs
         ## good to remove before reformatting to long-format
-        
         if (fewMeasurements=="remove") {
-            
             ## it is the same across experiments. # measurement per feature. 
             infile_w <- .remove_feature_with_few(infile_w)
         }
-        
         ## then, go back to long-format
         # good to fill rows with NAs, then now can have balanced data-structure.
         infile_l <- .melt_maxquant_to_long_silac(infile_w)
@@ -338,4 +321,3 @@ MaxQtoMSstatsFormat <- function(
     x <- x[, -ncol(x)]
     return(x)
 }
-

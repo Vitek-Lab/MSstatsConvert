@@ -24,6 +24,7 @@ DIAUmpiretoMSstatsFormat <- function(
     useSelectedPep = TRUE, fewMeasurements="remove",
     removeProtein_with1Feature = FALSE, summaryforMultipleRows=max) {
     
+    
     if (is.null(fewMeasurements)) {
         stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
     }
@@ -166,9 +167,9 @@ DIAUmpiretoMSstatsFormat <- function(
     
     ## 5. reformat
     ## change column names
-    colnames(raw.selected)[colnames(raw.selected) == 'Protein'] <- 'ProteinName'
-    colnames(raw.selected)[colnames(raw.selected) == 'Peptide'] <- 'PeptideSequence'
-    colnames(raw.selected)[colnames(raw.selected) == 'Fragment'] <- 'FragmentIon'
+    colnames(raw.selected) = .updateColnames(
+        raw.selected, c("Protein" = "ProteinName", "Peptide" = "PeptideSequece",
+                        "Fragment" = "FragmentIon"))
     ## make long format
     raw.l <- melt(raw.selected, id.vars=c('ProteinName', 'PeptideSequence', 'FragmentIon'),
                   variable.name='Run', value.name='Intensity')
@@ -258,8 +259,5 @@ DIAUmpiretoMSstatsFormat <- function(
     
     input$IsotopeLabelType <- 'L'
     input$ProteinName <- factor(input$ProteinName)
-    
     return(input)
 }
-
-

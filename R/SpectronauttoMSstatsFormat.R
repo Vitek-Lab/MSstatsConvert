@@ -167,20 +167,7 @@ SpectronauttoMSstatsFormat <- function(
   ## 6. remove peptides which are used in more than one protein
   ## we assume to use unique peptide
   if (useUniquePeptide) {
-    pepcount <- unique(input[, c("ProteinName", "PeptideSequence")]) ## Protein.group.IDs or Sequence
-    pepcount$PeptideSequence <- factor(pepcount$PeptideSequence)
-    ## count how many proteins are assigned for each peptide
-    structure <- pepcount %>% group_by(PeptideSequence) %>% summarise(length=length(ProteinName))
-    remove_peptide <- structure[structure$length != 1, ]
-    ## remove the peptides which are used in more than one protein
-    if(nrow(remove_peptide) != 0){
-      input <- input[-which(input$PeptideSequence %in% remove_peptide$PeptideSequence), ]
-      message('** Peptides, that are used in more than one proteins, are removed.')
-    } else {
-      message('** All peptides are unique peptides in proteins.')
-    }
-    rm(structure)
-    rm(remove_peptide)
+    input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
   }
   
   ##  7. remove features which has 1 or 2 measurements across runs
@@ -246,5 +233,3 @@ SpectronauttoMSstatsFormat <- function(
 
   return(input)
 }
-
-

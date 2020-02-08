@@ -56,6 +56,7 @@ PDtoMSstatsFormat <- function(input,
     } else if (which.quantification == 'Precursor.Abundance') {
         which.quant <- 'Precursor.Abundance'
     }
+    
     if (is.null(which.quant)) {
         stop('** Please select which columns should be used for quantified intensities, 
              among three options (Intensity, Area, Precursor.Area, Precursor.Abundance).')
@@ -132,15 +133,12 @@ PDtoMSstatsFormat <- function(input,
     }
     
     ## 1. get subset of columns
-    input <- input[, which(colnames(input) %in% c(which.pro, "X..Proteins",
-                                                  which.seq, "Modifications", "Charge",
-                                                  "Spectrum.File", which.quant))]
-    colnames(input)[colnames(input) == which.pro] <- 'ProteinName'
-    colnames(input)[colnames(input) == 'X..Proteins'] <- 'numProtein'
-    colnames(input)[colnames(input) == which.seq] <- 'PeptideSequence'
-    colnames(input)[colnames(input) == 'Spectrum.File'] <- 'Run'
-    colnames(input)[colnames(input) == which.quant] <- 'Intensity'
-    
+    input = input[, c(which.pro, "X..Proteins", which.seq, "Modifications", 
+                      "Charge", "Spectrum.File", which.quant)]
+    colnames(input) = .updateColnames(
+        input, c(which.pro = "ProteinName", "X..Proteins" = "numProtein",
+                 which.seq = "PeptideSequence", "Spectrum.File" = "Run", 
+                 which.quant = "Intensity"))
     ## 2. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
     if (useNumProteinsColumn) {
@@ -150,17 +148,7 @@ PDtoMSstatsFormat <- function(input,
     }
     
     if (useUniquePeptide) {
-        ## double check
-        pepcount <- unique(input[, c("ProteinName", "PeptideSequence")]) 
-        pepcount$PeptideSequence <- factor(pepcount$PeptideSequence)
-        ## count how many proteins are assigned for each peptide
-        structure <- aggregate(ProteinName ~ ., data=pepcount, length)
-        remove_peptide <- structure[structure$ProteinName != 1, ]
-        ## remove the peptides which are used in more than one protein
-        if (length(remove_peptide$Proteins != 1) != 0) {
-            input <- input[-which(input$Sequence %in% remove_peptide$Sequence), ]
-            message('** Peptides, that are used in more than one proteins, are removed.')
-        }
+        input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
     }
     
     ## 3. remove the peptides including oxidation (M) sequence
@@ -271,5 +259,3 @@ PDtoMSstatsFormat <- function(input,
     input$ProteinName <- input$ProteinName
     return(input)
 }
-
-

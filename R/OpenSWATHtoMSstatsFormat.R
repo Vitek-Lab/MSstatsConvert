@@ -85,23 +85,14 @@ OpenSWATHtoMSstatsFormat <- function(
   ## 4. Make required long format - disaggregate : one row for each transition
   ## The columns "aggr_Fragment_Annotation" : separate by ';' and "aggr_Peak_Area" : separate by ';' 
   ## are disaggregated into the new columns "FragmentIon" and "Intensity". 
-  input <- input %>%
-    separate_rows(aggr_Fragment_Annotation, aggr_Peak_Area, sep="[;]")
+  input <- separate_rows(input, aggr_Fragment_Annotation, aggr_Peak_Area, sep = "[;]")
   
-  colnames(input)[colnames(input) == 'aggr_Fragment_Annotation'] <- 'FragmentIon'
-  colnames(input)[colnames(input) == 'aggr_Peak_Area'] <- 'Intensity'
-  
-  ## use FullPeptideName as peptide sequence
   ##   Sequence       FullPeptideName
-  ##  TAEICEHLKR  TAEIC(UniMod:4)EHLKR
-  ##     SCTILIK     SC(UniMod:4)TILIK
-  ## FullPeptideName -> PeptideSequence, 
-  ## Charge -> PrecursorCharge, 
-  
-  colnames(input)[colnames(input) == 'FullPeptideName'] <- 'PeptideSequence'
-  colnames(input)[colnames(input) == 'Charge'] <- 'PrecursorCharge'
-  colnames(input)[colnames(input) == 'filename'] <- 'Run'
-  
+  ##  TAEICEHLKR  TAEIC(UniMod:4)EHLKR  
+  colnames(input) = .updateColnames(
+    input, c("aggr_Fragment_Annotation" = "FragmentIon",
+             "aggr_Peak_Area" = "Intensity", "FullPeptideName" = "PeptideSequence",
+             "Charge" = "PrecursorCharge", "filename" = "Run"))
   input <- input[, -which(colnames(input) %in% 'Sequence')]
   
   ## Unimod Identifier should be replaced from ":" to "_".
@@ -133,20 +124,7 @@ OpenSWATHtoMSstatsFormat <- function(
   ## 6. remove peptides which are used in more than one protein
   ## we assume to use unique peptide
   if (useUniquePeptide) {
-    pepcount <- unique(input[, c("ProteinName", "PeptideSequence")]) ## Protein.group.IDs or Sequence
-    pepcount$PeptideSequence <- factor(pepcount$PeptideSequence)
-    ## count how many proteins are assigned for each peptide
-    structure <- pepcount %>% group_by(PeptideSequence) %>% summarise(length=length(ProteinName))
-    remove_peptide <- structure[structure$length != 1, ]
-    ## remove the peptides which are used in more than one protein
-    if (nrow(remove_peptide) != 0) {
-      input <- input[-which(input$PeptideSequence %in% remove_peptide$PeptideSequence), ]
-      message('** Peptides, that are used in more than one proteins, are removed.')
-    } else {
-      message('** All peptides are unique peptides in proteins.')
-    }
-    rm(structure)
-    rm(remove_peptide)
+    input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
   }
   
   ##  7. remove features which has 1 or 2 measurements across runs
@@ -225,5 +203,3 @@ OpenSWATHtoMSstatsFormat <- function(
   rm(input.final)
   return(input)
 }
-
-
