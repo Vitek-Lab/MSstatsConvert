@@ -112,16 +112,14 @@ SpectronauttoMSstatsFormat <- function(
     input <- input[, c(subsetcolumn, 'F.PeakArea')]
   }
   
-  colnames(input)[colnames(input) == 'PG.ProteinGroups'] <- 'ProteinName'
-  colnames(input)[colnames(input) == 'EG.ModifiedSequence'] <- 'PeptideSequence'
-  colnames(input)[colnames(input) == 'FG.Charge'] <- 'PrecursorCharge'
-  colnames(input)[colnames(input) == 'F.FrgIon'] <- 'FragmentIon'
-  colnames(input)[colnames(input) == f.charge] <- 'ProductCharge'
-  colnames(input)[colnames(input) == 'R.FileName'] <- 'Run'
-  colnames(input)[colnames(input) == 'F.PeakArea'] <- 'Intensity'
-  colnames(input)[colnames(input) == 'F.NormalizedPeakArea'] <- 'Intensity'
-  colnames(input)[colnames(input) == 'EG.Qvalue'] <- 'Qvalue'
-  
+  # colnames(input) = 
+  colnames(input) = .updateColnames(
+    input, 
+    c("PG.ProteinGroups" = "ProteinName", "EG.ModifiedSequence" = "PeptideSequence",
+      "FG.Charge" = "PrecursorCharge", "F.FrgIon" = "FragmentIon",
+      f.charge = "ProductCharge", "R.FileName" = "Run", "F.PeakArea" = "Intensity",
+      "F.NormalizedPeakArea" = "Intensity", "EG.Qvalue" = "Qvalue"))
+
   ## 4. filter by Qvalue
   ## protein FDR
   if (is.element('PG.Qvalue', colnames(input))) {

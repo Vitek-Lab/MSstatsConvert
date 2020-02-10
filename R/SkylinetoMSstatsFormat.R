@@ -80,10 +80,8 @@ SkylinetoMSstatsFormat <- function(
     
     ## 5. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
-    if(useUniquePeptide) {
-        input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
-    }
-    
+    input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
+                                  remove_shared = useUniquePeptide)
     ## 6. class of intensity is factor, change it as numeric
     input$Intensity <- as.numeric(as.character(input$Intensity))
     

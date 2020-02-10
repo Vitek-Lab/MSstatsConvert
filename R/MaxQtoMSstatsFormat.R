@@ -150,13 +150,8 @@ MaxQtoMSstatsFormat <- function(
         message('** Peptides including oxidation (M) in the sequence are removed.')
         
     }
-    
-    ## 2. remove peptides which are used in more than one protein
-    ## we assume to use unique peptide
-    if(useUniquePeptide) {
-        infile = .removeSharedPeptides(infile, "Proteins", "Modified.sequence")
-    }
-    
+    infile = .handleSharedPeptides(infile, "Proteins", "Modified.sequence", 
+                                   remove_shared = useUniquePeptide)
     ## 3. duplicated(multiple) rows for certain feature and certain runs
     ## 	3.1) take highest intensity
     ##  3.2) take sum of intensities

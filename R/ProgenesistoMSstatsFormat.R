@@ -104,10 +104,8 @@ ProgenesistoMSstatsFormat <- function(input,
  
     ## 4. remove peptides which are used in more than one protein
     ## we assume to use unique peptide
-    if (useUniquePeptide) {
-        input = .removeSharedPeptides(input, "Protein", "Sequence")
-    }
-  
+    input = .handleSharedPeptides(input, "Protein", "Sequence",
+                                  remove_shared = useUniquePeptide)
     ## 5. remove multiple measurements per feature and run
     input <- input[, -which(colnames(input) %in% c('Sequence', 'Modifications'))]
     input_remove <- melt(input, id=c('Protein', 'ModifiedSequence', 'Charge'))

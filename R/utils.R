@@ -51,7 +51,6 @@
 }
 
 # COMMON DATA PREPROCESSING
-
 .removeSharedPeptides = function(data_frame, proteins_column, peptides_column) {
     unique_pairs = unique(data_frame[, c(proteins_column, peptides_column)])
     protein_counts = aggregate(x = unique_pairs[[proteins_column]], 
@@ -65,4 +64,12 @@
         data_frame[counts[data_frame[[peptides_column]]] == 1, ]    
     }
     # TODO: message for the user / log
+}
+.handleSharedPeptides = function(data_frame, proteins_column, peptides_column,
+                                 remove_shared = TRUE) {
+    if(remove_shared) {
+        .removeSharedPeptides(data_frame, proteins_column, peptides_column)
+    } else {
+        data_frame
+    }
 }

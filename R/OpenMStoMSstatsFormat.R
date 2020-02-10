@@ -81,12 +81,8 @@ OpenMStoMSstatsFormat <- function(
   }
   rm(inputtmp)
   
-  ## 3. remove peptides which are used in more than one protein
-  ## we assume to use unique peptide
-  if(useUniquePeptide) {
-    input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
-  }
-
+  input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
+                                remove_shared = useUniquePeptide)
   ##  4. remove features which has 1 or 2 measurements across runs
   if (fewMeasurements == "remove") {
     ## it is the same across experiments. # measurement per feature. 

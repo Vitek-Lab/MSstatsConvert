@@ -148,10 +148,8 @@ PDtoMSstatsFormat <- function(input,
         message('** Rows with #Proteins, which are not equal to 1, are removed.')
     }
     
-    if (useUniquePeptide) {
-        input = .removeSharedPeptides(input, "ProteinName", "PeptideSequence")
-    }
-    
+    input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
+                                  remove_shared = useUniquePeptide)
     ## 3. remove the peptides including oxidation (M) sequence
     if (removeOxidationMpeptides) {
         remove_m_sequence <- unique(input[grep("Oxidation", input$Modifications), "Modifications"])
