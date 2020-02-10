@@ -32,14 +32,31 @@
 
 # ALL DATA CHECKS!!
 
+.isLegalValue = function(parameter, legal_values = NULL, 
+                         can_be_null = FALSE) {
+    parameter_name = deparse(substitute(parameter))
+    if(is.null(parameter)) {
+        if(!can_be_null) {
+            stop(paste("Parameter", parameter_name, "cannot be NULL"))    
+        }
+    } else {
+        if(!is.null(legal_values)) {
+            if(!is.element(parameter, legal_values)) {
+                stop(paste("Parameter", parameter_name, "must be one of", 
+                           paste(legal_values, sep = ", ", collapse = ", ")))
+            }    
+        }
+    }
+    invisible(TRUE)
+}
 
 # COMMON DATA PREPROCESSING
 
 .removeSharedPeptides = function(data_frame, proteins_column, peptides_column) {
     unique_pairs = unique(data_frame[, c(proteins_column, peptides_column)])
     protein_counts = aggregate(x = unique_pairs[[proteins_column]], 
-              by = list(peptide = unique_pairs[[peptides_column]]),
-              length)
+                               by = list(peptide = unique_pairs[[peptides_column]]),
+                               length)
     counts = protein_counts[["x"]]
     names(counts) = protein_counts[["peptide"]]
     if(length(counts) == 0) {

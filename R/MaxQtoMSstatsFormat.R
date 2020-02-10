@@ -21,16 +21,9 @@ MaxQtoMSstatsFormat <- function(
     fewMeasurements = "remove", removeMpeptides = FALSE,
     removeOxidationMpeptides = FALSE, removeProtein_with1Peptide = FALSE) {
     
-    if (is.null(fewMeasurements)) {
-        stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-    }
-    if (!is.element(fewMeasurements, c('remove', 'keep'))) {
-        stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-    }
-    if (!is.element(proteinID, c('Proteins', 'Leading.razor.protein'))) {
-        stop('** Please select \'Proteins\' or \'Leading.razor.proteins\' for \'proteinID\'.')
-    }
-    
+    .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
+    .isLegalValue(proteinID, legal_values = c("Proteins", "Leading.razor.protein"))
+
     experiment <- "DDA"
     ## evidence.txt file
     infile <- evidence

@@ -24,13 +24,8 @@ DIAUmpiretoMSstatsFormat <- function(
     useSelectedPep = TRUE, fewMeasurements="remove",
     removeProtein_with1Feature = FALSE, summaryforMultipleRows=max) {
     
-    
-    if (is.null(fewMeasurements)) {
-        stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-    }
-    if (!is.element(fewMeasurements, c('remove', 'keep'))) {
-        stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-    }
+    .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
+    # .isLegalValue(annotation, can_be_null = FALSE)
     if (is.null(annotation)) {
         stop('** Please prepare \'annotation\' as one of input.')
     } else {
@@ -162,7 +157,7 @@ DIAUmpiretoMSstatsFormat <- function(
     raw$Peptide <- as.character(raw$Peptide)
     raw$Fragment <- as.character(raw$Fragment)
     raw$Fragment <- as.character(raw$Fragment)
-    raw.selected <- semi_join(raw, raw.final, by=c('Protein', 'Peptide', 'Fragment'))
+    raw.selected <- dplyr::semi_join(raw, raw.final, by=c('Protein', 'Peptide', 'Fragment'))
     message('** Extract the data from selected fragments and/or peptides.')
     
     ## 5. reformat

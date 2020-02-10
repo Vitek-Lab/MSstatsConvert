@@ -14,3 +14,21 @@ test_that("Column update works", {
                  .updateColnames(x, update))
 })
 
+test_that('Parameter value check works', {
+    expect_error({
+        x <- NULL
+        .isLegalValue(x, c("y", "z"))
+    })
+    expect_true({
+        x <- NULL
+        .isLegalValue(x, NULL, can_be_null = TRUE)
+    })
+    expect_error({
+        x <- "X"
+        .isLegalValue(x, c("y", "z"))
+    })
+    expect_error({
+        x <- NULL
+        .isLegalValue(x, NULL, FALSE)
+    })
+})

@@ -16,12 +16,7 @@ SpectronauttoMSstatsFormat <- function(
   qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements="remove",
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
-  if (is.null(fewMeasurements)) {
-    stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-  }
-  if (!is.element(fewMeasurements, c('remove', 'keep'))) {
-    stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-  }
+  .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
   ## Check correct option or input
   requiredinput.general <- c('F.FrgLossType', 'F.ExcludedFromQuantification',
                              'PG.ProteinGroups', 'EG.ModifiedSequence', 'FG.Charge',

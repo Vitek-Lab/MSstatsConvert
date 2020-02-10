@@ -18,13 +18,7 @@ SkylinetoMSstatsFormat <- function(
     qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements="remove",
     removeOxidationMpeptides = FALSE, removeProtein_with1Feature = FALSE) {
     
-    if (is.null(fewMeasurements)) {
-        stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-    }
-    if (!is.element(fewMeasurements, c('remove', 'keep'))) {
-        stop('** Please select \'remove\' or \'keep\' for \'fewMeasurements\'.')
-    }
-    
+    .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
     ## 1. Rename column names
     ## replace '.' between words with no spzce
     colnames(input) <- gsub('\\.', '', colnames(input))
@@ -198,7 +192,7 @@ SkylinetoMSstatsFormat <- function(
                        input$ProductCharge,
                        sep="_")
     inputtmp <- input[!is.na(input$Intensity) & input$Intensity > 1, ]
-    count <- summarise(group_by(inputtmp, fea), length=length(Intensity))
+    count <- dplyr::summarise(dplyr::group_by(inputtmp, fea), length=length(Intensity))
     ## get feature with all NA or zeros
     getfea <- count[count$length > 0, 'fea']
     if (nrow(getfea) > 0){

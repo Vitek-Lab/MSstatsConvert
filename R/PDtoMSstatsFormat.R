@@ -25,6 +25,7 @@ PDtoMSstatsFormat <- function(input,
                               which.quantification = 'Precursor.Area',
                               which.proteinid = 'Protein.Group.Accessions',
                               which.sequence = 'Sequence'){
+    .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
     ## check annotation
     required.annotation <- c('Condition', 'BioReplicate', 'Run')
     if (!all(required.annotation %in% colnames(annotation))) {
