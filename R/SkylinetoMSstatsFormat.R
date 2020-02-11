@@ -253,6 +253,5 @@ SkylinetoMSstatsFormat <- function(
         rm(input.final)
     }
     
-    input$ProteinName <- factor(input$ProteinName)
-    return(input)
+    .fixColumnTypes(input, factor_columns = "ProteinName")
 }

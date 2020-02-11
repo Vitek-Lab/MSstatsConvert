@@ -24,8 +24,9 @@ MaxQtoMSstatsFormat <- function(
     .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
     .isLegalValue(proteinID, legal_values = c("Proteins", "Leading.razor.protein"))
 
-    infile = evidence
     colnames(evidence) = .updateColnames(evidence, c("Raw.file" = "Run"))
+    infile = evidence
+    
     annotation = .makeAnnotation(
         annotation,
         c("Raw.file" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate",

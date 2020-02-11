@@ -36,7 +36,7 @@ OpenMStoMSstatsFormat <- function(
                      input$ProductCharge,
                      sep="_")
   inputtmp <- input[!is.na(input$Intensity) & input$Intensity > 1, ]
-  count <- inputtmp %>% group_by(fea) %>% summarise(length=length(Intensity))
+  count <- summarise(group_by(inputtmp, fea), length=length(Intensity))
   ## get feature with all NA or zeros
   getfea <- count[count$length > 0, 'fea']
   if (nrow(getfea) > 0) {
@@ -50,6 +50,7 @@ OpenMStoMSstatsFormat <- function(
   
   input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
                                 remove_shared = useUniquePeptide)
+  
   ##  4. remove features which has 1 or 2 measurements across runs
   if (fewMeasurements == "remove") {
     ## it is the same across experiments. # measurement per feature. 
@@ -105,24 +106,9 @@ OpenMStoMSstatsFormat <- function(
     message('** No multiple measurements in a feature and a run.')
   }
   
-  ## 10. class of intensity is character, change it as numeric
-  input$Intensity <- as.numeric(input$Intensity)
-
-  ## 11. merge annotation
-  input <- merge(input, annotation, by='Run', all=TRUE)
-  ## fill in extra columns
-  input.final <- data.frame("ProteinName" = input$ProteinName,
-                            "PeptideSequence" = input$PeptideSequence,
-                            "PrecursorCharge" = input$PrecursorCharge,
-                            "FragmentIon" = input$FragmentIon,
-                            "ProductCharge" = input$ProductCharge,
-                            "IsotopeLabelType" = "L",
-                            "Condition" = input$Condition,
-                            "BioReplicate" = input$BioReplicate,
-                            "Run" = input$Run,
-                            "Intensity" = input$Intensity)
-  input <- input.final
-  input$ProteinName <- factor(input$ProteinName)
-  rm(input.final)
-  return(input)
+  input = merge(input, annotation, by = "Run", all = TRUE)
+  input[["IsotopeLabelType"]] = "L"
+  # TODO: check if the previous code did the intended thing
+  .fixColumnTypes(input, factor_columns = "ProteinName", 
+                  numeric_columns = "Intensity")
 }

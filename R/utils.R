@@ -80,6 +80,21 @@
     .checkColumns(label, column_names, colnames(data_frame))
     data_frame[, column_names]
 }
+.removeColumns = function(data_frame, columns_to_remove) {
+    data_frame[, !(colnames(data_frame) %in% columns_to_remove)]
+}
+.fixColumnTypes = function(data_frame, numeric_columns, character_columns,
+                           factor_columns) {
+    for(column in factor_columns) {
+        data_frame[[column]] = factor(data_frame[[column]])
+    }for(column in numeric_columns) {
+        data_frame[[column]] = as.numeric(as.character(data_frame[[column]]))
+    }
+    for(column in character_columns) {
+        data_frame[[column]] = as.character(data_frame[[column]])
+    }
+    data_frame
+}
 
 .pickAnnotation = function(annotation, backup_annotation, columns_definition,
                            backup_columns_definition) {
@@ -201,10 +216,6 @@ if (!is.element(c('DetectionQValue'), colnames(input))) {
     data_frame[, ]
 }
 
-.fixColumnTypes = function(data_frame, numeric_columns, character_columns,
-                           factor_columnss) {
-    
-}
 
 .fixColumnNames = function(data_frame) {
     

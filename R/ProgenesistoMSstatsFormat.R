@@ -91,8 +91,6 @@ ProgenesistoMSstatsFormat <- function(input,
         message('Peptides including oxidation(M) in the sequence are removed.')
     }
  
-    ## 4. remove peptides which are used in more than one protein
-    ## we assume to use unique peptide
     input = .handleSharedPeptides(input, "Protein", "Sequence",
                                   remove_shared = useUniquePeptide)
     ## 5. remove multiple measurements per feature and run
@@ -164,8 +162,7 @@ ProgenesistoMSstatsFormat <- function(input,
 	    input <- input[, -which(colnames(input) %in% c('feature'))]
 	}
   
-    input$ProteinName <- input$ProteinName
-	return(input)
+	input
 }
 
 

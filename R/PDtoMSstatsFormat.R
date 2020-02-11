@@ -224,6 +224,5 @@ PDtoMSstatsFormat <- function(input,
         input <- input[, -which(colnames(input) %in% c('feature'))]
     }
     
-    input$ProteinName <- input$ProteinName
     return(input)
 }

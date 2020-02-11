@@ -58,14 +58,13 @@ OpenSWATHtoMSstatsFormat <- function(
   ## are disaggregated into the new columns "FragmentIon" and "Intensity". 
   input <- separate_rows(input, aggr_Fragment_Annotation, aggr_Peak_Area, sep = "[;]")
   
-  ##   Sequence       FullPeptideName
-  ##  TAEICEHLKR  TAEIC(UniMod:4)EHLKR  
+  # TODO: add difference between peptide name and full peptide name to documentation
   colnames(input) = .updateColnames(
     input, c("aggr_Fragment_Annotation" = "FragmentIon",
              "aggr_Peak_Area" = "Intensity", "FullPeptideName" = "PeptideSequence",
              "Charge" = "PrecursorCharge", "filename" = "Run"))
-  input <- input[, -which(colnames(input) %in% 'Sequence')]
-  
+  input = .removeColumns(input, "Sequence")
+
   ## Unimod Identifier should be replaced from ":" to "_".
   input$PeptideSequence <- gsub(':', '_', input$PeptideSequence)
   input$FragmentIon <- gsub(':', '_', input$FragmentIon)

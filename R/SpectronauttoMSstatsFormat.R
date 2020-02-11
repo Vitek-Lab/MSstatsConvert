@@ -17,7 +17,8 @@ SpectronauttoMSstatsFormat <- function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
   .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-  .isLegaValue(intensity, legal_values = c("PeakArea", "NormalizedPeakArea"))
+  .isLegalValue(intensity, legal_values = c("PeakArea", "NormalizedPeakArea"))
+
   .checkColumns("Input", 
                 c("F.FrgLossType", "F.ExcludedFromQuantification",
                   "PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge",
@@ -25,6 +26,7 @@ SpectronauttoMSstatsFormat <- function(
   .checkColumns("Input", c("F.PeakArea", "F.NormalizedPeakArea"), 
                 colnames(input), "optional")
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
+  input = input[input[["F.FrgLossType"]] == "noloss", ]
   
   annotation = .makeAnnotation(
     annotation, 
@@ -33,8 +35,6 @@ SpectronauttoMSstatsFormat <- function(
     c("R.FileName" = "Run", "R.Condition" = "Condition", "R.Replicate" = "BioReplicate")
   )  
   
-  ## 1. loss type : use only 'no loss'
-  input <- input[input$F.FrgLossType == 'noloss', ]
   
   ## 2. use only 'F.ExcludedFromQuantification == False' : XIC quality
   if (is.logical(input$F.ExcludedFromQuantification)) {
@@ -47,21 +47,6 @@ SpectronauttoMSstatsFormat <- function(
   }
   input <- input[input$F.ExcludedFromQuantification == 'False', ]
   
-  
-  if (is.element('F.Charge', colnames(input))) {
-    f.charge <- 'F.Charge'
-  } else if (is.element('F.FrgZ', colnames(input))) {
-    f.charge <- 'F.FrgZ'
-  } else {
-    f.charge <- NULL
-  }
-  if (is.element('PG.Qvalue', colnames(input))) {
-    pg.qvalue <- 'PG.Qvalue'
-  } else if(is.element('PG.Qvalue', colnames(input))) {
-    pg.qvalue <- 'PG.Qvalue'
-  } else {
-    pg.qvalue <- NULL
-  }
   f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(input))
   pg_qval_col = findAvailable(c("PG.Qvalue"), colnames(input))
   input = .selectColumns(
@@ -112,10 +97,9 @@ SpectronauttoMSstatsFormat <- function(
   }
   rm(inputtmp)
   
-  ## 6. remove peptides which are used in more than one protein
-  ## we assume to use unique peptide
   input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
                                 remove_shared = useUniquePeptide)
+
   ##  7. remove features which has 1 or 2 measurements across runs
   if (fewMeasurements == "remove"){
     ## it is the same across experiments. # measurement per feature. 
@@ -162,20 +146,17 @@ SpectronauttoMSstatsFormat <- function(
   }
   
   ## 10. merge annotation
-  input <- merge(input, annotinfo, all=TRUE)
-  input.final <- data.frame("ProteinName" = input$ProteinName,
-                            "PeptideSequence" = input$PeptideSequence,
-                            "PrecursorCharge" = input$PrecursorCharge,
-                            "FragmentIon" = input$FragmentIon,
-                            "ProductCharge" = input$ProductCharge,
-                            "IsotopeLabelType" = "L",
-                            "Condition" = input$Condition,
-                            "BioReplicate" = input$BioReplicate,
-                            "Run" = input$Run,
-                            "Intensity" = input$Intensity)
+  input <- merge(input, annotation, all=TRUE)
+  input <- data.frame("ProteinName" = input$ProteinName,
+                      "PeptideSequence" = input$PeptideSequence,
+                      "PrecursorCharge" = input$PrecursorCharge,
+                      "FragmentIon" = input$FragmentIon,
+                      "ProductCharge" = input$ProductCharge,
+                      "IsotopeLabelType" = "L",
+                      "Condition" = input$Condition,
+                      "BioReplicate" = input$BioReplicate,
+                      "Run" = input$Run,
+                      "Intensity" = input$Intensity)
   
-  input <- input.final
-  input$ProteinName <- factor(input$ProteinName)
-
-  return(input)
+  .fixColumnTypes(input, factor_columns = "ProteinName")
 }
