@@ -32,22 +32,16 @@ SkylinetoMSstatsFormat <- function(
         colnames(input)[colnames(input) == 'PeptideModifiedSequence'] <- 'PeptideSequence'
     }
     ## replace 'FileName' with Run
-    colnames(input)[colnames(input) == 'FileName'] <- 'Run'
-    ## replace 'Area' with Intensity
-    colnames(input)[colnames(input) == 'Area'] <- 'Intensity'
-    
+    colnames(input) = .updateColnames(input, c("FileName" = "Run", 
+                                               "Area" = "Intensity"))
+
     ## 1.1. check annotation information
     ## get annotation
-    if (is.null(annotation)) {
-        annotinfo <- unique(input[, c("Run", "Condition", 'BioReplicate')])	
-    } else {
-        annotinfo <- annotation
-    }
-    ## Each Run should has unique information about condition and bioreplicate
-    check.annot <- xtabs(~Run, annotinfo)
-    if ( any(check.annot > 1) ) {
-        stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-    }
+    annotation = .makeAnnotation(
+        annotation, 
+        c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
+        input
+    )
 
     ## 2. Remove decoy protein name
     proname <- unique(input$ProteinName)
@@ -132,16 +126,10 @@ SkylinetoMSstatsFormat <- function(
         colnames(newdata) = .updateColnames(newdata, c("variable" = "Run", "value" = "Intensity"))
         ## assignn protein name
         uniinfo <- unique(input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", "pepprecursor")])	
-        ## get annotation
-        if (is.null(annotation)) {
-            annotinfo <- unique(input[, c("Run", "Condition", 'BioReplicate')])	
-        } else {
-            annotinfo <- annotation
-        }
         input <- merge(newdata, uniinfo, by="pepprecursor")
         ## assign the annotation
         ## merge it by Run
-        input <- merge(input, annotinfo, by="Run")
+        input <- merge(input, annotation, by="Run")
         ## add other required information
         input$FragmentIon <- "sum"
         input$ProductCharge <- NA

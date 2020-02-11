@@ -24,27 +24,16 @@ MaxQtoMSstatsFormat <- function(
     .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
     .isLegalValue(proteinID, legal_values = c("Proteins", "Leading.razor.protein"))
 
-    experiment <- "DDA"
-    ## evidence.txt file
-    infile <- evidence
-    ## annotation.txt : Raw.file, Condition, BioReplicate, (IsotopeLabelType)
-    annot <- annotation
-    ## check annotation
-    required.annotation <- c('Raw.file', 'Condition', 'BioReplicate', 'IsotopeLabelType')
-    if (!all(required.annotation %in% colnames(annot))) {
-        missedAnnotation <- which(!(required.annotation %in% colnames(annot)))
-        stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                   "is not provided in Annotation. Please check the annotation file."))
-    }
-    ## check annotation information
-    ## get annotation
-    annotinfo <- unique(annot[, c("Raw.file", "Condition", 'BioReplicate')])	
-    ## Each Run should has unique information about condition and bioreplicate
-    check.annot <- xtabs(~Raw.file, annotinfo)
-    if ( any(check.annot > 1) ) {
-        stop('** Please check annotation. Each MS run (Raw.file) can\'t have multiple conditions or BioReplicates.' )
-    }
+    infile = evidence
+    colnames(evidence) = .updateColnames(evidence, c("Raw.file" = "Run"))
+    annotation = .makeAnnotation(
+        annotation,
+        c("Raw.file" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate",
+          "IsotopeLabelType" = "IsotopeLabelType")
+    )
     
+    experiment <- "DDA"
+
     ## 1.1 remove contaminant, reverse proteinID 
     ## Contaminant, Reverse column in evidence
     if (is.element("Contaminant", colnames(infile)) & 
@@ -102,7 +91,7 @@ MaxQtoMSstatsFormat <- function(
     ## ? can remove Retention.time column later
     if (experiment == "SILAC") {
         infile <- infile[c("uniqueProteins", "Protein.group.IDs", "Sequence", 
-                           "Modified.sequence", "Charge", "Raw.file", 
+                           "Modified.sequence", "Charge", "Run", 
                            "Intensity.L", "Intensity.H", "Retention.time", "id")]
         infile.l <- infile[, !(colnames(infile) %in% "Intensity.H")]
         infile.h <- infile[, !(colnames(infile) %in% "Intensity.L")]
@@ -117,7 +106,7 @@ MaxQtoMSstatsFormat <- function(
     } else {
         get.column <- c("Protein.group.IDs", 
                         "Sequence", "Modified.sequence", "Modifications", "Charge", 
-                        "Raw.file", "Intensity", "Retention.time", "id")
+                        "Run", "Intensity", "Retention.time", "id")
         if (proteinID == 'Proteins') {
             get.column <- c(get.column, 'uniqueProteins')
         } else {
@@ -162,7 +151,7 @@ MaxQtoMSstatsFormat <- function(
     if (experiment == "DDA") {
         ## count the number of intensities for feature by runs
         ##infile$Feature <- paste(infile$Modified.sequence, infile$Charge, sep="_")
-        ##structure <- dcast(Feature ~ Raw.file, data=infile, value.var='Intensity')
+        ##structure <- dcast(Feature ~ Run, data=infile, value.var='Intensity')
         ##flagduplicate = sum(structure>1)>0	
         
         ## take the highest intensity among duplicated or sum of intensities 
@@ -190,7 +179,7 @@ MaxQtoMSstatsFormat <- function(
     if (experiment == "SILAC") {
         ## count the number of intensities for feature by runs
         ##infile$Feature <- paste(infile$Modified.sequence, infile$Charge, sep="_")
-        ##structure <- dcast(Feature ~ Raw.file, data=infile, value.var='Intensity')
+        ##structure <- dcast(Feature ~ Run, data=infile, value.var='Intensity')
         ##flagduplicate = sum(structure>1)>0	
         
         ## take the highest intensity among duplicated or sum of intensities 
@@ -231,10 +220,10 @@ MaxQtoMSstatsFormat <- function(
     infile_l$FragmentIon <- NA
     infile_l$ProductCharge <- NA
     ## Create Condition & Bioreplicate columns; TODO: fill in with correct values
-    infile_l <- merge(infile_l, annot, by=c("Raw.file", "IsotopeLabelType"))
+    infile_l <- merge(infile_l, annotation, by=c("Run", "IsotopeLabelType"))
     infile_l.final <- infile_l[, c(c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                                      "FragmentIon", "ProductCharge", "IsotopeLabelType", 
-                                     "Condition", "BioReplicate", "Raw.file", "Intensity"))]
+                                     "Condition", "BioReplicate", "Run", "Intensity"))]
     colnames(infile_l.final)[9] <- "Run"
     if (any(is.element(colnames(infile_l), 'Fraction'))) {
         infile_l.final <- data.frame(infile_l.final,
@@ -254,7 +243,7 @@ MaxQtoMSstatsFormat <- function(
 
 
 .cast_maxquant_to_wide_glf <- function(d_long, aggregateFun=aggregateFun){
-    data_w <- dcast( Proteins + Modified.sequence + Charge ~ Raw.file, data=d_long, 
+    data_w <- dcast( Proteins + Modified.sequence + Charge ~ Run, data=d_long, 
                      value.var='Intensity', 
                      fun.aggregate=aggregateFun, 
                      keep=TRUE) 
@@ -266,14 +255,14 @@ MaxQtoMSstatsFormat <- function(
 
 .cast_maxquant_to_wide_silac <- function(d_long, aggregateFun=aggregateFun){
     ## check any cell has more than 1
-    ##data_w = dcast( Proteins + Modified.sequence + Charge + IsotopeLabelType ~ Raw.file, data=d_long, value.var='Intensity') 
+    ##data_w = dcast( Proteins + Modified.sequence + Charge + IsotopeLabelType ~ Run, data=d_long, value.var='Intensity') 
     ##temp <- data_w[,c(5:ncol(data_w))]
     ##head(temp)
     ##sum(temp>1)
     ##which(temp>1, arr.ind=TRUE)
     ##data_w[16300,]
     ##d_long[d_long$Modified.sequence=="HIILVLSGK" & d_long$Charge=="2" & d_long$IsotopeLabelType=="L",]
-    data_w <- dcast( Proteins + Modified.sequence + Charge + IsotopeLabelType ~ Raw.file, data=d_long, 
+    data_w <- dcast( Proteins + Modified.sequence + Charge + IsotopeLabelType ~ Run, data=d_long, 
                      value.var='Intensity', 
                      fun.aggregate=aggregateFun, 
                      keep=TRUE) 
@@ -285,14 +274,14 @@ MaxQtoMSstatsFormat <- function(
 
 .melt_maxquant_to_long_glf <- function(d_wide){
     data_l <- melt(d_wide, id.vars=c('Proteins', 'Modified.sequence', 'Charge'))
-    colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Raw.file', 'Intensity')
+    colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Run', 'Intensity')
     return(data_l)
 }
 
 
 .melt_maxquant_to_long_silac <- function(d_wide){
     data_l <- melt(d_wide, id.vars=c('Proteins', 'Modified.sequence', 'Charge', "IsotopeLabelType"))
-    colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Raw.file', 'Intensity')
+    colnames(data_l)[colnames(data_l) %in% c("variable", "value")] <- c('Run', 'Intensity')
     return(data_l)
 }
 

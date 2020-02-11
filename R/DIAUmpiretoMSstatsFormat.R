@@ -25,27 +25,12 @@ DIAUmpiretoMSstatsFormat <- function(
     removeProtein_with1Feature = FALSE, summaryforMultipleRows=max) {
     
     .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-    # .isLegalValue(annotation, can_be_null = FALSE)
-    if (is.null(annotation)) {
-        stop('** Please prepare \'annotation\' as one of input.')
-    } else {
-        ## check annotation
-        required.annotation <- c('Condition', 'BioReplicate', 'Run')
-        if (!all(required.annotation %in% colnames(annotation))) {
-            missedAnnotation <- which(!(required.annotation %in% colnames(annotation)))
-            stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                       "is not provided in Annotation. Please check the annotation file."))
-        } else {
-            ### annotation.txt : Condition, BioReplicate, Run, 
-            annot <- annotation
-        }
-    }
     
-    ## Each Run should has unique information about condition and bioreplicate
-    check.annot <- xtabs(~Run, annot)
-    if ( any(check.annot > 1) ) {
-        stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-    }
+    annotation = .makeAnnotation(
+        annotation,
+        c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate")
+    )
+    # FIXME: below, input is conditionally assigned to annotation
     
     ## 1.  get selected frag from DIA-Umpire
     ## need to check whether 'Selected_fragments' column is available or not.

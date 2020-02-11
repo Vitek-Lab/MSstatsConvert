@@ -17,50 +17,17 @@ OpenMStoMSstatsFormat <- function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
   .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-  if (is.null(annotation)) {
-    if (sum(is.na(input$Condition)) > 0){
-      stop('** All or partial annotation is missing. Please prepare \'annotation\' as one of input.')
-    }
-  } else {
-    annotinfo <- annotation
-  }
+  input = .selectColumns(input, 
+                         c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+                           "FragmentIon", "ProductCharge", "IsotopeLabelType",
+                           "Condition", "BioReplicate", "Run", "Intensity"))
   
-  ## Check correct option or input
-  requiredinput.general <- c("ProteinName", "PeptideSequence", "PrecursorCharge", 
-                             "FragmentIon", "ProductCharge", "IsotopeLabelType",
-                             "Condition", "BioReplicate", "Run", "Intensity")
-  
-  ## 1. check general input and use only required columns.
-  if (!all(requiredinput.general %in% colnames(input))) {
-    missing.col <- requiredinput.general[!requiredinput.general %in% colnames(input)]
-    stop(paste0("** Please check the required input. The required input needs : ", 
-                toString(missing.col)))
-  } else {
-    input <- input[, colnames(input) %in% requiredinput.general]
-  }
-  ## get annotation
-  if (is.null(annotation)) {
-    annotinfo <- unique(input[, c("Run", "Condition", 'BioReplicate')])	
-  } else {
-    ## check annotation
-    required.annotation <- c('Condition', 'BioReplicate', 'Run')
-    if (!all(required.annotation %in% colnames(annotation))) {
-      missedAnnotation <- which(!(required.annotation %in% colnames(annotation)))
-      stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                 "is not provided in Annotation. Please check the annotation file."))
-    } else {
-      annotinfo <- annotation
-    }
-  }
-  
-  ## check annotation information
-  ## get annotation
-  ## Each Run should has unique information about condition and bioreplicate
-  check.annot <- xtabs(~Run, annotinfo)
-  if ( any(check.annot > 1) ) {
-    stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-  }
-  
+  annotation = .makeAnnotation(
+    annotation, 
+    c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
+    input
+  )
+
   ## 2. remove features with all na or zero
   ## some rows have all zero values across all MS runs. They should be removed.
   input$fea <- paste(input$PeptideSequence,
@@ -142,7 +109,7 @@ OpenMStoMSstatsFormat <- function(
   input$Intensity <- as.numeric(input$Intensity)
 
   ## 11. merge annotation
-  input <- merge(input, annotinfo, by='Run', all=TRUE)
+  input <- merge(input, annotation, by='Run', all=TRUE)
   ## fill in extra columns
   input.final <- data.frame("ProteinName" = input$ProteinName,
                             "PeptideSequence" = input$PeptideSequence,

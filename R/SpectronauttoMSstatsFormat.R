@@ -17,58 +17,21 @@ SpectronauttoMSstatsFormat <- function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
   .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-  ## Check correct option or input
-  requiredinput.general <- c('F.FrgLossType', 'F.ExcludedFromQuantification',
-                             'PG.ProteinGroups', 'EG.ModifiedSequence', 'FG.Charge',
-                             'F.FrgIon', 
-                             'R.FileName', 'EG.Qvalue')
-  requiredinput.int <- c('F.PeakArea', 'F.NormalizedPeakArea')
-  requiredinput.charge <- c('F.Charge', 'F.FrgZ')
+  .isLegaValue(intensity, legal_values = c("PeakArea", "NormalizedPeakArea"))
+  .checkColumns("Input", 
+                c("F.FrgLossType", "F.ExcludedFromQuantification",
+                  "PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge",
+                  "F.FrgIon", "R.FileName", "EG.Qvalue"), colnames(input))
+  .checkColumns("Input", c("F.PeakArea", "F.NormalizedPeakArea"), 
+                colnames(input), "optional")
+  .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
   
-  ## general input
-  if (!all( requiredinput.general %in% colnames(input))) {
-    missing.col <- requiredinput.general[!requiredinput.general %in% colnames(input)]
-    stop(paste0("** Please check the required input. The required input needs : ", 
-                toString(missing.col)))
-  }
-  
-  ## intensity columns
-  if (sum( requiredinput.int %in% colnames(input) ) == 0) {
-    stop(paste0("** Please check the required input. The required input needs at least one of ", 
-                toString(requiredinput.int)))
-  }
-  ## general input
-  if (sum( requiredinput.charge %in% colnames(input) ) == 0) {
-    
-    stop(paste0("** Please check the required input. The required input needs at least one of '", 
-                toString(requiredinput.charge)))
-  }
-  ## get annotation
-  if (is.null(annotation)) {
-    annotinfo <- unique(input[, c("R.FileName", "R.Condition", "R.Replicate")])	
-    colnames(annotinfo) <- c('Run', 'Condition', 'BioReplicate')
-  } else {
-    ## check annotation
-    required.annotation <- c('Condition', 'BioReplicate', 'Run')
-    
-    if (!all(required.annotation %in% colnames(annotation))) {
-      
-      missedAnnotation <- which(!(required.annotation %in% colnames(annotation)))
-      
-      stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                 "is not provided in Annotation. Please check the annotation file.",
-                 "'Run' will be matched with 'R.FileName' "))
-    } else {
-      annotinfo <- annotation
-    }
-  }
-  
-  ## check annotation information
-  ## Each Run should has unique information about condition and bioreplicate
-  check.annot <- xtabs(~Run, annotinfo)
-  if ( any(check.annot > 1) ) {
-    stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-  }
+  annotation = .makeAnnotation(
+    annotation, 
+    c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
+    input, 
+    c("R.FileName" = "Run", "R.Condition" = "Condition", "R.Replicate" = "BioReplicate")
+  )  
   
   ## 1. loss type : use only 'no loss'
   input <- input[input$F.FrgLossType == 'noloss', ]
@@ -84,7 +47,7 @@ SpectronauttoMSstatsFormat <- function(
   }
   input <- input[input$F.ExcludedFromQuantification == 'False', ]
   
-  ## 3. get useful subset of column
+  
   if (is.element('F.Charge', colnames(input))) {
     f.charge <- 'F.Charge'
   } else if (is.element('F.FrgZ', colnames(input))) {
@@ -99,26 +62,18 @@ SpectronauttoMSstatsFormat <- function(
   } else {
     pg.qvalue <- NULL
   }
-  subsetcolumn <- c('PG.ProteinGroups', 'EG.ModifiedSequence', 'FG.Charge',
-                    'F.FrgIon', f.charge,
-                    'R.FileName', 
-                    'EG.Qvalue', pg.qvalue)
-  
-  if (intensity == 'NormalizedPeakArea') {
-    ## use normalized peak area by SN
-    input <- input[, c(subsetcolumn, 'F.NormalizedPeakArea')]
-  } else {
-    ## use original peak area without any normalization
-    input <- input[, c(subsetcolumn, 'F.PeakArea')]
-  }
-  
-  # colnames(input) = 
+  f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(input))
+  pg_qval_col = findAvailable(c("PG.Qvalue"), colnames(input))
+  input = .selectColumns(
+    input, 
+    c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
+      f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
   colnames(input) = .updateColnames(
     input, 
     c("PG.ProteinGroups" = "ProteinName", "EG.ModifiedSequence" = "PeptideSequence",
       "FG.Charge" = "PrecursorCharge", "F.FrgIon" = "FragmentIon",
-      f.charge = "ProductCharge", "R.FileName" = "Run", "F.PeakArea" = "Intensity",
-      "F.NormalizedPeakArea" = "Intensity", "EG.Qvalue" = "Qvalue"))
+      f_charge_col = "ProductCharge", "R.FileName" = "Run", "EG.Qvalue" = "Qvalue",
+      paste0("F.", intensity) = "Intensity"))
 
   ## 4. filter by Qvalue
   ## protein FDR

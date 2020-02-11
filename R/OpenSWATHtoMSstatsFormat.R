@@ -20,41 +20,17 @@ OpenSWATHtoMSstatsFormat <- function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
   .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-  if (is.null(annotation)) {
-    stop('** Please prepare \'annotation\' as one of input.')
-  } else {
-    ## check annotation
-    required.annotation <- c('Condition', 'BioReplicate', 'Run')
-    if (!all(required.annotation %in% colnames(annotation))) {
-      missedAnnotation <- which(!(required.annotation %in% colnames(annotation)))
-      stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                 "is not provided in Annotation. Please check the annotation file."))
-    } else {
-      annotinfo <- annotation
-    }
-  }
   
-  ## check annotation information
-  ## get annotation
-  ## Each Run should has unique information about condition and bioreplicate
-  check.annot <- xtabs(~Run, annotinfo)
-  if ( any(check.annot > 1) ) {
-    stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-  }
-  ## Check correct option or input
-  requiredinput.general <- c('ProteinName', 'FullPeptideName', 'Charge', 'Sequence',
-                             'decoy', 'm_score',
-                             'aggr_Fragment_Annotation', 'aggr_Peak_Area', 
-                             'filename')
+  input = .selectColumns(
+    input, 
+    c("ProteinName", "FullPeptideName", "Charge", "Sequence", "decoy", "m_score",
+      "aggr_Fragment_Annotation", "aggr_Peak_Area", "filename")
+  )
   
-  ## 1. check general input and use only required columns.
-  if (!all(requiredinput.general %in% colnames(input))) {
-    missing.col <- requiredinput.general[!requiredinput.general %in% colnames(input)]
-    stop(paste0("** Please check the required input. The required input needs : ", 
-                toString(missing.col)))
-  } else {
-    input <- input[, colnames(input) %in% requiredinput.general]
-  }
+  annotation = .makeAnnotation(
+    annotation, 
+    c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate")
+  )
   
   ## 2. remove the decoys
   if (length(unique(input$decoy)) == 2) {

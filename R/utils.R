@@ -4,7 +4,7 @@
 #' @param useUniquePeptide TRUE (default) removes peptides that are assigned for more than one proteins. 
 #' We assume to use unique peptide for each protein.
 #' @param summaryforMultipleRows max(default) or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities.
-#' @param removeProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.
+#' @param removeProtein_with1Feature TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.
 #' @param removeProtein_with1Peptide TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.
 #' @param removeOxidationMpeptides TRUE will remove the peptides including 'oxidation (M)' in modification. FALSE is default.
 #' @param removeMpeptides TRUE will remove the peptides including 'M' sequence. FALSE is default.
@@ -31,9 +31,17 @@
 
 
 # ALL DATA CHECKS!!
-
+.makeInclusionErrorMessage = function(parameter_name, legal_values, 
+                                      information) {
+    if(is.null(information)) {
+        paste("Parameter", parameter_name, "must be one of", 
+              paste(legal_values, sep = ", ", collapse = ", "))
+    } else {
+        paste(information, paste(legal_values, sep = ", ", collapse = ", "))
+    }
+}
 .isLegalValue = function(parameter, legal_values = NULL, 
-                         can_be_null = FALSE) {
+                         can_be_null = FALSE, information = NULL) {
     parameter_name = deparse(substitute(parameter))
     if(is.null(parameter)) {
         if(!can_be_null) {
@@ -42,8 +50,8 @@
     } else {
         if(!is.null(legal_values)) {
             if(!is.element(parameter, legal_values)) {
-                stop(paste("Parameter", parameter_name, "must be one of", 
-                           paste(legal_values, sep = ", ", collapse = ", ")))
+                stop(.makeInclusionErrorMessage(parameter_name, legal_values,
+                                                information))
             }    
         }
     }
@@ -51,6 +59,76 @@
 }
 
 # COMMON DATA PREPROCESSING
+.checkColumnsGen = function(df_name, expected_columns, actual_columns, 
+                            lgl_fun, msg_sep) {
+    if(!lgl_fun(expected_columns %in% actual_columns)) {
+        missing_columns = setdiff(expected_columns, actual_columns)
+        stop(paste("Missing columns in", paste0(df_name, ":"), 
+                   paste(missing_columns, sep = msg_sep, collapse = msg_sep)))
+    }
+}
+.checkColumns = function(df_name, expected_columns, 
+                         actual_columns, type = "required") {
+    if(type == "required") {
+        .checkColumnsGen(df_name, expected_columns, actual_columns, all, ", ")    
+    } else {
+        .checkColumnsGen(df_name, expected_columns, actual_columns, any, " or ")        
+    }
+    
+}
+.selectColumns = function(data_frame, column_names, label = "Input") {
+    .checkColumns(label, column_names, colnames(data_frame))
+    data_frame[, column_names]
+}
+
+.pickAnnotation = function(annotation, backup_annotation, columns_definition,
+                           backup_columns_definition) {
+    if(is.null(annotation)) {
+        .checkColumns("Annotation", names(backup_columns_definition), 
+                      colnames(backup_annotation))
+        list(df = backup_annotation,
+             cols = backup_columns_definition)
+    } else {
+        .checkColumns("Annotation", names(columns_definition), 
+                      colnames(annotation))
+        list(df = annotation,
+             cols = columns_definition)
+    }
+}
+.checkAnnotationValidity = function(annotation){
+    count_in_run = xtabs(~ Run, annotation)
+    if (any(count_in_run > 1)) {
+        stop('Please check annotation. Each MS Run must have a single condition and biological replicate')
+    }
+}
+
+.makeAnnotation = function(annotation_source, columns_definition,
+                           backup_annotation_source = NULL,
+                           backup_columns_definition = NULL) {
+    if(is.null(annotation_source) & is.null(backup_annotation_source)) {
+        stop("Please provide annotation information")
+    }
+    if(is.null(backup_columns_definition) & !is.null(backup_annotation_source)) {
+        backup_columns_definition = columns_definition
+    }
+    annotation_list = .pickAnnotation(annotation_source, backup_annotation_source,
+                                      columns_definition, backup_columns_definition)
+    colnames(annotation_list[["df"]]) = .updateColnames(annotation_list[["df"]], 
+                                                        annotation_list[["cols"]])
+    annotation_list[["df"]] = unique(annotation_list[["df"]])
+    .checkAnnotationValidity(annotation_list[["df"]])
+    annotation_list[["df"]]
+}
+
+.findAvailable = function(possibilities, option_set) {
+    chosen = option_set[option_set %in% possibilities]
+    if(length(chosen) == 0) {
+        NULL 
+    } else {
+        chosen
+    }
+}
+
 .removeSharedPeptides = function(data_frame, proteins_column, peptides_column) {
     unique_pairs = unique(data_frame[, c(proteins_column, peptides_column)])
     protein_counts = aggregate(x = unique_pairs[[proteins_column]], 
@@ -73,3 +151,95 @@
         data_frame
     }
 }
+
+# OpenSWATH
+## 3. filter by mscore
+## mscore
+if (filter_with_mscore) {
+    if (!is.element(c('m_score'), colnames(input))) {
+        stop('** m_score column is needed in order to filter out by m_scoe. Please add m_score column in the input.')
+    } else {
+        ## when mscore > mscore_cutoff, replace with zero for intensity
+        input <- input[!is.na(input$m_score) & input$m_score <= mscore_cutoff, ] 
+        message(paste0('** Features with great than ', mscore_cutoff, ' in m_score are removed.'))
+    }
+    input <- input[, -which(colnames(input) %in% 'm_score')]
+}
+# Spectronaut
+## 4. filter by Qvalue
+## protein FDR
+if (is.element('PG.Qvalue', colnames(input))) {
+    input[!is.na(input$PG.Qvalue) & input$PG.Qvalue > 0.01, "Intensity"] <- NA
+    message('** Intensities with great than 0.01 in PG.Qvalue are replaced with NA.')
+    input <- input[, -which(colnames(input) %in% 'PG.Qvalue')]
+}
+## precursor qvalue
+if (filter_with_Qvalue) {
+    if (!is.element(c('Qvalue'), colnames(input))) {
+        stop('** EG.Qvalue column is needed in order to filter out by Qvalue. Please add EG.Qvalue column in the input.')
+    } else {
+        ## when qvalue > qvalue_cutoff, replace with zero for intensity
+        input[!is.na(input$Qvalue) & input$Qvalue > qvalue_cutoff, "Intensity"] <- 0
+        message(paste0('** Intensities with great than ', qvalue_cutoff, ' in EG.Qvalue are replaced with zero.'))
+    }
+}
+# Skyline 
+if (!is.element(c('DetectionQValue'), colnames(input))) {
+    stop('** DetectionQValue column is needed in order to filter out by Qvalue. Please add DectionQValue column in the input.')
+} else {
+    ## make Q value as numeric
+    input$DetectionQValue <- as.numeric(as.character(input$DetectionQValue))
+    ## when qvalue > qvalue_cutoff, replace with zero for intensity
+    input[!is.na(input$DetectionQValue) & input$DetectionQValue > qvalue_cutoff, "Intensity"] <- 0
+    message(paste0('** Intensities with great than ', qvalue_cutoff, 
+                   ' in DetectionQValue are replaced with zero.'))
+}
+.filterFDR = function(data_frame, score_column, score_threshold, direction) {
+    .isLegalValue(score_column, NULL, FALSE)
+    not_missing = !is.na(data_frame[[score_column]])
+    
+    data_frame[, ]
+}
+
+.fixColumnTypes = function(data_frame, numeric_columns, character_columns,
+                           factor_columnss) {
+    
+}
+
+.fixColumnNames = function(data_frame) {
+    
+}
+
+# DIA-Umpire
+# # 4 files: 
+# # - fragment ion summary
+# # - peptide summary
+# # - protein summary
+# MaxQuant
+# # 2 or 3 files:
+# # - evidence.txt (feature level data)
+# # - annotation.txt (Raw.file, Condition, BioReplicate, Run, IsotopeLabelType)
+# # - proteinGroups.txt (protein group ID). We can use "Proteins" column from evidence instead
+# OpenMS
+# # 1 or 2 files:
+# # - feature-level data
+# # - annotation (Condition, BioReplicate, Run). Can be replaced with columns from the feature-level data 
+# OpenSWATH
+# # 2 files:
+# # - feature-level data
+# # - annotation file ('Condition', 'BioReplicate', 'Run')
+# Progenesis
+# # - feature-level data ('Accession', 'Sequence', 'Modification', 'Charge' and one column for each run are required)
+# # - annotation file (Condition, BioReplicate, Run)
+# Skyline
+# # 1 or 2 files:
+# # - feature-level data
+# # - annotation file - can be replaced with columns "Run", "Condition", 'BioReplicate' in the feature-level data
+# Spectronaut
+# # 1 or 2 files:
+# # - feature-level data
+# # - annotation file - can be replaced with "R.FileName", "R.Condition", "R.Replicate" in the feature-level data
+# Proteome Discoverer
+# # 2 files:
+# # - feature-level data 
+# # - annotation file - 'Condition', 'BioReplicate', 'Run'

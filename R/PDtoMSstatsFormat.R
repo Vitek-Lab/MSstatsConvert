@@ -25,43 +25,21 @@ PDtoMSstatsFormat <- function(input,
                               which.quantification = 'Precursor.Area',
                               which.proteinid = 'Protein.Group.Accessions',
                               which.sequence = 'Sequence'){
-    .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-    ## check annotation
-    required.annotation <- c('Condition', 'BioReplicate', 'Run')
-    if (!all(required.annotation %in% colnames(annotation))) {
-        missedAnnotation <- which(!(required.annotation %in% colnames(annotation)))
-        stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                   "is not provided in Annotation. Please check the annotation file.",
-                   "'Run' will be matched with 'Spectrum.File' "))
-    }
-    ## check annotation information
-    ## get annotation
-    annotinfo <- unique(annotation[, c("Run", "Condition", 'BioReplicate')])	
-    ## Each Run should has unique information about condition and bioreplicate
-    check.annot <- xtabs(~Run, annotinfo)
-    if ( any(check.annot > 1) ) {
-        stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-    }
     
+    .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
+
+    annotation = .makeAnnotation(annotation, 
+                                 c("Run" = "Run", "Condition" = "Condition",
+                                   "BioReplicate" = "BioReplicate"))    
     ## 0.1. which intensity : Precursor.Area vs. Intensity vs Area
     ## 2017.01.11 : use 'Precursor.Area' instead of 'Intensity'
     ## default : Precursor.Area
-    which.quant <- NULL
+    .isLegalValue(which.quantification, 
+                  legal_values = c("Intensity", "Area", "Precursor.Area",
+                                   "Precursor.Abundance"),
+                  message = "Please select a column to be used for quantified intensities among four options: ")
+    which.quant = which.quantification
     
-    if (which.quantification == 'Intensity') {
-        which.quant <- 'Intensity'
-    } else if (which.quantification == 'Area') {
-        which.quant <- 'Area'
-    } else if (which.quantification == 'Precursor.Area') {
-        which.quant <- 'Precursor.Area'
-    } else if (which.quantification == 'Precursor.Abundance') {
-        which.quant <- 'Precursor.Abundance'
-    }
-    
-    if (is.null(which.quant)) {
-        stop('** Please select which columns should be used for quantified intensities, 
-             among three options (Intensity, Area, Precursor.Area, Precursor.Abundance).')
-    }
     if (which.quant == 'Intensity' & !is.element('Intensity', colnames(input))) {
         ## then that is because, input came from different version
         which.quant <- 'Precursor.Area'
@@ -83,24 +61,18 @@ PDtoMSstatsFormat <- function(input,
     
     ## 0.2. which protein id : Protein Accessions vs Master Protein Accesisions
     ## default : Protein Accessions
-    which.pro <- NULL
-    if (which.proteinid == 'Protein.Accessions') {
-        which.pro <- 'Protein.Accessions'
-    } else if (which.proteinid == 'Master.Protein.Accessions') {
-        which.pro <- 'Master.Protein.Accessions'
-    } else if (which.proteinid == 'Protein.Group.Accessions') { 
-        which.pro <- 'Protein.Group.Accessions'
-    }
-    if (is.null(which.pro)) {
-        stop('** Please select which columns should be used for protein ids, among three options (Protein.Accessions, Master.Protein.Accessions, Protein.Group.Accessions).')
-    }
+    .isLegalValue(which.proteinid, 
+                  legal_values = c("ProteinAccessions", 
+                                   "Master.Protein.Accessions",
+                                   "Protein.Group.Accessions"),
+                  message = "Please select a column to be used as protein IDs among three options: ")
+    which.pro = which.proteinid
+    # FIXME: remove unnecessary renaming
     if (which.pro == 'Protein.Accessions' & !is.element('Protein.Accessions', colnames(input))) {
-        
         which.pro <- 'Protein.Group.Accessions'
         message('** Use Protein.Group.Accessions instead of Protein.Accessions.')
     }
     if (which.pro == 'Master.Protein.Accessions' & !is.element('Master.Protein.Accessions', colnames(input))) {
-        
         which.pro <- 'Protein.Group.Accessions'
         message('** Use Protein.Group.Accessions instead of Master.Protein.Accessions.')
     }
@@ -116,15 +88,12 @@ PDtoMSstatsFormat <- function(input,
     ## 0.3. which sequence : Sequence vs Annotated.Sequence
     ################################################
     ## default : Sequence
-    which.seq <- NULL
-    if (which.sequence == 'Annotated.Sequence') {
-        which.seq <- 'Annotated.Sequence'
-    } else if (which.sequence == 'Sequence') {
-        which.seq <- 'Sequence'
-    } 
-    if (is.null(which.sequence)) {
-        stop('** Please select which columns should be used for peptide sequence, between twp options (Sequence or Annotated.Sequence).')
-    }
+    .isLegalValue(which.sequence, 
+                  legal_values = c("Annotated.Sequence", "Sequence"),
+                  message = "Please select peptide sequence column between two options: ")
+    which.seq = which.sequence
+    # FIXME: remove unncessary re-naming
+    
     if (which.seq == 'Annotated.Sequence' & !is.element('Annotated.Sequence', colnames(input))) {
         which.seq <- 'Sequence'
         message('** Use Sequence instead of Annotated.Sequence.')

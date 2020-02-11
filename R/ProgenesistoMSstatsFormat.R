@@ -37,22 +37,11 @@ ProgenesistoMSstatsFormat <- function(input,
         stop(paste("**", toString(required.column[missedInput]), 
                    "is not provided in input. Please check the input."))
     }
-    ## check annotation
-    required.annotation <- c('Run', 'BioReplicate', 'Condition')
-    if (!all(required.annotation %in% colnames(annotation))) {
-        missedAnnotation <- which(!(required.annotation %in% colnames(annotation)))
-        stop(paste("**", toString(required.annotation[missedAnnotation]), 
-                   "is not provided in Annotation. Please check the annotation."))
-    }
-    
-    ## check annotation information
-    ## get annotation
-    annotinfo <- unique(annotation[, c("Run", "Condition", 'BioReplicate')])	
-    ## Each Run should has unique information about condition and bioreplicate
-    check.annot <- xtabs(~Run, annotinfo)
-    if ( any(check.annot > 1) ) {
-        stop('** Please check annotation. Each MS run can\'t have multiple conditions or BioReplicates.' )
-    }
+
+    annotation = .makeAnnotation(
+        input, 
+        c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate")
+    )
     ## get abundance information
     if (is.element('Raw.abundance', colnames(input)) & 
         is.element('Normalized.abundance', colnames(input))) {
