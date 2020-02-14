@@ -40,6 +40,7 @@
         paste(information, paste(legal_values, sep = ", ", collapse = ", "))
     }
 }
+
 .isLegalValue = function(parameter, legal_values = NULL, 
                          can_be_null = FALSE, information = NULL) {
     parameter_name = deparse(substitute(parameter))
@@ -67,6 +68,7 @@
                    paste(missing_columns, sep = msg_sep, collapse = msg_sep)))
     }
 }
+
 .checkColumns = function(df_name, expected_columns, 
                          actual_columns, type = "required") {
     if(type == "required") {
@@ -76,13 +78,16 @@
     }
     
 }
+
 .selectColumns = function(data_frame, column_names, label = "Input") {
     .checkColumns(label, column_names, colnames(data_frame))
     data_frame[, column_names]
 }
+
 .removeColumns = function(data_frame, columns_to_remove) {
     data_frame[, !(colnames(data_frame) %in% columns_to_remove)]
 }
+
 .fixColumnTypes = function(data_frame, numeric_columns, character_columns,
                            factor_columns) {
     for(column in factor_columns) {
@@ -111,9 +116,10 @@
              cols = columns_definition)
     }
 }
+
 .checkAnnotationValidity = function(annotation){
-    count_in_run = xtabs(~ Run, annotation)
-    if (any(count_in_run > 1)) {
+    counts_in_run = xtabs(~ Run, annotation)
+    if (any(counts_in_run > 1)) {
         stop('Please check annotation. Each MS Run must have a single condition and biological replicate')
     }
 }
@@ -131,7 +137,7 @@
                                       columns_definition, backup_columns_definition)
     colnames(annotation_list[["df"]]) = .updateColnames(annotation_list[["df"]], 
                                                         annotation_list[["cols"]])
-    annotation_list[["df"]] = unique(annotation_list[["df"]])
+    annotation_list[["df"]] = unique(annotation_list[["df"]][, annotation_list[["cols"]]])
     .checkAnnotationValidity(annotation_list[["df"]])
     annotation_list[["df"]]
 }
@@ -159,6 +165,7 @@
     }
     # TODO: message for the user / log
 }
+
 .handleSharedPeptides = function(data_frame, proteins_column, peptides_column,
                                  remove_shared = TRUE) {
     if(remove_shared) {
@@ -205,6 +212,36 @@
         data_frame[[column]] = fill_vector[column]
     }
     data_frame
+}
+
+
+.makeFeature = function(data_frame, feature_columns) {
+    
+}
+
+.filterMissingFeatures = function(data_frame, feature) {
+    
+}
+
+.filterFewMeasurements = function(data_frame, features) {
+    
+}
+
+.summarizeMultipleMeasurements = function(data_frame, features) {
+    
+}
+
+.cleanByFeature = function(data_frame, feature_columns, summarize_function,
+                           handle_few_measurements,                         
+) {
+ # 1. Make features
+    features = .makeFeature(data_frame, feature_columns)
+ # 2. Remove features that are all 0/NA
+    filtered = .filterMissingFeatures(data_frame, features)
+ # 3. Remove features with few measurements
+    filtered = .filterFewMeasurements(data_frame, features)
+ # 4. Summarize multiple measurements per feature
+    .summarizeMultipleMeasurements(data_frame, features)
 }
 
 # DIA-Umpire
