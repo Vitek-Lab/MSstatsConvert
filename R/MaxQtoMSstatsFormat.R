@@ -33,8 +33,6 @@ MaxQtoMSstatsFormat <- function(
           "IsotopeLabelType" = "IsotopeLabelType")
     )
     
-    experiment <- "DDA"
-
     ## 1.1 remove contaminant, reverse proteinID 
     ## Contaminant, Reverse column in evidence
     if (is.element("Contaminant", colnames(infile)) & 
@@ -90,31 +88,15 @@ MaxQtoMSstatsFormat <- function(
     infile <- merge(infile, tempname, by="Protein.group.IDs")
     ## get useful information
     ## ? can remove Retention.time column later
-    if (experiment == "SILAC") {
-        infile <- infile[c("uniqueProteins", "Protein.group.IDs", "Sequence", 
-                           "Modified.sequence", "Charge", "Run", 
-                           "Intensity.L", "Intensity.H", "Retention.time", "id")]
-        infile.l <- infile[, !(colnames(infile) %in% "Intensity.H")]
-        infile.h <- infile[, !(colnames(infile) %in% "Intensity.L")]
-        colnames(infile.l)[colnames(infile.l) == "Intensity.L"] <- "Intensity"
-        colnames(infile.h)[colnames(infile.h) == "Intensity.H"] <- "Intensity"
-        ## new IsotopeLabelType column
-        infile.l$IsotopeLabelType <- "L"
-        infile.h$IsotopeLabelType <- "H"
-        infile <- rbind(infile.l, infile.h)
-        rm(infile.l)
-        rm(infile.h)
+    get.column <- c("Protein.group.IDs", 
+                    "Sequence", "Modified.sequence", "Modifications", "Charge", 
+                    "Run", "Intensity", "Retention.time", "id")
+    if (proteinID == 'Proteins') {
+        get.column <- c(get.column, 'uniqueProteins')
     } else {
-        get.column <- c("Protein.group.IDs", 
-                        "Sequence", "Modified.sequence", "Modifications", "Charge", 
-                        "Run", "Intensity", "Retention.time", "id")
-        if (proteinID == 'Proteins') {
-            get.column <- c(get.column, 'uniqueProteins')
-        } else {
-            get.column <- c(get.column, 'Leading.razor.protein')
-        }
-        infile <- infile[, get.column]
+        get.column <- c(get.column, 'Leading.razor.protein')
     }
+    infile <- infile[, get.column]
     if (proteinID == 'Proteins') {
         colnames(infile) = .updateColnames(infile, "uniqueProteins" = "Proteins")
     } else {
@@ -149,54 +131,33 @@ MaxQtoMSstatsFormat <- function(
     ## first remove NA intensity
     infile <- infile[!is.na(infile$Intensity), ]
     ### 2.1) general Label-free : one measurement for a feature and a run
-    if (experiment == "DDA") {
-        ## count the number of intensities for feature by runs
-        ##infile$Feature <- paste(infile$Modified.sequence, infile$Charge, sep="_")
-        ##structure <- dcast(Feature ~ Run, data=infile, value.var='Intensity')
-        ##flagduplicate = sum(structure>1)>0	
-        
-        ## take the highest intensity among duplicated or sum of intensities 
-        ## summaryforMultipleRows="max" or "sum
-        infile_w <- .cast_maxquant_to_wide_glf(infile, aggregateFun=summaryforMultipleRows)
-        
-        ## *** remove features which has less than 2 measurements across runs
-        ## !!! for MSstats v3, we don't need to remove them.
-        ## good to remove before reformatting to long-format
-        if (fewMeasurements == "remove") {
-            infile_w <- .remove_feature_with_few(infile_w)
-            message('** Peptide and charge, that have 1 or 2 measurements across runs, are removed.')
-        }
-        ## then, go back to long-format
-        ## good to fill rows with NAs, then now can have balanced data-structure.
-        infile_l <- .melt_maxquant_to_long_glf(infile_w)
-        ## need to set 'IsotopeLabelType' because SILAC already has it.
-        infile_l$IsotopeLabelType  <-  "L"
-    }
+    ## count the number of intensities for feature by runs
+    ##infile$Feature <- paste(infile$Modified.sequence, infile$Charge, sep="_")
+    ##structure <- dcast(Feature ~ Run, data=infile, value.var='Intensity')
+    ##flagduplicate = sum(structure>1)>0	
     
+    ## take the highest intensity among duplicated or sum of intensities 
+    ## summaryforMultipleRows="max" or "sum
+    infile_w <- .cast_maxquant_to_wide_glf(infile, aggregateFun=summaryforMultipleRows)
+    
+    ## *** remove features which has less than 2 measurements across runs
+    ## !!! for MSstats v3, we don't need to remove them.
+    ## good to remove before reformatting to long-format
+    if (fewMeasurements == "remove") {
+        infile_w <- .remove_feature_with_few(infile_w)
+        message('** Peptide and charge, that have 1 or 2 measurements across runs, are removed.')
+    }
+    ## then, go back to long-format
+    ## good to fill rows with NAs, then now can have balanced data-structure.
+    infile_l <- .melt_maxquant_to_long_glf(infile_w)
+    ## need to set 'IsotopeLabelType' because SILAC already has it.
+    infile_l$IsotopeLabelType  <-  "L"
+
     #########################
     ## 2.2) label-free : however, several runs for a sample.
     #########################
     ## 2.3) SILAC : two measurements for a feature and a run -> one measurements for a feature and a run and condition
-    if (experiment == "SILAC") {
-        ## count the number of intensities for feature by runs
-        ##infile$Feature <- paste(infile$Modified.sequence, infile$Charge, sep="_")
-        ##structure <- dcast(Feature ~ Run, data=infile, value.var='Intensity')
-        ##flagduplicate = sum(structure>1)>0	
-        
-        ## take the highest intensity among duplicated or sum of intensities 
-        ## summaryforMultipleRows="max" or "sum
-        infile_w <- .cast_maxquant_to_wide_silac(infile, aggregateFun=summaryforMultipleRows)
-        ## *** remove features which has less than 2 measurements across runs
-        ## good to remove before reformatting to long-format
-        if (fewMeasurements=="remove") {
-            ## it is the same across experiments. # measurement per feature. 
-            infile_w <- .remove_feature_with_few(infile_w)
-        }
-        ## then, go back to long-format
-        # good to fill rows with NAs, then now can have balanced data-structure.
-        infile_l <- .melt_maxquant_to_long_silac(infile_w)
-    }
-    
+
     ## 4. remove proteins with only one peptide and charge per protein
     if (removeProtein_with1Peptide) {
         ## remove protein which has only one peptide
@@ -235,11 +196,7 @@ MaxQtoMSstatsFormat <- function(
                                      "TechReplicate" = infile_l$TechReplicate)
     }
     infile_l <- infile_l.final
-    rm(infile_l.final)
-    infile_l$PeptideSequence <- factor(infile_l$PeptideSequence)
-    infile_l$ProteinName <- factor(infile_l$ProteinName)
-    
-    return(infile_l)
+    .fixColumnTypes(infile_l, factor = c("ProteinName", "PeptideSequence"))
 }
 
 
