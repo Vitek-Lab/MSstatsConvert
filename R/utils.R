@@ -87,7 +87,8 @@
                            factor_columns) {
     for(column in factor_columns) {
         data_frame[[column]] = factor(data_frame[[column]])
-    }for(column in numeric_columns) {
+    }
+    for(column in numeric_columns) {
         data_frame[[column]] = as.numeric(as.character(data_frame[[column]]))
     }
     for(column in character_columns) {
@@ -167,58 +168,43 @@
     }
 }
 
-# OpenSWATH
-## 3. filter by mscore
-## mscore
-if (filter_with_mscore) {
-    if (!is.element(c('m_score'), colnames(input))) {
-        stop('** m_score column is needed in order to filter out by m_scoe. Please add m_score column in the input.')
+.filterByScore = function(data_frame, score_column, score_threshold, direction,
+                          behavior, fill_value = NULL) {
+    if(direction == "greater") {
+        score_filter = data_frame[[score_column]] > score_threshold
     } else {
-        ## when mscore > mscore_cutoff, replace with zero for intensity
-        input <- input[!is.na(input$m_score) & input$m_score <= mscore_cutoff, ] 
-        message(paste0('** Features with great than ', mscore_cutoff, ' in m_score are removed.'))
+        score_filter = data_frame[[score_column]] < score_threshold
     }
-    input <- input[, -which(colnames(input) %in% 'm_score')]
-}
-# Spectronaut
-## 4. filter by Qvalue
-## protein FDR
-if (is.element('PG.Qvalue', colnames(input))) {
-    input[!is.na(input$PG.Qvalue) & input$PG.Qvalue > 0.01, "Intensity"] <- NA
-    message('** Intensities with great than 0.01 in PG.Qvalue are replaced with NA.')
-    input <- input[, -which(colnames(input) %in% 'PG.Qvalue')]
-}
-## precursor qvalue
-if (filter_with_Qvalue) {
-    if (!is.element(c('Qvalue'), colnames(input))) {
-        stop('** EG.Qvalue column is needed in order to filter out by Qvalue. Please add EG.Qvalue column in the input.')
+    score_filter = score_filter & !is.na(data_frame[[score_column]])
+    if(behavior == "remove") {
+        data_frame[score_filter, ]    
     } else {
-        ## when qvalue > qvalue_cutoff, replace with zero for intensity
-        input[!is.na(input$Qvalue) & input$Qvalue > qvalue_cutoff, "Intensity"] <- 0
-        message(paste0('** Intensities with great than ', qvalue_cutoff, ' in EG.Qvalue are replaced with zero.'))
+        data_frame[score_filter, ] = fill_value
+        data_frame
     }
 }
-# Skyline 
-if (!is.element(c('DetectionQValue'), colnames(input))) {
-    stop('** DetectionQValue column is needed in order to filter out by Qvalue. Please add DectionQValue column in the input.')
-} else {
-    ## make Q value as numeric
-    input$DetectionQValue <- as.numeric(as.character(input$DetectionQValue))
-    ## when qvalue > qvalue_cutoff, replace with zero for intensity
-    input[!is.na(input$DetectionQValue) & input$DetectionQValue > qvalue_cutoff, "Intensity"] <- 0
-    message(paste0('** Intensities with great than ', qvalue_cutoff, 
-                   ' in DetectionQValue are replaced with zero.'))
-}
-.filterFDR = function(data_frame, score_column, score_threshold, direction) {
-    .isLegalValue(score_column, NULL, FALSE)
-    not_missing = !is.na(data_frame[[score_column]])
-    
-    data_frame[, ]
+
+.handleFiltering = function(data_frame, score_column, score_threshold, 
+                            direction, behavior, fill_value = NULL, 
+                            drop_column = TRUE, filter = TRUE) {
+    if(filter) {
+        result = .filterByScore(data_frame, score_column, score_threshold, behavior,
+                                fill_value)
+    } else {
+        result = data_frame
+    }
+    if(drop_column) {
+        .removeColumns(result, score_column)
+    } else {
+        result
+    }
 }
 
-
-.fixColumnNames = function(data_frame) {
-    
+.fillValues = function(data_frame, fill_vector) {
+    for(column in names(fill_vector)) {
+        data_frame[[column]] = fill_vector[column]
+    }
+    data_frame
 }
 
 # DIA-Umpire

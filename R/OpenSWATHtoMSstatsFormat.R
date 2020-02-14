@@ -26,6 +26,7 @@ OpenSWATHtoMSstatsFormat <- function(
     c("ProteinName", "FullPeptideName", "Charge", "Sequence", "decoy", "m_score",
       "aggr_Fragment_Annotation", "aggr_Peak_Area", "filename")
   )
+  # TODO: only choose m_score if filter_with_mscore = TRUE
   
   annotation = .makeAnnotation(
     annotation, 
@@ -40,19 +41,9 @@ OpenSWATHtoMSstatsFormat <- function(
     message("** Remove the decoys.")
   }
   
-  ## 3. filter by mscore
-  ## mscore
-  if (filter_with_mscore) {
-    if (!is.element(c('m_score'), colnames(input))) {
-      stop('** m_score column is needed in order to filter out by m_scoe. Please add m_score column in the input.')
-    } else {
-      ## when mscore > mscore_cutoff, replace with zero for intensity
-      input <- input[!is.na(input$m_score) & input$m_score <= mscore_cutoff, ] 
-      message(paste0('** Features with great than ', mscore_cutoff, ' in m_score are removed.'))
-    }
-    input <- input[, -which(colnames(input) %in% 'm_score')]
-  }
-  
+  input = .handleFiltering(input, "m_score", mscore_cutoff, "smaller", "remove", 
+                           NULL, TRUE, filter_with_mscore)
+
   ## 4. Make required long format - disaggregate : one row for each transition
   ## The columns "aggr_Fragment_Annotation" : separate by ';' and "aggr_Peak_Area" : separate by ';' 
   ## are disaggregated into the new columns "FragmentIon" and "Intensity". 

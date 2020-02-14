@@ -18,7 +18,6 @@ SpectronauttoMSstatsFormat <- function(
   
   .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
   .isLegalValue(intensity, legal_values = c("PeakArea", "NormalizedPeakArea"))
-
   .checkColumns("Input", 
                 c("F.FrgLossType", "F.ExcludedFromQuantification",
                   "PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge",
@@ -35,49 +34,23 @@ SpectronauttoMSstatsFormat <- function(
     c("R.FileName" = "Run", "R.Condition" = "Condition", "R.Replicate" = "BioReplicate")
   )  
   
-  
-  ## 2. use only 'F.ExcludedFromQuantification == False' : XIC quality
-  if (is.logical(input$F.ExcludedFromQuantification)) {
-    input$F.ExcludedFromQuantification <- factor(input$F.ExcludedFromQuantification)
-    input$F.ExcludedFromQuantification <- factor(input$F.ExcludedFromQuantification,
-                                                 labels = c('False', 'True'))
-  }
-  if (!all(unique(input$F.ExcludedFromQuantification) %in% c('False', 'True'))) {
-    stop( paste("** Please check the column called F.ExcludedFromQuantification. Only False or True are allowed in this column."))
-  }
-  input <- input[input$F.ExcludedFromQuantification == 'False', ]
-  
+  input = input[!input[["F.ExcludedFromQuantification"]], ] # XIC quality. TODO: explain in documentation
   f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(input))
-  pg_qval_col = findAvailable(c("PG.Qvalue"), colnames(input))
-  input = .selectColumns(
-    input, 
+  pg_qval_col = .findAvailable(c("PG.Qvalue"), colnames(input))
+  input = .selectColumns(input, 
     c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
       f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
-  colnames(input) = .updateColnames(
-    input, 
+  colnames(input) = .updateColnames(input, 
     c("PG.ProteinGroups" = "ProteinName", "EG.ModifiedSequence" = "PeptideSequence",
       "FG.Charge" = "PrecursorCharge", "F.FrgIon" = "FragmentIon",
       f_charge_col = "ProductCharge", "R.FileName" = "Run", "EG.Qvalue" = "Qvalue",
       paste0("F.", intensity) = "Intensity"))
 
-  ## 4. filter by Qvalue
-  ## protein FDR
-  if (is.element('PG.Qvalue', colnames(input))) {
-    input[!is.na(input$PG.Qvalue) & input$PG.Qvalue > 0.01, "Intensity"] <- NA
-    message('** Intensities with great than 0.01 in PG.Qvalue are replaced with NA.')
-    input <- input[, -which(colnames(input) %in% 'PG.Qvalue')]
-  }
-  ## precursor qvalue
-  if (filter_with_Qvalue) {
-    if (!is.element(c('Qvalue'), colnames(input))) {
-      stop('** EG.Qvalue column is needed in order to filter out by Qvalue. Please add EG.Qvalue column in the input.')
-    } else {
-      ## when qvalue > qvalue_cutoff, replace with zero for intensity
-      input[!is.na(input$Qvalue) & input$Qvalue > qvalue_cutoff, "Intensity"] <- 0
-      message(paste0('** Intensities with great than ', qvalue_cutoff, ' in EG.Qvalue are replaced with zero.'))
-    }
-  }
-  
+  input = .handleFiltering(input, "PG.Qvalue", 0.01, "greater", "fill", NA)
+  # TODO: 1. Does 0.01 have to be hard-coded? 2. Explain in documentation that this is protein q-value. 3. Log+message
+  input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "greater", "fill", 0)
+  # TODO: 1. Explain in documentation that this is precursor q-value. 2. Log+messagre
+
   ## 5. remove featuares with all na or zero
   ## some rows have all zero values across all MS runs. They should be removed.
   input$fea <- paste(input$PeptideSequence,
@@ -145,18 +118,10 @@ SpectronauttoMSstatsFormat <- function(
     message('** No multiple measurements in a feature and a run.')
   }
   
-  ## 10. merge annotation
   input <- merge(input, annotation, all=TRUE)
-  input <- data.frame("ProteinName" = input$ProteinName,
-                      "PeptideSequence" = input$PeptideSequence,
-                      "PrecursorCharge" = input$PrecursorCharge,
-                      "FragmentIon" = input$FragmentIon,
-                      "ProductCharge" = input$ProductCharge,
-                      "IsotopeLabelType" = "L",
-                      "Condition" = input$Condition,
-                      "BioReplicate" = input$BioReplicate,
-                      "Run" = input$Run,
-                      "Intensity" = input$Intensity)
-  
+  input = .selectColumns(
+    input, c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
+             "ProductCharge", "Condition", "BioReplicate", "Run", "Intensity"))
+  input = .fillValues(input, c("IsotopeLabelType" = "L"))
   .fixColumnTypes(input, factor_columns = "ProteinName")
 }
