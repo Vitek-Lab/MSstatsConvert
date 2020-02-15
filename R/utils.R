@@ -139,6 +139,7 @@
     annotation_list = .pickAnnotation(annotation_source, backup_annotation_source,
                                       columns_definition, backup_columns_definition)
     colnames(annotation_list[["df"]]) = .updateColnames(annotation_list[["df"]], 
+                                                        names(annotation_list[["cols"]]),
                                                         annotation_list[["cols"]])
     annotation_list[["df"]] = unique(annotation_list[["df"]][, annotation_list[["cols"]]])
     .checkAnnotationValidity(annotation_list[["df"]])
@@ -243,13 +244,14 @@
     data_frame[features_few_filter, ]
 }
 
-.summarizeMultipleMeasurements = function(data_frame, features, counts, 
+.summarizeMultipleMeasurements = function(data_frame, feature_columns, counts, 
                                           aggregator) {
-    
+    intensity_col = which(colnames(data_frame) == "Intensity")
     if(any(counts > length(unique(data_frame[["Run"]])))) {
-        merge(aggregate(data_frame[["Intensity"]] ~ features + data_frame[["Run"]], 
+        merge(aggregate(Intensity ~ .,
+                        data = data_frame[, c("Intensity", "Run", feature_columns)],
                         FUN = max), 
-              data_frame)
+              data_frame[, -intensity_col], by = c("Run", feature_columns))
     } else {
         data_frame
     }
@@ -277,6 +279,6 @@
     counts = .getCounts(data_frame[["Intensity"]], features)
     filtered = .filterFewMeasurements(data_frame, features, counts,
                                       handle_few_measurements)
-    .summarizeMultipleMeasurements(filtered, features, counts, 
+    .summarizeMultipleMeasurements(filtered, feature_columns, counts, 
                                    summarize_function)
 }
