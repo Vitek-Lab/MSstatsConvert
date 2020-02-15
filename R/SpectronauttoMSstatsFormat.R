@@ -11,7 +11,7 @@
 #' @author Meena Choi, Olga Vitek
 #' 
 #' @export
-SpectronauttoMSstatsFormat <- function(
+SpectronauttoMSstatsFormat = function(
   input, annotation = NULL, intensity = 'PeakArea', filter_with_Qvalue = TRUE,
   qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements="remove",
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
@@ -26,6 +26,7 @@ SpectronauttoMSstatsFormat <- function(
                 colnames(input), "optional")
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
   input = input[input[["F.FrgLossType"]] == "noloss", ]
+  input = input[!input[["F.ExcludedFromQuantification"]], ] # XIC quality. TODO: explain in documentation
   
   annotation = .makeAnnotation(
     annotation, 
@@ -34,7 +35,6 @@ SpectronauttoMSstatsFormat <- function(
     c("R.FileName" = "Run", "R.Condition" = "Condition", "R.Replicate" = "BioReplicate")
   )  
   
-  input = input[!input[["F.ExcludedFromQuantification"]], ] # XIC quality. TODO: explain in documentation
   f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(input))
   pg_qval_col = .findAvailable(c("PG.Qvalue"), colnames(input))
   input = .selectColumns(
@@ -42,10 +42,10 @@ SpectronauttoMSstatsFormat <- function(
     c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
       f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
   colnames(input) = .updateColnames(
-    input, c("PG.ProteinGroups" = "ProteinName", "EG.ModifiedSequence" = "PeptideSequence",
-             "FG.Charge" = "PrecursorCharge", "F.FrgIon" = "FragmentIon",
-             f_charge_col = "ProductCharge", "R.FileName" = "Run", "EG.Qvalue" = "Qvalue",
-             paste0("F.", intensity) = "Intensity"))
+    input, c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon",
+             f_charge_col, "R.FileName", "EG.Qvalue", paste0("F.", intensity)),
+    c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
+      "ProductCharge", "Run", "Qvalue", "Intensity"))
   
   input = .handleFiltering(input, "PG.Qvalue", 0.01, "greater", "fill", NA)
   # TODO: 1. Does 0.01 have to be hard-coded? 2. Explain in documentation that this is protein q-value. 3. Log+message
@@ -58,7 +58,7 @@ SpectronauttoMSstatsFormat <- function(
                           summaryforMultipleRows, fewMeasurements,
                           removeProtein_with1Feature)
 
-  input <- merge(input, annotation, all = TRUE)
+  input <- merge(input, annotation, by = "Run", all = TRUE)
   input = .selectColumns(
     input, c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
              "ProductCharge", "Condition", "BioReplicate", "Run", "Intensity"))
