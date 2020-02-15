@@ -255,8 +255,23 @@
     }
 }
 
+
+.handleSingleFeaturePerProtein = function(data_frame, features, 
+                                          remove_single_feature) {
+    counts = xtabs( ~ ProteinName, 
+                    data = unique(cbind(data_frame[, "ProteinName", drop = FALSE],
+                                        feature = features)))
+    single_feature = names(counts[counts <= 1])
+    if(remove_single_feature & length(single_feature) > 0) {
+        data_frame[!(data_frame[["ProteinName"]] %in% single_feature), ]
+    } else {
+        data_frame
+    }
+    # TODO: message + logs
+}
+
 .cleanByFeature = function(data_frame, feature_columns, summarize_function,
-                           handle_few_measurements) {
+                           handle_few_measurements, remove_single_feature) {
     data_frame = .filterSmallIntensities(data_frame, 1)
     features = .makeFeatures(data_frame, feature_columns)
     counts = .getCounts(data_frame[["Intensity"]], features)
@@ -265,37 +280,3 @@
     .summarizeMultipleMeasurements(filtered, features, counts, 
                                    summarize_function)
 }
-
-# DIA-Umpire
-# # 4 files: 
-# # - fragment ion summary
-# # - peptide summary
-# # - protein summary
-# MaxQuant
-# # 2 or 3 files:
-# # - evidence.txt (feature level data)
-# # - annotation.txt (Raw.file, Condition, BioReplicate, Run, IsotopeLabelType)
-# # - proteinGroups.txt (protein group ID). We can use "Proteins" column from evidence instead
-# OpenMS
-# # 1 or 2 files:
-# # - feature-level data
-# # - annotation (Condition, BioReplicate, Run). Can be replaced with columns from the feature-level data 
-# OpenSWATH
-# # 2 files:
-# # - feature-level data
-# # - annotation file ('Condition', 'BioReplicate', 'Run')
-# Progenesis
-# # - feature-level data ('Accession', 'Sequence', 'Modification', 'Charge' and one column for each run are required)
-# # - annotation file (Condition, BioReplicate, Run)
-# Skyline
-# # 1 or 2 files:
-# # - feature-level data
-# # - annotation file - can be replaced with columns "Run", "Condition", 'BioReplicate' in the feature-level data
-# Spectronaut
-# # 1 or 2 files:
-# # - feature-level data
-# # - annotation file - can be replaced with "R.FileName", "R.Condition", "R.Replicate" in the feature-level data
-# Proteome Discoverer
-# # 2 files:
-# # - feature-level data 
-# # - annotation file - 'Condition', 'BioReplicate', 'Run'
