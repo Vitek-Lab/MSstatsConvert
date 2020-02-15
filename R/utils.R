@@ -22,7 +22,9 @@
     
 }
 
-.updateColnames = function(data_frame, column_update) {
+.updateColnames = function(data_frame, old_names, new_names) {
+    column_update = new_names
+    names(column_update) = old_names
     columns <- colnames(data_frame)
     not_changing <- setdiff(columns, names(column_update))
     column_update[not_changing] <- not_changing
@@ -88,8 +90,9 @@
     data_frame[, !(colnames(data_frame) %in% columns_to_remove)]
 }
 
-.fixColumnTypes = function(data_frame, numeric_columns, character_columns,
-                           factor_columns) {
+.fixColumnTypes = function(data_frame, numeric_columns = NULL, 
+                           character_columns = NULL,
+                           factor_columns = NULL) {
     for(column in factor_columns) {
         data_frame[[column]] = factor(data_frame[[column]])
     }
@@ -194,9 +197,9 @@
 .handleFiltering = function(data_frame, score_column, score_threshold, 
                             direction, behavior, fill_value = NULL, 
                             drop_column = TRUE, filter = TRUE) {
-    if(filter) {
-        result = .filterByScore(data_frame, score_column, score_threshold, behavior,
-                                fill_value)
+    if(filter) { 
+        result = .filterByScore(data_frame, score_column, score_threshold, 
+                                direction, behavior, fill_value)
     } else {
         result = data_frame
     }
@@ -214,34 +217,53 @@
     data_frame
 }
 
-
-.makeFeature = function(data_frame, feature_columns) {
-    
+.filterSmallIntensities = function(data_frame, threshold) {
+    threshold_filter = data_frame[["Intensity"]] > threshold
+    data_frame[threshold_filter, ]
 }
 
-.filterMissingFeatures = function(data_frame, feature) {
-    
+.makeFeatures = function(data_frame, feature_columns) {
+    apply(data_frame[, feature_columns], 1, 
+          function(x) paste(x, sep = "_", collapse = "_"))
 }
 
-.filterFewMeasurements = function(data_frame, features) {
-    
+.getCounts = function(intensity, features) {
+    xtabs( ~ feature,
+           data = data.frame(Intensity = intensity,
+                             feature = features),
+           na.action = na.omit)    
 }
 
-.summarizeMultipleMeasurements = function(data_frame, features) {
+.filterFewMeasurements = function(data_frame, features, counts, handle_few) {
+    if(handle_few == "remove") {
+        features_few_filter = features %in% names(counts[counts > 2])
+    } else {
+        features_few_filter = features %in% names(counts[counts > 0])
+    }
+    data_frame[features_few_filter, ]
+}
+
+.summarizeMultipleMeasurements = function(data_frame, features, counts, 
+                                          aggregator) {
     
+    if(any(counts > length(unique(data_frame[["Run"]])))) {
+        merge(aggregate(data_frame[["Intensity"]] ~ features + data_frame[["Run"]], 
+                        FUN = max), 
+              data_frame)
+    } else {
+        data_frame
+    }
 }
 
 .cleanByFeature = function(data_frame, feature_columns, summarize_function,
-                           handle_few_measurements,                         
-) {
- # 1. Make features
-    features = .makeFeature(data_frame, feature_columns)
- # 2. Remove features that are all 0/NA
-    filtered = .filterMissingFeatures(data_frame, features)
- # 3. Remove features with few measurements
-    filtered = .filterFewMeasurements(data_frame, features)
- # 4. Summarize multiple measurements per feature
-    .summarizeMultipleMeasurements(data_frame, features)
+                           handle_few_measurements) {
+    data_frame = .filterSmallIntensities(data_frame, 1)
+    features = .makeFeatures(data_frame, feature_columns)
+    counts = .getCounts(data_frame[["Intensity"]], features)
+    filtered = .filterFewMeasurements(data_frame, features, counts,
+                                      handle_few_measurements)
+    .summarizeMultipleMeasurements(filtered, features, counts, 
+                                   summarize_function)
 }
 
 # DIA-Umpire
