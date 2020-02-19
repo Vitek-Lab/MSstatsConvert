@@ -283,11 +283,13 @@
     filtered = .filterFewMeasurements(data_frame, feature_columns, counts,
                                       "keep")
     filtered = .handleSharedPeptides(filtered, "ProteinName", "PeptideSequence",
-                                   remove_shared = remove_shared)
-    features = .makeFeatures(filtered, feature_columns)
-    counts = .getCounts(filtered[["Intensity"]], features)
-    filtered = .filterFewMeasurements(filtered, features, counts,
+                                     remove_shared = remove_shared)
+    few_filter = .filterSmallIntensities(filtered, 0)
+    features = .makeFeatures(filtered[few_filter, ], feature_columns)
+    counts = .getCounts(filtered[few_filter, ][["Intensity"]], features)
+    filtered = .filterFewMeasurements(filtered, feature_columns, counts,
                                       handle_few_measurements)
     .summarizeMultipleMeasurements(filtered, feature_columns, counts, 
                                    summarize_function)
+    # TODO: fix this part after a common order of operations is chosen.
 }
