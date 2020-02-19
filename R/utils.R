@@ -188,9 +188,9 @@
     }
     score_filter = score_filter & !is.na(data_frame[[score_column]])
     if(behavior == "remove") {
-        data_frame[score_filter, ]    
+        data_frame[!score_filter, ]    
     } else {
-        data_frame[score_filter, ] = fill_value
+        data_frame[score_filter, "Intensity"] = fill_value
         data_frame
     }
 }
@@ -220,12 +220,13 @@
 
 .filterSmallIntensities = function(data_frame, threshold) {
     threshold_filter = data_frame[["Intensity"]] > threshold
-    data_frame[threshold_filter, ]
+    threshold_filter = threshold_filter & !is.na(data_frame[["Intensity"]])
+    threshold_filter
 }
 
 .makeFeatures = function(data_frame, feature_columns) {
-    apply(data_frame[, feature_columns], 1, 
-          function(x) paste(x, sep = "_", collapse = "_"))
+    gsub(" " , "", apply(data_frame[, feature_columns], 1, 
+          function(x) paste(x, sep = "_", collapse = "_")))
 }
 
 .getCounts = function(intensity, features) {
@@ -235,7 +236,8 @@
            na.action = na.omit)    
 }
 
-.filterFewMeasurements = function(data_frame, features, counts, handle_few) {
+.filterFewMeasurements = function(data_frame, feature_columns, counts, handle_few) {
+    features = .makeFeatures(data_frame, feature_columns)
     if(handle_few == "remove") {
         features_few_filter = features %in% names(counts[counts > 2])
     } else {
@@ -273,11 +275,18 @@
 }
 
 .cleanByFeature = function(data_frame, feature_columns, summarize_function,
-                           handle_few_measurements, remove_single_feature) {
-    data_frame = .filterSmallIntensities(data_frame, 1)
-    features = .makeFeatures(data_frame, feature_columns)
-    counts = .getCounts(data_frame[["Intensity"]], features)
-    filtered = .filterFewMeasurements(data_frame, features, counts,
+                           handle_few_measurements, remove_single_feature, 
+                           remove_shared) {
+    few_filter = .filterSmallIntensities(data_frame, 1)
+    features = .makeFeatures(data_frame[few_filter, ], feature_columns)
+    counts = .getCounts(data_frame[few_filter, ][["Intensity"]], features)
+    filtered = .filterFewMeasurements(data_frame, feature_columns, counts,
+                                      "keep")
+    filtered = .handleSharedPeptides(filtered, "ProteinName", "PeptideSequence",
+                                   remove_shared = remove_shared)
+    features = .makeFeatures(filtered, feature_columns)
+    counts = .getCounts(filtered[["Intensity"]], features)
+    filtered = .filterFewMeasurements(filtered, features, counts,
                                       handle_few_measurements)
     .summarizeMultipleMeasurements(filtered, feature_columns, counts, 
                                    summarize_function)
