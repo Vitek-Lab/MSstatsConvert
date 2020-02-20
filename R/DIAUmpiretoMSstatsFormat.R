@@ -139,9 +139,7 @@ DIAUmpiretoMSstatsFormat <- function(
     ## remove extra column
     raw <- raw[, -which(colnames(raw) %in% c('Fragment.Key'))]
     ## 0.4 get selected fragment and peptide only
-    raw$Peptide <- as.character(raw$Peptide)
-    raw$Fragment <- as.character(raw$Fragment)
-    raw$Fragment <- as.character(raw$Fragment)
+    raw = .fixColumnTypes(raw, character_columns = c("Peptide", "Fragment"))
     raw.selected <- dplyr::semi_join(raw, raw.final, by=c('Protein', 'Peptide', 'Fragment'))
     message('** Extract the data from selected fragments and/or peptides.')
     
@@ -156,9 +154,8 @@ DIAUmpiretoMSstatsFormat <- function(
     ## remove suffix in the Run
     raw.l$Run <- gsub(paste("_", inputlevel, sep=""), '', raw.l$Run)
     ## fill in other column
-    raw.l$PrecursorCharge <- NA
-    raw.l$ProductCharge <- NA
-    raw.l$IsotopeLabelType <- 'light'
+    raw.l = .fillValues(raw.l, c("PrecursorCharge" = NA, "ProductCharge" = NA,
+                                 "IsotopeLabelType" = "light"))
     ## 4. add annotation
     input <- merge(raw.l, annot, by='Run')
     rm(raw.l)
@@ -196,23 +193,12 @@ DIAUmpiretoMSstatsFormat <- function(
     }
     
     ## 8. remove proteins with only one peptide and charge per protein
-    if (removeProtein_with1Feature) {
-        ## remove protein which has only one peptide
-        tmp <- unique(input[, c("ProteinName", 'fea')])
-        tmp$ProteinName <- factor(tmp$ProteinName)
-        count <- xtabs( ~ ProteinName, data=tmp)
-        lengthtotalprotein <- length(count)
-        removepro <- names(count[count <= 1])
-        if (length(removepro) > 0) {
-            input <- input[-which(input$ProteinName %in% removepro), ]
-            message(paste0("** ", length(removepro), 
-                           ' proteins, which have only one feature in a protein, are removed among ', 
-                           lengthtotalprotein, ' proteins.'))
-        } else {
-            message("All proteins have at least two features.")
-        }
-    }
-    
+    input = .handleSingleFeaturePerProtein(
+        input, 
+        c("PeptideSequence", "PrecursorCharge",
+          "FragmentIon", "ProductCharge"),
+        removeProtein_with1Feature)
+
     ## 9. remove multiple measurements per feature and run
     count <- aggregate(Intensity ~ fea, data=input, FUN=length)
     ## if any feature has more number of total MS runs, 
@@ -237,7 +223,6 @@ DIAUmpiretoMSstatsFormat <- function(
         message('** No multiple measurements in a feature and a run.')
     }
     
-    input$IsotopeLabelType <- 'L'
-    input$ProteinName <- factor(input$ProteinName)
-    return(input)
+    input = .fillValues(input, c("IsotopeLabelType" = "L"))
+    .fixColumnTypes(input, factor = "ProteinName")
 }

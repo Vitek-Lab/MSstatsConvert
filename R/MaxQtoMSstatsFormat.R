@@ -159,28 +159,18 @@ MaxQtoMSstatsFormat <- function(
     ## 2.3) SILAC : two measurements for a feature and a run -> one measurements for a feature and a run and condition
 
     ## 4. remove proteins with only one peptide and charge per protein
-    if (removeProtein_with1Peptide) {
-        ## remove protein which has only one peptide
-        infile_l$feature <- paste(infile_l$Modified.sequence, infile_l$Charge, sep="_")
-        tmp <- unique(infile_l[, c("Proteins", 'feature')])
-        tmp$Proteins <- factor(tmp$Proteins)
-        count <- xtabs( ~ Proteins, data=tmp)
-        lengthtotalprotein <- length(count)
-        removepro <- names(count[count <= 1])
-        infile_l <- infile_l[-which(infile_l$Proteins %in% removepro), ]
-        message(paste0("** ", length(removepro), 
-                       ' proteins, which have only peptide and charge in a protein, are removed among ', 
-                       lengthtotalprotein, ' proteins.'))
-    }
-    
+    infile_l = .handleSingleFeaturePerProtein(
+        infile_l, 
+        c("Modified.sequence", "Charge"),
+        removeProtein_with1Peptide)
+
     ## merge all information
     colnames(infile_l)[1] <- "ProteinName"
     colnames(infile_l)[2] <- "PeptideSequence"
     colnames(infile_l)[3] <- "PrecursorCharge"
     ## Add in columns for FramentIon & ProductCharge (all values are NA)
     ## Add column for IsotopeLabelType (all "L")
-    infile_l$FragmentIon <- NA
-    infile_l$ProductCharge <- NA
+    infile_l = .fillValues(infile_l, c("FragmentIon" = NA, "ProductCharge" = NA))
     ## Create Condition & Bioreplicate columns; TODO: fill in with correct values
     infile_l <- merge(infile_l, annotation, by=c("Run", "IsotopeLabelType"))
     infile_l.final <- infile_l[, c(c("ProteinName", "PeptideSequence", "PrecursorCharge", 

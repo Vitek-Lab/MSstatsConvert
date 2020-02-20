@@ -76,9 +76,8 @@ SkylinetoMSstatsFormat <- function(
     ## we assume to use unique peptide
     input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
                                   remove_shared = useUniquePeptide)
-    ## 6. class of intensity is factor, change it as numeric
-    input$Intensity <- as.numeric(as.character(input$Intensity))
-    
+    input = .fixColumnTypes(input, numeric = "Intensity")
+
     ##  7. remove truncated peaks with NA
     if (is.element('True', input$Truncated)) {
         if (sum(!is.na(input$Truncated) & input$Truncated == 'True') > 0) {
@@ -86,7 +85,6 @@ SkylinetoMSstatsFormat <- function(
             message('** Truncated peaks are replaced with NA.')
         }
     }
-    
     if (is.element(TRUE, input$Truncated)) {
         if (sum(!is.na(input$Truncated) & input$Truncated) > 0) {
             input[!is.na(input$Truncated) & input$Truncated, "Intensity"] <- NA
@@ -201,24 +199,11 @@ SkylinetoMSstatsFormat <- function(
         }
     }
     
-    ##  12. remove proteins with only one feature per protein
-    if (removeProtein_with1Feature) {
-        ## remove protein which has only one peptide
-        tmp <- unique(input[, c("ProteinName", 'fea')])
-        tmp$ProteinName <- factor(tmp$ProteinName)
-        count <- xtabs( ~ ProteinName, data=tmp)
-        lengthtotalprotein <- length(count)
-        removepro <- names(count[count <= 1])
-        if (length(removepro) > 0) {
-            input <- input[-which(input$ProteinName %in% removepro), ]
-            message(paste0("** ", length(removepro), 
-                           ' proteins, which have only one feature in a protein, are removed among ', 
-                           lengthtotalprotein, ' proteins.'))
-        } else {
-            message("** All proteins have at least two features.")
-        }
-    }
-    input <- input[, -which(colnames(input) %in% c('fea'))]
+    input = .handleSingleFeaturePerProtein(
+        input, 
+        c("PeptideSequence", "PrecursorCharge",
+          "FragmentIon", "ProductCharge"),
+        removeProtein_with1Feature)
 
     ##  13. if annotation is missing,
     missing.annotation <- any( is.na(input$Condition) | is.na(input$BioReplicate) )

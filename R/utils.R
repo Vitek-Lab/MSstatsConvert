@@ -246,8 +246,10 @@
     data_frame[features_few_filter, ]
 }
 
-.summarizeMultipleMeasurements = function(data_frame, feature_columns, counts, 
+.summarizeMultipleMeasurements = function(data_frame, feature_columns, 
                                           aggregator) {
+    features = .makeFeatures(data_frame, feature_columns)
+    counts = .getCounts(data_frame[["Intensity"]], features)
     intensity_col = which(colnames(data_frame) == "Intensity")
     if(any(counts > length(unique(data_frame[["Run"]])))) {
         merge(aggregate(Intensity ~ .,
@@ -274,22 +276,20 @@
     # TODO: message + logs
 }
 
-.cleanByFeature = function(data_frame, feature_columns, summarize_function,
-                           handle_few_measurements, remove_single_feature, 
-                           remove_shared) {
-    few_filter = .filterSmallIntensities(data_frame, 1)
+.handleFewMeasurements = function(data_frame, feature_columns, min_intensity,
+                                  behavior) {
+    few_filter = .filterSmallIntensities(data_frame, min_intensity)
     features = .makeFeatures(data_frame[few_filter, ], feature_columns)
     counts = .getCounts(data_frame[few_filter, ][["Intensity"]], features)
-    filtered = .filterFewMeasurements(data_frame, feature_columns, counts,
-                                      "keep")
-    filtered = .handleSharedPeptides(filtered, "ProteinName", "PeptideSequence",
-                                     remove_shared = remove_shared)
-    few_filter = .filterSmallIntensities(filtered, 0)
-    features = .makeFeatures(filtered[few_filter, ], feature_columns)
-    counts = .getCounts(filtered[few_filter, ][["Intensity"]], features)
-    filtered = .filterFewMeasurements(filtered, feature_columns, counts,
-                                      handle_few_measurements)
-    .summarizeMultipleMeasurements(filtered, feature_columns, counts, 
-                                   summarize_function)
-    # TODO: fix this part after a common order of operations is chosen.
+    .filterFewMeasurements(data_frame, feature_columns, counts, behavior)
+}
+
+.cleanByFeature = function(data_frame, feature_columns, summarize_function,
+                           handle_few_measurements) {
+    data_frame = .summarizeMultipleMeasurements(data_frame, feature_columns,
+                                                summarize_function)
+    data_frame = .handleFewMeasurements(data_frame, feature_columns, 1, "keep")
+    data_frame = .handleFewMeasurements(data_frame, feature_columns, 0, 
+                                        handle_few_measurements)
+    data_frame
 }

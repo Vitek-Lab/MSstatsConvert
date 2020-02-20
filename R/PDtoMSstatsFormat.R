@@ -27,7 +27,7 @@ PDtoMSstatsFormat <- function(input,
                               which.sequence = 'Sequence'){
     
     .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-
+    
     annotation = .makeAnnotation(annotation, 
                                  c("Run" = "Run", "Condition" = "Condition",
                                    "BioReplicate" = "BioReplicate"))    
@@ -202,27 +202,11 @@ PDtoMSstatsFormat <- function(input,
         input <- input[, -which(colnames(input) %in% c('feature'))]
     }
     
-    ##  8. remove proteins with only one peptide and charge per protein
-    if (removeProtein_with1Peptide) {
-        ## remove protein which has only one peptide
-        input$feature <- paste(input$PeptideModifiedSequence, 
-                               input$PrecursorCharge, 
-                               input$FragmentIon, 
-                               input$ProductCharge, 
-                               sep="_")
-        tmp <- unique(input[, c("ProteinName", 'feature')])
-        tmp$ProteinName <- factor(tmp$ProteinName)
-        count <- xtabs( ~ ProteinName, data=tmp)
-        lengthtotalprotein <- length(count)
-        removepro <- names(count[count <= 1])
-        if (length(removepro) > 0) {
-            input <- input[-which(input$ProteinName %in% removepro), ]
-            message(paste0("** ", length(removepro), 
-                           ' proteins, which have only one feature in a protein, are removed among ', 
-                           lengthtotalprotein, ' proteins.'))
-        }
-        input <- input[, -which(colnames(input) %in% c('feature'))]
-    }
+    input = .handleSingleFeaturePerProtein(
+        input, 
+        c("PeptideModifiedSequence", "PrecursorCharge", 
+          "FragmentIon", "ProductCharge"),
+        removeProtein_with1Peptide)
     
-    return(input)
+    input
 }

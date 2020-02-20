@@ -25,6 +25,7 @@ SpectronauttoMSstatsFormat = function(
   .checkColumns("Input", c("F.PeakArea", "F.NormalizedPeakArea"), 
                 colnames(input), "optional")
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
+  
   input = input[input[["F.FrgLossType"]] == "noloss", ]
   input = input[!input[["F.ExcludedFromQuantification"]], ] # XIC quality. TODO: explain in documentation
   
@@ -50,14 +51,17 @@ SpectronauttoMSstatsFormat = function(
   input = .handleFiltering(input, "PG.Qvalue", 0.01, "greater", "fill", NA)
   # TODO: 1. Does 0.01 have to be hard-coded? 2. Explain in documentation that this is protein q-value. 3. Log+message
   input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "greater", "fill", 0, TRUE)
-  # TODO: 1. Explain in documentation that this is precursor q-value. 2. Log+messagre
+  # TODO: 1. Explain in documentation that this is precursor q-value. 2. Log+message
   input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
                                 remove_shared = useUniquePeptide)
   input = .cleanByFeature(input, c("PeptideSequence", "PrecursorCharge",
                                    "FragmentIon", "ProductCharge"),
-                          summaryforMultipleRows, fewMeasurements,
-                          removeProtein_with1Feature)
-
+                          summaryforMultipleRows, fewMeasurements)
+  input = .handleSingleFeaturePerProtein(input, 
+                                         c("PeptideSequence", "PrecursorCharge",
+                                           "FragmentIon", "ProductCharge"),
+                                         removeProtein_with1Feature)
+  # Conditional filtering of single-feature proteins.
   input <- merge(input, annotation, by = "Run", all = TRUE)
   input = .selectColumns(
     input, c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",

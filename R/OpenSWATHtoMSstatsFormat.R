@@ -97,23 +97,9 @@ OpenSWATHtoMSstatsFormat <- function(
     }
   }
   
-  ## 8. remove proteins with only one peptide and charge per protein
-  if (removeProtein_with1Feature) {
-    ## remove protein which has only one peptide
-    tmp <- unique(input[, c("ProteinName", 'fea')])
-    tmp$ProteinName <- factor(tmp$ProteinName)
-    count <- xtabs( ~ ProteinName, data=tmp)
-    lengthtotalprotein <- length(count)
-    removepro <- names(count[count <= 1])
-    if (length(removepro) > 0) {
-      input <- input[-which(input$ProteinName %in% removepro), ]
-      message(paste0("** ", length(removepro), 
-                     ' proteins, which have only one feature in a protein, are removed among ', 
-                     lengthtotalprotein, ' proteins.'))
-    } else {
-      message("** All proteins have at least two features.")
-    }
-  }
+  input = .handleSingleFeaturePerProtein(
+    input, c("PeptideSequence", "PrecursorCharge", "FragmentIon"), 
+    removeProtein_with1Feature)
   
   ## 9. remove multiple measurements per feature and run
   count <- aggregate(Intensity ~ fea, data=input, FUN=length)
