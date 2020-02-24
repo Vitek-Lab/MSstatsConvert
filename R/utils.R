@@ -58,7 +58,7 @@
             }    
         }
     }
-    invisible(TRUE)
+    parameter
 }
 
 # COMMON DATA PREPROCESSING
@@ -146,10 +146,18 @@
     annotation_list[["df"]]
 }
 
-.findAvailable = function(possibilities, option_set) {
+.findAvailable = function(possibilities, option_set, fall_back = NULL) {
     chosen = option_set[option_set %in% possibilities]
-    if(length(chosen) == 0) {
-        NULL 
+    if(length(chosen) != 1L) {
+        if(is.null(fall_back)) {
+            NULL
+        } else {
+            if(fall_back %in% possibilities) {
+                fall_back
+            } else {
+                NULL
+            }
+        }
     } else {
         chosen
     }
@@ -170,12 +178,24 @@
     # TODO: message for the user / log
 }
 
-.handleSharedPeptides = function(data_frame, remove_shared = TRUE) {
+.handleSharedPeptides = function(data_frame, remove_shared = TRUE,
+                                 protein_column = "ProteinName",
+                                 peptide_column = "PeptideSequence") {
     if(remove_shared) {
-        .removeSharedPeptides(data_frame, "ProteinName", "PeptideSequence")
+        .removeSharedPeptides(data_frame, protein_column, peptide_column)
     } else {
         data_frame
     }
+}
+
+.handleOxidationPeptides = function(data_frame, sequence_column, 
+                                    oxidation_pattern, remove) {
+    if(remove) {
+        data_frame[!(grepl(oxidation_pattern, data_frame[[sequence_column]])), ]    
+    } else {
+        data_frame
+    }
+    
 }
 
 .filterByScore = function(data_frame, score_column, score_threshold, direction,
@@ -307,7 +327,7 @@
         c("FullPeptideName", "Charge", "filename"),
         c("PeptideSequence", "PrecursorCharge", "Run"))
     input = input[, lapply(.(aggr_Fragment_Annotation, aggr_Peak_Area), 
-                           function(x) unlist(tstrsplit(x, ";", fixed=TRUE))),
+                           function(x) unlist(tstrsplit(x, ";", fixed = TRUE))),
                   by = .(ProteinName, PeptideSequence, PrecursorCharge, Run)]
     colnames(input) = .updateColnames(input, c("V1", "V2"), 
                                       c("FragmentIon", "Intensity"))
@@ -315,5 +335,53 @@
                                                                   function(x) gsub(":", "_", x))]
     input[["Intensity"]] = as.numeric(input[["Intensity"]])
     input[input[["Intensity"]] < 1, "Intensity"] = NA
+    input = .fillValues(input, c("ProductCharge" = NA, "IsotopeLabelType" = "L"))
     input
 }
+
+.cleanRawPD = function(pd_input, quantification_column, proteinID_column,
+                       sequence_column, filter_num_col) {
+    
+    which.quantification = .findAvailable(c("Intensity", "Area"),
+                                          colnames(pd_input),
+                                          "Precursor.Area")
+    which.quantification = .isLegalValue(which.quantification, 
+                  legal_values = c("Intensity", "Area", "Precursor.Area",
+                                   "Precursor.Abundance"),
+                  message = "Please select a column to be used for quantified intensities among four options: ")
+    
+    which.proteinid = .findAvailable(c("Protein.Accessions", 
+                                       "Master.Protein.Accessions"),
+                                     colnames(pd_input),
+                                     "Protein.Group.Accessions")
+    which.proteinid = .isLegalValue(which.proteinid, 
+                  legal_values = c("ProteinAccessions", 
+                                   "Master.Protein.Accessions",
+                                   "Protein.Group.Accessions"),
+                  message = "Please select a column to be used as protein IDs among three options: ")
+    which.sequence = .findAvailable("Annotated.Sequence", colnames(pd_input), 
+                                    "Sequence")
+    which.sequence = .isLegalValue(which.sequence, 
+                  legal_values = c("Annotated.Sequence", "Sequence"),
+                  message = "Please select peptide sequence column between two options: ")
+    
+    if(filter_num_col) {
+        pd_input = pd_input[pd_input[["X..Proteins"]] == '1', ]
+    }
+    pd_cols = c(proteinID_column, "X..Proteins", sequence_column, 
+                "Modifications", "Charge", "Spectrum.File", quantification_column)
+    if (any(is.element(colnames(pd_input), "Fraction"))) {
+        pd_cols = c(pd_cols, "Fraction")
+    }
+    input = data.table::as.data.table(pd_input[, pd_cols])
+    colnames(input) = .updateColnames(
+        input,
+        c(proteinID_column, sequence_column, "Spectrum.File", quantification_column),
+        c("ProteinName", "PeptideSequence", "Run", "Intensity"))
+    input[["PeptideModifiedSequence"]] = paste(input[["PeptideSequence"]], 
+                                               input[["Modifications"]], 
+                                               sep = "_")
+    input[, -which(colnames(input) == "PeptideSequence")]
+}
+
+.cleanRaw
