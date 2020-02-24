@@ -170,10 +170,9 @@
     # TODO: message for the user / log
 }
 
-.handleSharedPeptides = function(data_frame, proteins_column, peptides_column,
-                                 remove_shared = TRUE) {
+.handleSharedPeptides = function(data_frame, remove_shared = TRUE) {
     if(remove_shared) {
-        .removeSharedPeptides(data_frame, proteins_column, peptides_column)
+        .removeSharedPeptides(data_frame, "ProteinName", "PeptideSequence")
     } else {
         data_frame
     }
@@ -182,15 +181,15 @@
 .filterByScore = function(data_frame, score_column, score_threshold, direction,
                           behavior, fill_value = NULL) {
     if(direction == "greater") {
-        score_filter = data_frame[[score_column]] > score_threshold
+        score_filter = data_frame[[score_column]] >= score_threshold
     } else {
-        score_filter = data_frame[[score_column]] < score_threshold
+        score_filter = data_frame[[score_column]] <= score_threshold
     }
     score_filter = score_filter & !is.na(data_frame[[score_column]])
     if(behavior == "remove") {
-        data_frame[!score_filter, ]    
+        data_frame[score_filter, ]    
     } else {
-        data_frame[score_filter, "Intensity"] = fill_value
+        data_frame[!score_filter, "Intensity"] = fill_value
         data_frame
     }
 }
@@ -286,10 +285,35 @@
 
 .cleanByFeature = function(data_frame, feature_columns, summarize_function,
                            handle_few_measurements) {
+    data_frame = .handleFewMeasurements(data_frame, feature_columns, 1, "keep")
     data_frame = .summarizeMultipleMeasurements(data_frame, feature_columns,
                                                 summarize_function)
-    data_frame = .handleFewMeasurements(data_frame, feature_columns, 1, "keep")
     data_frame = .handleFewMeasurements(data_frame, feature_columns, 0, 
                                         handle_few_measurements)
     data_frame
+}
+
+.handleDecoyProteins = function(data_frame, decoy_column, decoy_symbol, drop = TRUE) {
+    decoy_index = which(colnames(data_frame) == decoy_column)
+    data_frame[!(data_frame[[decoy_column]] == decoy_symbol), -decoy_index]
+}
+
+.cleanRawOpenSWATH = function(openswath_input) {
+    os_cols = c("ProteinName", "FullPeptideName", "Charge", "filename", 
+                "aggr_Fragment_Annotation", "aggr_Peak_Area")
+    input = data.table::as.data.table(openswath_input[, os_cols])
+    colnames(input) = .updateColnames(
+        input,
+        c("FullPeptideName", "Charge", "filename"),
+        c("PeptideSequence", "PrecursorCharge", "Run"))
+    input = input[, lapply(.(aggr_Fragment_Annotation, aggr_Peak_Area), 
+                           function(x) unlist(tstrsplit(x, ";", fixed=TRUE))),
+                  by = .(ProteinName, PeptideSequence, PrecursorCharge, Run)]
+    colnames(input) = .updateColnames(input, c("V1", "V2"), 
+                                      c("FragmentIon", "Intensity"))
+    input[, c("PeptideSequence", "FragmentIon")] = input[, lapply(.(PeptideSequence, FragmentIon), 
+                                                                  function(x) gsub(":", "_", x))]
+    input[["Intensity"]] = as.numeric(input[["Intensity"]])
+    input[input[["Intensity"]] < 1, "Intensity"] = NA
+    input
 }
