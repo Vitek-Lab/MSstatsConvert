@@ -20,7 +20,8 @@ OpenSWATHtoMSstatsFormat <- function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
   # TODO: 1. Improved checks 2. Messages + logs
-  .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
+  fewMeasurements = .isLegalValue(fewMeasurements, 
+                                  legal_values = c("remove", "keep"))
   annotation = .makeAnnotation(annotation, 
                                c("Run" = "Run", "Condition" = "Condition", 
                                  "BioReplicate" = "BioReplicate"))
