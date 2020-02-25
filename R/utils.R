@@ -245,7 +245,7 @@
 
 .makeFeatures = function(data_frame, feature_columns) {
     gsub(" " , "", apply(data_frame[, feature_columns], 1, 
-          function(x) paste(x, sep = "_", collapse = "_")))
+                         function(x) paste(x, sep = "_", collapse = "_")))
 }
 
 .getCounts = function(intensity, features) {
@@ -341,29 +341,29 @@
 
 .cleanRawPD = function(pd_input, quantification_column, proteinID_column,
                        sequence_column, filter_num_col) {
-    
+    colnames(pd_input) = .standardizeColnames(pd_input)
     which.quantification = .findAvailable(c("Intensity", "Area"),
                                           colnames(pd_input),
                                           "Precursor.Area")
     which.quantification = .isLegalValue(which.quantification, 
-                  legal_values = c("Intensity", "Area", "Precursor.Area",
-                                   "Precursor.Abundance"),
-                  message = "Please select a column to be used for quantified intensities among four options: ")
+                                         legal_values = c("Intensity", "Area", "Precursor.Area",
+                                                          "Precursor.Abundance"),
+                                         message = "Please select a column to be used for quantified intensities among four options: ")
     
     which.proteinid = .findAvailable(c("Protein.Accessions", 
                                        "Master.Protein.Accessions"),
                                      colnames(pd_input),
                                      "Protein.Group.Accessions")
     which.proteinid = .isLegalValue(which.proteinid, 
-                  legal_values = c("ProteinAccessions", 
-                                   "Master.Protein.Accessions",
-                                   "Protein.Group.Accessions"),
-                  message = "Please select a column to be used as protein IDs among three options: ")
+                                    legal_values = c("ProteinAccessions", 
+                                                     "Master.Protein.Accessions",
+                                                     "Protein.Group.Accessions"),
+                                    message = "Please select a column to be used as protein IDs among three options: ")
     which.sequence = .findAvailable("Annotated.Sequence", colnames(pd_input), 
                                     "Sequence")
     which.sequence = .isLegalValue(which.sequence, 
-                  legal_values = c("Annotated.Sequence", "Sequence"),
-                  message = "Please select peptide sequence column between two options: ")
+                                   legal_values = c("Annotated.Sequence", "Sequence"),
+                                   message = "Please select peptide sequence column between two options: ")
     
     if(filter_num_col) {
         pd_input = pd_input[pd_input[["X..Proteins"]] == '1', ]
@@ -384,4 +384,52 @@
     input[, -which(colnames(input) == "PeptideSequence")]
 }
 
-.cleanRaw
+# .cleanRawMaxQuant = function(mq_input) {
+#     
+# }
+
+.standardizeColnames = function(col_names) {
+    gsub(" ", ".", col_names, fixed = TRUE)
+}
+
+
+.cleanRawProgenesis = function(prog_input, runs, fix_colnames = TRUE) {
+    prog_input = data.table::as.data.table(prog_input)
+    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
+    if(fix_colnames) {
+        prog_input = prog_input[-1, ]
+        colnames(prog_input) = prog_input[1, ]
+        prog_input = prog_input[-1, ]
+    }
+    protein_col = .findAvailable(c("Protein", "Accession"), 
+                                 colnames(prog_input))
+    colnames(prog_input) = .updateColnames(prog_input, 
+                                           c(protein_col, "Charge"), 
+                                           c("ProteinName", "PrecursorCharge"))
+    
+    nonmissing_prot = !is.na(prog_input[["ProteinName"]]) & prog_input[["ProteinName"]] != ""
+    nonmissing_pept = !is.na(prog_input[["Sequence"]]) & prog_input[["Sequence"]] != ""
+    prog_input = prog_input[nonmissing_prot & nonmissing_pept, ]
+    prog_input[["PeptideModifiedSequence"]] = paste(input[["Sequence"]],
+                                                    input[["Modifications"]],
+                                                    sep = "")
+    prog_input <- prog_input[!duplicated(prog_input), ] # dubious performance-wise
+    if(is.element("Use.in.quantitation", colnames(prog_input))) {
+        prog_input = prog_input[prog_input[["Use.in.quantitation"]], ]
+        # TODO: consider character version if these files ever import this 
+        # columns as character
+        prog_input = prog_input[, Use.in.quantitation := NULL]
+    }
+    feature_cols = c("ProteinName", "PeptideModifiedSequence",
+                     "PrecursorCharge", "Fraction")
+    prog_cols = intersect(colnames(prog_input), 
+                          c(feature_cols, runs))
+    prog_input = prog_input[, prog_cols]
+    prog_input = data.table::melt(prog_input,
+                                  id.vars = feature_cols,
+                                  measure_vars = runs,
+                                  variable.name = "Run",
+                                  value.name = "Intensity")
+    prog_input[["Intensity"]] = as.numeric() # Remove if not needed
+    prog_input
+}
