@@ -16,8 +16,8 @@ SpectronauttoMSstatsFormat = function(
   qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements="remove",
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
-  .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
-  .isLegalValue(intensity, legal_values = c("PeakArea", "NormalizedPeakArea"))
+  fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
+  intensity = .isLegalValue(intensity, c("PeakArea", "NormalizedPeakArea"))
   .checkColumns("Input", 
                 c("F.FrgLossType", "F.ExcludedFromQuantification",
                   "PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge",
@@ -26,28 +26,13 @@ SpectronauttoMSstatsFormat = function(
                 colnames(input), "optional")
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
   
-  input = input[input[["F.FrgLossType"]] == "noloss", ]
-  input = input[!input[["F.ExcludedFromQuantification"]], ] # XIC quality. TODO: explain in documentation
-  
   annotation = .makeAnnotation(
     annotation, 
     c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
     input, 
     c("R.FileName" = "Run", "R.Condition" = "Condition", "R.Replicate" = "BioReplicate")
   )  
-  
-  f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(input))
-  pg_qval_col = .findAvailable(c("PG.Qvalue"), colnames(input))
-  input = .selectColumns(
-    input, 
-    c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
-      f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
-  colnames(input) = .updateColnames(
-    input, c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon",
-             f_charge_col, "R.FileName", "EG.Qvalue", paste0("F.", intensity)),
-    c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
-      "ProductCharge", "Run", "Qvalue", "Intensity"))
-  
+  input = .cleanRawSpectronaut(input)
   input = .handleFiltering(input, "PG.Qvalue", 0.01, "greater", "fill", NA)
   # TODO: 1. Does 0.01 have to be hard-coded? 2. Explain in documentation that this is protein q-value. 3. Log+message
   input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "greater", "fill", 0, TRUE)
@@ -61,11 +46,8 @@ SpectronauttoMSstatsFormat = function(
                                          c("PeptideSequence", "PrecursorCharge",
                                            "FragmentIon", "ProductCharge"),
                                          removeProtein_with1Feature)
-  # Conditional filtering of single-feature proteins.
   input <- merge(input, annotation, by = "Run", all = TRUE)
-  input = .selectColumns(
-    input, c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
-             "ProductCharge", "Condition", "BioReplicate", "Run", "Intensity"))
   input = .fillValues(input, c("IsotopeLabelType" = "L"))
-  .fixColumnTypes(input, factor_columns = "ProteinName")
+  # Convert ProteinName to factor?
+  input
 }
