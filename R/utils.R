@@ -433,3 +433,26 @@
     prog_input[["Intensity"]] = as.numeric() # Remove if not needed
     prog_input
 }
+
+.cleanRawSpectronaut = function(spec_input) {
+    spec_input = data.table::as.data.table(spec_input)
+    colnames(spec_input) = .standardizeColnames(colnames(spec_input))
+    
+    spec_input = spec_input[spec_input[["F.FrgLossType"]] == "noloss", ]
+    spec_input = spec_input[!spec_input[["F.ExcludedFromQuantification"]], ]
+    # XIC quality. TODO: explain in documentation
+    
+    f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(spec_input))
+    pg_qval_col = .findAvailable(c("PG.Qvalue"), colnames(spec_input))
+    spec_input = .selectColumns(
+        spec_input, 
+        c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
+          f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
+    colnames(spec_input) = .updateColnames(
+        spec_input, 
+        c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon",
+          f_charge_col, "R.FileName", "EG.Qvalue", paste0("F.", intensity)),
+        c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
+          "ProductCharge", "Run", "Qvalue", "Intensity"))
+    spec_input
+}
