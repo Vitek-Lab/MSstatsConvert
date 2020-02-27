@@ -1,5 +1,7 @@
 #' A dummy function to store shared documentation items.
 #' 
+#' @import data.table
+#' 
 #' @param fewMeasurements 'remove'(default) will remove the features that have 1 or 2 measurements across runs.
 #' @param useUniquePeptide TRUE (default) removes peptides that are assigned for more than one proteins. 
 #' We assume to use unique peptide for each protein.
@@ -87,7 +89,7 @@
 }
 
 .removeColumns = function(data_frame, columns_to_remove) {
-    data_frame[, !(colnames(data_frame) %in% columns_to_remove)]
+    data_frame[, !(colnames(data_frame) %in% columns_to_remove), with = FALSE]
 }
 
 .fixColumnTypes = function(data_frame, numeric_columns = NULL, 
@@ -120,8 +122,8 @@
     }
 }
 
-.checkAnnotationValidity = function(annotation){
-    counts_in_run = xtabs(~ Run, annotation)
+.checkAnnotationValidity = function(annotation) {
+    counts_in_run = xtabs(~ Run, as.data.frame(annotation))
     if (any(counts_in_run > 1)) {
         stop('Please check annotation. Each MS Run must have a single condition and biological replicate')
     }
@@ -141,7 +143,7 @@
     colnames(annotation_list[["df"]]) = .updateColnames(annotation_list[["df"]], 
                                                         names(annotation_list[["cols"]]),
                                                         annotation_list[["cols"]])
-    annotation_list[["df"]] = unique(annotation_list[["df"]][, annotation_list[["cols"]]])
+    annotation_list[["df"]] = unique(annotation_list[["df"]][, annotation_list[["cols"]], with = FALSE])
     .checkAnnotationValidity(annotation_list[["df"]])
     annotation_list[["df"]]
 }
@@ -164,7 +166,7 @@
 }
 
 .removeSharedPeptides = function(data_frame, proteins_column, peptides_column) {
-    unique_pairs = unique(data_frame[, c(proteins_column, peptides_column)])
+    unique_pairs = unique(data_frame[, c(proteins_column, peptides_column), with = FALSE])
     protein_counts = aggregate(x = unique_pairs[[proteins_column]], 
                                by = list(peptide = unique_pairs[[peptides_column]]),
                                length)
@@ -173,7 +175,7 @@
     if(length(counts) == 0) {
         data_frame
     } else {
-        data_frame[counts[data_frame[[peptides_column]]] == 1, ]    
+        data_frame[counts[data_frame[[peptides_column]]] == 1L, ]    
     }
     # TODO: message for the user / log
 }
@@ -209,7 +211,7 @@
     if(behavior == "remove") {
         data_frame[score_filter, ]    
     } else {
-        data_frame[!score_filter, "Intensity"] = fill_value
+        data_frame[!score_filter, c("Intensity")] = fill_value
         data_frame
     }
 }
@@ -244,78 +246,87 @@
 }
 
 .makeFeatures = function(data_frame, feature_columns) {
-    gsub(" " , "", apply(data_frame[, feature_columns], 1, 
+    gsub(" " , "", apply(data_frame[, feature_columns, drop = FALSE,
+                                    with = FALSE], 1, 
                          function(x) paste(x, sep = "_", collapse = "_")))
 }
 
-.getCounts = function(intensity, features) {
-    xtabs( ~ feature,
-           data = data.frame(Intensity = intensity,
-                             feature = features),
-           na.action = na.omit)    
-}
-
-.filterFewMeasurements = function(data_frame, feature_columns, counts, handle_few) {
-    features = .makeFeatures(data_frame, feature_columns)
+.filterFewMeasurements = function(data_frame, min_intensity, handle_few) {
+    int_filter = data_frame[["Intensity"]] > min_intensity
+    int_filter = int_filter & !is.na(data_frame[["Intensity"]])
+    counts = data_frame[int_filter, .(n_obs = length(Intensity)), 
+                        by = .(feature)]
     if(handle_few == "remove") {
-        features_few_filter = features %in% names(counts[counts > 2])
+        not_few = unique(counts[["feature"]][counts[["n_obs"]] > 2])
     } else {
-        features_few_filter = features %in% names(counts[counts > 0])
+        not_few = unique(counts[["feature"]][counts[["n_obs"]] > 0])
     }
-    data_frame[features_few_filter, ]
+    data_frame[data_frame[["feature"]] %in% not_few, ]
+    # TODO: compare performance to join
+    # TODO: improve design by making minimum number a variable?
 }
 
-.summarizeMultipleMeasurements = function(data_frame, feature_columns, 
-                                          aggregator) {
-    features = .makeFeatures(data_frame, feature_columns)
-    counts = .getCounts(data_frame[["Intensity"]], features)
-    intensity_col = which(colnames(data_frame) == "Intensity")
-    if(any(counts > length(unique(data_frame[["Run"]])))) {
-        merge(aggregate(Intensity ~ .,
-                        data = data_frame[, c("Intensity", "Run", feature_columns)],
-                        FUN = max), 
-              data_frame[, -intensity_col], by = c("Run", feature_columns))
+.summarizeMultipleMeasurements = function(data_frame, aggregator) {
+    counts = data_frame[, ("n_obs" = length("Intensity")), by = ("feature"),
+                        with = FALSE]
+    if(any(counts[["n_obs"]] > length(unique(data_frame[["Run"]])))) {
+        merge(data_frame[, .(Intensity = aggregator(Intensity)), 
+                         by = list(Run, feature)],
+              data_frame[, Intensity := NULL],
+              by = c("Run", "feature")
+            
+        )
     } else {
         data_frame
     }
 }
 
-
-.handleSingleFeaturePerProtein = function(data_frame, features, 
-                                          remove_single_feature) {
-    counts = xtabs( ~ ProteinName, 
-                    data = unique(cbind(data_frame[, "ProteinName", drop = FALSE],
-                                        feature = features)))
-    single_feature = names(counts[counts <= 1])
+.handleSingleFeaturePerProtein = function(data_frame, remove_single_feature) {
+    counts = data_frame[, .(n_obs = length(Intensity)), by = .(feature)]
+    single_feature = counts[["feature"]][counts[["n_obs"]] <= 1]
     if(remove_single_feature & length(single_feature) > 0) {
-        data_frame[!(data_frame[["ProteinName"]] %in% single_feature), ]
+        data_frame = data_frame[!(data_frame[["ProteinName"]] %in% single_feature),
+                   feature := NULL]
     } else {
-        data_frame
+        data_frame = data_frame[, feature := NULL]
     }
     # TODO: message + logs
-}
-
-.handleFewMeasurements = function(data_frame, feature_columns, min_intensity,
-                                  behavior) {
-    few_filter = .filterSmallIntensities(data_frame, min_intensity)
-    features = .makeFeatures(data_frame[few_filter, ], feature_columns)
-    counts = .getCounts(data_frame[few_filter, ][["Intensity"]], features)
-    .filterFewMeasurements(data_frame, feature_columns, counts, behavior)
-}
-
-.cleanByFeature = function(data_frame, feature_columns, summarize_function,
-                           handle_few_measurements) {
-    data_frame = .handleFewMeasurements(data_frame, feature_columns, 1, "keep")
-    data_frame = .summarizeMultipleMeasurements(data_frame, feature_columns,
-                                                summarize_function)
-    data_frame = .handleFewMeasurements(data_frame, feature_columns, 0, 
-                                        handle_few_measurements)
     data_frame
 }
 
-.handleDecoyProteins = function(data_frame, decoy_column, decoy_symbol, drop = TRUE) {
+
+.cleanByFeature = function(data_frame, feature_columns, summarize_function,
+                           handle_few_measurements) {
+    data_frame[["feature"]] = .makeFeatures(data_frame, feature_columns)    
+    data_frame = .filterFewMeasurements(data_frame, 1, "keep")
+    data_frame = .summarizeMultipleMeasurements(data_frame, summarize_function)
+    data_frame = .filterFewMeasurements(data_frame, 0, handle_few_measurements)
+    data_frame
+}
+
+.handleDecoyProteins = function(data_frame, decoy_column, decoy_symbols, drop = TRUE) {
     decoy_index = which(colnames(data_frame) == decoy_column)
-    data_frame[!(data_frame[[decoy_column]] == decoy_symbol), -decoy_index]
+    if(drop) {
+        data_frame[!(data_frame[[decoy_column]] %in% decoy_symbols), -decoy_index]    
+    } else {
+        data_frame[!(data_frame[[decoy_column]] %in% decoy_symbols), ]
+    }
+}
+
+.checkDDA = function(input) {
+    # For now, assume Skyline input. Might need to be more general in the future
+    fragment_ions = as.character(unique(input[["FragmentIon"]]))
+    check_DDA = setdiff(c("precursor", "precursor [M+1]", "precursor [M+2]"), 
+                        fragment_ions)
+    frags = setdiff(fragment_ions, 
+                    c('precursor', 'precursor [M+1]', 'precursor [M+2]'))
+    precursors = intersect(fragment_ions, 
+                           c("precursor", "precursor [M+1]", "precursor [M+2]"))
+    ## if there are fragment ion and also have any 'precursor', it is the issue.
+    if (length(frags) > 0 & length(precursors) > 0) {
+        stop("** Please check precursors information. If your experiment is DIA, please remove the precursors. If your experiments is DDA, please check the precursor information.")
+    }
+    length(check_DDA) < 3
 }
 
 .cleanRawOpenSWATH = function(openswath_input) {
@@ -455,4 +466,57 @@
         c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
           "ProductCharge", "Run", "Qvalue", "Intensity"))
     spec_input
+}
+
+.aggregateMonoisotopicPeaks <- function(data_frame) {
+    data_frame[["pepprecursor"]] <- paste(data_frame[["PeptideSequence"]], 
+                                          data_frame[["PrecursorCharge"]], 
+                                          sep = "_")
+    data_frame <- data_frame[!is.na(data_frame[["Intensity"]]), ]
+    standard.info <- unique(data_frame[, c("ProteinName", "PeptideSequence", 
+                                           "PrecursorCharge", "StandardType")])
+    data_w <- data.table::dcast(data = data_frame, pepprecursor ~ Run, 
+                                value.var = "Intensity", 
+                                fun.aggregate = function(x) sum(x, na.rm = TRUE), 
+                                fill = NA_real_) 
+    newdata <- data.table::melt(data_w, id.vars = c("pepprecursor"))
+    colnames(newdata) = .updateColnames(newdata, c("variable", "value"),
+                                        c("Run", "Intensity"))
+    uniinfo <- unique(data_frame[, c("ProteinName", "PeptideSequence", "PrecursorCharge", "pepprecursor")])	
+    data_frame <- merge(newdata, uniinfo, by = "pepprecursor")
+    data_frame <- merge(data_frame, standard.info, 
+                        by = c("ProteinName", "PeptideSequence", "PrecursorCharge"))
+    data_frame = .fillValues(data_frame, c("FragmentIon" = "sum",
+                                           "ProductCharge" = NA,
+                                           "IsotopeLabelType" = "L"))
+    data_frame = data_frame[, pepprecursor := NULL]
+    data_frame
+}
+
+.cleanRawSkyline = function(sl_input) {
+    colnames(sl_input) = gsub("\\.", "", colnames(sl_input))
+    colnames(sl_input) = .updateColnames(sl_input, c("FileName", "Area"),
+                                         c("Run", "Intensity"))
+    
+    sl_input = data.table::as.data.table(sl_input) 
+    if(is.element("PeptideSequence", colnames(sl_input))) {
+        sl_input = sl_input[, .(PeptideSequence) := NULL]
+    }
+    colnames(sl_input) = .updateColnames(sl_input, "PeptideModifiedSequence",
+                                         "PeptideSequence")
+    sl_input[["Intensity"]] = as.numeric(sl_input[["Intensity"]])
+    if(is.element("DetectionQValue", colnames(sl_input))) {
+        sl_input[["DetectionQValue"]] = as.numeric(as.character(sl_input[["DetectionQValue"]]))    
+    }
+    if(is.character(sl_input[["Truncated"]])) {
+        sl_input[["Truncated"]] = sl_input[["Truncated"]] == "True"
+    }
+    sl_input[["Truncated"]] = as.integer(sl_input[["Truncated"]])
+    
+    sl_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+                "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition",
+                "BioReplicate", "Run", "Intensity", "StandardType")
+    sl_cols = c(sl_cols, "Fraction", "DetectionQValue", "Truncated")
+    sl_input = sl_input[, intersect(sl_cols, colnames(sl_input)), with = FALSE]
+    sl_input
 }
