@@ -32,8 +32,8 @@ DIAUmpiretoMSstatsFormat <- function(
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
     input = merge(input, annotation, by = "Run")
     
-    input = .fillValues(input, c("PrecursorCharge" = NA
-                                 "ProductCharge" = NA
+    input = .fillValues(input, c("PrecursorCharge" = NA,
+                                 "ProductCharge" = NA,
                                  "IsotopeLabelType" = "L"))
     input # ProteinName as factor?
 }
