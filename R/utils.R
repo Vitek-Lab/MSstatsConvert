@@ -520,3 +520,15 @@
     sl_input = sl_input[, intersect(sl_cols, colnames(sl_input)), with = FALSE]
     sl_input
 }
+
+.cleanRawOpenMS = function(om_input) {
+    om_input = data.table::as.data.table(om_input)
+    om_input[["Intensity"]] = as.numeric(om_input[["Intensity"]])
+    if(!is.element("IsotopeLabelType", colnames(om_input))) {
+        om_input = .fillValues(om_input, c("IsotopeLabelType" = "L"))
+    }
+    om_input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+                 "FragmentIon", "ProductCharge", "IsotopeLabelType",
+                 "Condition", "BioReplicate", "Run", "Intensity"),
+             with = FALSE]
+}
