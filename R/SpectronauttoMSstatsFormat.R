@@ -37,17 +37,13 @@ SpectronauttoMSstatsFormat = function(
   # TODO: 1. Does 0.01 have to be hard-coded? 2. Explain in documentation that this is protein q-value. 3. Log+message
   input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "greater", "fill", 0, TRUE)
   # TODO: 1. Explain in documentation that this is precursor q-value. 2. Log+message
-  input = .handleSharedPeptides(input, "ProteinName", "PeptideSequence",
-                                remove_shared = useUniquePeptide)
-  input = .cleanByFeature(input, c("PeptideSequence", "PrecursorCharge",
-                                   "FragmentIon", "ProductCharge"),
-                          summaryforMultipleRows, fewMeasurements)
-  input = .handleSingleFeaturePerProtein(input, 
-                                         c("PeptideSequence", "PrecursorCharge",
-                                           "FragmentIon", "ProductCharge"),
-                                         removeProtein_with1Feature)
+  input = .handleSharedPeptides(input, useUniquePeptide)
+  feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
+  input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, fewMeasurements)
+  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
   input <- merge(input, annotation, by = "Run", all = TRUE)
-  input = .fillValues(input, c("IsotopeLabelType" = "L"))
-  # Convert ProteinName to factor?
-  input
+  input = .fillValues(input[, setdiff(colnames(input), 
+                                      c("Condition", "BioReplicate")), 
+                            with = FALSE], c("IsotopeLabelType" = "L"))
+  input # Convert ProteinName to factor?
 }

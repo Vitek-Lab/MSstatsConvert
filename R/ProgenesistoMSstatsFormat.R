@@ -30,8 +30,7 @@ ProgenesistoMSstatsFormat <- function(
                                 peptide_column = "PeptideModifiedSequence")
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows,
                           fewMeasurements)
-  input = .handleSingleFeaturePerProtein(input, feature_cols, 
-                                         removeProtein_with1Peptide)
+  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide)
   input = merge(input, annotation, by = "Run")
   input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))

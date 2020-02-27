@@ -16,9 +16,8 @@ OpenMStoMSstatsFormat <- function(
   input, annotation = NULL, useUniquePeptide = TRUE, fewMeasurements = "remove",
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
   
-  .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
+  fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
   input = .cleanRawOpenMS(input)
-  
   
   annotation = .makeAnnotation(
     annotation, 
@@ -28,7 +27,7 @@ OpenMStoMSstatsFormat <- function(
   
   feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon",
                    "ProductCharge")
-  input = .handleSharedPeptides(input, remove_shared = useUniquePeptide)
+  input = .handleSharedPeptides(input, useUniquePeptide)
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, 
                           fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)

@@ -33,8 +33,7 @@ OpenSWATHtoMSstatsFormat <- function(
   input = .handleSharedPeptides(input, useUniquePeptide)
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows,
                           fewMeasurements)
-  input = .handleSingleFeaturePerProtein(input, feature_cols, 
-                                         removeProtein_with1Feature)
+  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
   input = merge(input, annotation, by = "Run")
   input
 }
