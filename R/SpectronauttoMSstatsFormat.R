@@ -41,9 +41,9 @@ SpectronauttoMSstatsFormat = function(
   feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
-  input = merge(input, annotation, by = "Run", all = TRUE)
-  input = .fillValues(input[, setdiff(colnames(input), 
-                                      c("Condition", "BioReplicate")), 
-                            with = FALSE], c("IsotopeLabelType" = "L"))
+  input = merge(input[, setdiff(colnames(input), 
+                                c("Condition", "BioReplicate")), 
+                      with = FALSE], annotation, by = "Run", all = TRUE)
+  input = .fillValues(input, c("IsotopeLabelType" = "L"))
   input # Convert ProteinName to factor?
 }
