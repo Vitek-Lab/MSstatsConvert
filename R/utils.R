@@ -285,13 +285,13 @@
     counts = data_frame[, .(n_obs = length(Intensity)), by = .(feature)]
     single_feature = counts[["feature"]][counts[["n_obs"]] <= 1]
     if(remove_single_feature & length(single_feature) > 0) {
-        data_frame = data_frame[!(data_frame[["ProteinName"]] %in% single_feature),
-                   feature := NULL]
+        data_frame = data_frame[!(data_frame[["ProteinName"]] %in% single_feature), ]
     } else {
-        data_frame = data_frame[, feature := NULL]
+        data_frame = data_frame
     }
     # TODO: message + logs
-    data_frame
+    feature_col = colnames(data_frame) == "feature"
+    data_frame[, !feature_col, with = FALSE]
 }
 
 

@@ -40,7 +40,7 @@ SkylinetoMSstatsFormat <- function(
         # TODO: maybe replace with .summarizeMultipleMeasurements (performance and logic). Can this be done later inside .summarize...?
     }
     
-    input = .handleFiltering(input, "DetectionQValue", qvalue_cutoff, "smaller", "fill", 0.0, FALSE, filter_with_Qvalue)
+    input = .handleFiltering(input, "DetectionQValue", qvalue_cutoff, "smaller", "fill", 0.01, FALSE, filter_with_Qvalue)
     # TODO: conditionally check if DetectionQValue is in the input at the beginning
     feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
     input = .cleanByFeature(input, feature_cols, max, fewMeasurements)
