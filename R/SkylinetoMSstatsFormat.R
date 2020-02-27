@@ -29,14 +29,13 @@ SkylinetoMSstatsFormat <- function(
     input = .handleDecoyProteins(input, "ProteinName", c("DECOY", "Decoys"), FALSE)
     if(removeiRT) {
         input = .handleDecoyProteins(input, "StandardType", "iRT", FALSE)
+        # TODO: maybe refactor later to match style of .handleSharedPeptides etc
     }
     input = .handleOxidationPeptides(input, "PeptideSequence", "+16", removeOxidationMpeptides)
     input = .handleSharedPeptides(input, useUniquePeptide)
-    input = .handleFiltering(input, "Truncated", 0L, "smaller", "fill", NA_real_)
+    input = .handleFiltering(input, "Truncated", 0L, "smaller", "fill", NA_real_) # trick
 
-    is_DDA = .checkDDA(input)
-
-    if (is_DDA) {
+    if (.checkDDA(input)) {
         input = .aggregateMonoisotopicPeaks(input)
         # TODO: maybe replace with .summarizeMultipleMeasurements (performance and logic). Can this be done later inside .summarize...?
     }
