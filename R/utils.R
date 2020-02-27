@@ -395,10 +395,6 @@
     input[, -which(colnames(input) == "PeptideSequence")]
 }
 
-# .cleanRawMaxQuant = function(mq_input) {
-#     
-# }
-
 .standardizeColnames = function(col_names) {
     gsub(" ", ".", col_names, fixed = TRUE)
 }
@@ -497,6 +493,7 @@
     colnames(sl_input) = gsub("\\.", "", colnames(sl_input))
     colnames(sl_input) = .updateColnames(sl_input, c("FileName", "Area"),
                                          c("Run", "Intensity"))
+    colnames(sl_input) = .standardizeColnames(sl_input)
     
     sl_input = data.table::as.data.table(sl_input) 
     if(is.element("PeptideSequence", colnames(sl_input))) {
@@ -522,6 +519,7 @@
 }
 
 .cleanRawOpenMS = function(om_input) {
+    colnames(om_input) = .standardizeColnames(om_input)
     om_input = data.table::as.data.table(om_input)
     om_input[["Intensity"]] = as.numeric(om_input[["Intensity"]])
     if(!is.element("IsotopeLabelType", colnames(om_input))) {
