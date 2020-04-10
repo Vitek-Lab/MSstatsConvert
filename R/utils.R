@@ -18,7 +18,7 @@
                              useUniquePeptide,
                              summaryforMultipleRows, 
                              removeProtein_with1Feature,
-                             removeProtein_with1Protein,
+                             removeProtein_with1Peptide,
                              removeOxidationMpeptides,
                              removeMpeptides) {
     
