@@ -14,10 +14,12 @@
 #' @export
 #' 
 
-OpenSWATHtoMSstatsFormat <- function(
+.OpenSWATHFromDFs = function(
   input, annotation, filter_with_mscore = TRUE, mscore_cutoff = 0.01,
   useUniquePeptide = TRUE, fewMeasurements = "remove",
-  removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
+  removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
+  use_log_file = TRUE, append = FALSE, verbose = TRUE
+) {
   
   # TODO: 1. Improved checks 2. Messages + logs
   fewMeasurements = .isLegalValue(fewMeasurements, 
@@ -35,5 +37,27 @@ OpenSWATHtoMSstatsFormat <- function(
                           fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
   input = merge(input, annotation, by = "Run")
+  input
+}
+
+
+.cleanRawOpenSWATH = function(openswath_input) {
+  os_cols = c("ProteinName", "FullPeptideName", "Charge", "filename", 
+              "aggr_Fragment_Annotation", "aggr_Peak_Area")
+  input = data.table::as.data.table(openswath_input[, os_cols])
+  colnames(input) = .updateColnames(
+    input,
+    c("FullPeptideName", "Charge", "filename"),
+    c("PeptideSequence", "PrecursorCharge", "Run"))
+  input = input[, lapply(.(aggr_Fragment_Annotation, aggr_Peak_Area), 
+                         function(x) unlist(tstrsplit(x, ";", fixed = TRUE))),
+                by = .(ProteinName, PeptideSequence, PrecursorCharge, Run)]
+  colnames(input) = .updateColnames(input, c("V1", "V2"), 
+                                    c("FragmentIon", "Intensity"))
+  input[, c("PeptideSequence", "FragmentIon")] = input[, lapply(.(PeptideSequence, FragmentIon), 
+                                                                function(x) gsub(":", "_", x))]
+  input[["Intensity"]] = as.numeric(input[["Intensity"]])
+  input[input[["Intensity"]] < 1, "Intensity"] = NA
+  input = .fillValues(input, c("ProductCharge" = NA, "IsotopeLabelType" = "L"))
   input
 }

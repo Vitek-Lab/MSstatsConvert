@@ -13,13 +13,17 @@
 #' 
 #' @export
 #' 
-SkylinetoMSstatsFormat <- function(
+
+.SkylineFromFiles = function(
     input, annotation = NULL, removeiRT = TRUE, filter_with_Qvalue = TRUE,
     qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements = "remove",
-    removeOxidationMpeptides = FALSE, removeProtein_with1Feature = FALSE) {
+    removeOxidationMpeptides = FALSE, removeProtein_with1Feature = FALSE,
+    use_log_file = TRUE, append = FALSE, verbose = TRUE
+) {
     
     fewMeasurements = .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
     
+    input = .getInput(input)
     input = .cleanRawSkyline(input)
     annotation = .makeAnnotation(
         annotation, 
@@ -34,7 +38,7 @@ SkylinetoMSstatsFormat <- function(
     input = .handleOxidationPeptides(input, "PeptideSequence", "+16", removeOxidationMpeptides)
     input = .handleSharedPeptides(input, useUniquePeptide)
     input = .handleFiltering(input, "Truncated", 0L, "smaller", "fill", NA_real_) # trick
-
+    
     if (.checkDDA(input)) {
         input = .aggregateMonoisotopicPeaks(input)
         # TODO: maybe replace with .summarizeMultipleMeasurements (performance and logic). Can this be done later inside .summarize...?
@@ -47,4 +51,72 @@ SkylinetoMSstatsFormat <- function(
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
     input <- merge(input[, setdiff(colnames(input), c("Condition", "BioReplicate")), with = FALSE], annotation, by = "Run")
     input # TODO: change ProteinName to facor?
+}
+
+
+.OpenMSFromFiles = function(
+    input, annotation = NULL, useUniquePeptide = TRUE, fewMeasurements = "remove",
+    removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
+    use_log_file = TRUE, append = FALSE, verbose = TRUE
+) {
+    
+}
+
+setGeneric("SkylinetoMSstatsFormat",
+           function(input, annotation, ...) {
+               standardGeneric("SkylinetoMSstatsFormat")
+           })
+
+setMethod("SkylinetoMSstatsFormat",
+          signature = rep("character", 2),
+          function(input, annotation, ...)
+              .SkylineFromFiles(input, annotation, ...))
+
+
+setMethod("SkylinetoMSstatsFormat",
+          signature = rep("data.frame", 2),
+          function(input, annotation, ...) {
+              .SkylineFromDFs(input, annotation, ...)
+          })
+
+setMethod("SkylinetoMSstatsFormat",
+          signature = c("data.frame", "missing"),
+          function(input, ...) {
+              .SkylineFromDFs(input, ...)
+          })
+
+setMethod("SkylinetoMSstatsFormat",
+          signature = c("character", "missing"),
+          function(input, ...) {
+              .OpenMSFromFiles(input, ...)
+          })
+
+
+.cleanRawSkyline = function(sl_input) {
+    colnames(sl_input) = gsub("\\.", "", colnames(sl_input))
+    colnames(sl_input) = .updateColnames(sl_input, c("FileName", "Area"),
+                                         c("Run", "Intensity"))
+    colnames(sl_input) = .standardizeColnames(sl_input)
+    
+    sl_input = data.table::as.data.table(sl_input) 
+    if(is.element("PeptideSequence", colnames(sl_input))) {
+        sl_input = sl_input[, .(PeptideSequence) := NULL]
+    }
+    colnames(sl_input) = .updateColnames(sl_input, "PeptideModifiedSequence",
+                                         "PeptideSequence")
+    sl_input[["Intensity"]] = as.numeric(sl_input[["Intensity"]])
+    if(is.element("DetectionQValue", colnames(sl_input))) {
+        sl_input[["DetectionQValue"]] = as.numeric(as.character(sl_input[["DetectionQValue"]]))    
+    }
+    if(is.character(sl_input[["Truncated"]])) {
+        sl_input[["Truncated"]] = sl_input[["Truncated"]] == "True"
+    }
+    sl_input[["Truncated"]] = as.integer(sl_input[["Truncated"]])
+    
+    sl_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+                "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition",
+                "BioReplicate", "Run", "Intensity", "StandardType")
+    sl_cols = c(sl_cols, "Fraction", "DetectionQValue", "Truncated")
+    sl_input = sl_input[, intersect(sl_cols, colnames(sl_input)), with = FALSE]
+    sl_input
 }

@@ -22,7 +22,7 @@ We assume to use unique peptide for each protein.}
 
 \item{summaryforMultipleRows}{max(default) or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities.}
 
-\item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.}
+\item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 
 \item{removeOxidationMpeptides}{TRUE will remove the peptides including 'oxidation (M)' in modification. FALSE is default.}
 

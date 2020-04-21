@@ -1,12 +1,12 @@
 Package: MSstatsConvert
-Title: Import Data from Various MS Data Analysis Tools to MSstats Format
+Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
 Version: 0.0.1
 Authors@R: c(
   person("Meena", "Choi", email = "mnchoi67@gmail.com", role = c("aut", "cre")),
   person("Tsung-Heng", "Tsai", email = "tsai.tsungheng@gmail.com", role = "aut"), 
   person("Cyril", "Galitzine", email = "cyrildgg@gmail.com", role = "aut"), 
   person("Ting", "Huang", email = "thuang0703@gmail.com", role = "aut"),
-  person("Mateusz", "Staniak", email = "staniak@math.uni.wroc.pl", role = "aut"),
+  person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = "aut"),
   person("Olga", "Vitek", , email = "o.vitek@northeastern.edu", role = "aut")) 
 Description: MSstatsConvert provides tools for importing results of Mass Spectrometry data analysis
     into R format suitable for statistical analysis using the MSstats package.
@@ -15,7 +15,11 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
+Depends:
+    R (>= 3.6)
 Suggests: 
     testthat (>= 2.1.0)
 Imports: 
-    data.table
+    data.table,
+    log4r,
+    tinytest

@@ -11,10 +11,14 @@
 #' @author Meena Choi, Olga Vitek
 #' 
 #' @export
+#' 
+
 SpectronauttoMSstatsFormat = function(
   input, annotation = NULL, intensity = 'PeakArea', filter_with_Qvalue = TRUE,
   qvalue_cutoff = 0.01, useUniquePeptide = TRUE, fewMeasurements="remove",
-  removeProtein_with1Feature = FALSE, summaryforMultipleRows = max) {
+  removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
+  use_log_file = TRUE, append = FALSE, verbose = TRUE
+) {
   
   fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
   intensity = .isLegalValue(intensity, c("PeakArea", "NormalizedPeakArea"))
@@ -25,6 +29,9 @@ SpectronauttoMSstatsFormat = function(
   .checkColumns("Input", c("F.PeakArea", "F.NormalizedPeakArea"), 
                 colnames(input), "optional")
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
+  
+  .setMSstatsLogger(use_log_file, append, verbose)
+  input = .getInput(input)
   
   annotation = .makeAnnotation(
     annotation, 
@@ -46,4 +53,27 @@ SpectronauttoMSstatsFormat = function(
                       with = FALSE], annotation, by = "Run", all = TRUE)
   input = .fillValues(input, c("IsotopeLabelType" = "L"))
   input # Convert ProteinName to factor?
+}
+
+
+.cleanRawSpectronaut = function(spec_input) {
+  colnames(spec_input) = .standardizeColnames(colnames(spec_input))
+  
+  spec_input = spec_input[spec_input[["F.FrgLossType"]] == "noloss", ]
+  spec_input = spec_input[!spec_input[["F.ExcludedFromQuantification"]], ]
+  # XIC quality. TODO: explain in documentation
+  
+  f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(spec_input))
+  pg_qval_col = .findAvailable(c("PG.Qvalue"), colnames(spec_input))
+  spec_input = .selectColumns(
+    spec_input, 
+    c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
+      f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
+  colnames(spec_input) = .updateColnames(
+    spec_input, 
+    c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon",
+      f_charge_col, "R.FileName", "EG.Qvalue", paste0("F.", intensity)),
+    c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
+      "ProductCharge", "Run", "Qvalue", "Intensity"))
+  spec_input
 }
