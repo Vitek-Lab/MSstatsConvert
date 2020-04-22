@@ -21,7 +21,7 @@ MaxQtoMSstatsFormat = function(
     useUniquePeptide = TRUE, summaryforMultipleRows = max, 
     fewMeasurements = "remove", removeMpeptides = FALSE,
     removeOxidationMpeptides = FALSE, removeProtein_with1Peptide = FALSE,
-    use_log_file = TRUE, append = FALSE, verbose = TRUE
+    use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
     
     .setMSstatsLogger(use_log_file, append, verbose)
@@ -45,7 +45,8 @@ MaxQtoMSstatsFormat = function(
                                      removeOxidationMpeptides)
     input = .handleSharedPeptides(input, useUniquePeptide)
     input = .cleanByFeature(input, c("PeptideSequence", "PrecursorCharge"), summaryforMultipleRows, fewMeasurements)
-    input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide)
+    input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide,
+                                           c("PeptideSequence", "PrecursorCharge"))
     input = merge(input, annotation, by = "Run") # by , "IsotopeLabelType?
     input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                  "IsotopeLabelType"  =  "L"))
