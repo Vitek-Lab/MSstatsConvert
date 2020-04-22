@@ -34,6 +34,9 @@
     
     options(MSstatsLog = ms_logs,
             MSstatsMsg = ms_messages)
+    if (is.null(logs)) {
+        getOption("MSstatsLog")("INFO", "Initialized MSstats session")
+    }
 }
 
 
@@ -64,3 +67,4 @@
         options(MSstatsMsg = .nullAppender)
     }
 }
+
