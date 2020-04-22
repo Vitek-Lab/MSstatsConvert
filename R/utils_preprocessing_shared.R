@@ -188,12 +188,11 @@
 }
 
 .removeSharedPeptides = function(data_frame, proteins_column, peptides_column) {
-    unique_pairs = unique(data_frame[, c(proteins_column, peptides_column), with = FALSE])
-    protein_counts = aggregate(x = unique_pairs[[proteins_column]], 
-                               by = list(peptide = unique_pairs[[peptides_column]]),
-                               length)
-    counts = protein_counts[["x"]]
-    names(counts) = protein_counts[["peptide"]]
+    unique_pairs = unique(data_frame[, c(proteins_column, peptides_column), 
+                                     with = FALSE])
+    protein_counts = unique_pairs[, .(count = .N), by = peptides_column]
+    counts = protein_counts[["count"]]
+    names(counts) = protein_counts[[peptides_column]]
     if(length(counts) == 0) {
         data_frame
     } else {
@@ -273,33 +272,36 @@
     threshold_filter
 }
 
-.makeFeatures = function(data_frame, feature_columns) {
-    gsub(" ", "", do.call(.combine, dt[, feats, with = FALSE]))
+.combine = function(...) {
+    paste(..., sep = "_")
 }
 
-.filterFewMeasurements = function(data_frame, min_intensity, handle_few) {
+.makeFeatures = function(data_frame, feature_columns) {
+    gsub(" ", "", do.call(.combine, data_frame[, feature_columns, with = FALSE]))
+}
+
+.filterFewMeasurements = function(data_frame, min_intensity, handle_few,
+                                  feature_columns) {
     int_filter = data_frame[["Intensity"]] > min_intensity
     int_filter = int_filter & !is.na(data_frame[["Intensity"]])
     counts = data_frame[int_filter, .(n_obs = length(Intensity)), 
-                        by = .(feature)]
+                        by = feature_columns]
     if(handle_few == "remove") {
-        not_few = unique(counts[["feature"]][counts[["n_obs"]] > 2])
+        counts = counts[counts$n_obs > 2, ]
     } else {
-        not_few = unique(counts[["feature"]][counts[["n_obs"]] > 0])
+        counts = counts[counts$n_obs > 0, ]
     }
-    data_frame[data_frame[["feature"]] %in% not_few, ]
-    # TODO: compare performance to join
-    # TODO: improve design by making minimum number a variable?
+    merge(data_frame, counts[, feature_columns, with = FALSE])
 }
 
-.summarizeMultipleMeasurements = function(data_frame, aggregator) {
-    counts = data_frame[, ("n_obs" = length("Intensity")), by = ("feature"),
-                        with = FALSE]
+.summarizeMultipleMeasurements = function(data_frame, aggregator, feature_columns) {
+    counts = data_frame[, ("n_obs" = length("Intensity")), 
+                        by = feature_columns]
     if(any(counts[["n_obs"]] > length(unique(data_frame[["Run"]])))) {
         merge(data_frame[, .(Intensity = aggregator(Intensity)), 
-                         by = list(Run, feature)],
+                         by = c("Run", feature_columns), with = FALSE],
               data_frame[, Intensity := NULL],
-              by = c("Run", "feature")
+              by = c("Run", feature_columns)
               
         )
     } else {
@@ -307,32 +309,32 @@
     }
 }
 
-.handleSingleFeaturePerProtein = function(data_frame, remove_single_feature) {
-    counts = data_frame[, .(n_obs = length(Intensity)), by = .(feature)]
-    single_feature = counts[["feature"]][counts[["n_obs"]] <= 1]
+.handleSingleFeaturePerProtein = function(data_frame, remove_single_feature,
+                                          feature_cols) {
+    counts = data_frame[, .(n_obs = length(Intensity)), by = feature_cols]
+    single_feature = counts[counts$n_obs > 1]
     if (remove_single_feature & length(single_feature) > 0) {
-        data_frame = data_frame[!(data_frame[["ProteinName"]] %in% single_feature), ]
+        data_frame = merge(data_frame, counts, by = c("Run", feature_cols))
         getOption("MSstatsLog")("INFO", "Proteins with a single feature are removed")
         getOption("MSstatsMsg")("INFO", "Proteins with a single feature are removed")
     } else {
         data_frame = data_frame
     }
-    # TODO: message + logs
-    feature_col = colnames(data_frame) == "feature"
-    data_frame[, !feature_col, with = FALSE]
+    data_frame
 }
 
 
 .cleanByFeature = function(data_frame, feature_columns, summarize_function,
-                           handle_few_measurements) {
-    data_frame[["feature"]] = .makeFeatures(data_frame, feature_columns)    
-    data_frame = .filterFewMeasurements(data_frame, 1, "keep")
+                           handle_few_measurements) {   
+    data_frame = .filterFewMeasurements(data_frame, 1, "keep", feature_columns)
     getOption("MSstatsLog")("INFO", "Features with 1 or two measurements across runs are removed")
     getOption("MSstatsMsg")("INFO", "Features with 1 or two measurements across runs are removed")
-    data_frame = .summarizeMultipleMeasurements(data_frame, summarize_function)
+    data_frame = .summarizeMultipleMeasurements(data_frame, summarize_function,
+                                                feature_columns)
     getOption("MSstatsLog")("INFO", "Multiple measurements per run are aggregated")
     getOption("MSstatsMsg")("INFO", "Multiple measurements per run are aggregated")
-    data_frame = .filterFewMeasurements(data_frame, 0, handle_few_measurements)
+    data_frame = .filterFewMeasurements(data_frame, 0, handle_few_measurements,
+                                        feature_columns)
     data_frame
 }
 
@@ -375,4 +377,8 @@
                                           has_col, has_col)        
     }
     data_frame
+}
+
+.standardizeColnames = function(col_names) {
+    gsub(" ", ".", col_names, fixed = TRUE)
 }
