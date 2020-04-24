@@ -74,6 +74,6 @@
 #' @return character vector
 #' @keywords internal
 .standardizeColnames = function(col_names) {
-    gsub(" ", ".", col_names, fixed = TRUE)
-    # gsub("#", ".", col_names, fixed = TRUE) ?
+    col_names = gsub(" ", ".", col_names, fixed = TRUE)
+    gsub("#", "X.", col_names, fixed = TRUE)
 }
