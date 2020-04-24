@@ -31,7 +31,7 @@ SpectronauttoMSstatsFormat = function(
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
   
   .setMSstatsLogger(use_log_file, append, verbose)
-  input = .getInput(input)
+  input = .getDataTable(input)
   
   annotation = .makeAnnotation(
     annotation, 
@@ -56,7 +56,7 @@ SpectronauttoMSstatsFormat = function(
 }
 
 
-.cleanRawSpectronaut = function(spec_input) {
+.cleanRawSpectronaut = function(spec_input, intensity) {
   colnames(spec_input) = .standardizeColnames(colnames(spec_input))
   
   spec_input = spec_input[spec_input[["F.FrgLossType"]] == "noloss", ]
@@ -65,10 +65,10 @@ SpectronauttoMSstatsFormat = function(
   
   f_charge_col = .findAvailable(c("F.Charge", "F.FrgZ"), colnames(spec_input))
   pg_qval_col = .findAvailable(c("PG.Qvalue"), colnames(spec_input))
-  spec_input = .selectColumns(
-    spec_input, 
-    c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
-      f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, paste0("F.", intensity)))
+  cols = c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon", 
+           f_charge_col, "R.FileName", "EG.Qvalue", pg_qval_col, 
+           paste0("F.", intensity))
+  spec_input = spec_input[, cols, with = FALSE]
   colnames(spec_input) = .updateColnames(
     spec_input, 
     c("PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge", "F.FrgIon",
