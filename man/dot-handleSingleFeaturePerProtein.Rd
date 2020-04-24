@@ -4,7 +4,7 @@
 \alias{.handleSingleFeaturePerProtein}
 \title{Remove proteins only identified by a single feature}
 \usage{
-.handleSingleFeaturePerProtein(input, remove_single_feature, feature_cols)
+.handleSingleFeaturePerProtein(input, remove_single_feature, feature_columns)
 }
 \arguments{
 \item{input}{data.table pre-processed by one of the .cleanRaw* functions.}

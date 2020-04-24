@@ -1,7 +1,6 @@
 #' Import MaxQuant files
 #' 
 #' @inheritParams .documentFunction
-#' @inheritParams .setMS
 #' @param evidence name of 'evidence.txt' data, which includes feature-level data.
 #' @param annotation name of 'annotation.txt' data which includes Raw.file, Condition, BioReplicate, Run, IsotopeLabelType information.
 #' @param proteinGroups name of 'proteinGroups.txt' data. It needs to matching protein group ID. If proteinGroups=NULL, use 'Proteins' column in 'evidence.txt'.
