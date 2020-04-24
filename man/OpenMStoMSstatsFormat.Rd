@@ -10,7 +10,10 @@ OpenMStoMSstatsFormat(
   useUniquePeptide = TRUE,
   fewMeasurements = "remove",
   removeProtein_with1Feature = FALSE,
-  summaryforMultipleRows = max
+  summaryforMultipleRows = max,
+  use_log_file = TRUE,
+  append = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -27,6 +30,12 @@ We assume to use unique peptide for each protein.}
 \item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 
 \item{summaryforMultipleRows}{max(default) or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities.}
+
+\item{use_log_file}{lgl, if TRUE, messages from the converter functions will be written to a log file.}
+
+\item{append}{lgl, if TRUE, messages will be appended to an existing file.}
+
+\item{verbose}{lgl, if TRUE, messages from the converter functions will be printed to the console.}
 }
 \value{
 data.frame with the required format of MSstats.
