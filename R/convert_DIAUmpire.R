@@ -30,26 +30,37 @@ DIAUmpiretoMSstatsFormat = function(
     # TODO: can I move removing shared peptides here?
     feature_cols = c("PeptideSequence", "FragmentIon")
     input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, fewMeasurements)
-    input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
+    input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
+                                           feature_cols)
     input = merge(input, annotation, by = "Run")
     
     input = .fillValues(input, c("PrecursorCharge" = NA,
                                  "ProductCharge" = NA,
                                  "IsotopeLabelType" = "L"))
-    input # ProteinName as factor?
+    input
 }
 
 
 .cleanRawDIAUmpire = function(frag_input, pept_input, prot_input,
                               use_frag, use_pept) {
-    if(!is.element("Selected_fragments", pept_input)) {
-        stop("** Selected_fragments column is required. Please check it.")
+    frag_input = .getDataTable(frag_input)
+    pept_input = .getDataTable(pept_input)
+    prot_input = .getDataTable(prot_input)
+    colnames(frag_input) = .standardizeColnames(colnames(frag_input))
+    colnames(pept_input) = .standardizeColnames(colnames(pept_input))
+    colnames(prot_input) = .standardizeColnames(colnames(prot_input))
+    
+    if (!is.element("Selected_fragments", pept_input)) {
+        msg = "Selected_fragments column is required. Please check it."
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
     }
-    if(!is.element("Selected_peptides", prot_input)) {
-        stop("** Selected_peptides column is required. Please check it.")
+    if (!is.element("Selected_peptides", prot_input)) {
+        msg = "Selected_peptides column is required. Please check it."
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
     }
     
-    pept_input = data.table::as.data.table(pept_input)
     pept_cols = c("Peptide.Key", "Proteins", "Selected_fragments")
     pept_input = pept_input[, pept_cols, with = FALSE]
     pept_input = pept_input[pept_input[["Proteins"]] != "", ]
@@ -61,18 +72,16 @@ DIAUmpiretoMSstatsFormat = function(
     pept_input = pept_input[, lapply(.(FragmentIon), 
                                      function(x) unlist(tstrsplit(x, "|", fixed = TRUE))),
                             by = .(ProteinName, PeptideSequence)] 
-    # TODO: test this data.table idiom properly!
-    colnames(pept_input) = .updateColnames(pept_input, "V1", "FragmentIon")
+        colnames(pept_input) = .updateColnames(pept_input, "V1", "FragmentIon")
     pept_input = pept_input[pept_input[["FragmentIon"]] != "", ]
     # TOOD: It's possible to extract a function here for prot/pept input  
     pept_input[["ProteinName"]] = as.character(pept_input[["ProteinName"]])
     
-    prot_input = data.table::as.data.table(prot_input)
     prot_input = prot_input[, c("Protein.Key", "Selected_peptides"), with = FALSE]
-    prot_input = prot_input[prot_input[["Protein.Key"]] != "", ] # change to the decoy function?
+    prot_input = prot_input[prot_input[["Protein.Key"]] != "", ] 
     prot_input[["Selected_peptides"]] = as.character(prot_input[["Selected_peptides"]])
-    # prot_input[["Selected_peptides"]] = trimws(prot_input[["Selected_peptides"]],
-    #                                            "both") # Is it needed?
+    prot_input[["Selected_peptides"]] = trimws(prot_input[["Selected_peptides"]],
+                                               "both") # Is it needed?
     colnames(prot_input) = .updateColnames(prot_input, colnames(prot_input),
                                            c("ProteinName", "PeptideSequence"))
     prot_input = prot_input[, lapply(.(PeptideSequence),
@@ -91,19 +100,18 @@ DIAUmpiretoMSstatsFormat = function(
         ## make the final list of selected proteins and peptides
         input = merge(pept_input[, c(FALSE, TRUE, TRUE), with = FALSE], 
                       prot_input, all.x = TRUE, by = "PeptideSequence")
-        input[["ProteinName"]] = as.character(input[["ProteinName"]])
     } else if (use_frag & !use_pept) { 
         # only use selected fragment, and use all peptides, can use raw.pep3 only.
         ## but doublecheck protein id : protein id in raw.frag is always one id.
         ## need to find shared peptides
         input = pept_input
     } else if (!use_frag & !use_pept) {
-        stop('** MSstats recommends to use at least selected fragments.')
+        msg = "MSstats recommends to use at least selected fragments."
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
     }
     input[["FragmentIon"]] = gsub("\\+", "_", input[["FragmentIon"]])
     
-    frag_input = data.table::as.data.table(frag_input)
-    frag_input[["Protein"]] = as.character(frag_input[["Protein"]])
     intensity_cols = grepl("Intensity", colnames(frag_input))
     frag_col_names = c("Fragment.Key", "Protein", "Peptide", "Fragment")
     key_cols = colnames(frag_input) %in% frag_col_names
@@ -116,7 +124,7 @@ DIAUmpiretoMSstatsFormat = function(
         frag_input, character_columns = c(new_names, "Fragment.Key"))
     
     if (!grepl("\\+", frag_input[["FragmentIon"]][1])) {
-        # TODO: is alway all or none true? Indicate in docs that + means charge
+        # TODO: is always all or none true? Indicate in docs that + means charge
         last_char = nchar(frag_input[["Fragment.Key"]])
         frag_input[["FragmentIon"]] = paste(
             frag_input[["FragmentIon"]],
@@ -130,11 +138,11 @@ DIAUmpiretoMSstatsFormat = function(
     
     setkey(input, ProteinName, PeptideSequence, FragmentIon)
     setkey(frag_input, ProteinName, PeptideSequence, FragmentIon)
-    to_join = unique(frag_input[input, which = TRUE, allow.cartesian = TRUE])
+    to_join = unique(frag_input[input, which = TRUE, allow.cartesian = TRUE, drop = FALSE])
     frag_input = frag_input[to_join]
     frag_input = melt(frag_input, 
-                      id.vars = new_names,
-                      variable.name = "Run", value.name = "Intensity")
+                      id.vars = new_names, variable.name = "Run", 
+                      value.name = "Intensity", value.factor = FALSE)
     frag_input[["Run"]] = gsub("_Intensity", "", frag_input[["Run"]])
     frag_input 
 }
