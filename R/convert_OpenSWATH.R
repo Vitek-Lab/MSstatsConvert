@@ -21,43 +21,41 @@
   use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
   
-  # TODO: 1. Improved checks 2. Messages + logs
   fewMeasurements = .isLegalValue(fewMeasurements, 
                                   legal_values = c("remove", "keep"))
   annotation = .makeAnnotation(annotation, 
                                c("Run" = "Run", "Condition" = "Condition", 
                                  "BioReplicate" = "BioReplicate"))
-  feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon")
   
+  input = .cleanRawOpenSWATH(input)
   input = .handleFiltering(input, "m_score", mscore_cutoff, "smaller", "remove")
   input = .handleDecoyProteins(input, "decoy", 1)
   input = .cleanRawOpenSWATH(input)
   input = .handleSharedPeptides(input, useUniquePeptide)
+  feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon")
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows,
                           fewMeasurements)
-  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
+  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
+                                         feature_cols)
   input = merge(input, annotation, by = "Run")
   input
 }
 
-
-.cleanRawOpenSWATH = function(openswath_input) {
-  os_cols = c("ProteinName", "FullPeptideName", "Charge", "filename", 
-              "aggr_Fragment_Annotation", "aggr_Peak_Area")
-  input = data.table::as.data.table(openswath_input[, os_cols])
-  colnames(input) = .updateColnames(
-    input,
+.cleanRawOpenSWATH = function(os_input) {
+  os_input = .getDataTable(os_input)
+  colnames(os_input) = .updateColnames(
+    os_input,
     c("FullPeptideName", "Charge", "filename"),
     c("PeptideSequence", "PrecursorCharge", "Run"))
-  input = input[, lapply(.(aggr_Fragment_Annotation, aggr_Peak_Area), 
-                         function(x) unlist(tstrsplit(x, ";", fixed = TRUE))),
-                by = .(ProteinName, PeptideSequence, PrecursorCharge, Run)]
-  colnames(input) = .updateColnames(input, c("V1", "V2"), 
-                                    c("FragmentIon", "Intensity"))
-  input[, c("PeptideSequence", "FragmentIon")] = input[, lapply(.(PeptideSequence, FragmentIon), 
-                                                                function(x) gsub(":", "_", x))]
-  input[["Intensity"]] = as.numeric(input[["Intensity"]])
-  input[input[["Intensity"]] < 1, "Intensity"] = NA
-  input = .fillValues(input, c("ProductCharge" = NA, "IsotopeLabelType" = "L"))
-  input
+  os_input = os_input[, lapply(.(aggr_Fragment_Annotation, aggr_Peak_Area), 
+                               function(x) unlist(tstrsplit(x, ";", fixed = TRUE))),
+                      by = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run")]
+  colnames(os_input) = .updateColnames(os_input, c("V1", "V2"), 
+                                       c("FragmentIon", "Intensity"))
+  os_input[, c("PeptideSequence", "FragmentIon")] = os_input[, lapply(.(PeptideSequence, FragmentIon), 
+                                                                   function(x) gsub(":", "_", x))]
+  os_input[["Intensity"]] = as.numeric(os_input[["Intensity"]])
+  os_input[os_input[["Intensity"]] < 1, "Intensity"] = NA
+  os_input = .fillValues(os_input, c("ProductCharge" = NA, "IsotopeLabelType" = "L"))
+  os_input
 }
