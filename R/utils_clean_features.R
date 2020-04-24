@@ -21,7 +21,8 @@
         getOption("MSstatsLog")("INFO", "Features with 1 or two measurements across runs are removed")
         getOption("MSstatsMsg")("INFO", "Features with 1 or two measurements across runs are removed")
     }
-    merge(input, counts[, feature_columns, with = FALSE])
+    merge(input, counts[, feature_columns, with = FALSE],
+          by = feature_columns)
 }
 
 
@@ -80,8 +81,8 @@
 #' @return data.table
 #' @keywords internal
 .handleSingleFeaturePerProtein = function(input, remove_single_feature,
-                                          feature_cols) {
-    counts = unique(input[, c(feature_cols, "ProteinName"), with = FALSE])
+                                          feature_columns) {
+    counts = unique(input[, c(feature_columns, "ProteinName"), with = FALSE])
     counts = counts[, .(n_obs = .N), by = "ProteinName"]
     counts = counts[counts$n_obs > 1L, .(ProteinName)]
     if (remove_single_feature & nrow(counts) > 0) {
