@@ -11,7 +11,7 @@
 #' @export
 #' 
 
-.ProgenesisFromDFs = function(
+ProgenesistoMSstatsFormat = function(
   input, annotation, useUniquePeptide = TRUE, summaryforMultipleRows = max,
   fewMeasurements = "remove", removeOxidationMpeptides = FALSE, 
   removeProtein_with1Peptide = FALSE,
@@ -23,16 +23,16 @@
                                c("Run" = "Run", "Condition" = "Condition",
                                  "BioReplicate" = "BioReplicate"))
   
-  input = .cleanRawProgenesis(input, unique(annotation[["Run"]]))
-  
-  feature_cols = c("PeptideModifiedSequence", "PrecursorCharge")
+  input = .cleanRawProgenesis(input, runs)
   input = .handleOxidationPeptides(input, "PeptideModifiedSequence", 
                                    "Oxidation", removeOxidationMpeptides)
   input = .handleSharedPeptides(input, useUniquePeptide,
                                 peptide_column = "PeptideModifiedSequence")
+  feature_cols = c("PeptideModifiedSequence", "PrecursorCharge")
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows,
                           fewMeasurements)
-  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide)
+  input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide,
+                                         feature_cols)
   input = merge(input, annotation, by = "Run")
   input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
@@ -40,41 +40,14 @@
 }
 
 
-.ProgenesisFromFiles = function(
-  input, annotation, filter_with_mscore = TRUE, mscore_cutoff = 0.01,
-  useUniquePeptide = TRUE, fewMeasurements = "remove",
-  removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
-  use_log_file = TRUE, append = FALSE, verbose = TRUE
-) {
-  
-}
-
-setGeneric("ProgenesistoMSstatsFormat",
-           function(input, annotation, ...) {
-             standardGeneric("ProgenesistoMSstatsFormat")
-           })
-
-setMethod("ProgenesistoMSstatsFormat",
-          signature = rep("character", 2),
-          function(input, annotation, ...)
-            .ProgenesisFromFiles(input, annotation, ...))
-
-
-setMethod("ProgenesistoMSstatsFormat",
-          signature = rep("data.frame", 2),
-          function(input, annotation, ...) {
-            .ProgenesisFromDFs(input, annotation, ...)
-          })
-
-
 .cleanRawProgenesis = function(prog_input, runs, fix_colnames = TRUE) {
-  prog_input = data.table::as.data.table(prog_input)
-  colnames(prog_input) = .standardizeColnames(colnames(prog_input))
-  if(fix_colnames) {
-    prog_input = prog_input[-1, ]
-    colnames(prog_input) = prog_input[1, ]
+  prog_input = .getDataTable(prog_input)
+  if (fix_colnames) {
+    prog_input = prog_input[-(1:2), ]
+    colnames(prog_input) = unlist(prog_input[1, ])
     prog_input = prog_input[-1, ]
   }
+  colnames(prog_input) = .standardizeColnames(colnames(prog_input))
   protein_col = .findAvailable(c("Protein", "Accession"), 
                                colnames(prog_input))
   colnames(prog_input) = .updateColnames(prog_input, 
@@ -87,23 +60,27 @@ setMethod("ProgenesistoMSstatsFormat",
   prog_input[["PeptideModifiedSequence"]] = paste(prog_input[["Sequence"]],
                                                   prog_input[["Modifications"]],
                                                   sep = "")
-  prog_input <- prog_input[!duplicated(prog_input), ] # dubious performance-wise
-  if(is.element("Use.in.quantitation", colnames(prog_input))) {
-    prog_input = prog_input[prog_input[["Use.in.quantitation"]], ]
-    # TODO: consider character version if these files ever import this 
-    # columns as character
-    prog_input = prog_input[, Use.in.quantitation := NULL]
+  prog_input = prog_input[!duplicated(prog_input), ] # dubious performance-wise
+  if (is.element("Use.in.quantitation", colnames(prog_input))) {
+    if (!is.logical(prog_input[["Use.in.quantitation"]])) {
+      prog_input[["Use.in.quantitation"]] = prog_input[["Use.in.quantitation"]] == "True"
+    }
+    prog_input = prog_input[prog_input$Use.in.quantitation, ]
+    # TODO: consider character version if these files ever import this columns as character
+    prog_input = prog_input[, !(colnames(prog_input) == "Use.in.quantitation"),
+                            with = FALSE]
   }
-  feature_cols = c("ProteinName", "PeptideModifiedSequence",
-                   "PrecursorCharge", "Fraction")
-  prog_cols = intersect(colnames(prog_input), 
-                        c(feature_cols, runs))
-  prog_input = prog_input[, prog_cols]
+  feature_cols = intersect(colnames(prog_input), 
+                           c("ProteinName", "PeptideModifiedSequence",
+                             "PrecursorCharge", "Fraction"))
+  prog_cols = intersect(colnames(prog_input), c(feature_cols, runs))
+  prog_input = prog_input[, prog_cols, with = FALSE]
   prog_input = data.table::melt(prog_input,
                                 id.vars = feature_cols,
-                                measure_vars = runs,
+                                measure.vars = runs,
                                 variable.name = "Run",
-                                value.name = "Intensity")
-  prog_input[["Intensity"]] = as.numeric() # Remove if not needed
+                                value.name = "Intensity",
+                                value.factor = FALSE)
+  prog_input[["Intensity"]] = as.numeric(prog_input[["Intensity"]])
   prog_input
 }
