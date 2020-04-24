@@ -1,4 +1,3 @@
-# append = TRUE by default?
 #' log4r appender used not to write messages 
 #' 
 #' A convenience function written to save time on checking if messages should
@@ -7,23 +6,20 @@
 #' @param level log level 
 #' @param ... messages - ignored
 #' @keywords internal
-#' 
 .nullAppender = function(level, ...) {
     invisible(NULL)
 }
 
 
 #' Set default logging object when package is loaded
-#' 
 #' @param ... ignored
 #' @importFrom log4r file_appender console_appender
 #' @keywords internal
-#' 
 .onLoad = function(...) {
     logs = getOption("MSstatsLog")
     msgs = getOption("MSstatsMsg")
-    time_now = gsub("[ :\\-]", "_", Sys.time())
-    path = paste0("./MSstats_log_", time_now, ".log")
+    time_now = Sys.time()
+    path = paste0("./MSstats_log_", gsub("[ :\\-]", "_", time_now), ".log")
     
     if (is.null(logs)) {
         ms_logs = file_appender(path, append = TRUE)
@@ -34,21 +30,24 @@
     
     options(MSstatsLog = ms_logs,
             MSstatsMsg = ms_messages)
+    # TODO: this should be happening on load, because we don't know yet if the user
+    # want to append?
+    # OR if we don't save at this moment, the file won't be created, yet
+    # - file name can go to options, too?
     if (is.null(logs)) {
-        getOption("MSstatsLog")("INFO", "Initialized MSstats session")
+        getOption("MSstatsLog")("INFO", paste("Initialized MSstats session:",
+                                              time_now))
     }
 }
 
 
 #' Set log4 appenders based on user preferences
-#' 
 #' @param log logical, if TRUE, messages will be written to a file.
 #' @param append logical, if TRUE, messages will be written to an existing 
 #' MSstats log file.
 #' @param verbose logical, if TRUE, messages will be printed to the console.
 #' @importFrom log4r file_appender
 #' @keywords internal
-#' 
 .setMSstatsLogger = function(log, append, verbose) {
     if (log) {
         if (append) {
@@ -67,4 +66,3 @@
         options(MSstatsMsg = .nullAppender)
     }
 }
-
