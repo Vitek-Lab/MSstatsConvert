@@ -23,17 +23,13 @@
     
     if (is.null(logs)) {
         ms_logs = file_appender(path, append = TRUE)
+        options(MSstatsLog = ms_logs)
     }
     if (is.null(msgs)) {
         ms_messages = console_appender()
+        options(MSstatsMsg = ms_messages)
     }
     
-    options(MSstatsLog = ms_logs,
-            MSstatsMsg = ms_messages)
-    # TODO: this should be happening on load, because we don't know yet if the user
-    # want to append?
-    # OR if we don't save at this moment, the file won't be created, yet
-    # - file name can go to options, too?
     if (is.null(logs)) {
         getOption("MSstatsLog")("INFO", paste("Initialized MSstats session:",
                                               time_now))
