@@ -20,7 +20,7 @@
     if (behavior == "remove") {
         input = input[score_filter, ]    
     } else {
-        input = input[!score_filter, c("Intensity")] = fill_value
+        input[!score_filter, "Intensity"] = fill_value
     }
     input
 }
@@ -37,10 +37,10 @@
                             drop_column = TRUE, filter = TRUE) {
     if (filter) { 
         input = .filterByScore(input, score_column, score_threshold, 
-                                direction, behavior, fill_value)
+                               direction, behavior, fill_value)
     }
     if (drop_column) {
-        input = .removeColumns(input, score_column)
+        input = input[, colnames(input) != score_column, with = FALSE] 
     }
     input
 }
@@ -104,7 +104,7 @@
     for(col in filter_columns) {
         has_col = is.element(col, colnames(input))
         input = .handleDecoyProteins(input, col, filter_symbols, 
-                                          has_col, has_col)        
+                                     has_col, has_col)        
     }
     input
 }
