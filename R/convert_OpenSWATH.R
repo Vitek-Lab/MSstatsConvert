@@ -14,7 +14,7 @@
 #' @export
 #' 
 
-.OpenSWATHFromDFs = function(
+OpenSWATHtoMSstatsFormat = function(
   input, annotation, filter_with_mscore = TRUE, mscore_cutoff = 0.01,
   useUniquePeptide = TRUE, fewMeasurements = "remove",
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
