@@ -75,19 +75,19 @@
 #' @param filter lgl, if TRUE, decoy proteins will be removed from the data.
 #' @return data.table
 #' @keywords internal
-.handleDecoyProteins = function(input, decoy_column, decoy_symbols, 
-                                drop = TRUE, filter = TRUE) {
-    decoy_index = which(colnames(input) == decoy_column)  
+.filterExact = function(input, col_name, filter_symbols, 
+                        drop = TRUE, filter = TRUE) {
+    find_col = colnames(input) == col_name
     if (filter) {
-        decoy_filter = !(input[[decoy_column]] %in% decoy_symbols)
+        exact_filter = !(input[[col_name]] %in% filter_symbols)
     } else {
-        decoy_filter = rep(TRUE, nrow(input))
+        exact_filter = rep(TRUE, nrow(input))
     }
     
     if (drop) {
-        input[decoy_filter, -decoy_index, with = FALSE]    
+        input[exact_filter, !find_col, with = FALSE]    
     } else {
-        input[decoy_filter, ]
+        input[exact_filter, ]
     }
 }
 

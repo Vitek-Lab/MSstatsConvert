@@ -30,9 +30,9 @@ SkylinetoMSstatsFormat = function(
         input
     )
     input = .cleanRawSkyline(input)
-    input = .handleDecoyProteins(input, "ProteinName", 
+    input = .filterExact(input, "ProteinName", 
                                  c("DECOY", "Decoys"), FALSE)
-    input = .handleDecoyProteins(input, "StandardType", "iRT", FALSE, removeiRT)
+    input = .filterExact(input, "StandardType", "iRT", FALSE, removeiRT)
     input = .handleOxidationPeptides(input, "PeptideSequence", "+16", 
                                      removeOxidationMpeptides)
     input = .handleSharedPeptides(input, useUniquePeptide)
@@ -53,10 +53,11 @@ SkylinetoMSstatsFormat = function(
 
 #' Clean raw data from Skyline
 #' @param sl_input data.frame with raw Skyline input or a path to Skyline output.
+#' @param ... optional, additional parameters to data.table::fread.
 #' @return data.table
 #' @keywords internal
-.cleanRawSkyline = function(sl_input) {
-    sl_input = .getDataTable(sl_input)
+.cleanRawSkyline = function(sl_input, ...) {
+    sl_input = .getDataTable(sl_input, ...)
     colnames(sl_input) = gsub("\\.", "", colnames(sl_input))
     colnames(sl_input) = .updateColnames(sl_input, c("FileName", "Area"),
                                          c("Run", "Intensity"))

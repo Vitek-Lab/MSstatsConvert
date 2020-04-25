@@ -29,7 +29,7 @@ OpenSWATHtoMSstatsFormat = function(
   
   input = .cleanRawOpenSWATH(input)
   input = .handleFiltering(input, "m_score", mscore_cutoff, "smaller", "remove")
-  input = .handleDecoyProteins(input, "decoy", 1)
+  input = .filterExact(input, "decoy", 1)
   input = .cleanRawOpenSWATH(input)
   input = .handleSharedPeptides(input, useUniquePeptide)
   feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon")
@@ -44,10 +44,11 @@ OpenSWATHtoMSstatsFormat = function(
 
 #' Clean raw OpenSWATH files
 #' @param os input OpenSWATH report or a path to it.
+#' @param ... optional, additional parameters for data.table::fread
 #' @return data.table
 #' @keywords internal
-.cleanRawOpenSWATH = function(os_input) {
-  os_input = .getDataTable(os_input)
+.cleanRawOpenSWATH = function(os_input, ...) {
+  os_input = .getDataTable(os_input, ...)
   colnames(os_input) = .updateColnames(
     os_input,
     c("FullPeptideName", "Charge", "filename"),
