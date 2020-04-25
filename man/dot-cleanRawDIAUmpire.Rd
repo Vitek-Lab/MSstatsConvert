@@ -4,7 +4,7 @@
 \alias{.cleanRawDIAUmpire}
 \title{Clean raw DIAUmpire files}
 \usage{
-.cleanRawDIAUmpire(frag_input, pept_input, prot_input, use_frag, use_pept)
+.cleanRawDIAUmpire(frag_input, pept_input, prot_input, use_frag, use_pept, ...)
 }
 \arguments{
 \item{frag_input}{DIAUmpire fragments output or a path to it.}
@@ -15,7 +15,9 @@
 
 \item{use_frag}{TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.}
 
-\item{use_peptTRUE}{will use the selected fragment for each protein 'Selected_peptides' column is required.}
+\item{use_pept}{TRUE will use the selected fragment for each protein 'Selected_peptides' column is required.}
+
+\item{...}{optional, additional parameters to data.table::fread.}
 }
 \value{
 data.table

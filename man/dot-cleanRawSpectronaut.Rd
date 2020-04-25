@@ -4,12 +4,14 @@
 \alias{.cleanRawSpectronaut}
 \title{Clean raw Spectronaut output.}
 \usage{
-.cleanRawSpectronaut(spec_input, intensity)
+.cleanRawSpectronaut(spec_input, intensity, ...)
 }
 \arguments{
 \item{spec_input}{Spectronaut report or a path to it.}
 
 \item{intensity}{chr, specifies which column will be used for Intensity.}
+
+\item{...}{optional, additional parameters to data.table::fread.}
 }
 \value{
 data.table

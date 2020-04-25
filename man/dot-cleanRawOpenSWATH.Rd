@@ -4,9 +4,11 @@
 \alias{.cleanRawOpenSWATH}
 \title{Clean raw OpenSWATH files}
 \usage{
-.cleanRawOpenSWATH(os_input)
+.cleanRawOpenSWATH(os_input, ...)
 }
 \arguments{
+\item{...}{optional, additional parameters for data.table::fread}
+
 \item{os}{input OpenSWATH report or a path to it.}
 }
 \value{

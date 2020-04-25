@@ -6,6 +6,11 @@
 \usage{
 .getDataTable(input, ...)
 }
+\arguments{
+\item{input}{report from a signal processing tool or a path to it}
+
+\item{...}{additional parameters for data.table::fread}
+}
 \description{
 Read file from a provided path or convert given data.frame to data.table
 }

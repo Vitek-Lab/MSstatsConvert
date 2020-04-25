@@ -4,7 +4,7 @@
 \alias{.cleanRawMaxQuant}
 \title{Clean raw output from MaxQuant}
 \usage{
-.cleanRawMaxQuant(mq_input, mq_pg, protein_id_col)
+.cleanRawMaxQuant(mq_input, mq_pg, protein_id_col, ...)
 }
 \arguments{
 \item{mq_input}{evidence file from MaxQuant or a path to it.}
@@ -12,6 +12,8 @@
 \item{mq_pg}{proteinGroups file from MaxQuant or a path to it.}
 
 \item{protein_id_col}{chr, name of a column with names of proteins.}
+
+\item{...}{optional, additional parameters for data.table::fread}
 }
 \value{
 data.table

@@ -4,10 +4,12 @@
 \alias{.cleanRawOpenMS}
 \title{Clean raw output from OpenMS}
 \usage{
-.cleanRawOpenMS(om_input)
+.cleanRawOpenMS(om_input, ...)
 }
 \arguments{
 \item{om_input}{OpenMS report or a path to it.}
+
+\item{...}{optional, additional parameters for data.table::fread.}
 }
 \value{
 data.table

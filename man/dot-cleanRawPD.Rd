@@ -9,7 +9,8 @@
   quantification_column,
   proteinID_column,
   sequence_column,
-  filter_num_col
+  filter_num_col,
+  ...
 )
 }
 \arguments{
@@ -22,7 +23,13 @@
 \item{sequence_column}{chr, name of a column with peptide sequences.}
 
 \item{filter_num_col}{lgl, if TRUE, shared peptides will be removed.}
+
+\item{...}{optional, additional parameters to data.table::fread.}
+}
+\value{
+data.table
 }
 \description{
 Clean raw PD output
 }
+\keyword{internal}
