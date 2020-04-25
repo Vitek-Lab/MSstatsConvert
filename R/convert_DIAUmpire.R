@@ -40,7 +40,14 @@ DIAUmpiretoMSstatsFormat = function(
     input
 }
 
-
+#' Clean raw DIAUmpire files
+#' @param frag_input DIAUmpire fragments output or a path to it.
+#' @param pept_input DIAUmpire peptides output or a path to it.
+#' @param prot_input DIAUmpire proteins output or a path to it.
+#' @param use_frag TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.
+#' @param use_peptTRUE will use the selected fragment for each protein 'Selected_peptides' column is required.
+#' @return data.table
+#' @keywords internal
 .cleanRawDIAUmpire = function(frag_input, pept_input, prot_input,
                               use_frag, use_pept) {
     frag_input = .getDataTable(frag_input)

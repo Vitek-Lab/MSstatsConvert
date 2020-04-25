@@ -35,9 +35,7 @@ MaxQtoMSstatsFormat = function(
           "IsotopeLabelType" = "IsotopeLabelType")
     )
     
-    input = .getDataTable(evidence)
-    proteinGroups = .getDataTable(proteinGroups)
-    input = .cleanRawMaxQuant(input, proteinGroups, proteinID)
+    input = .cleanRawMaxQuant(evidence, proteinGroups, proteinID)
     input = .handleOxidationPeptides(input, "PeptideSequence", 
                                      "M", removeMpeptides)
     input = .handleOxidationPeptides(input, "Modifications", "Oxidation",
@@ -53,7 +51,15 @@ MaxQtoMSstatsFormat = function(
 }
 
 
+#' Clean raw output from MaxQuant
+#' @param mq_input evidence file from MaxQuant or a path to it.
+#' @param mq_pg proteinGroups file from MaxQuant or a path to it.
+#' @param protein_id_col chr, name of a column with names of proteins.
+#' @return data.table
+#' @keywords internal
 .cleanRawMaxQuant = function(mq_input, mq_pg, protein_id_col) {
+    mq_input = .getDataTable(mq_input)
+    mq_pg = .getDataTable(mq_pg)
     colnames(mq_input) = .standardizeColnames(colnames(mq_input))
     colnames(mq_pg) = .standardizeColnames(colnames(mq_pg))
     filter_cols = c("Contaminant", "Potential.contaminant", 

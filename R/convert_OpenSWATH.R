@@ -41,6 +41,11 @@ OpenSWATHtoMSstatsFormat = function(
   input
 }
 
+
+#' Clean raw OpenSWATH files
+#' @param os input OpenSWATH report or a path to it.
+#' @return data.table
+#' @keywords internal
 .cleanRawOpenSWATH = function(os_input) {
   os_input = .getDataTable(os_input)
   colnames(os_input) = .updateColnames(

@@ -40,6 +40,12 @@ ProgenesistoMSstatsFormat = function(
 }
 
 
+#' Clean raw Progenesis output
+#' @param prog_input Progenesis report or a path to it.
+#' @param runs chr, vector of Run labels.
+#' @param fix_colnames lgl, if TRUE, one of the rows will be used as colnames.
+#' @return data.table
+#' @keywords internal
 .cleanRawProgenesis = function(prog_input, runs, fix_colnames = TRUE) {
   prog_input = .getDataTable(prog_input)
   if (fix_colnames) {

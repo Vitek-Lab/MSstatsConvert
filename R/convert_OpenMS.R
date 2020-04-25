@@ -40,11 +40,15 @@ OpenMStoMSstatsFormat = function(
 }
 
 
+#' Clean raw output from OpenMS
+#' @param om_input OpenMS report or a path to it.
+#' @return data.table
+#' @keywords internal
 .cleanRawOpenMS = function(om_input) {
   om_input = .getDataTable(om_input)
   colnames(om_input) = .standardizeColnames(colnames(om_input))
   om_input[["Intensity"]] = as.numeric(om_input[["Intensity"]])
-  if(!is.element("IsotopeLabelType", colnames(om_input))) {
+  if (!is.element("IsotopeLabelType", colnames(om_input))) {
     om_input = .fillValues(om_input, c("IsotopeLabelType" = "L"))
   }
   om_input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", 

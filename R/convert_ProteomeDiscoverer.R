@@ -48,6 +48,12 @@ PDtoMSstatsFormat = function(
 }
 
 
+#' Clean raw PD output
+#' @param pd_input PD report or a path to it.
+#' @param quantification_column chr, name of a column used for quantification.
+#' @param proteinID_column chr, name of a column with protein IDs.
+#' @param sequence_column chr, name of a column with peptide sequences.
+#' @param filter_num_col lgl, if TRUE, shared peptides will be removed.
 .cleanRawPD = function(pd_input, quantification_column, proteinID_column,
                        sequence_column, filter_num_col) {
     pd_input = .getDataTable(pd_input)

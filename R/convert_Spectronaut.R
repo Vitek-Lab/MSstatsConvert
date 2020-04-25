@@ -56,6 +56,11 @@ SpectronauttoMSstatsFormat = function(
 }
 
 
+#' Clean raw Spectronaut output.
+#' @param spec_input Spectronaut report or a path to it.
+#' @param intensity chr, specifies which column will be used for Intensity.
+#' @return data.table
+#' @keywords internal
 .cleanRawSpectronaut = function(spec_input, intensity) {
   colnames(spec_input) = .standardizeColnames(colnames(spec_input))
   
