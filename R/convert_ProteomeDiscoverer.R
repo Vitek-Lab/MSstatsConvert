@@ -54,9 +54,12 @@ PDtoMSstatsFormat = function(
 #' @param proteinID_column chr, name of a column with protein IDs.
 #' @param sequence_column chr, name of a column with peptide sequences.
 #' @param filter_num_col lgl, if TRUE, shared peptides will be removed.
+#' @param ... optional, additional parameters to data.table::fread.
+#' @return data.table
+#' @keywords internal
 .cleanRawPD = function(pd_input, quantification_column, proteinID_column,
-                       sequence_column, filter_num_col) {
-    pd_input = .getDataTable(pd_input)
+                       sequence_column, filter_num_col, ...) {
+    pd_input = .getDataTable(pd_input, ...)
     colnames(pd_input) = .standardizeColnames(colnames(pd_input))
     quantification_column = .findAvailable(c("Intensity", "Area"),
                                            colnames(pd_input),

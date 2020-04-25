@@ -31,8 +31,6 @@ SpectronauttoMSstatsFormat = function(
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
   
   .setMSstatsLogger(use_log_file, append, verbose)
-  input = .getDataTable(input)
-  
   annotation = .makeAnnotation(
     annotation, 
     c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
@@ -59,9 +57,11 @@ SpectronauttoMSstatsFormat = function(
 #' Clean raw Spectronaut output.
 #' @param spec_input Spectronaut report or a path to it.
 #' @param intensity chr, specifies which column will be used for Intensity.
+#' @param ... optional, additional parameters to data.table::fread.
 #' @return data.table
 #' @keywords internal
-.cleanRawSpectronaut = function(spec_input, intensity) {
+.cleanRawSpectronaut = function(spec_input, intensity, ...) {
+  spec_input = .getDataTable(spec_input, ...)
   colnames(spec_input) = .standardizeColnames(colnames(spec_input))
   
   spec_input = spec_input[spec_input[["F.FrgLossType"]] == "noloss", ]

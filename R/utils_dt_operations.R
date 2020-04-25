@@ -1,5 +1,6 @@
 #' Read file from a provided path or convert given data.frame to data.table
-#' 
+#' @param input report from a signal processing tool or a path to it
+#' @param ... additional parameters for data.table::fread
 #' @importFrom data.table as.data.table fread
 #' @keywords internal
 .getDataTable = function(input, ...) {

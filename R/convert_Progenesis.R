@@ -44,10 +44,11 @@ ProgenesistoMSstatsFormat = function(
 #' @param prog_input Progenesis report or a path to it.
 #' @param runs chr, vector of Run labels.
 #' @param fix_colnames lgl, if TRUE, one of the rows will be used as colnames.
+#' @param ... optional, additional parameters to data.table::fread.
 #' @return data.table
 #' @keywords internal
-.cleanRawProgenesis = function(prog_input, runs, fix_colnames = TRUE) {
-  prog_input = .getDataTable(prog_input)
+.cleanRawProgenesis = function(prog_input, runs, fix_colnames = TRUE, ...) {
+  prog_input = .getDataTable(prog_input, ...)
   if (fix_colnames) {
     prog_input = prog_input[-(1:2), ]
     colnames(prog_input) = unlist(prog_input[1, ])

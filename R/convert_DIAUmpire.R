@@ -45,14 +45,15 @@ DIAUmpiretoMSstatsFormat = function(
 #' @param pept_input DIAUmpire peptides output or a path to it.
 #' @param prot_input DIAUmpire proteins output or a path to it.
 #' @param use_frag TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.
-#' @param use_peptTRUE will use the selected fragment for each protein 'Selected_peptides' column is required.
+#' @param use_pept TRUE will use the selected fragment for each protein 'Selected_peptides' column is required.
+#' @param ... optional, additional parameters to data.table::fread.
 #' @return data.table
 #' @keywords internal
 .cleanRawDIAUmpire = function(frag_input, pept_input, prot_input,
-                              use_frag, use_pept) {
-    frag_input = .getDataTable(frag_input)
-    pept_input = .getDataTable(pept_input)
-    prot_input = .getDataTable(prot_input)
+                              use_frag, use_pept, ...) {
+    frag_input = .getDataTable(frag_input, ...)
+    pept_input = .getDataTable(pept_input, ...)
+    prot_input = .getDataTable(prot_input, ...)
     colnames(frag_input) = .standardizeColnames(colnames(frag_input))
     colnames(pept_input) = .standardizeColnames(colnames(pept_input))
     colnames(prot_input) = .standardizeColnames(colnames(prot_input))
