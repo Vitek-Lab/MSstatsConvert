@@ -102,3 +102,97 @@ PDtoMSstatsFormat = function(
                                                   sep = "_")
     pd_input[, !(colnames(pd_input) == "PeptideSequence"), with = FALSE]
 }
+
+
+#' Convert Proteome Discoverer output to MSstatsTMT format.
+#' 
+#' @param input PD report or a path to it.
+#' @param annotation annotation with Run, Fraction, TechRepMixture, Mixture, Channel, 
+#' BioReplicate, Condition columns or a path to file. Refer to the example 'annotation' for the meaning of each column.
+#' @param which.proteinid Use 'Proteins'(default) column for protein name. 'Leading.proteins' or 'Leading.razor.proteins' or 'Gene.names' can be used instead to get the protein ID with single protein. However, those can potentially have the shared peptides.
+#' @param useUniquePeptide lgl, if TRUE (default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
+#' @param rmPSM_withMissing_withinRun lgl, if TRUE, will remove PSM with any missing value within each Run. Default is FALSE.
+#' @param rmPSM_withfewMea_withinRun lgl, only for rmPSM_withMissing_withinRun = FALSE. TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
+#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
+#' @param summaryforMultipleRows sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
+#' @return data.table
+#' @export
+#' 
+PDtoMSstatsTMTFormat <- function(
+    input, annotation, which.proteinid = 'Protein.Accessions', 
+    useNumProteinsColumn = TRUE, useUniquePeptide = TRUE, 
+    rmPSM_withMissing_withinRun = FALSE, rmPSM_withfewMea_withinRun = TRUE, 
+    rmProtein_with1Feature = FALSE, summaryforMultipleRows = sum,
+    use_log_file = TRUE, append = TRUE, verbose = TRUE
+) {
+    .setMSstatsLogger(use_log_file, append, verbose)
+    # annotation = .makeAnnotation()
+    # TODO: checks!
+    input = .cleanRawPDTMT(input, remove_shared = useUniquePeptide, protein_ID = which.proteinid)
+    input = .filterExact(input, "numProtein", "1", TRUE, useNumProteinsColumn)
+    feature_cols = c("PeptideSequence", "Charge")
+    input = .removeMissingAllChannels(input, feature_cols)
+    input = .handleSharedPeptides(input, useUniquePeptide)
+    input = .cleanByFeatureTMT(input, feature_cols,
+                               summaryforMultipleRows, rmPSM_withfewMea_withinRun,
+                               rmPSM_withMissing_withinRun)
+    input = .mergeAnnotation(input, annotation)
+    input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, 
+                                           feature_cols)
+    input = .handleFractions(input, annotation)
+    input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+              "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")] # unique?
+}
+
+
+#' Clean raw TMT data from Proteome Discoverer
+#' @param pd_input PD report or a path to it.
+#' @param remove_shared lgl, if TRUE, shared peptides will be removed.
+#' @param protein_ID chr, names of a column with protein names.
+#' @param ... optional, additional parameters for data.table::fread.
+#' @importFrom data.table melt
+#' @return data.table
+#' @keywords internal
+.cleanRawPDTMT = function(pd_input, remove_shared = TRUE, protein_ID = "ProteinAccessions", ...) {
+    pd_input = .getDataTable(pd_input, ...)
+    colnames(pd_input) = .standardizeColnames(colnames(pd_input))
+    colnames(pd_input) = gsub(".", "", colnames(pd_input), fixed = TRUE)
+    protein_ID = gsub(".", "", protein_ID, fixed = TRUE)
+    if (!is.element(protein_ID, colnames(pd_input))) {
+        protein_ID = .findAvailable(c("ProteinAccessions", "MasterProteinAccessions"),
+                                    colnames(pd_input), "ProteinAccessions")
+    }
+    if (protein_ID == "ProteinAccessions") {
+        num_proteins = "XProteins"
+    } else {
+        num_proteins = "XProteinsGroups"
+    }
+    
+    channels = .getChannelColumns(colnames(pd_input), "Abundance")
+    if (length(channels) == 0L) {
+        msg = "There is no channel intensity column in the input data, which should start with 'Abundance'."
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
+    
+    pd_cols = c(protein_ID, num_proteins, "AnnotatedSequence", "Charge", "IonsScore",
+                "SpectrumFile", "QuanInfo", "IsolationInterference", channels)
+    pd_input = pd_input[, pd_cols, with = FALSE]
+    colnames(pd_input) = .updateColnames(pd_input,
+                                         c(protein_ID, num_proteins, "AnnotatedSequence", "SpectrumFile"),
+                                         c("ProteinName", "numProtein", "PeptideSequence", "Run"))
+    pd_input$PSM = paste(pd_input$PeptideSequence, pd_input$Charge,
+                         1:nrow(pd_input), sep = "_")
+    pd_input = melt(pd_input, measure.vars = channels, 
+                    id.vars = setdiff(colnames(pd_input), channels),
+                    variable.name = "Channel", value.name = "Intensity")
+    pd_input$Channel = gsub("Abundance", "", pd_input$Channel)
+    pd_input$Channel = gsub("[:\\.]", "", pd_input$Channel)
+    pd_input = pd_input[(pd_input$ProteinName != "") & (!is.na(pd_input$ProteinName)), ]
+    if (remove_shared) {
+        if ("UNIQUE" %in% toupper(pd_input[["QuanInof"]])) {
+            pd_input = pd_input[toupper(pd_input$QuanInfo) == 'UNIQUE', ]
+        }
+    }
+    pd_input
+}
