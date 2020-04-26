@@ -42,10 +42,11 @@ OpenMStoMSstatsFormat = function(
 
 #' Clean raw output from OpenMS
 #' @param om_input OpenMS report or a path to it.
+#' @param ... optional, additional parameters for data.table::fread.
 #' @return data.table
 #' @keywords internal
-.cleanRawOpenMS = function(om_input) {
-  om_input = .getDataTable(om_input)
+.cleanRawOpenMS = function(om_input, ...) {
+  om_input = .getDataTable(om_input, ...)
   colnames(om_input) = .standardizeColnames(colnames(om_input))
   om_input[["Intensity"]] = as.numeric(om_input[["Intensity"]])
   if (!is.element("IsotopeLabelType", colnames(om_input))) {
@@ -55,4 +56,38 @@ OpenMStoMSstatsFormat = function(
                "FragmentIon", "ProductCharge", "IsotopeLabelType",
                "Condition", "BioReplicate", "Run", "Intensity"),
            with = FALSE]
+}
+
+
+# TODO: modify parameter names 
+OpenMStoMSstatsTMTFormat = function(
+  input, useUniquePeptide = TRUE, rmPSM_withMissing_withinRun = FALSE,
+  rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE,
+  summaryforMultiplePSMs = sum, use_log_file = TRUE, append = TRUE, verbose = TRUE
+) {
+  .setMSstatsLogger(use_log_file, append, verbose)
+  # TODO: all checks
+  input = .cleanRawOpenMSTMT(input)
+  feature_cols = c("PeptideSequence", "Charge", "Reference", "RetentionTime") # THIS used to include protein name and run
+  input = .removeMissingAllChannels(input, feature_cols)
+  input = .handleSharedPeptides(input, useUniquePeptide)
+  input = .cleanByFeatureTMT(input, feature_cols, summaryforMultiplePSMs, 
+                             rmPSM_withfewMea_withinRun, rmPSM_withMissing_withinRun)
+  input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature,
+                                         c("PeptideSequence", "Charge")) # or just PSM
+  input = .handleFractions(input)
+  input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+            "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")]
+}
+
+
+#' Clean raw OpenMS TMT data
+#' @param om_input OpenMS report or a path to it.
+#' @param ... optional, additional parameters for data.table::fread
+#' @return data.table
+#' @keywords internal
+.cleanRawOpenMSTMT = function(om_input, ...) {
+  om_input = .getDataTable(om_input, ...)
+  colnames(om_input) = .standardizeColnames(colnames(om_input))
+  om_input
 }
