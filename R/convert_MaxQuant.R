@@ -55,11 +55,12 @@ MaxQtoMSstatsFormat = function(
 #' @param mq_input evidence file from MaxQuant or a path to it.
 #' @param mq_pg proteinGroups file from MaxQuant or a path to it.
 #' @param protein_id_col chr, name of a column with names of proteins.
+#' @param ... optional, additional parameters for data.table::fread
 #' @return data.table
 #' @keywords internal
-.cleanRawMaxQuant = function(mq_input, mq_pg, protein_id_col) {
-    mq_input = .getDataTable(mq_input)
-    mq_pg = .getDataTable(mq_pg)
+.cleanRawMaxQuant = function(mq_input, mq_pg, protein_id_col, ...) {
+    mq_input = .getDataTable(mq_input, ...)
+    mq_pg = .getDataTable(mq_pg, ...)
     colnames(mq_input) = .standardizeColnames(colnames(mq_input))
     colnames(mq_pg) = .standardizeColnames(colnames(mq_pg))
     filter_cols = c("Contaminant", "Potential.contaminant", 
@@ -96,5 +97,88 @@ MaxQtoMSstatsFormat = function(
         mq_input, 
         c(protein_id, "Modified.sequence", "Charge", "Raw.file"), 
         c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run"))
+    mq_input
+}
+
+
+MaxQtoMSstatsTMTFormat = function(
+    evidence, proteinGroups, annotation, which.proteinid = 'Proteins',
+    rmProt_Only.identified.by.site = FALSE, useUniquePeptide = TRUE,
+    rmPSM_withMissing_withinRun = FALSE, rmPSM_withfewMea_withinRun = TRUE,
+    rmProtein_with1Feature = FALSE, summaryforMultipleRows = sum,
+    use_log_file = TRUE, append = TRUE, verbose = TRUE
+) {
+    .setMSstatsLogger(use_log_file, append, verbose)
+    # CHECKS HERE
+    # annotation = .makeAnnotation(...)
+    input = .cleanRawMaxQuantTMT(evidence)
+    feature_cols = c("PeptideSequence", "Charge")
+    input = .removeMissingAllChannels(input)
+    input = .handleSharedPeptides(input, useUniquePeptide)
+    input = .cleanByFeatureTMT(input, feature_cols, summaryforMultipleRows, 
+                               rmPSM_withfewMea_withinRun, rmPSM_withMissing_withinRun)
+    input = .mergeAnnotation(input, annotation)
+    input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, "PSM")
+    input = .handleFractions(input, annotation)
+    input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+              "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
+    
+}
+
+.cleanRawMaxQuantTMT = function(mq_input, mq_pg, remove_by_site = FALSE,
+                                channel_columns = "Reporter.intensity.corrected",
+                                ...) {
+    mq_input = .getDataTable(mq_input, ...)
+    colnames(mq_input) = .standardizeColnames(colnames(mq_input))
+    mq_pg = .getDataTable(mq_pg, ...)
+    colnames(mq_pg) = .standardizeColnames(colnames(mq_pg))
+    
+    mq_input = .filterManyColumns(mq_input, 
+                                  c("Contaminant", "Potential.contaminant", "Reverse"), 
+                                  "+")
+    msg = "+ Contaminant, + Reverse, + Only.identified.by.site, proteins are removed."
+    getOption("MSstatsLog")("INFO", msg)
+    getOption("MSstatsMsg")("INFO", msg)
+    
+    mq_input = .filterExact(mq_input, "Only.identified.by.site", "+",
+                            is.element("Only.identified.by.site", colnames(mq_input)), 
+                            remove_by_site)
+    msg = "+ Only.identified.by.site are removed."
+    getOption("MSstatsLog")("INFO", msg)
+    getOption("MSstatsMsg")("INFO", msg) # TODO: make this conditional
+    
+    mq_pg = .filterManyColumns(mq_pg, 
+                               c("Contaminant", "Potential.contaminant", "Reverse"), 
+                               "+")
+    mq_pg = .filterExact(mq_pg, "Only.identified.by.site", 
+                         is.element("Only.identified.by.site", 
+                                    colnames(mq_pg)), 
+                         remove_by_site)
+    mq_input$Protein.group.IDs = as.numeric(mq_input$Protein.group.IDs)
+    mq_input = merge(mq_input, 
+                     unique(mq_pg[, .(uniquefromProteinGroups = Protein.IDs,
+                                      Protein.group.IDs = id)]),
+                     by = "Protein.group.IDs") # is unique() necessary? + check this code
+    protein_ID = .findAvailable(c("Proteins", "Leading.proteins", 
+                                  "Leading.razor.protein", "Gene.names"),
+                                colnames(mq_input), "Proteins")
+    channels = .getChannelColumns(colnames(mq_input), channel_columns)
+    mq_input = mq_input[, c(protein_ID, "Modified.sequence", "Charge", "Raw.file",
+                            "Score", channels), with = FALSE]
+    colnames(mq_input) = .updateColnames(mq_input, 
+                                         c(protein_ID, "Modified.sequence", "Raw.file"),
+                                         c("ProteinName", "PeptideSequence", "Run"))
+    mq_input[["PeptideSequence"]] = gsub("_", "", mq_input[["PeptideSequence"]])
+    mq_input$PSM = paste(mq_input$PeptideSequence, 
+                         mq_input$PeptideCharge, 
+                         1:nrow(mq_input),
+                         sep = "_")
+    mq_input = melt(mq_input, measure.vars = channels,
+                    id.vars = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Run", "Score"),
+                    variable.name = "Channel", value.name = "Intensity")
+    mq_input$Channel = gsub(channel_columns, "channel", mq_input$Channel)
+    # mq_input$PSM = paste(mq_input$PeptideSequence, 
+    #                      mq_input$PeptideCharge, 
+    #                      sep = "_")
     mq_input
 }
