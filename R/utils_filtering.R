@@ -103,8 +103,8 @@
 .filterManyColumns = function(input, filter_columns, filter_symbols) {
     for(col in filter_columns) {
         has_col = is.element(col, colnames(input))
-        input = .handleDecoyProteins(input, col, filter_symbols, 
-                                     has_col, has_col)        
+        input = .filterExact(input, col, filter_symbols, 
+                             has_col, has_col)        
     }
     input
 }
