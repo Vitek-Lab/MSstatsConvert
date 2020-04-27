@@ -79,3 +79,19 @@
     col_names = gsub("\\[|\\]|\\%", ".", col_names, fixed = FALSE)
     gsub("#", "X.", col_names, fixed = TRUE)
 }
+
+
+#' Get intensity columns from wide-format data
+#' @param col_names names of columns, where some of the columns store intensity
+#' value for different channels
+#' @param ... varying number of strings that define channel columns.
+#' @return character vector of column names that correspond to channel intensities
+#' @keywords internal
+.getChannelColumns = function(col_names, ...) {
+    all_patterns = unlist(list(...))
+    channel_filter = rep(TRUE, length(col_names))
+    for (pattern in all_patterns) {
+        channel_filter = channel_filter & grepl(pattern, col_names, fixed = TRUE)
+    }
+    col_names[channel_filter]
+}
