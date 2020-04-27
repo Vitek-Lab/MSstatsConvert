@@ -42,7 +42,7 @@ PDtoMSstatsFormat = function(
     input = .mergeAnnotation(input, annotation)
     input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                  "IsotopeLabelType" = "L"))
-    input
+    .MSstatsFormat(input)
 }
 
 
@@ -140,8 +140,9 @@ PDtoMSstatsTMTFormat <- function(
     input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, 
                                            feature_cols)
     input = .handleFractions(input, annotation)
-    input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
-              "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")] # unique?
+    input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+                      "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")] # unique?
+    .MSstatsFormat(input)
 }
 
 

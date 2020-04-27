@@ -22,7 +22,6 @@ SkylinetoMSstatsFormat = function(
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
     # .checkConverterParams()
-    
 
     input = .cleanRawSkyline(input)
     input = .makeAnnotation(input, annotation)
@@ -44,7 +43,7 @@ SkylinetoMSstatsFormat = function(
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                            feature_cols)
     input = .mergeAnnotation(input, annotation)
-    input
+    .MSstatsFormat(input)
 }
 
 

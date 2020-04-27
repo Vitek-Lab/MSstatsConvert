@@ -23,8 +23,9 @@ SpectroMinetoMSstatsTMTFormat <- function(
   input = .mergeAnnotation(input, annotation)
   input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, "PSM")
   input = .handleFractions(input, annotation)
-  input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+  input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
             "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
+  .MSstatsFormat(input)
 }
 
 #' Clean raw SpectroMine TMT data

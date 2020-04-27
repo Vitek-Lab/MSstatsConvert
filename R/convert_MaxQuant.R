@@ -27,7 +27,7 @@ MaxQtoMSstatsFormat = function(
     
     input = .cleanRawMaxQuant(evidence, proteinGroups, proteinID)
     input = .makeAnnotation(input, .getDataTable(annotation), "Run" = "Rawfile")
-        
+    
     input = .handleOxidationPeptides(input, "PeptideSequence", 
                                      "M", removeMpeptides)
     input = .handleOxidationPeptides(input, "Modifications", "Oxidation",
@@ -39,7 +39,7 @@ MaxQtoMSstatsFormat = function(
     input = .mergeAnnotation(input, annotation) 
     input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                  "IsotopeLabelType"  =  "L"))
-    input
+    .MSstatsFormat(input)
 }
 
 
@@ -102,10 +102,10 @@ MaxQtoMSstatsTMTFormat = function(
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
     # .checkConverterParams()
-
+    
     input = .cleanRawMaxQuantTMT(evidence)
     annotation = .makeAnnotation(input, .getDataTable(annotation))
-
+    
     feature_cols = c("PeptideSequence", "Charge")
     input = .removeMissingAllChannels(input)
     input = .handleSharedPeptides(input, useUniquePeptide)
@@ -114,9 +114,9 @@ MaxQtoMSstatsTMTFormat = function(
     input = .mergeAnnotation(input, annotation)
     input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, "PSM")
     input = .handleFractions(input, annotation)
-    input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
-              "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
-    
+    input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+                      "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
+    .MSstatsFormat(input)
 }
 
 .cleanRawMaxQuantTMT = function(mq_input, mq_pg, remove_by_site = FALSE,

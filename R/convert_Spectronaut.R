@@ -37,7 +37,7 @@ SpectronauttoMSstatsFormat = function(
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
   input = .mergeAnnotation(input, annotation)
   input = .fillValues(input, c("IsotopeLabelType" = "L"))
-  input # Convert ProteinName to factor?
+  .MSstatsFormat(input)
 }
 
 

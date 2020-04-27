@@ -31,7 +31,7 @@ OpenMStoMSstatsFormat = function(
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                          feature_cols)
   input = .mergeAnnotation(input, annotation)
-  input
+  .MSstatsFormat(input)
 }
 
 
@@ -72,8 +72,9 @@ OpenMStoMSstatsTMTFormat = function(
   input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature,
                                          c("PeptideSequence", "Charge")) # or just PSM
   input = .handleFractions(input)
-  input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+  input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
             "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")]
+  .MSstatsFormat(input)
 }
 
 

@@ -36,7 +36,7 @@ ProgenesistoMSstatsFormat = function(
   input = .mergeAnnotation(input, annotation)
   input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
-  input
+  .MSstatsFormat(input)
 }
 
 

@@ -37,7 +37,7 @@ DIAUmpiretoMSstatsFormat = function(
     input = .fillValues(input, c("PrecursorCharge" = NA,
                                  "ProductCharge" = NA,
                                  "IsotopeLabelType" = "L"))
-    input
+    .MSstatsFormat(input)
 }
 
 #' Clean raw DIAUmpire files

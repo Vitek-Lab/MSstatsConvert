@@ -36,7 +36,7 @@ OpenSWATHtoMSstatsFormat = function(
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                          feature_cols)
   input = .mergeAnnotation(input, annotation)
-  input
+  .MSstatsFormat(input)
 }
 
 
