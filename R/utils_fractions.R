@@ -73,5 +73,5 @@
     overlapped = merge(overlapped, maximized, by = "feature")
     overlapped = overlapped[overlapped$agg_intensity != overlapped$max_intensity] # drop == !
     # TODO: there is a better pattern for this
-    input[!(input$feature %in% overlapped$feature), ]
+    input[!(input$id %in% overlapped$id), ]
 }
