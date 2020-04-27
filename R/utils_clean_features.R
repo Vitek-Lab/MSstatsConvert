@@ -135,6 +135,7 @@
     input = .filterFewMeasurements(input, 0, remove_few,
                                    c("ProteinName", feature_columns, "Run"))
     input = .aggregatePSMstoPeptideIons(input, feature_columns, summary_function)
+    input$PSM = paste(input$PeptideSequence, input$Charge, sep = "_")
     input
 }
 
