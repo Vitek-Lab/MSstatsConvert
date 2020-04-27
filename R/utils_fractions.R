@@ -63,7 +63,7 @@
 
 
 #' Remove overlapped features
-#' @inheritParams .handleFraction
+#' @inheritParams .handleFractions
 #' @param summary_function summary function (mean, sum, max) that will be used
 #' to pick one feature from multiple overlapping features
 #' @param overlapped_features features that overlap.
