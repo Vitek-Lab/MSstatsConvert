@@ -29,13 +29,10 @@ MaxQtoMSstatsFormat = function(
     proteinID = .isLegalValue(proteinID, 
                               legal_values = c("Proteins", 
                                                "Leading.razor.protein"))
-    annotation = .makeAnnotation(
-        annotation,
-        c("Raw.file" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate",
-          "IsotopeLabelType" = "IsotopeLabelType")
-    )
-    
+
     input = .cleanRawMaxQuant(evidence, proteinGroups, proteinID)
+    input = .makeAnnotation(input, .getDataTable(annotation), "Run" = "Rawfile")
+        
     input = .handleOxidationPeptides(input, "PeptideSequence", 
                                      "M", removeMpeptides)
     input = .handleOxidationPeptides(input, "Modifications", "Oxidation",
@@ -44,10 +41,10 @@ MaxQtoMSstatsFormat = function(
     input = .cleanByFeature(input, c("PeptideSequence", "PrecursorCharge"), summaryforMultipleRows, fewMeasurements)
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide,
                                            c("PeptideSequence", "PrecursorCharge"))
-    input = merge(input, annotation, by = "Run") # by , "IsotopeLabelType?
+    input = .mergeAnnotation(input, annotation) 
     input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                  "IsotopeLabelType"  =  "L"))
-    new("MSstatsValidated", as.data.frame(input)) # Convert ProteinName and PeptideSequence to factor?
+    input
 }
 
 
@@ -109,9 +106,10 @@ MaxQtoMSstatsTMTFormat = function(
     use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
-    # CHECKS HERE
-    # annotation = .makeAnnotation(...)
+
     input = .cleanRawMaxQuantTMT(evidence)
+    annotation = .makeAnnotation(input, .getDataTable(annotation))
+
     feature_cols = c("PeptideSequence", "Charge")
     input = .removeMissingAllChannels(input)
     input = .handleSharedPeptides(input, useUniquePeptide)
@@ -177,8 +175,5 @@ MaxQtoMSstatsTMTFormat = function(
                     id.vars = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Run", "Score"),
                     variable.name = "Channel", value.name = "Intensity")
     mq_input$Channel = gsub(channel_columns, "channel", mq_input$Channel)
-    # mq_input$PSM = paste(mq_input$PeptideSequence, 
-    #                      mq_input$PeptideCharge, 
-    #                      sep = "_")
     mq_input
 }

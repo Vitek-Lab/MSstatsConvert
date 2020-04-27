@@ -31,13 +31,13 @@ SpectronauttoMSstatsFormat = function(
   .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
   
   .setMSstatsLogger(use_log_file, append, verbose)
-  annotation = .makeAnnotation(
-    annotation, 
-    c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
-    input, 
-    c("R.FileName" = "Run", "R.Condition" = "Condition", "R.Replicate" = "BioReplicate")
-  )  
+  # Checks go here
+
   input = .cleanRawSpectronaut(input)
+  annotation = .makeAnnotation(input, .getDataTable(annotation),
+                               "Run" = "RFileName", "Condition" = "RCondition",
+                               "BioReplicate" = "R.Replicate")
+  
   input = .handleFiltering(input, "PG.Qvalue", 0.01, "greater", "fill", NA)
   # TODO: 1. Does 0.01 have to be hard-coded? 2. Explain in documentation that this is protein q-value. 3. Log+message
   input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "greater", "fill", 0, TRUE)
@@ -46,9 +46,7 @@ SpectronauttoMSstatsFormat = function(
   feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature)
-  input = merge(input[, setdiff(colnames(input), 
-                                c("Condition", "BioReplicate")), 
-                      with = FALSE], annotation, by = "Run", all = TRUE)
+  input = .mergeAnnotation(input, annotation)
   input = .fillValues(input, c("IsotopeLabelType" = "L"))
   input # Convert ProteinName to factor?
 }

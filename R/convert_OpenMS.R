@@ -17,16 +17,12 @@ OpenMStoMSstatsFormat = function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
   use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
-  
+  .setMSstatsLogger(use_log_file, append, verbose)
   fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
+
   input = .cleanRawOpenMS(input)
-  
-  annotation = .makeAnnotation(
-    annotation, 
-    c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
-    input
-  )
-  
+  annotation = .makeAnnotation(input, .getDataTable(annotation))
+
   feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon",
                    "ProductCharge")
   input = .handleSharedPeptides(input, useUniquePeptide)
@@ -34,8 +30,7 @@ OpenMStoMSstatsFormat = function(
                           fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                          feature_cols)
-  input = merge(input[, setdiff(colnames(input), c("Condition", "BioReplicate")), 
-                      with = FALSE], annotation, by = "Run")
+  input = .mergeAnnotation(input, annotation)
   input
 }
 

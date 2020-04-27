@@ -21,19 +21,18 @@ DIAUmpiretoMSstatsFormat = function(
     removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
     use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
-    fewMeasurements = .isLegalValue(fewMeasurements, c("keep", "remove"))
-    # TODO: annotation checks
-    
+    .setMSstatsLogger(use_log_file, append, verbose)
+    # all checks
     input = .cleanRawDIAUmpire(raw.frag, raw.pep, raw.pro, useSelectedFrag,
                                useSelectedPep)
-    input = .handleSharedPeptides(input, TRUE) # this function always removes and does it earlier than others
-    # TODO: can I move removing shared peptides here?
+    annotation = .makeAnnotation(input, .getDataTable(annotation))
+    
+    input = .handleSharedPeptides(input, TRUE) # DIA always removes and does it earlier than others, actually
     feature_cols = c("PeptideSequence", "FragmentIon")
     input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, fewMeasurements)
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                            feature_cols)
-    input = merge(input, annotation, by = "Run")
-    
+    input = .mergeAnnotation(input, annotation)
     input = .fillValues(input, c("PrecursorCharge" = NA,
                                  "ProductCharge" = NA,
                                  "IsotopeLabelType" = "L"))

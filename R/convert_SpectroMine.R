@@ -7,9 +7,11 @@ SpectroMinetoMSstatsTMTFormat <- function(
 ) {
   
   .setMSstatsLogger(use_log_file, append, verbose)
-  # annotation = .makeAnnotation() ...
   # TODO: checks go here
+  
   input = .cleanRawSpectroMineTMT(input)
+  annotation = .makeAnnotation(input, annotation)
+  
   input = .handleFiltering(input, "PQ.QValue", 0.01, "smaller", "fill", NA,
                            TRUE,) 
   input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "smaller", "fill", 
@@ -19,7 +21,6 @@ SpectroMinetoMSstatsTMTFormat <- function(
   input = .handleSharedPeptides(input, useUniquePeptide)
   input = .cleanByFeatureTMT(input, feature_cols, summaryforMultipleRows,
                              rmPSM_withfewMea_withinRun, rmPSM_withMissing_withinRun)
-  
   input = .mergeAnnotation(input, annotation)
   input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, "PSM")
   input = .handleFractions(input, annotation)
@@ -59,6 +60,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
   sm_input$Channel = gsub("PSM", "", sm_input$Channel)
   sm_input$Channel = gsub("Raw", "", sm_input$Channel)
   sm_input$Channel = gsub(".", "", sm_input$Channel, fixed = TRUE)
-  sm_input$PSM = paste(sm_input$PeptideSequence, sm_input$Charge, sep = "_")
+  sm_input$PSM = paste(sm_input$PeptideSequence, sm_input$Charge, 
+                       1:nrow(sm_input), sep = "_",)
   sm_input
 }

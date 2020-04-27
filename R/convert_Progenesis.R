@@ -17,13 +17,14 @@ ProgenesistoMSstatsFormat = function(
   removeProtein_with1Peptide = FALSE,
   use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
+  .setMSstatsLogger(use_log_file, append, verbose)
   fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
-  # Check go here
-  annotation = .makeAnnotation(annotation, 
-                               c("Run" = "Run", "Condition" = "Condition",
-                                 "BioReplicate" = "BioReplicate"))
+  # Checks go here
   
-  input = .cleanRawProgenesis(input, runs)
+  annotation = .getDataTable(annotation)
+  input = .cleanRawProgenesis(input, unique(annotation$Run))
+  annotation = .makeAnnotation(input, annotation)
+  
   input = .handleOxidationPeptides(input, "PeptideModifiedSequence", 
                                    "Oxidation", removeOxidationMpeptides)
   input = .handleSharedPeptides(input, useUniquePeptide,
@@ -33,7 +34,7 @@ ProgenesistoMSstatsFormat = function(
                           fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Peptide,
                                          feature_cols)
-  input = merge(input, annotation, by = "Run")
+  input = .mergeAnnotation(input, annotation)
   input = .fillValues(input, c("FragmentIon" = NA, "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
   input

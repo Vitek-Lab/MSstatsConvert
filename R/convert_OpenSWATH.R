@@ -20,14 +20,12 @@ OpenSWATHtoMSstatsFormat = function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
   use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
-  
+  .setMSstatsLogger(use_log_file, append, verbose)
   fewMeasurements = .isLegalValue(fewMeasurements, 
                                   legal_values = c("remove", "keep"))
-  annotation = .makeAnnotation(annotation, 
-                               c("Run" = "Run", "Condition" = "Condition", 
-                                 "BioReplicate" = "BioReplicate"))
-  
   input = .cleanRawOpenSWATH(input)
+  annotation = .makeAnnotation(input, .getDataTable(annotation))
+  
   input = .handleFiltering(input, "m_score", mscore_cutoff, "smaller", "remove")
   input = .filterExact(input, "decoy", 1)
   input = .cleanRawOpenSWATH(input)
@@ -37,7 +35,7 @@ OpenSWATHtoMSstatsFormat = function(
                           fewMeasurements)
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                          feature_cols)
-  input = merge(input, annotation, by = "Run")
+  input = .mergeAnnotation(input, annotation)
   input
 }
 

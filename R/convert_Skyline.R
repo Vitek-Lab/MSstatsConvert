@@ -21,15 +21,12 @@ SkylinetoMSstatsFormat = function(
     use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
-    
     # fewMeasurements = .isLegalValue(fewMeasurements, legal_values = c("remove", "keep"))
     
-    annotation = .makeAnnotation(
-        annotation, 
-        c("Run" = "Run", "Condition" = "Condition", "BioReplicate" = "BioReplicate"),
-        input
-    )
+
     input = .cleanRawSkyline(input)
+    input = .makeAnnotation(input, annotation)
+    
     input = .filterExact(input, "ProteinName", 
                                  c("DECOY", "Decoys"), FALSE)
     input = .filterExact(input, "StandardType", "iRT", FALSE, removeiRT)
@@ -46,7 +43,7 @@ SkylinetoMSstatsFormat = function(
     input = .cleanByFeature(input, feature_cols, max, fewMeasurements)
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                            feature_cols)
-    input = merge(input, annotation, by = "Run")
+    input = .mergeAnnotation(input, annotation)
     input
 }
 
@@ -94,7 +91,8 @@ SkylinetoMSstatsFormat = function(
         input = .summarizeMultipleMeasurements(input, 
                                                function(x) sum(x, na.rm = TRUE),
                                                c("PeptideSequence",
-                                                 "PrecursorCharge"))
+                                                 "PrecursorCharge",
+                                                 "Run")) # or just PeptideSequence and PrecursorCharge?
     }
     getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
     getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
