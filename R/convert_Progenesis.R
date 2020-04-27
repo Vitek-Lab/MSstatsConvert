@@ -18,8 +18,7 @@ ProgenesistoMSstatsFormat = function(
   use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
   .setMSstatsLogger(use_log_file, append, verbose)
-  fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
-  # Checks go here
+  # .checkConverterParams()
   
   annotation = .getDataTable(annotation)
   input = .cleanRawProgenesis(input, unique(annotation$Run))

@@ -18,7 +18,7 @@ OpenMStoMSstatsFormat = function(
   use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
   .setMSstatsLogger(use_log_file, append, verbose)
-  fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
+  # .checkConverterParams()
 
   input = .cleanRawOpenMS(input)
   annotation = .makeAnnotation(input, .getDataTable(annotation))
@@ -61,7 +61,8 @@ OpenMStoMSstatsTMTFormat = function(
   summaryforMultiplePSMs = sum, use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
   .setMSstatsLogger(use_log_file, append, verbose)
-  # TODO: all checks
+  # .checkConverterParams()
+  
   input = .cleanRawOpenMSTMT(input)
   feature_cols = c("PeptideSequence", "Charge", "Reference", "RetentionTime") # THIS used to include protein name and run
   input = .removeMissingAllChannels(input, feature_cols)
@@ -84,5 +85,6 @@ OpenMStoMSstatsTMTFormat = function(
 .cleanRawOpenMSTMT = function(om_input, ...) {
   om_input = .getDataTable(om_input, ...)
   colnames(om_input) = .standardizeColnames(colnames(om_input))
+  om_input$PSM = paste(om_input$PSM, 1:nrow(om_input), sep = "_")
   om_input
 }

@@ -21,8 +21,8 @@ OpenSWATHtoMSstatsFormat = function(
   use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
   .setMSstatsLogger(use_log_file, append, verbose)
-  fewMeasurements = .isLegalValue(fewMeasurements, 
-                                  legal_values = c("remove", "keep"))
+  # .checkConverterParams()
+  
   input = .cleanRawOpenSWATH(input)
   annotation = .makeAnnotation(input, .getDataTable(annotation))
   

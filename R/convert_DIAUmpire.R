@@ -22,7 +22,8 @@ DIAUmpiretoMSstatsFormat = function(
     use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
-    # all checks
+    # .checkConverterParams()
+    
     input = .cleanRawDIAUmpire(raw.frag, raw.pep, raw.pro, useSelectedFrag,
                                useSelectedPep)
     annotation = .makeAnnotation(input, .getDataTable(annotation))

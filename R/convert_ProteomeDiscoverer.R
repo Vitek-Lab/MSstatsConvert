@@ -24,8 +24,7 @@ PDtoMSstatsFormat = function(
     use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
-    fewMeasurements = .isLegalValue(fewMeasurements, 
-                                    legal_values = c("remove", "keep"))
+    # .checkConverterParams()
     
     input = .cleanRawPD(input, which.proteinid, which.quantification, 
                         which.sequence, useNumProteinsColumn)
@@ -125,7 +124,7 @@ PDtoMSstatsTMTFormat <- function(
     use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
-    # TODO: checks!
+    # .checkConverterParams()
     
     input = .cleanRawPDTMT(input, remove_shared = useUniquePeptide, protein_ID = which.proteinid)
     annotation = .makeAnnotation(input, .getDataTable(annotation))

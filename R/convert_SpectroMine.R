@@ -5,9 +5,8 @@ SpectroMinetoMSstatsTMTFormat <- function(
   rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE,
   summaryforMultipleRows = sum, use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
-  
   .setMSstatsLogger(use_log_file, append, verbose)
-  # TODO: checks go here
+  # .checkConverterParams()
   
   input = .cleanRawSpectroMineTMT(input)
   annotation = .makeAnnotation(input, annotation)

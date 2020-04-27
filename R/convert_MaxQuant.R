@@ -22,14 +22,9 @@ MaxQtoMSstatsFormat = function(
     removeOxidationMpeptides = FALSE, removeProtein_with1Peptide = FALSE,
     use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
-    
     .setMSstatsLogger(use_log_file, append, verbose)
-    fewMeasurements = .isLegalValue(fewMeasurements, 
-                                    legal_values = c("remove", "keep"))
-    proteinID = .isLegalValue(proteinID, 
-                              legal_values = c("Proteins", 
-                                               "Leading.razor.protein"))
-
+    # .checkConverterParams()
+    
     input = .cleanRawMaxQuant(evidence, proteinGroups, proteinID)
     input = .makeAnnotation(input, .getDataTable(annotation), "Run" = "Rawfile")
         
@@ -106,6 +101,7 @@ MaxQtoMSstatsTMTFormat = function(
     use_log_file = TRUE, append = TRUE, verbose = TRUE
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
+    # .checkConverterParams()
 
     input = .cleanRawMaxQuantTMT(evidence)
     annotation = .makeAnnotation(input, .getDataTable(annotation))

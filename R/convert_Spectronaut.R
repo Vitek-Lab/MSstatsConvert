@@ -19,19 +19,8 @@ SpectronauttoMSstatsFormat = function(
   removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
   use_log_file = TRUE, append = FALSE, verbose = TRUE
 ) {
-  
-  fewMeasurements = .isLegalValue(fewMeasurements, c("remove", "keep"))
-  intensity = .isLegalValue(intensity, c("PeakArea", "NormalizedPeakArea"))
-  .checkColumns("Input", 
-                c("F.FrgLossType", "F.ExcludedFromQuantification",
-                  "PG.ProteinGroups", "EG.ModifiedSequence", "FG.Charge",
-                  "F.FrgIon", "R.FileName", "EG.Qvalue"), colnames(input))
-  .checkColumns("Input", c("F.PeakArea", "F.NormalizedPeakArea"), 
-                colnames(input), "optional")
-  .checkColumns("Input", c("F.Charge", "F.FrgZ"), colnames(input), "optional")
-  
   .setMSstatsLogger(use_log_file, append, verbose)
-  # Checks go here
+  # .checkConverterParams()
 
   input = .cleanRawSpectronaut(input)
   annotation = .makeAnnotation(input, .getDataTable(annotation),
