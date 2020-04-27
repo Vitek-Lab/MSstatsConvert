@@ -4,6 +4,7 @@
 #' @param ... key-value pairs, where keys are names of columns of `annotation` 
 .makeAnnotation = function(input, annotation, ...) {
     all_columns = unlist(list(...))
+    colnames(annotation) = .standardizeColnames(annotation)
     annotation = .updateColnames(annotation, 
                                  unname(all_columns),
                                  names(all_columns))
