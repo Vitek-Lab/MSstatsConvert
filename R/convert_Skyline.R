@@ -22,12 +22,12 @@ SkylinetoMSstatsFormat = function(
 ) {
     .setMSstatsLogger(use_log_file, append, verbose)
     # .checkConverterParams()
-
+    
     input = .cleanRawSkyline(input)
-    input = .makeAnnotation(input, annotation)
+    annotation = .makeAnnotation(input, annotation)
     
     input = .filterExact(input, "ProteinName", 
-                                 c("DECOY", "Decoys"), FALSE)
+                         c("DECOY", "Decoys"), FALSE)
     input = .filterExact(input, "StandardType", "iRT", FALSE, removeiRT)
     input = .handleOxidationPeptides(input, "PeptideSequence", "+16", 
                                      removeOxidationMpeptides)
@@ -35,14 +35,15 @@ SkylinetoMSstatsFormat = function(
     input = .handleFiltering(input, "Truncated", 0L, "smaller", "fill", NA_real_)
     input = .handleIsotopicPeaks(input)
     input = .handleFiltering(input, "DetectionQValue", qvalue_cutoff, "smaller", 
-                             "fill", 0.01, FALSE, filter_with_Qvalue)
+                             "fill", 0, TRUE, filter_with_Qvalue)
     # TODO: conditionally check if DetectionQValue is in the input at the beginning
-    feature_cols = c("PeptideSequence", "PrecursorCharge", 
-                     "FragmentIon", "ProductCharge")
+    feature_cols = c("PeptideSequence", "PrecursorCharge")
     input = .cleanByFeature(input, feature_cols, max, fewMeasurements)
     input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                            feature_cols)
     input = .mergeAnnotation(input, annotation)
+    input = .fillValues(input, c("ProductCharge" = NA, "IsotopeLabelType" = "L",
+                                 "FragmentIon" = "sum"))
     .MSstatsFormat(input)
 }
 
@@ -76,8 +77,8 @@ SkylinetoMSstatsFormat = function(
                 "BioReplicate", "Run", "Intensity", "StandardType")
     sl_cols = c(sl_cols, "Fraction", "DetectionQValue", "Truncated")
     sl_input = sl_input[, intersect(sl_cols, colnames(sl_input)), with = FALSE]
-    sl_input[, setdiff(colnames(sl_input), c("Condition", "BioReplicate")), 
-             with = FALSE]
+    non_missing = sapply(sl_input, function(x) !all(is.na(x))) | colnames(sl_input) == "StandardType"
+    sl_input[, non_missing, with = FALSE]
 }
 
 
@@ -89,7 +90,8 @@ SkylinetoMSstatsFormat = function(
     if (.checkDDA(input)) {
         input = .summarizeMultipleMeasurements(input, 
                                                function(x) sum(x, na.rm = TRUE),
-                                               c("PeptideSequence",
+                                               c("ProteinName",
+                                                 "PeptideSequence",
                                                  "PrecursorCharge",
                                                  "Run")) # or just PeptideSequence and PrecursorCharge?
     }
