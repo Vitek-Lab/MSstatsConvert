@@ -30,7 +30,7 @@ PDtoMSstatsFormat = function(
                         which.sequence, useNumProteinsColumn)
     annotation = .makeAnnotation(input, annotation)
     
-    feature_cols = c("PeptideModifiedSequence", "PrecursorCharge", "FragmentIon")
+    feature_cols = c("PeptideModifiedSequence", "PrecursorCharge") # +, "FragmentIon"?
     input = .handleOxidationPeptides(input, "PeptideModifiedSequence", 
                                      "Oxidation", removeOxidationMpeptides)
     input = .handleSharedPeptides(input, useUniquePeptide,
@@ -68,7 +68,8 @@ PDtoMSstatsFormat = function(
     #                                      message = "Please select a column to be used for quantified intensities among four options: ")
     
     proteinID_column = .findAvailable(c("Protein.Accessions", 
-                                        "Master.Protein.Accessions"),
+                                        "Master.Protein.Accessions",
+                                        "Protein.Group.Accessions"),
                                       colnames(pd_input),
                                       proteinID_column)
     # which.proteinid = .isLegalValue(which.proteinid, 
@@ -76,16 +77,16 @@ PDtoMSstatsFormat = function(
     #                                                  "Master.Protein.Accessions",
     #                                                  "Protein.Group.Accessions"),
     #                                 message = "Please select a column to be used as protein IDs among three options: ")
-    sequence_column = .findAvailable("Annotated.Sequence", colnames(pd_input), 
+    sequence_column = .findAvailable(c("Sequence", "Annotated.Sequence"), colnames(pd_input), 
                                      sequence_column)
     # which.sequence = .isLegalValue(which.sequence, 
     #                                legal_values = c("Annotated.Sequence", "Sequence"),
     #                                message = "Please select peptide sequence column between two options: ")
     
-    if(filter_num_col) {
-        pd_input = pd_input[pd_input[["X..Proteins"]] == '1', ]
+    if (filter_num_col) {
+        pd_input = pd_input[X..Proteins == "1", ]
     }
-    pd_cols = c(proteinID_column, "X..Proteins", sequence_column, 
+    pd_cols = c(proteinID_column, sequence_column, 
                 "Modifications", "Charge", "Spectrum.File", quantification_column)
     if (any(is.element(colnames(pd_input), "Fraction"))) {
         pd_cols = c(pd_cols, "Fraction")
@@ -93,12 +94,12 @@ PDtoMSstatsFormat = function(
     pd_input = pd_input[, pd_cols, with = FALSE]
     colnames(pd_input) = .updateColnames(
         pd_input,
-        c(proteinID_column, sequence_column, "Spectrum.File", quantification_column),
-        c("ProteinName", "PeptideSequence", "Run", "Intensity"))
+        c(proteinID_column, sequence_column, "Spectrum.File", quantification_column, "Charge"),
+        c("ProteinName", "PeptideSequence", "Run", "Intensity", "PrecursorCharge"))
     pd_input[["PeptideModifiedSequence"]] = paste(pd_input[["PeptideSequence"]], 
                                                   pd_input[["Modifications"]], 
                                                   sep = "_")
-    pd_input[, !(colnames(pd_input) == "PeptideSequence"), with = FALSE]
+    pd_input[, !(colnames(pd_input) %in% c("PeptideSequence", "Modifications")), with = FALSE]
 }
 
 
@@ -129,7 +130,6 @@ PDtoMSstatsTMTFormat <- function(
     input = .cleanRawPDTMT(input, remove_shared = useUniquePeptide, protein_ID = which.proteinid)
     annotation = .makeAnnotation(input, .getDataTable(annotation))
     
-    input = .filterExact(input, "numProtein", "1", TRUE, useNumProteinsColumn)
     feature_cols = c("PeptideSequence", "Charge")
     input = .removeMissingAllChannels(input, feature_cols)
     input = .handleSharedPeptides(input, useUniquePeptide)
@@ -139,7 +139,7 @@ PDtoMSstatsTMTFormat <- function(
     input = .mergeAnnotation(input, annotation)
     input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, 
                                            feature_cols)
-    input = .handleFractions(input, annotation)
+    input = .handleFractions(input)
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")] # unique?
     .MSstatsFormat(input)
