@@ -4,7 +4,7 @@
 #' @importFrom data.table as.data.table fread
 #' @keywords internal
 .getDataTable = function(input, ...) {
-    if (is.data.frame(input)) {
+    if (inherits(input, "data.frame")) {
         as.data.table(input)
     } else {
         data.table::fread(input, showProgress = FALSE, ...)
@@ -22,9 +22,9 @@
 .updateColnames = function(input, old_names, new_names) {
     column_update = new_names
     names(column_update) = old_names
-    columns <- colnames(input)
-    not_changing <- setdiff(columns, names(column_update))
-    column_update[not_changing] <- not_changing
+    columns = colnames(input)
+    not_changing = setdiff(columns, names(column_update))
+    column_update[not_changing] = not_changing
     unname(column_update[columns])
 }
 
