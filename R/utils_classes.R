@@ -19,8 +19,3 @@ setClass("MSstatsTMT", contains = "MSstatsValidated")
         }
     }
 }
-
-
-is(.MSstatsFormat(input))
-is.data.frame(.MSstatsFormat(input))
-inherits(.MSstatsFormat(input), "data.frame")
