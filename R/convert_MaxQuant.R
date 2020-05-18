@@ -26,7 +26,7 @@ MaxQtoMSstatsFormat = function(
     # .checkConverterParams()
     
     input = .cleanRawMaxQuant(evidence, proteinGroups, proteinID)
-    input = .makeAnnotation(input, .getDataTable(annotation), "Run" = "Rawfile")
+    annotation = .makeAnnotation(input, .getDataTable(annotation), "Run" = "Rawfile")
     
     input = .handleOxidationPeptides(input, "PeptideSequence", 
                                      "M", removeMpeptides)
@@ -113,7 +113,7 @@ MaxQtoMSstatsTMTFormat = function(
                                rmPSM_withfewMea_withinRun, rmPSM_withMissing_withinRun)
     input = .mergeAnnotation(input, annotation)
     input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, "PSM")
-    input = .handleFractions(input, annotation)
+    input = .handleFractions(input)
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
     .MSstatsFormat(input)
