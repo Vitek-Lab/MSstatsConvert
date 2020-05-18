@@ -33,19 +33,15 @@
 #' @return data.table
 #' @keywords internal
 .summarizeMultipleMeasurements = function(input, aggregator, feature_columns) {
-    counts = input[, ("n_obs" = length("Intensity")), 
-                   by = feature_columns]
-    if(any(counts[["n_obs"]] > length(unique(input[["Run"]])))) {
-        input = merge(input[, .(Intensity = aggregator(Intensity)), 
-                            by = c("Run", feature_columns), with = FALSE],
-                      input[, -which(colnames(input) == "Intensity"), 
-                            with = FALSE],
-                      by = c("Run", feature_columns)
-        )
-        getOption("MSstatsLog")("INFO", "Multiple measurements per run are aggregated")
-        getOption("MSstatsMsg")("INFO", "Multiple measurements per run are aggregated")
-    }
-    input
+    info = unique(input[, intersect(colnames(input), 
+                                c("StandardType", "ProteinName", 
+                                  "PeptideModifiedSequence",
+                                  "PeptideSequence", "PrecursorCharge",
+                                  "IsotopeLabelType")), 
+                    with = FALSE])
+    feature_columns = c(feature_columns, "Run")
+    input = input[, .(Intensity = sum(Intensity, na.rm = TRUE)), by = feature_columns]
+    merge(input, info, by = intersect(colnames(input), colnames(info)))
 }
 
 #' A set of common operations for converters: remove few features and aggregate
