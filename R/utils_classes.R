@@ -1,11 +1,18 @@
+setOldClass("data.frame")
+
 setClass("MSstatsValidated", contains = "data.frame")
+setOldClass("MSstatsValidated", S4Class = "MSstatsValidated")
 
 setClass("MSstatsLabelFree", contains = "MSstatsValidated")
+setOldClass("MSstatsLabelFree", S4Class = "MSstatsLabelFree")
 
 setClass("MSstatsLabeled", contains = "MSstatsValidated")
 
 setClass("MSstatsTMT", contains = "MSstatsValidated")
 
+
+#' @importFrom methods new
+#' @keywords internal
 .MSstatsFormat = function(input) {
     if (is.element("Channel", colnames(input))) {
         new("MSstatsTMT", new("MSstatsValidated", as.data.frame(input)))
