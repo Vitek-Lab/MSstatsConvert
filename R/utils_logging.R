@@ -22,7 +22,7 @@
     path = paste0("./MSstats_log_", gsub("[ :\\-]", "_", time_now), ".log")
     
     if (is.null(logs)) {
-        ms_logs = file_appender(path, append = TRUE)
+        ms_logs = file_appender(path)
         options(MSstatsLog = ms_logs)
     }
     if (is.null(msgs)) {
@@ -49,7 +49,7 @@
         if (append) {
             msstats_logs = sort(list.files(".", "MSstats_log"),
                                 decreasing = TRUE)
-            if(length(msstats_logs) > 0) {
+            if (length(msstats_logs) > 0) {
                 options(MSstatsLog = file_appender(msstats_logs[1], 
                                                    append = TRUE))
             }
