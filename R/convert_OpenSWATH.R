@@ -26,9 +26,9 @@ OpenSWATHtoMSstatsFormat = function(
   input = .cleanRawOpenSWATH(input)
   annotation = .makeAnnotation(input, .getDataTable(annotation))
   
+  # TODO: check the existence of m_score column earlier
   input = .handleFiltering(input, "m_score", mscore_cutoff, "smaller", "remove")
   input = .filterExact(input, "decoy", 1)
-  input = .cleanRawOpenSWATH(input)
   input = .handleSharedPeptides(input, useUniquePeptide)
   feature_cols = c("PeptideSequence", "PrecursorCharge", "FragmentIon")
   input = .cleanByFeature(input, feature_cols, summaryforMultipleRows,
@@ -36,6 +36,7 @@ OpenSWATHtoMSstatsFormat = function(
   input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
                                          feature_cols)
   input = .mergeAnnotation(input, annotation)
+  input = .fillValues(input, c("ProductCharge" = NA, "IsotopeLabelType" = "L"))
   .MSstatsFormat(input)
 }
 
@@ -47,19 +48,21 @@ OpenSWATHtoMSstatsFormat = function(
 #' @keywords internal
 .cleanRawOpenSWATH = function(os_input, ...) {
   os_input = .getDataTable(os_input, ...)
+  colnames(os_input) = .standardizeColnames(colnames(os_input))
   colnames(os_input) = .updateColnames(
     os_input,
-    c("FullPeptideName", "Charge", "filename"),
-    c("PeptideSequence", "PrecursorCharge", "Run"))
-  os_input = os_input[, lapply(.(aggr_Fragment_Annotation, aggr_Peak_Area), 
+    c("FullPeptideName", "Charge", "filename", "aggr_Fragment_Annotation", "aggr_Peak_Area"),
+    c("PeptideSequence", "PrecursorCharge", "Run", "FragmentIon", "Intensity"))
+  os_input = os_input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+                          "Run", "FragmentIon", "Intensity",
+                          "m_score", "decoy"), with = FALSE]
+  os_input = os_input[, lapply(.SD, 
                                function(x) unlist(tstrsplit(x, ";", fixed = TRUE))),
-                      by = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run")]
-  colnames(os_input) = .updateColnames(os_input, c("V1", "V2"), 
-                                       c("FragmentIon", "Intensity"))
-  os_input[, c("PeptideSequence", "FragmentIon")] = os_input[, lapply(.(PeptideSequence, FragmentIon), 
+                      by = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run", "m_score", "decoy"),
+                      .SDcols = c("FragmentIon", "Intensity")]
+  os_input[, c("PeptideSequence", "FragmentIon")] = os_input[, lapply(.(PeptideSequence, FragmentIon),
                                                                    function(x) gsub(":", "_", x))]
   os_input[["Intensity"]] = as.numeric(os_input[["Intensity"]])
   os_input[os_input[["Intensity"]] < 1, "Intensity"] = NA
-  os_input = .fillValues(os_input, c("ProductCharge" = NA, "IsotopeLabelType" = "L"))
   os_input
 }
