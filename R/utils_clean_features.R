@@ -96,9 +96,9 @@
 #' @keywords internal
 .removeMissingAllChannels = function(input, feature_columns) {
     cols = c("ProteinName", feature_columns, "Run")
-    non_missing = input[, .(AllMissing = all(is.na(Intensity)) | all(Intensity == 0)),
+    non_missing = input[, .(NotAllMissing = !(all(is.na(Intensity)) | all(Intensity == 0))),
                         by = cols]
-    non_missing = non_missing[!non_missing$AllMissing, cols, with = FALSE]
+    non_missing = non_missing[(NotAllMissing), cols, with = FALSE]
     input = merge(input, non_missing, by = cols)
     msg = "PSMs, that have all zero intensities across channels in each run, are removed."
     getOption("MSstatsLog")("INFO", msg)
@@ -129,7 +129,7 @@
     input = .removeAnyMissingInRun(input, feature_columns, remove_any_missing)
     # TODO: MSstats had a threshold on Intensity - is it not necessary here?
     input = .filterFewMeasurements(input, 0, remove_few,
-                                   c("ProteinName", feature_columns, "Run"))
+                                   unique(c("ProteinName", feature_columns, "Run")))
     input = .aggregatePSMstoPeptideIons(input, feature_columns, summary_function)
     input$PSM = paste(input$PeptideSequence, input$Charge, sep = "_")
     input
@@ -149,24 +149,26 @@
 .aggregatePSMstoPeptideIons <- function(input, feature_columns, summary_function = sum) {
     feature_columns = cols = c("ProteinName", feature_columns, "Run")
     n_channels = length(unique(input$Channel))
-    cols = intersect(colnames(duplicated),
-                     c("Feature", "PSM", "Channel", "Intensity", "Run", "Score",
-                       "IsolationInterference", "IonsScore"))
     
     counts = input[, .(n_measurements = .N),
                    by = feature_columns]
     duplicated = counts[counts$n_measurements > n_channels, ]
-    not_duplicated = merge(input, counts[counts$n_measurements == n_channels, 
+    not_duplicated = merge(input, counts[counts$n_measurements <= n_channels, 
                                          feature_columns, with = FALSE],
                            by = feature_columns)
     duplicated = merge(input, duplicated[, feature_columns, with = FALSE], 
                        by = feature_columns)
     duplicated[, Feature := do.call(".combine", .SD), 
                .SDcols = feature_columns]
+    
+    cols = intersect(colnames(duplicated),
+                     c("Feature", "PSM", "Channel", "Intensity", "Run", "Score",
+                       "IsolationInterference", "IonsScore"))
     duplicated[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
-               by = "Feature", .SDcols = cols]
+               by = "", .SDcols = cols]
     duplicated = duplicated[duplicated$PSM == duplicated$keep, 
-                            colnames(duplicated) != "keep"]
+                            !(colnames(duplicated) %in% c("keep", "Feature")), 
+                            with = FALSE]
     input = rbind(duplicated, not_duplicated)
     
     msg = "PSMs have been aggregated to peptide ions."
