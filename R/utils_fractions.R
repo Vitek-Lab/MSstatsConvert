@@ -40,7 +40,7 @@
                 }
             }
         }
-        unoverlapped_list[[technical_run]] = single_run[, !(colnames %in% c("feature", "techrun", "id")),
+        unoverlapped_list[[technical_run]] = single_run[, !(colnames(single_run) %in% c("feature", "techrun", "id")),
                                                         with = FALSE]
         msg = paste("For peptides overlapped between fractions of",
                     technical_run, "use the fraction with maximal average abundance.")
