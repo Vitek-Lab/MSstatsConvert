@@ -176,8 +176,9 @@ PDtoMSstatsTMTFormat <- function(
         stop(msg)
     }
     
-    pd_cols = c(protein_ID, num_proteins, "AnnotatedSequence", "Charge", "IonsScore",
-                "SpectrumFile", "QuanInfo", "IsolationInterference", channels)
+    pd_cols = intersect(c(protein_ID, num_proteins, "AnnotatedSequence", "Charge", "IonsScore",
+                          "SpectrumFile", "QuanInfo", "IsolationInterference", channels),
+                        colnames(pd_input))
     pd_input = pd_input[, pd_cols, with = FALSE]
     colnames(pd_input) = .updateColnames(pd_input,
                                          c(protein_ID, num_proteins, "AnnotatedSequence", "SpectrumFile"),
