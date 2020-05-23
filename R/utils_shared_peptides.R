@@ -10,7 +10,7 @@
     protein_counts = unique_pairs[, .(count = .N), by = peptide_column]
     protein_counts = protein_counts[protein_counts$count == 1L, 
                                     peptide_column, with = FALSE]
-    merge(input, protein_counts)
+    merge(input, protein_counts, sort = FALSE)[, colnames(input), with = FALSE]
 }
 
 #' Handle shared peptides.
