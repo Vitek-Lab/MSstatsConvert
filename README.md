@@ -1,6 +1,7 @@
 # MSstats development version
 
 <!-- badges: start -->
+[![Travis build status](https://travis-ci.org/Vitek-Lab/MSstatsConvert.svg?branch=master)](https://travis-ci.org/Vitek-Lab/MSstatsConvert)
 <!-- badges: end -->
 
 [MSstats](https://msstats.org) is an R-based/Bioconductor package for statistical relative quantification of peptides and proteins in mass spectrometry-based proteomic experiments. 
