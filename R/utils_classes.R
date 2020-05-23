@@ -7,7 +7,6 @@ setClass("MSstatsLabelFree", contains = "MSstatsValidated")
 setOldClass("MSstatsLabelFree", S4Class = "MSstatsLabelFree")
 
 setClass("MSstatsLabeled", contains = "MSstatsValidated")
-
 setClass("MSstatsTMT", contains = "MSstatsValidated")
 
 
@@ -17,12 +16,19 @@ setClass("MSstatsTMT", contains = "MSstatsValidated")
     if (is.element("Channel", colnames(input))) {
         new("MSstatsTMT", new("MSstatsValidated", as.data.frame(input)))
     } else {
-        if (length(unique(input$IsotopeLabelType)) == 1L) {
-            new("MSstatsLabelFree", new("MSstatsValidated", 
-                                        as.data.frame(input)))
-        } else {
-            new("MSstatsLabeled", new("MSstatsValidated", 
-                                      as.data.frame(input)))
+        if (is.element("IsotopeLabelType", colnames(input))) {
+            if (length(unique(input$IsotopeLabelType)) == 1L) {
+                new("MSstatsLabelFree", new("MSstatsValidated", 
+                                            as.data.frame(input)))
+            } else {
+                new("MSstatsLabeled", new("MSstatsValidated", 
+                                          as.data.frame(input)))
+            }
+        }
+        else {
+            msg = "Incorrect data format: missing isotope label information"
+            getOption("MSstatsLog")("ERROR", msg)
+            stop(msg)
         }
     }
 }
