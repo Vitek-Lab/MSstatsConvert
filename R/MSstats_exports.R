@@ -119,12 +119,13 @@ MaxQtoMSstatsTMTFormat = function(
                          remove_by_site = rmProt_Only.identified.by.site,
                          channel_columns = "Reporter.intensity.corrected")
     annotation = .makeAnnotation(input, annotation)
+    few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
     input = MSstatsPreprocess(
         input, annotation, 
         feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
-        remove_single_feature_proteins = rmProtein_with1Feature,
+        remove_single_feature_proteins = few_measurements,
         list(handle_features_with_few_measurements = rmPSM_withfewMea_withinRun,
              summarize_multiple_psms = summaryforMultipleRows,
              remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
@@ -192,13 +193,14 @@ OpenMStoMSstatsTMTFormat = function(
     input = MSstatsImport(list(input = input), "MSstats", "OpenMS", ...)
     input = MSstatsClean(input)
     annotation = .makeAnnotation(input, .getDataTable(annotation))
+    few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
     input = MSstatsPreprocess(
         input, annotation, 
         feature_columns = c("PeptideSequence", "Charge", "Reference", "RetentionTime"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
-        list(handle_features_with_few_measurements = rmPSM_withfewMea_withinRun,
+        list(handle_features_with_few_measurements = few_measurements,
              summarize_multiple_psms = summaryforMultiplePSMs,
              remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
     )
@@ -377,12 +379,13 @@ PDtoMSstatsTMTFormat <- function(
                          remove_shared = useNumProteinsColumn)
     annotation = .makeAnnotation(input, annotation)
     
+    few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     input = MSstatsPreprocess(
         input, annotation, 
         feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
-        feature_cleaning = list(handle_features_with_few_measurements = rmPSM_withfewMea_withinRun,
+        feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows,
                                 remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
     )
@@ -479,6 +482,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
     input = MSstatsClean(input)
     annotation = .makeAnnotation(input, annotation)
     
+    few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     pq_filter = list(score_column = "PGQValue", score_threshold = 0.01, 
                      direction = "smaller", behavior = "fill", 
                      handle_na = "keep", fill_value = NA,
@@ -494,7 +498,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         score_filtering = list(pgq = pq_filter, psm_q = qval_filter),
-        feature_cleaning = list(handle_features_with_few_measurements = rmPSM_withfewMea_withinRun,
+        feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows,
                                 remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
     )
