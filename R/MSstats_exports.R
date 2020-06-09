@@ -23,7 +23,8 @@ DIAUmpiretoMSstatsFormat = function(
     input = MSstatsImport(list(Fragments = raw.frag, Peptides = raw.pep, 
                                Proteins = raw.pro), 
                           type = "MSstats", tool = "DIAUmpire", ...)
-    input = MSstatsClean(input, useSelectedFrag, useSelectedPep)
+    input = MSstatsClean(input, use_frag = useSelectedFrag, 
+                         use_pept = useSelectedPep)
     annotation = .makeAnnotation(input, .getDataTable(annotation))
     input = MSstatsPreprocess(input, annotation,
                               c("PeptideSequence", "FragmentIon"),

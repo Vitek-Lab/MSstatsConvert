@@ -11,7 +11,7 @@
     prot_input = getInputFile(msstats_object, "Proteins")
 
     if (!is.element("Selected_fragments", pept_input) | 
-        !is.element("Selected_fragments", prot_input)) {
+        !is.element("Selected_fragments", frag_input)) {
         msg = "Selected_fragments column is required. Please check it."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
