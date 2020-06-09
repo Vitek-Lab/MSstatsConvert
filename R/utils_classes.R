@@ -7,7 +7,9 @@ setClass("MSstatsLabelFree", contains = "MSstatsValidated")
 setOldClass("MSstatsLabelFree", S4Class = "MSstatsLabelFree")
 
 setClass("MSstatsLabeled", contains = "MSstatsValidated")
+setOldClass("MSstatsLabeled", S4Class = "MSstatsLabeled")
 setClass("MSstatsTMT", contains = "MSstatsValidated")
+setOldClass("MSstatsTMT", S4Class = "MSstatsTMT")
 
 
 #' @importFrom methods new
