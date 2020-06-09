@@ -11,7 +11,7 @@
 merged with annotation.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Check if there are overlapping features and remove if needed

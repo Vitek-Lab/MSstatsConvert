@@ -11,7 +11,7 @@
 merged with annotation.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Remove peptide ions overlapped among multiple fractions of the same biological mixture

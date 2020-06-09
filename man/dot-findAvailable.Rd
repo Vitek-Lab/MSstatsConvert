@@ -20,3 +20,4 @@ same as option_set, usually character
 \description{
 Select an available options from a set of possibilities
 }
+\keyword{internal}

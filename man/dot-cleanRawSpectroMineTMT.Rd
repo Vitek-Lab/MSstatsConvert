@@ -4,15 +4,13 @@
 \alias{.cleanRawSpectroMineTMT}
 \title{Clean raw SpectroMine TMT data}
 \usage{
-.cleanRawSpectroMineTMT(sm_input, ...)
+.cleanRawSpectroMineTMT(msstats_object)
 }
 \arguments{
-\item{sm_input}{SpectroMine report or a path to it.}
-
-\item{...}{optional, additional parameters for data.table::fread}
+\item{msstats_object}{an object of class \code{MSstatsSpectroMineFiles}.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Clean raw SpectroMine TMT data

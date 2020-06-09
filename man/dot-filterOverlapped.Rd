@@ -16,7 +16,7 @@ to pick one feature from multiple overlapping features}
 \item{overlapped_features}{features that overlap.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Remove overlapped features

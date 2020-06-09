@@ -5,23 +5,20 @@
 \title{Clean raw TMT data from Proteome Discoverer}
 \usage{
 .cleanRawPDTMT(
-  pd_input,
+  msstats_object,
   remove_shared = TRUE,
-  protein_ID = "ProteinAccessions",
-  ...
+  protein_id_column = "ProteinAccessions"
 )
 }
 \arguments{
-\item{pd_input}{PD report or a path to it.}
+\item{msstats_object}{an object of class \code{MSstatsSpectroMineFiles}.}
 
 \item{remove_shared}{lgl, if TRUE, shared peptides will be removed.}
 
-\item{protein_ID}{chr, names of a column with protein names.}
-
-\item{...}{optional, additional parameters for data.table::fread.}
+\item{protein_id_column}{chr, name of a column with protein IDs.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Clean raw TMT data from Proteome Discoverer

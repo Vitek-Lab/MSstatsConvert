@@ -7,7 +7,7 @@
 .filterFewMeasurements(input, min_intensity, handle_few, feature_columns)
 }
 \arguments{
-\item{input}{data.table pre-processed by one of the .cleanRaw* functions.}
+\item{input}{\code{data.table} pre-processed by one of the .cleanRaw* functions.}
 
 \item{min_intensity}{minimum intensity that will be considered non-missing.}
 

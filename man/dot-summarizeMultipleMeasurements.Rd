@@ -7,14 +7,14 @@
 .summarizeMultipleMeasurements(input, aggregator, feature_columns)
 }
 \arguments{
-\item{input}{data.table pre-processed by one of the .cleanRaw* functions.}
+\item{input}{\code{data.table} pre-processed by one of the .cleanRaw* functions.}
 
 \item{aggregator}{function that will be used to aggregate duplicated values.}
 
 \item{feature_columns}{chr, vector of names of columns that define features.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Summarize multiple measurements per feature in a single run

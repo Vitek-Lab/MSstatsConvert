@@ -4,20 +4,14 @@
 \alias{.cleanRawDIAUmpire}
 \title{Clean raw DIAUmpire files}
 \usage{
-.cleanRawDIAUmpire(frag_input, pept_input, prot_input, use_frag, use_pept, ...)
+.cleanRawDIAUmpire(msstats_object, use_frag, use_pept)
 }
 \arguments{
-\item{frag_input}{DIAUmpire fragments output or a path to it.}
-
-\item{pept_input}{DIAUmpire peptides output or a path to it.}
-
-\item{prot_input}{DIAUmpire proteins output or a path to it.}
+\item{msstats_object}{Object that inherits from MSstatsInputFiles class.}
 
 \item{use_frag}{TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.}
 
 \item{use_pept}{TRUE will use the selected fragment for each protein 'Selected_peptides' column is required.}
-
-\item{...}{optional, additional parameters to data.table::fread.}
 }
 \value{
 data.table

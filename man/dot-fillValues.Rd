@@ -4,12 +4,12 @@
 \alias{.fillValues}
 \title{Set column to a single value}
 \usage{
-.fillValues(input, fill_vector)
+.fillValues(input, fill_list)
 }
 \arguments{
 \item{input}{data.table preprocessed by one of the \verb{cleanRaw*} functions.}
 
-\item{fill_vector}{named vector, names correspond to column names, elements
+\item{fill_list}{named list, names correspond to column names, elements
 to values that will be used in the columns.}
 }
 \value{

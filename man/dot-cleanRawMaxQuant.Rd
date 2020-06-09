@@ -4,16 +4,23 @@
 \alias{.cleanRawMaxQuant}
 \title{Clean raw output from MaxQuant}
 \usage{
-.cleanRawMaxQuant(mq_input, mq_pg, protein_id_col, ...)
+.cleanRawMaxQuant(
+  msstats_object,
+  protein_id_col,
+  remove_by_site = FALSE,
+  channel_columns = "Reporterintensitycorrected"
+)
 }
 \arguments{
-\item{mq_input}{evidence file from MaxQuant or a path to it.}
+\item{msstats_object}{object that inherits from MSstatsInputFiles class.}
 
-\item{mq_pg}{proteinGroups file from MaxQuant or a path to it.}
+\item{protein_id_col}{character, name of a column with names of proteins.}
 
-\item{protein_id_col}{chr, name of a column with names of proteins.}
+\item{remove_by_site}{logical, if TRUE, proteins only identified by site will
+be removed.}
 
-\item{...}{optional, additional parameters for data.table::fread}
+\item{channel_columns}{character, regular expression that identifies channel columns
+in TMT data.}
 }
 \value{
 data.table

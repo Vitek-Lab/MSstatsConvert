@@ -4,12 +4,10 @@
 \alias{.cleanRawOpenMS}
 \title{Clean raw output from OpenMS}
 \usage{
-.cleanRawOpenMS(om_input, ...)
+.cleanRawOpenMS(msstats_object)
 }
 \arguments{
-\item{om_input}{OpenMS report or a path to it.}
-
-\item{...}{optional, additional parameters for data.table::fread.}
+\item{msstats_object}{an object of class \code{MSstatsSpectroMineFiles}.}
 }
 \value{
 data.table

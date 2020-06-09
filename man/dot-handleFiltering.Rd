@@ -4,37 +4,16 @@
 \alias{.handleFiltering}
 \title{Handle PSM/proteins scores}
 \usage{
-.handleFiltering(
-  input,
-  score_column,
-  score_threshold,
-  direction,
-  behavior,
-  fill_value = NA,
-  drop_column = TRUE,
-  filter = TRUE
-)
+.handleFiltering(input, score_filtering, exact_filtering, pattern_filtering)
 }
 \arguments{
-\item{input}{data.table preprocessed by one of the .cleanRaw* functions.}
+\item{input}{\code{data.table} preprocessed by one of the .cleanRaw* functions.}
 
-\item{score_column}{chr, name of the column that contains scores.}
+\item{score_filtering}{list of by-score filtering controls.}
 
-\item{score_threshold}{num, values below or above this threshold will be
-removed from the data.}
+\item{exact_filtering}{list of exact filtering controls.}
 
-\item{direction}{chr, if "greater" only values above the threshold will be
-retained, if "smaller" - below the threshold.}
-
-\item{behavior}{chr, if "remove", values below/above the threshold will be
-removed, if "replace", they will be set to \code{fill_value}.}
-
-\item{fill_value}{if \code{behavior} = "replace", values below/above the threshold
-will be replaced with \code{fill_value}. Defaults to \code{NA}.}
-
-\item{drop_column}{lgl, if TRUE, score column will be removed from the data.}
-
-\item{filter}{lgl, if TRUE, data will be actually filtered.}
+\item{pattern_filtering}{list of by-pattern filtering controls.}
 }
 \value{
 data.table

@@ -4,18 +4,16 @@
 \alias{.handleSingleFeaturePerProtein}
 \title{Remove proteins only identified by a single feature}
 \usage{
-.handleSingleFeaturePerProtein(input, remove_single_feature, feature_columns)
+.handleSingleFeaturePerProtein(input, remove_single_feature)
 }
 \arguments{
-\item{input}{data.table pre-processed by one of the .cleanRaw* functions.}
+\item{input}{\code{data.table} pre-processed by one of the .cleanRaw* functions.}
 
 \item{remove_single_feature}{lgl, if TRUE, proteins with a single feature
 will be removed.}
-
-\item{feature_columns}{chr, vector of names of columns that define features.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Remove proteins only identified by a single feature

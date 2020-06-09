@@ -2,30 +2,22 @@
 % Please edit documentation in R/utils_clean_features.R
 \name{.cleanByFeature}
 \alias{.cleanByFeature}
-\title{A set of common operations for converters: remove few features and aggregate}
+\title{Perform by-feature operations.}
 \usage{
-.cleanByFeature(
-  input,
-  feature_columns,
-  summarize_function,
-  handle_few_measurements
-)
+.cleanByFeature(input, feature_columns, cleaning_control)
 }
 \arguments{
-\item{input}{}
+\item{input}{\code{data.table} preprocessed by one of the cleanRaw* functions.}
 
-\item{summarize_function}{function that will be used to aggregate multiple
-measurement per feature in a single run.}
+\item{feature_columns}{character vector of names of columns that define features.}
 
-\item{handle_few_measurements}{lgl, if TRUE, features with less than three
-measurements across runs will be removed.}
+\item{cleaning_control}{named list of two or three elements. See the documentation
+for \code{MSstatsImport} for details.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
-This function aggregates duplicated measurements per run for all features
-and removes features that have only missing or less than three measurements
-across runs.
+Perform by-feature operations.
 }
 \keyword{internal}

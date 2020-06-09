@@ -2,16 +2,16 @@
 % Please edit documentation in R/utils_filtering.R
 \name{.filterExact}
 \alias{.filterExact}
-\title{Handle decoy protein.}
+\title{Filter out specified symbols.}
 \usage{
-.filterExact(input, col_name, filter_symbols, drop = TRUE, filter = TRUE)
+.filterExact(input, col_name, filter_symbols, filter, drop)
 }
 \arguments{
 \item{input}{data.table preprocessed by one of the .cleanRaw* functions.}
 
-\item{drop}{lgl, if TRUE, column that contains decoy proteins will be dropped.}
-
 \item{filter}{lgl, if TRUE, decoy proteins will be removed from the data.}
+
+\item{drop}{lgl, if TRUE, column that contains decoy proteins will be dropped.}
 
 \item{decoy_column}{chr, name of the column that contains names of decoy
 proteins.}
@@ -20,6 +20,6 @@ proteins.}
 data.table
 }
 \description{
-Handle decoy protein.
+Filter out specified symbols.
 }
 \keyword{internal}

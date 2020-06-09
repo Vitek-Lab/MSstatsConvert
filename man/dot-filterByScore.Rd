@@ -10,11 +10,14 @@
   score_threshold,
   direction,
   behavior,
-  fill_value = NA
+  handle_na = "keep",
+  fill_value = NA,
+  filter = TRUE,
+  drop = TRUE
 )
 }
 \arguments{
-\item{input}{data.table preprocessed by one of the .cleanRaw* functions.}
+\item{input}{\code{data.table} preprocessed by one of the .cleanRaw* functions.}
 
 \item{score_column}{chr, name of the column that contains scores.}
 
@@ -29,7 +32,12 @@ removed, if "replace", they will be set to \code{fill_value}.}
 
 \item{fill_value}{if \code{behavior} = "replace", values below/above the threshold
 will be replaced with \code{fill_value}. Defaults to \code{NA}.}
+
+\item{filter}{If TRUE, filtering will be performed.}
+
+\item{drop}{if TRUE, \code{score_column} will be removed.}
 }
 \description{
 Filter PSMs / proteins by a given score column.
 }
+\keyword{internal}

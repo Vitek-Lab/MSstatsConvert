@@ -4,12 +4,10 @@
 \alias{.cleanRawOpenSWATH}
 \title{Clean raw OpenSWATH files}
 \usage{
-.cleanRawOpenSWATH(os_input, ...)
+.cleanRawOpenSWATH(msstats_object)
 }
 \arguments{
-\item{...}{optional, additional parameters for data.table::fread}
-
-\item{os}{input OpenSWATH report or a path to it.}
+\item{msstats_object}{an object of class \code{MSstatsSpectroMineFiles}.}
 }
 \value{
 data.table

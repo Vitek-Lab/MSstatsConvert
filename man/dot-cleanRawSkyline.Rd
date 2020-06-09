@@ -4,12 +4,10 @@
 \alias{.cleanRawSkyline}
 \title{Clean raw data from Skyline}
 \usage{
-.cleanRawSkyline(sl_input, ...)
+.cleanRawSkyline(msstats_object)
 }
 \arguments{
-\item{sl_input}{data.frame with raw Skyline input or a path to Skyline output.}
-
-\item{...}{optional, additional parameters to data.table::fread.}
+\item{msstats_object}{an object of class \code{MSstatsSpectroMineFiles}.}
 }
 \value{
 data.table

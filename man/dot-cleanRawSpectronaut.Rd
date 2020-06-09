@@ -4,17 +4,15 @@
 \alias{.cleanRawSpectronaut}
 \title{Clean raw Spectronaut output.}
 \usage{
-.cleanRawSpectronaut(spec_input, intensity, ...)
+.cleanRawSpectronaut(msstats_object, intensity)
 }
 \arguments{
-\item{spec_input}{Spectronaut report or a path to it.}
+\item{msstats_object}{an object of class \code{MSstatsSpectronautFiles}.}
 
 \item{intensity}{chr, specifies which column will be used for Intensity.}
-
-\item{...}{optional, additional parameters to data.table::fread.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Clean raw Spectronaut output.

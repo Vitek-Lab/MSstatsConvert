@@ -15,3 +15,4 @@ if needed.}
 \description{
 Pick one PSM from a data.table of several PSMs.
 }
+\keyword{internal}

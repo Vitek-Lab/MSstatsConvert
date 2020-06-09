@@ -11,7 +11,7 @@
 merged with annotation.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Get features that are overlapped among multiple runs

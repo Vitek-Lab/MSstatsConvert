@@ -12,7 +12,7 @@
 \item{feature_columns}{chr, vector of names of columns that define features.}
 }
 \value{
-data.table
+\code{data.table}
 }
 \description{
 Remove features for which all channels are missing in one run.

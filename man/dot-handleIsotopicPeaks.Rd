@@ -4,7 +4,7 @@
 \alias{.handleIsotopicPeaks}
 \title{Handle isotopic peaks}
 \usage{
-.handleIsotopicPeaks(input)
+.handleIsotopicPeaks(input, aggregate = FALSE)
 }
 \arguments{
 \item{input}{data.table preprocessed by one of the \verb{cleanRaw*} functions.}

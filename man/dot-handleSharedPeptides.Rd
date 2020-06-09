@@ -23,3 +23,4 @@
 \description{
 Handle shared peptides.
 }
+\keyword{internal}
