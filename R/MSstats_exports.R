@@ -128,7 +128,7 @@ MaxQtoMSstatsTMTFormat = function(
         remove_single_feature_proteins = few_measurements,
         list(handle_features_with_few_measurements = rmPSM_withfewMea_withinRun,
              summarize_multiple_psms = summaryforMultipleRows,
-             remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
+             remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     colnames(input) = .updateColnames(colnames(input), "PrecursorCharge", "Charge")
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
@@ -202,7 +202,7 @@ OpenMStoMSstatsTMTFormat = function(
         remove_single_feature_proteins = rmProtein_with1Feature,
         list(handle_features_with_few_measurements = few_measurements,
              summarize_multiple_psms = summaryforMultiplePSMs,
-             remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
+             remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     colnames(input) = .updateColnames(colnames(input), "PrecursorCharge", "Charge")
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
@@ -387,7 +387,7 @@ PDtoMSstatsTMTFormat <- function(
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows,
-                                remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
+                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")] # unique?
@@ -483,7 +483,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
     annotation = .makeAnnotation(input, annotation)
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
-    pq_filter = list(score_column = "PGQvalue", score_threshold = 0.01, 
+    pq_filter = list(score_column = "PGQValue", score_threshold = 0.01, 
                      direction = "smaller", behavior = "fill", 
                      handle_na = "keep", fill_value = NA,
                      filter = TRUE, drop_column = TRUE)
@@ -500,7 +500,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
         score_filtering = list(pgq = pq_filter, psm_q = qval_filter),
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows,
-                                remove_psms_with_all_missing = rmPSM_withMissing_withinRun)
+                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
