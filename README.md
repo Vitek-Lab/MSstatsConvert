@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/Vitek-Lab/MSstatsConvert.svg?branch=master)](https://travis-ci.org/Vitek-Lab/MSstatsConvert)
+[![Codecov test coverage](https://codecov.io/gh/Vitek-Lab/MSstatsConvert/branch/master/graph/badge.svg)](https://codecov.io/gh/Vitek-Lab/MSstatsConvert?branch=master)
 <!-- badges: end -->
 
 [MSstats](https://msstats.org) is an R-based/Bioconductor package for statistical relative quantification of peptides and proteins in mass spectrometry-based proteomic experiments. 

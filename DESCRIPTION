@@ -23,4 +23,5 @@ Imports:
     methods,
     checkmate
 Suggests: 
-    tinytest
+    tinytest,
+    covr
