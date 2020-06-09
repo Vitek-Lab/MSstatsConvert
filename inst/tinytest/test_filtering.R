@@ -11,124 +11,124 @@ data_to_filter = data.table::data.table(
 data_to_filter$Score[c(1, 13, 15, 27, 38)] = NA
 # Filter by pattern ----
 ## Warn when the column isn't there
-expect_message(
+tinytest::expect_message(
     MSstatsConvert:::.filterByPattern(data_to_filter, "Not_there", "\\+", TRUE, FALSE)
 )
 ## Filter and don't drop the column
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.filterByPattern(data_to_filter, "Symbol_1", "\\+", TRUE, FALSE),
     data_to_filter[26:50, ]
 )
 ## Filter and drop the column
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.filterByPattern(data_to_filter, "Symbol_1", "\\+", TRUE, TRUE),
     data_to_filter[26:50, -6]
 )
 ## Don't filter and don't drop the column
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.filterByPattern(data_to_filter, "Symbol_1", "\\+", FALSE, FALSE),
     data_to_filter
 )
 # Don't filter but drop the column 
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.filterByPattern(data_to_filter, "Symbol_1", "\\+", FALSE, TRUE),
     data_to_filter[, -6]
 )
 # Filter by exact values ----
 ## Warn when the column isn't there
-expect_message(MSstatsConvert:::.filterExact(data_to_filter, "Not_there", 
+tinytest::expect_message(MSstatsConvert:::.filterExact(data_to_filter, "Not_there", 
                                              "-", TRUE, TRUE))
 ## Filter and drop column
-expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
                                                "-", TRUE, TRUE),
                  data_to_filter[1:25, -6])
 ## Filter so that nothing's left
-expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
                                                c("+", "-"), TRUE, TRUE),
                  data_to_filter[FALSE, -6])
 ## Filter, but don't drop the column
-expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
                                                "+", TRUE, FALSE),
                  data_to_filter[26:50, ])
 ## Don't filter, but drop column
-expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
                                                c("+", "-"), FALSE, TRUE),
                  data_to_filter[, -6])
 ## Don't filter and don't drop column
-expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
                                                c("+", "-"), FALSE, FALSE),
                  data_to_filter)
 ## Filter and drop, but the symbol is not there
-expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", "R", TRUE, TRUE),
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", "R", TRUE, TRUE),
                  data_to_filter[, -6])
 # Filter multiple columns by exact values ----
 ## Warn when the column isn't there
-expect_message(
+tinytest::expect_message(
     MSstatsConvert:::.filterManyColumns(data_to_filter, c("Not_there", "Not_there"), "+")
 )
 ## Filter
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.filterManyColumns(data_to_filter, c("Symbol_1", "Symbol_2"), "+"),
     data_to_filter[26:50, 1:5]
 )
 ## When the values aren't there just drop columns
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.filterManyColumns(data_to_filter, c("Symbol_1", "Symbol_2"), "X"),
     data_to_filter[, 1:5]
 )
 # Filter by a numerical score ----
 ## Warn when the column is not there
-expect_message(MSstatsConvert:::.filterByScore(data_to_filter, "Not_there", 0.3, "smaller",
+tinytest::expect_message(MSstatsConvert:::.filterByScore(data_to_filter, "Not_there", 0.3, "smaller",
                                                "fill", handle_na = "keep", fill_value = NA,
                                                filter = TRUE, drop = TRUE)
 )
 ## Don't filter and don't drop
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                  "remove", handle_na = "keep", fill_value = NA,
                                                  filter = FALSE, drop = FALSE),
                  data_to_filter)
 ## Don't filter but drop
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                  "remove", handle_na = "keep", fill_value = NA,
                                                  filter = FALSE, drop = TRUE),
                  data_to_filter[, -5])
 ## Keep only scores bigger than 0.3, don't drop the column, keep NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                  "remove", handle_na = "keep", fill_value = NA,
                                                  filter = TRUE, drop = FALSE),
                  data_to_filter[Score > 0.3 | is.na(Score), ])
 ## Keep only scores bigger than 0.3, don't drop the column, remove NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                  "remove", handle_na = "remove", fill_value = NA,
                                                  filter = TRUE, drop = FALSE),
                  data_to_filter[Score > 0.3 & !is.na(Score), ])
 ## Keep only scores bigger than 0.3, drop the column, keep NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                  "remove", handle_na = "keep", fill_value = NA,
                                                  filter = TRUE, drop = TRUE),
                  data_to_filter[Score > 0.3 | is.na(Score), -5])
 ## Keep only scores bigger than 0.3, drop the column, remove NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                  "remove", handle_na = "remove", fill_value = NA,
                                                  filter = TRUE, drop = TRUE),
                  data_to_filter[Score > 0.3 & !is.na(Score), -5])
 ## Keep only scores smaller than 0.3, don't drop the column, keep NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
                                                  "remove", handle_na = "keep", fill_value = NA,
                                                  filter = TRUE, drop = FALSE),
                  data_to_filter[Score < 0.3 | is.na(Score), ])
 ## Keep only scores smaller than 0.3, don't drop the column, remove NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
                                                  "remove", handle_na = "remove", fill_value = NA,
                                                  filter = TRUE, drop = FALSE),
                  data_to_filter[Score < 0.3 & !is.na(Score), ])
 ## Keep only scores smaller than 0.3, drop the column, keep NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
                                                  "remove", handle_na = "keep", fill_value = NA,
                                                  filter = TRUE, drop = TRUE),
                  data_to_filter[Score < 0.3 | is.na(Score), -5])
 ## Keep only scores smaller than 0.3, drop the column, remove NA
-expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
+tinytest::expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
                                                  "remove", handle_na = "remove", fill_value = NA,
                                                  filter = TRUE, drop = TRUE),
                  data_to_filter[Score < 0.3 & !is.na(Score), -5])
@@ -137,8 +137,8 @@ expect_identical(MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "
 fill_smaller_than_0_3 = MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                         "fill", handle_na = "keep", fill_value = NA,
                                                         filter = TRUE, drop = TRUE)
-expect_identical(ncol(fill_smaller_than_0_3), 6L)
-expect_identical(fill_smaller_than_0_3$Intensity, 
+tinytest::expect_identical(ncol(fill_smaller_than_0_3), 6L)
+tinytest::expect_identical(fill_smaller_than_0_3$Intensity, 
                  ifelse(data_to_filter$Score > 0.3 | is.na(data_to_filter$Score),
                         data_to_filter$Intensity, NA))
 ## Keep only scores bigger than 0.3, drop the column, remove NA, 
@@ -146,8 +146,8 @@ expect_identical(fill_smaller_than_0_3$Intensity,
 fill_smaller_than_0_3_2 = MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "greater",
                                                           "fill", handle_na = "remove", fill_value = NA,
                                                           filter = TRUE, drop = TRUE)
-expect_identical(ncol(fill_smaller_than_0_3_2), 6L)
-expect_identical(fill_smaller_than_0_3_2$Intensity, 
+tinytest::expect_identical(ncol(fill_smaller_than_0_3_2), 6L)
+tinytest::expect_identical(fill_smaller_than_0_3_2$Intensity, 
                  ifelse(data_to_filter$Score > 0.3 & !is.na(data_to_filter$Score),
                         data_to_filter$Intensity, NA))
 
@@ -156,8 +156,8 @@ expect_identical(fill_smaller_than_0_3_2$Intensity,
 fill_smaller_than_0_3_s = MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
                                                           "fill", handle_na = "keep", fill_value = NA,
                                                           filter = TRUE, drop = TRUE)
-expect_identical(ncol(fill_smaller_than_0_3_s), 6L)
-expect_identical(fill_smaller_than_0_3_s$Intensity, 
+tinytest::expect_identical(ncol(fill_smaller_than_0_3_s), 6L)
+tinytest::expect_identical(fill_smaller_than_0_3_s$Intensity, 
                  ifelse(data_to_filter$Score < 0.3 | is.na(data_to_filter$Score),
                         data_to_filter$Intensity, NA))
 ## Keep only scores smaller than 0.3, drop the column, remove NA, 
@@ -165,13 +165,13 @@ expect_identical(fill_smaller_than_0_3_s$Intensity,
 fill_smaller_than_0_3_2_s = MSstatsConvert:::.filterByScore(data_to_filter, "Score", 0.3, "smaller",
                                                             "fill", handle_na = "remove", fill_value = NA,
                                                             filter = TRUE, drop = TRUE)
-expect_identical(ncol(fill_smaller_than_0_3_2_s), 6L)
-expect_identical(fill_smaller_than_0_3_2_s$Intensity, 
+tinytest::expect_identical(ncol(fill_smaller_than_0_3_2_s), 6L)
+tinytest::expect_identical(fill_smaller_than_0_3_2_s$Intensity, 
                  ifelse(data_to_filter$Score < 0.3 & !is.na(data_to_filter$Score),
                         data_to_filter$Intensity, NA))
 # Full filtering function ----
 ## Nothing to filter
-expect_equal(
+tinytest::expect_equal(
     MSstatsConvert:::.handleFiltering(data_to_filter, 
                                       list(), 
                                       list(), 
@@ -179,7 +179,7 @@ expect_equal(
     data_to_filter
 )
 ## Filter and drop
-expect_identical(
+tinytest::expect_identical(
     MSstatsConvert:::.handleFiltering(data_to_filter, 
                                       list(list(score_column = "Score", score_threshold = 0.3, 
                                                 direction = "greater", behavior = "remove", 
@@ -192,7 +192,7 @@ expect_identical(
     data_to_filter[(Score > 0.3 | is.na(Score)) & Symbol_1 == "-", 1:4]
 )
 ## Filter, but don't drop
-expect_equal(
+tinytest::expect_equal(
     MSstatsConvert:::.handleFiltering(data_to_filter, 
                                       list(list(score_column = "Score", score_threshold = 0.3, 
                                                 direction = "greater", behavior = "remove", 
