@@ -280,12 +280,12 @@ ProgenesistoMSstatsFormat = function(
     annotation = .makeAnnotation(input, annotation)
     input = MSstatsClean(input, unique(annotation$Run), TRUE)
     
-    oxidation_filter = list(column = "PeptideSequence", pattern = "Oxidation", 
+    oxidation_filter = list(col_name = "PeptideSequence", pattern = "Oxidation", 
                             filter = TRUE, drop_column = FALSE)
     
     input = MSstatsPreprocess(
         input, annotation, 
-        c("PeptideModifiedSequence", "PrecursorCharge"),
+        c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Peptide,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
