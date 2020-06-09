@@ -530,14 +530,14 @@ SpectronauttoMSstatsFormat = function(
     annotation = .makeAnnotation(input, annotation, "Run" = "RFileName", 
                                  "Condition" = "RCondition", "BioReplicate" = "RReplicate")
     
-    pq_filter = list(score_column = "PGQValue", score_threshold = 0.01, 
+    pq_filter = list(score_column = "PGQvalue", score_threshold = 0.01, 
                      direction = "smaller", behavior = "fill", 
                      handle_na = "keep", fill_value = NA,
-                     filter = TRUE, drop = TRUE)
+                     filter = TRUE, drop_column = TRUE)
     qval_filter = list(score_column = "Qvalue", score_threshold = qvalue_cutoff, 
                        direction = "smaller", behavior = "fill", 
                        handle_na = "keep", fill_value = 0, 
-                       filter = filter_with_Qvalue, drop = TRUE)
+                       filter = filter_with_Qvalue, drop_column = TRUE)
     
     input = MSstatsPreprocess(
         input, annotation, 
