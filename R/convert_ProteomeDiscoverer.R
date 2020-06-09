@@ -86,14 +86,15 @@
                         colnames(pd_input))
     pd_input = pd_input[, pd_cols, with = FALSE]
     colnames(pd_input) = .updateColnames(pd_input,
-                                         c(protein_id_column, num_proteins, "AnnotatedSequence", "SpectrumFile"),
-                                         c("ProteinName", "numProtein", "PeptideSequence", "Run"))
+                                         c(protein_id_column, num_proteins, "AnnotatedSequence", "SpectrumFile", "Charge"),
+                                         c("ProteinName", "numProtein", "PeptideSequence", "Run", "PrecursorCharge"))
     pd_input$PSM = paste(pd_input$PeptideSequence, pd_input$Charge,
                          1:nrow(pd_input), sep = "_")
     pd_input = melt(pd_input, measure.vars = channels, 
                     id.vars = setdiff(colnames(pd_input), channels),
                     variable.name = "Channel", value.name = "Intensity")
     pd_input$Channel = .standardizeColnames(pd_input$Channel)
+    pd_input$Channel = gsub("Abundance:", "", pd_input$Channel)
     pd_input = pd_input[(pd_input$ProteinName != "") & (!is.na(pd_input$ProteinName)), ]
     if (remove_shared) {
         if ("UNIQUE" %in% toupper(pd_input[["QuanInof"]])) {

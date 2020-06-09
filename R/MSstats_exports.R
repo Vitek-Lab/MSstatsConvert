@@ -329,14 +329,14 @@ PDtoMSstatsFormat = function(
                          protein_id_column = which.proteinid,
                          sequence_column = which.sequence, 
                          remove_shared = useNumProteinsColumn)
-    annotation = .makeAnnotation(input, annotation)
+    annotation = .makeAnnotation(input, annotation, Run = "Rawfile")
     
-    oxidation_filter = list(column = "PeptideSequence", pattern = "Oxidation", 
+    oxidation_filter = list(col_name = "PeptideSequence", pattern = "Oxidation", 
                             filter = TRUE, drop_column = FALSE)
     
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Peptide,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -382,13 +382,14 @@ PDtoMSstatsTMTFormat <- function(
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows,
                                 remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
+    colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")] # unique?
     input
