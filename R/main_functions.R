@@ -115,6 +115,7 @@ MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
 #' @param msstats_object object that inherits from `MSstatsInputFiles` class.
 #' @param ... additional parameter to specific cleaning functions.
 #' @rdname MSstatsClean
+#' @export
 setGeneric("MSstatsClean", function(msstats_object, ...) {
     standardGeneric("MSstatsClean")
 })
