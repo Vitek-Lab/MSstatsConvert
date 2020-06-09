@@ -1,75 +1,23 @@
-#' Import DIA-Umpire files 
-#' 
-#' @inheritParams .documentFunction
-#' @param raw.frag name of FragSummary_date.xls data, which includes feature-level data.
-#' @param raw.pep name of PeptideSummary_date.xls data, which includes selected fragments information.
-#' @param raw.pro name of ProteinSummary_date.xls data, which includes selected peptides information.
-#' @param annotation name of annotation data which includes Condition, BioReplicate, Run information.
-#' @param useSelectedFrag TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.
-#' @param useSelectedPep TRUE will use the selected peptide for each protein. 'Selected_peptides' column is required.
-#' 
-#' @return data.frame with the required format of MSstats.
-#'
-#' @author Meena Choi, Olga Vitek 
-#'
-#' @export
-#' 
-
-DIAUmpiretoMSstatsFormat = function(
-    raw.frag, raw.pep, raw.pro, annotation, useSelectedFrag = TRUE,
-    useSelectedPep = TRUE, fewMeasurements = "remove",
-    removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
-    use_log_file = TRUE, append = FALSE, verbose = TRUE
-) {
-    .setMSstatsLogger(use_log_file, append, verbose)
-    # .checkConverterParams()
-    
-    input = .cleanRawDIAUmpire(raw.frag, raw.pep, raw.pro, useSelectedFrag,
-                               useSelectedPep)
-    annotation = .makeAnnotation(input, .getDataTable(annotation))
-    
-    input = .handleSharedPeptides(input, TRUE) # DIA always removes and does it earlier than others, actually
-    feature_cols = c("PeptideSequence", "FragmentIon")
-    input = .cleanByFeature(input, feature_cols, summaryforMultipleRows, fewMeasurements)
-    input = .handleSingleFeaturePerProtein(input, removeProtein_with1Feature,
-                                           feature_cols)
-    input = .mergeAnnotation(input, annotation)
-    input = .fillValues(input, c("PrecursorCharge" = NA,
-                                 "ProductCharge" = NA,
-                                 "IsotopeLabelType" = "L"))
-    .MSstatsFormat(input)
-}
-
 #' Clean raw DIAUmpire files
-#' @param frag_input DIAUmpire fragments output or a path to it.
-#' @param pept_input DIAUmpire peptides output or a path to it.
-#' @param prot_input DIAUmpire proteins output or a path to it.
+#' @param msstats_object Object that inherits from MSstatsInputFiles class.
 #' @param use_frag TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.
 #' @param use_pept TRUE will use the selected fragment for each protein 'Selected_peptides' column is required.
-#' @param ... optional, additional parameters to data.table::fread.
 #' @return data.table
 #' @keywords internal
-.cleanRawDIAUmpire = function(frag_input, pept_input, prot_input,
-                              use_frag, use_pept, ...) {
-    frag_input = .getDataTable(frag_input, ...)
-    pept_input = .getDataTable(pept_input, ...)
-    prot_input = .getDataTable(prot_input, ...)
-    colnames(frag_input) = .standardizeColnames(colnames(frag_input))
-    colnames(pept_input) = .standardizeColnames(colnames(pept_input))
-    colnames(prot_input) = .standardizeColnames(colnames(prot_input))
-    
-    if (!is.element("Selected_fragments", pept_input)) {
+.cleanRawDIAUmpire = function(msstats_object, use_frag, use_pept) {
+    FragmentIon = ProteinName = PeptideSequence = . = NULL
+    frag_input = getInputFile(msstats_object, "Fragments")
+    pept_input = getInputFile(msstats_object, "Peptides")
+    prot_input = getInputFile(msstats_object, "Proteins")
+
+    if (!is.element("Selected_fragments", pept_input) | 
+        !is.element("Selected_fragments", prot_input)) {
         msg = "Selected_fragments column is required. Please check it."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
-    if (!is.element("Selected_peptides", prot_input)) {
-        msg = "Selected_peptides column is required. Please check it."
-        getOption("MSstatsLog")("ERROR", msg)
-        stop(msg)
-    }
-    
-    pept_cols = c("Peptide.Key", "Proteins", "Selected_fragments")
+
+    pept_cols = c("PeptideKey", "Proteins", "Selected_fragments")
     pept_input = pept_input[, pept_cols, with = FALSE]
     pept_input = pept_input[pept_input[["Proteins"]] != "", ]
     pept_input[["Selected_fragments"]] =  as.character(pept_input[["Selected_fragments"]])
@@ -85,7 +33,7 @@ DIAUmpiretoMSstatsFormat = function(
     # TOOD: It's possible to extract a function here for prot/pept input  
     pept_input[["ProteinName"]] = as.character(pept_input[["ProteinName"]])
     
-    prot_input = prot_input[, c("Protein.Key", "Selected_peptides"), with = FALSE]
+    prot_input = prot_input[, c("ProteinKey", "Selected_peptides"), with = FALSE]
     prot_input = prot_input[prot_input[["Protein.Key"]] != "", ] 
     prot_input[["Selected_peptides"]] = as.character(prot_input[["Selected_peptides"]])
     prot_input[["Selected_peptides"]] = trimws(prot_input[["Selected_peptides"]],
@@ -97,6 +45,7 @@ DIAUmpiretoMSstatsFormat = function(
                             by = .(ProteinName)]
     colnames(prot_input) = .updateColnames(prot_input, "V1", "PeptideSequence")
     prot_input = prot_input[prot_input[["PeptideSequence"]] != "", ]
+    
     prot_input[["ProteinName"]] = gsub(";", "", prot_input[["ProteinName"]])
     
     # TODO: move the comments to documentation
@@ -107,7 +56,8 @@ DIAUmpiretoMSstatsFormat = function(
         ## raw.frag can have multiple protein ids.
         ## make the final list of selected proteins and peptides
         input = merge(pept_input[, c(FALSE, TRUE, TRUE), with = FALSE], 
-                      prot_input, all.x = TRUE, by = "PeptideSequence")
+                      prot_input, all.x = TRUE, by = "PeptideSequence",
+                      sort = FALSE)
     } else if (use_frag & !use_pept) { 
         # only use selected fragment, and use all peptides, can use raw.pep3 only.
         ## but doublecheck protein id : protein id in raw.frag is always one id.
@@ -121,7 +71,7 @@ DIAUmpiretoMSstatsFormat = function(
     input[["FragmentIon"]] = gsub("\\+", "_", input[["FragmentIon"]])
     
     intensity_cols = grepl("Intensity", colnames(frag_input))
-    frag_col_names = c("Fragment.Key", "Protein", "Peptide", "Fragment")
+    frag_col_names = c("FragmentKey", "Protein", "Peptide", "Fragment")
     key_cols = colnames(frag_input) %in% frag_col_names
     frag_cols = intensity_cols | key_cols
     frag_input = frag_input[, frag_cols, with = FALSE]
@@ -133,15 +83,15 @@ DIAUmpiretoMSstatsFormat = function(
     
     if (!grepl("\\+", frag_input[["FragmentIon"]][1])) {
         # TODO: is always all or none true? Indicate in docs that + means charge
-        last_char = nchar(frag_input[["Fragment.Key"]])
+        last_char = nchar(frag_input[["FragmentKey"]])
         frag_input[["FragmentIon"]] = paste(
             frag_input[["FragmentIon"]],
-            substr(frag_input[["Fragment.Key"]], start = last_char, stop = last_char), 
+            substr(frag_input[["FragmentKey"]], start = last_char, stop = last_char), 
             sep = "_")
     } else {
         frag_input[["FragmentIon"]] = gsub("\\+", "_", frag_input[["FragmentIon"]])
     }
-    frag_input = frag_input[, (colnames(frag_input) != "Fragment.Key"),
+    frag_input = frag_input[, (colnames(frag_input) != "FragmentKey"),
                             with = FALSE]
     
     setkey(input, ProteinName, PeptideSequence, FragmentIon)

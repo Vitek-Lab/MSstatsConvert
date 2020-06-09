@@ -1,43 +1,10 @@
-# TODO: modify parameter names
-SpectroMinetoMSstatsTMTFormat <- function(
-  input, annotation, filter_with_Qvalue = TRUE, qvalue_cutoff = 0.01,
-  useUniquePeptide = TRUE, rmPSM_withMissing_withinRun = FALSE,
-  rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE,
-  summaryforMultipleRows = sum, use_log_file = TRUE, append = TRUE, verbose = TRUE
-) {
-  .setMSstatsLogger(use_log_file, append, verbose)
-  # .checkConverterParams()
-  
-  input = .cleanRawSpectroMineTMT(input)
-  annotation = .makeAnnotation(input, annotation)
-  
-  input = .handleFiltering(input, "PQ.QValue", 0.01, "smaller", "fill", NA,
-                           TRUE,) 
-  input = .handleFiltering(input, "Qvalue", qvalue_cutoff, "smaller", "fill", 
-                           NA, TRUE, filter_with_Qvalue)
-  feature_cols = c("PeptideSequence", "Charge")
-  input = .removeMissingAllChannels(input, feature_cols)
-  input = .handleSharedPeptides(input, useUniquePeptide)
-  input = .cleanByFeatureTMT(input, feature_cols, summaryforMultipleRows,
-                             rmPSM_withfewMea_withinRun, rmPSM_withMissing_withinRun)
-  input = .mergeAnnotation(input, annotation)
-  input = .handleSingleFeaturePerProtein(input, rmProtein_with1Feature, "PSM")
-  input = .handleFractions(input)
-  input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
-            "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
-  .MSstatsFormat(input)
-}
-
 #' Clean raw SpectroMine TMT data
-#' @param sm_input SpectroMine report or a path to it.
-#' @param ... optional, additional parameters for data.table::fread
+#' @param msstats_object an object of class `MSstatsSpectroMineFiles`.
 #' @importFrom data.table melt
-#' @return data.table
+#' @return `data.table`
 #' @keywords internal
-.cleanRawSpectroMineTMT = function(sm_input, ...) {
-  sm_input = .getDataTable(sm_input, ...)
-  colnames(sm_input) = .standardizeColnames(colnames(sm_input))
-  # TODO: allow for other regular expressions?
+.cleanRawSpectroMineTMT = function(msstats_object) {
+  sm_input = getInputFile(msstats_object, "input")
   channels = .getChannelColumns(colnames(sm_input), "PSM", "Raw")
   if (length(channels) == 0L) {
     msg = paste("There is no channel intensity column in the input data,", 
@@ -45,12 +12,12 @@ SpectroMinetoMSstatsTMTFormat <- function(
     getOption("MSstatsMsg")("ERROR", msg)
     stop(msg)
   }
-  sm_input = sm_input[, c("PG.ProteinAccessions", "P.MoleculeID", "PP.Charge",
-                          "PG.QValue", "PSM.Qvalue", "R.FileName", channels),
-                      with = FALSE] # TODO: check column validity
+  sm_input = sm_input[, c("PGProteinAccessions", "PMoleculeID", "PPCharge",
+                          "PGQValue", "PSMQvalue", "RFileName", channels),
+                      with = FALSE]
   colnames(sm_input) = .updateColnames(sm_input, 
-                                       c("PG.ProteinAccessions", "P.MoleculeID", 
-                                         "PP.Charge", "PSM.Qvalue", "R.FileName"),
+                                       c("PGProteinAccessions", "PMoleculeID", 
+                                         "PPCharge", "PSMQvalue", "RFileName"),
                                        c("ProteinName", "PeptideSequence", "Charge",
                                          "Qvalue", "Run"))
   sm_input = sm_input[(sm_input$ProteinName != "") & (!is.na(sm_input$ProteinName)), ]
@@ -61,6 +28,6 @@ SpectroMinetoMSstatsTMTFormat <- function(
   sm_input$Channel = gsub("Raw", "", sm_input$Channel)
   sm_input$Channel = gsub(".", "", sm_input$Channel, fixed = TRUE)
   sm_input$PSM = paste(sm_input$PeptideSequence, sm_input$Charge, 
-                       1:nrow(sm_input), sep = "_",)
+                       1:nrow(sm_input), sep = "_")
   sm_input
 }
