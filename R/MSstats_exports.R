@@ -192,7 +192,6 @@ OpenMStoMSstatsTMTFormat = function(
 ) {
     input = MSstatsImport(list(input = input), "MSstats", "OpenMS", ...)
     input = MSstatsClean(input)
-    annotation = .makeAnnotation(input, .getDataTable(annotation))
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
     input = MSstatsPreprocess(
