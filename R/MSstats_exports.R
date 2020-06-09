@@ -196,16 +196,17 @@ OpenMStoMSstatsTMTFormat = function(
     
     input = MSstatsPreprocess(
         input, NULL, 
-        feature_columns = c("PeptideSequence", "Charge", "Reference", "RetentionTime"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge", "Reference", "RetentionTime"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         list(handle_features_with_few_measurements = few_measurements,
              summarize_multiple_psms = summaryforMultiplePSMs,
              remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
-    colnames(input) = .updateColnames(colnames(input), "PrecursorCharge", "Charge")
-    input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
-                      "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")]
+    colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
+    cols = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture",  "Fraction",
+             "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")
+    input = input[, intersect(cols, colnames(input))]
     input
 }
 

@@ -14,9 +14,12 @@
     om_input$PSM = paste(om_input$PSM, 1:nrow(om_input), sep = "_")  
   }
   
-  all_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+  all_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Charge",
                "FragmentIon", "ProductCharge", "PSM", "IsotopeLabelType",
-               "Condition", "BioReplicate", "Run", "Channel", "Intensity")
+               "Condition", "BioReplicate", "Run", "Channel", "Intensity",
+               "Fraction", "Reference", "RetentionTime")
   cols = intersect(all_cols, colnames(om_input))
-  om_input[, cols, with = FALSE]
+  om_input = om_input[, cols, with = FALSE]
+  colnames(om_input) = .updateColnames(om_input, "Charge", "PrecursorCharge")
+  om_input
 }
