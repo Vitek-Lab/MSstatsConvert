@@ -23,7 +23,7 @@
     
     input[, techrun := paste(Mixture, TechRepMixture, sep = "_")]
     input[, feature := do.call(".combine", .SD), 
-          .SDcols = c("ProteinName", "PeptideSequence", "Charge")]
+          .SDcols = c("ProteinName", "PeptideSequence", "PrecursorCharge")]
     input[, id := paste(feature, Run, sep = "_")]
     
     unoverlapped_list = vector("list", length(unique(input$techrun)))
