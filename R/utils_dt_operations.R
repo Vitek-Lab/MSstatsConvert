@@ -5,10 +5,12 @@
 #' @keywords internal
 .getDataTable = function(input, ...) {
     if (inherits(input, "data.frame")) {
-        as.data.table(input)
+        input = as.data.table(input)
     } else {
-        data.table::fread(input, showProgress = FALSE, ...)
+        input = data.table::fread(input, showProgress = FALSE, ...)
     }
+    colnames(input) = .standardizeColnames(colnames(input))
+    input
 }
 
 
@@ -58,13 +60,13 @@
 
 #' Set column to a single value
 #' @param input data.table preprocessed by one of the `cleanRaw*` functions.
-#' @param fill_vector named vector, names correspond to column names, elements 
+#' @param fill_list named list, names correspond to column names, elements 
 #' to values that will be used in the columns.
 #' @return data.table
 #' @keywords internal
-.fillValues = function(input, fill_vector) {
-    for (column in names(fill_vector)) {
-        input[[column]] = fill_vector[column]
+.fillValues = function(input, fill_list) {
+    for (column in names(fill_list)) {
+        input[[column]] = fill_list[[column]]
     }
     input
 }
@@ -77,7 +79,9 @@
 .standardizeColnames = function(col_names) {
     col_names = gsub(" ", ".", col_names, fixed = TRUE)
     col_names = gsub("\\[|\\]|\\%", ".", col_names, fixed = FALSE)
-    gsub("#", "X.", col_names, fixed = TRUE)
+    col_names = gsub("/", "", col_names, fixed = TRUE)
+    col_names = gsub("#", "X.", col_names, fixed = TRUE)
+    gsub("[\\.]+", "", col_names)
 }
 
 
