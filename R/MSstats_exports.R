@@ -277,8 +277,8 @@ ProgenesistoMSstatsFormat = function(
     removeProtein_with1Peptide = FALSE, ... 
 ) {
     input = MSstatsImport(list(input = input), "MSstats", "Progenesis", ...)
-    input = MSstatsClean(input, unique(annotation$Run), TRUE)
     annotation = .makeAnnotation(input, annotation)
+    input = MSstatsClean(input, unique(annotation$Run), TRUE)
     
     oxidation_filter = list(column = "PeptideSequence", pattern = "Oxidation", 
                             filter = TRUE, drop_column = FALSE)
@@ -329,7 +329,7 @@ PDtoMSstatsFormat = function(
                          protein_id_column = which.proteinid,
                          sequence_column = which.sequence, 
                          remove_shared = useNumProteinsColumn)
-    annotation = .makeAnnotation(input, annotation, Run = "Rawfile")
+    annotation = .makeAnnotation(input, annotation)
     
     oxidation_filter = list(col_name = "PeptideSequence", pattern = "Oxidation", 
                             filter = TRUE, drop_column = FALSE)
