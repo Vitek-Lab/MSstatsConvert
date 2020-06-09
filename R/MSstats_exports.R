@@ -422,10 +422,9 @@ SkylinetoMSstatsFormat = function(
     
     decoy_filter = list(col_name = "ProteinName",
                         filter_symbols = c("DECOY", "Decoys"),
-                        filter = TRUE,
-                        drop = FALSE)
+                        filter = TRUE, drop_column = FALSE)
     irt_filter = list(col_name = "StandardType", filter_symbols = "iRT",
-                      filter = removeiRT, drop = FALSE)
+                      filter = removeiRT, drop_column = FALSE)
     oxidation_filter = list(col_name = "PeptideSequence",
                             pattern = "\\+16", 
                             filter = removeOxidationMpeptides, 
@@ -437,11 +436,11 @@ SkylinetoMSstatsFormat = function(
     qval_filter = list(score_column = "DetectionQValue", 
                        score_threshol = qvalue_cutoff, direction = "smaller",
                        behavior = "fill", fill_value = 0, handle_na = "keep",
-                       filter = filter_with_Qvalue, drop = TRUE)
+                       filter = filter_with_Qvalue, drop_column = TRUE)
     
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PeptideSequence", "Charge"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         score_filtering = list(truncated = truncated_filter, qval = qval_filter),
