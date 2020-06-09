@@ -195,7 +195,7 @@ OpenMStoMSstatsTMTFormat = function(
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
     input = MSstatsPreprocess(
-        input, annotation, 
+        input, NULL, 
         feature_columns = c("PeptideSequence", "Charge", "Reference", "RetentionTime"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
