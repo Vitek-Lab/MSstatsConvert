@@ -43,8 +43,8 @@
                                                  "Run"))
         getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
         getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
-        input
     }
+    input
 }
 
 
