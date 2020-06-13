@@ -120,38 +120,47 @@ setGeneric("MSstatsClean", function(msstats_object, ...) {
     standardGeneric("MSstatsClean")
 })
 #' Clean DIAUmpire files
+#' @include convert_DIAUmpire.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawDIAUmpire
 setMethod("MSstatsClean", signature = "MSstatsDIAUmpireFiles", .cleanRawDIAUmpire)
 #' Clean MaxQuant files
+#' @include convert_MaxQuant.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawMaxQuant
 setMethod("MSstatsClean", signature = "MSstatsMaxQuantFiles", .cleanRawMaxQuant)
 #' Clean OpenMS files
+#' @include convert_OpenMS.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawOpenMS
 setMethod("MSstatsClean", signature = "MSstatsOpenMSFiles", .cleanRawOpenMS)
 #' Clean OpenSWATH files
+#' @include convert_OpenSWATH.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawOpenSWATH
 setMethod("MSstatsClean", signature = "MSstatsOpenSWATHFiles", .cleanRawOpenSWATH)
 #' Clean Progenesis files
+#' @include convert_Progenesis.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawProgenesis
 setMethod("MSstatsClean", signature = "MSstatsProgenesisFiles", .cleanRawProgenesis)
 #' Clean ProteomeDiscoverer files
+#' @include convert_ProteomeDiscoverer.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawPD
 setMethod("MSstatsClean", signature = "MSstatsProteomeDiscovererFiles", .cleanRawPD)
 #' Clean Skyline files
+#' @include convert_Skyline.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSkyline
 setMethod("MSstatsClean", signature = "MSstatsSkylineFiles", .cleanRawSkyline)
 #' Clean SpectroMine files
+#' @include convert_SpectroMine.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSpectroMineTMT
 setMethod("MSstatsClean", signature = "MSstatsSpectroMineFiles", .cleanRawSpectroMineTMT)
 #' Clean Spectronaut files
+#' @include convert_Spectronaut.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSpectronaut
 setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles", .cleanRawSpectronaut)
