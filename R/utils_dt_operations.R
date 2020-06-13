@@ -4,6 +4,7 @@
 #' @importFrom data.table as.data.table fread
 #' @keywords internal
 .getDataTable = function(input, ...) {
+    checkmate::checkTRUE(is.character(input) | inherits(input, "data.frame"))
     if (inherits(input, "data.frame")) {
         input = as.data.table(input)
     } else {
