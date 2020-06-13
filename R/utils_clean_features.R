@@ -26,6 +26,7 @@
     }
     merge(input, unique(counts[, feature_columns, with = FALSE]),
           by = feature_columns, sort = FALSE)
+
 }
 
 
@@ -40,7 +41,7 @@
     
     info = unique(input[, intersect(colnames(input), 
                                     c("StandardType", "ProteinName", 
-                                      "PeptideModifiedSequence",
+                                      "PeptideModifiedSequence", "Charge",
                                       "PeptideSequence", "PrecursorCharge",
                                       "IsotopeLabelType")), 
                         with = FALSE])
