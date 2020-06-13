@@ -12,6 +12,7 @@
     }
   } else {
     om_input$PSM = paste(om_input$PSM, 1:nrow(om_input), sep = "_")  
+    om_input$Intensity = ifelse(om_input$Intensity == 0, NA, om_input$Intensity)
   }
   
   all_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Charge",

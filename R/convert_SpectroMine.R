@@ -27,6 +27,7 @@
   sm_input$Channel = gsub("PSM", "", sm_input$Channel)
   sm_input$Channel = gsub("Raw", "", sm_input$Channel)
   sm_input$Channel = gsub(".", "", sm_input$Channel, fixed = TRUE)
+  sm_input$Intensity = ifelse(sm_input$Intensity == 0, NA, sm_input$Intensity)
   sm_input$PSM = paste(sm_input$PeptideSequence, sm_input$Charge, 
                        1:nrow(sm_input), sep = "_")
   sm_input

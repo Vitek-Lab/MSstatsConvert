@@ -72,6 +72,7 @@
                                     "PrecursorCharge", "PSM", "Run", "Score"),
                         variable.name = "Channel", value.name = "Intensity")
         mq_input$Channel = gsub(channel_columns, "channel", mq_input$Channel)
+        mq_input$Intensity = ifelse(mq_input$Intensity == 0, NA, mq_input$Intensity)
     }
     
     mq_input = mq_input[!is.na(mq_input[["Intensity"]]), ] # how about tmt case?
