@@ -15,14 +15,16 @@
                    by = feature_columns]
     if (handle_few == "remove") {
         counts = counts[n_obs > 2, ]
-        getOption("MSstatsLog")("INFO", "Features with all missing measurements across runs are removed")
-        getOption("MSstatsMsg")("INFO", "Features with all missing measurements across runs are removed")
+        msg = "Features with 1 or two measurements across runs are removed"
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
     } else {
         counts = counts[n_obs > 0, ]
-        getOption("MSstatsLog")("INFO", "Features with 1 or two measurements across runs are removed")
-        getOption("MSstatsMsg")("INFO", "Features with 1 or two measurements across runs are removed")
+        msg = "Features with all missing measurements across runs are removed"
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
     }
-    merge(input, counts[, feature_columns, with = FALSE],
+    merge(input, unique(counts[, feature_columns, with = FALSE]),
           by = feature_columns, sort = FALSE)
 }
 
@@ -187,16 +189,16 @@
 #' if needed.
 #' @return data.table
 #' @keywords internal
-.aggregatePSMstoPeptideIons <- function(input, feature_columns, summary_function = sum) {
-    Feature = keep = NULL
+.aggregatePSMstoPeptideIons = function(input, feature_columns, summary_function = sum) {
+    Feature = keep = n_measurements = NULL
     
-    feature_columns = cols = c("ProteinName", feature_columns, "Run")
+    feature_columns = c("ProteinName", feature_columns, "Run")
     n_channels = length(unique(input$Channel))
     
     counts = input[, list(n_measurements = .N),
                    by = feature_columns]
-    duplicated = counts[counts$n_measurements > n_channels, ]
-    not_duplicated = merge(input, counts[counts$n_measurements <= n_channels, 
+    duplicated = counts[n_measurements > n_channels, ]
+    not_duplicated = merge(input, counts[n_measurements <= n_channels, 
                                          feature_columns, with = FALSE],
                            by = feature_columns, sort = FALSE)
     duplicated = merge(input, duplicated[, feature_columns, with = FALSE], 
@@ -208,10 +210,11 @@
                      c("Feature", "PSM", "Channel", "Intensity", "Run", "Score",
                        "IsolationInterference", "IonsScore"))
     duplicated[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
-               by = "", .SDcols = cols]
+               by = feature_columns, .SDcols = cols]
     duplicated = duplicated[duplicated$PSM == duplicated$keep, 
                             !(colnames(duplicated) %in% c("keep", "Feature")), 
                             with = FALSE]
+    not_duplicated = not_duplicated[, !(colnames(not_duplicated) %in% c("keep", "Feature")), with = FALSE]
     input = rbind(duplicated, not_duplicated)
     
     msg = "PSMs have been aggregated to peptide ions."
