@@ -79,7 +79,7 @@
     colnames(frag_input) = .updateColnames(
         frag_input, frag_col_names[2:4], new_names)
     frag_input = .fixColumnTypes(
-        frag_input, character_columns = c(new_names, "Fragment.Key"))
+        frag_input, character_columns = c(new_names, "FragmentKey"))
     
     if (!grepl("\\+", frag_input[["FragmentIon"]][1])) {
         # TODO: is always all or none true? Indicate in docs that + means charge
@@ -102,5 +102,5 @@
                       id.vars = new_names, variable.name = "Run", 
                       value.name = "Intensity", value.factor = FALSE)
     frag_input[["Run"]] = gsub("_Intensity", "", frag_input[["Run"]])
-    frag_input 
+    frag_input[!(is.na(ProteinName))]
 }
