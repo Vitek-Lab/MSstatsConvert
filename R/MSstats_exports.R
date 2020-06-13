@@ -240,7 +240,7 @@ OpenSWATHtoMSstatsFormat = function(
     m_score_filter = list(score_column = "m_score", score_threshold = mscore_cutoff, 
                           direction = "smaller", behavior = "remove", 
                           handle_na = "remove", fill_value = NA,
-                          filter = TRUE, drop = TRUE)
+                          filter = TRUE, drop_column = TRUE)
     decoy_filter = list(col_name = "decoy", filter_symbols = 1, 
                         filter = TRUE, drop_column = TRUE)
     
