@@ -25,3 +25,25 @@ Imports:
 Suggests: 
     tinytest,
     covr
+Collate: 
+    'convert_Spectronaut.R'
+    'convert_SpectroMine.R'
+    'convert_Skyline.R'
+    'convert_ProteomeDiscoverer.R'
+    'convert_Progenesis.R'
+    'convert_OpenSWATH.R'
+    'convert_OpenMS.R'
+    'convert_MaxQuant.R'
+    'convert_DIAUmpire.R'
+    'MSstatsConvert_core_functions.R'
+    'MSstats_exports.R'
+    'utils_MSstatsConvert.R'
+    'utils_annotation.R'
+    'utils_checks.R'
+    'utils_classes.R'
+    'utils_clean_features.R'
+    'utils_dt_operations.R'
+    'utils_filtering.R'
+    'utils_fractions.R'
+    'utils_logging.R'
+    'utils_shared_peptides.R'
