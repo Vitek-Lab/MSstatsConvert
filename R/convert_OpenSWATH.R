@@ -20,6 +20,6 @@
   os_input[, c("PeptideSequence", "FragmentIon")] = os_input[, lapply(list(PeptideSequence, FragmentIon),
                                                                    function(x) gsub(":", "_", x))]
   os_input[["Intensity"]] = as.numeric(os_input[["Intensity"]])
-  os_input[Intensity < 1, "Intensity", with = FALSE] = NA
+  os_input$Intensity[os_input$Intensity < 1] = NA
   os_input
 }
