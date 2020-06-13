@@ -32,6 +32,13 @@
 #' @keywords internal 
 .mergeAnnotation = function(input, annotation) {
     if (!is.null(annotation)) {
+        if (is.element("Channel", colnames(input))) {
+            if (!all(unique(annotation$Channel) %in% unique(input$Channel))) {
+                msg = "Please check the annotation file. The channel name must be matched with that in input data "
+                getOption("MSstatsLog")("ERROR", msg)
+                stop(msg)
+            }
+        }
         cols = intersect(colnames(input), colnames(annotation))
         input = merge(input, annotation, by = cols, all.x = TRUE, sort = FALSE)
     }
@@ -39,13 +46,6 @@
         msg = "Condition in the input file must match condition in annotation"
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
-    }
-    if (is.element("Channel", colnames(input))) {
-        if (!all(unique(annotation$Channel) %in% unique(input$Channel))) {
-            msg = "Please check the annotation file. The channel name must be matched with that in input data "
-            getOption("MSstatsLog")("ERROR", msg)
-            stop(msg)
-        }
     }
     input
 }
