@@ -5,13 +5,13 @@
 #' @return data.table
 #' @keywords internal
 .cleanRawDIAUmpire = function(msstats_object, use_frag, use_pept) {
-    FragmentIon = ProteinName = PeptideSequence = . = NULL
+    FragmentIon = ProteinName = PeptideSequence = . ProteinKey = NULL
     frag_input = getInputFile(msstats_object, "Fragments")
     pept_input = getInputFile(msstats_object, "Peptides")
     prot_input = getInputFile(msstats_object, "Proteins")
 
-    if (!is.element("Selected_fragments", pept_input) | 
-        !is.element("Selected_fragments", frag_input)) {
+    if (!is.element("Selected_fragments", colnames(pept_input)) | 
+        !is.element("Selected_peptides", colnames(prot_input))) {
         msg = "Selected_fragments column is required. Please check it."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
@@ -26,7 +26,7 @@
         colnames(pept_input), 
         c("PeptideSequence", "ProteinName", "FragmentIon"))
     pept_input = pept_input[, lapply(.(FragmentIon), 
-                                     function(x) unlist(tstrsplit(x, "|", fixed = TRUE))),
+                                     function(x) unlist(data.table::tstrsplit(x, "|", fixed = TRUE))),
                             by = .(ProteinName, PeptideSequence)] 
         colnames(pept_input) = .updateColnames(pept_input, "V1", "FragmentIon")
     pept_input = pept_input[pept_input[["FragmentIon"]] != "", ]
@@ -34,17 +34,17 @@
     pept_input[["ProteinName"]] = as.character(pept_input[["ProteinName"]])
     
     prot_input = prot_input[, c("ProteinKey", "Selected_peptides"), with = FALSE]
-    prot_input = prot_input[prot_input[["Protein.Key"]] != "", ] 
+    prot_input = prot_input[ProteinKey != "", ] 
     prot_input[["Selected_peptides"]] = as.character(prot_input[["Selected_peptides"]])
     prot_input[["Selected_peptides"]] = trimws(prot_input[["Selected_peptides"]],
                                                "both") # Is it needed?
     colnames(prot_input) = .updateColnames(prot_input, colnames(prot_input),
                                            c("ProteinName", "PeptideSequence"))
     prot_input = prot_input[, lapply(.(PeptideSequence),
-                                     function(x) (unlist(tstrsplit(x, "|", fixed = TRUE)))),
+                                     function(x) (unlist(data.table::tstrsplit(x, "|", fixed = TRUE)))),
                             by = .(ProteinName)]
     colnames(prot_input) = .updateColnames(prot_input, "V1", "PeptideSequence")
-    prot_input = prot_input[prot_input[["PeptideSequence"]] != "", ]
+    prot_input = prot_input[PeptideSequence != "", ]
     
     prot_input[["ProteinName"]] = gsub(";", "", prot_input[["ProteinName"]])
     
