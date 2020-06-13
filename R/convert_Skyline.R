@@ -40,11 +40,11 @@
                                                c("ProteinName",
                                                  "PeptideSequence",
                                                  "PrecursorCharge",
-                                                 "Run")) # or just PeptideSequence and PrecursorCharge?
+                                                 "Run"))
+        getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
+        getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
+        input
     }
-    getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
-    getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
-    input
 }
 
 
