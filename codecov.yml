@@ -1,5 +1,10 @@
 comment: false
 
+ignore:
+  - R/utils_logging.R
+  - R/MSstats_exports.R
+  - R/utils_check.R
+
 coverage:
   status:
     project:
