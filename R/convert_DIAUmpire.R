@@ -5,7 +5,7 @@
 #' @return data.table
 #' @keywords internal
 .cleanRawDIAUmpire = function(msstats_object, use_frag, use_pept) {
-    FragmentIon = ProteinName = PeptideSequence = . ProteinKey = NULL
+    FragmentIon = ProteinName = PeptideSequence = . = ProteinKey = NULL
     frag_input = getInputFile(msstats_object, "Fragments")
     pept_input = getInputFile(msstats_object, "Peptides")
     prot_input = getInputFile(msstats_object, "Proteins")
