@@ -25,13 +25,13 @@ DIAUmpiretoMSstatsFormat = function(
                           type = "MSstats", tool = "DIAUmpire", ...)
     input = MSstatsClean(input, use_frag = useSelectedFrag, 
                          use_pept = useSelectedPep)
-    annotation = .makeAnnotation(input, .getDataTable(annotation))
+    annotation = .makeAnnotation(input, annotation)
     input = MSstatsPreprocess(input, annotation,
                               c("PeptideSequence", "FragmentIon"),
                               remove_shared_peptides = TRUE, 
                               remove_single_feature_proteins = removeProtein_with1Feature,
                               feature_cleaning = list(
-                                  handle_feature_with_few_measurements = fewMeasurements,
+                                  handle_features_with_few_measurements = fewMeasurements,
                                   summarize_multiple_psms = summaryforMultipleRows
                               ),
                               columns_to_fill = list("PrecursorCharge" = NA,
