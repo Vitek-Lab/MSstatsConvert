@@ -17,9 +17,9 @@ labelled_object = MSstatsConvert:::.MSstatsFormat(data_no_channel_LH)
 # Fails with data that is not in MSstats format
 expect_error(MSstatsConvert:::.MSstatsFormat(data_invalid))
 # Has the right format for MSstats data
-expect_true(is(labelled_object, "MSstatsLabeled"))
-expect_true(is(labelfree_object, "MSstatsLabelFree"))
-expect_true(is(tmt_object, "MSstatsTMT"))
+expect_true(is(labelled_object, "MSstatsValidated"))
+expect_true(is(labelfree_object, "MSstatsValidated"))
+expect_true(is(tmt_object, "MSstatsValidated"))
 # Inherits after data.frame
 expect_true(is(labelled_object, "data.frame"))
 expect_true(is(labelfree_object, "data.frame"))
