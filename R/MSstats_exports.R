@@ -69,9 +69,9 @@ MaxQtoMSstatsFormat = function(
     input = MSstatsClean(input, protein_id_col = proteinID)
     annotation = .makeAnnotation(input, annotation, "Run" = "Rawfile")
     
-    m_filter = list(column = "PeptideSequence", pattern = "M", 
+    m_filter = list(col_name = "PeptideSequence", pattern = "M", 
                     filter = removeMpeptides, drop_column = FALSE)
-    oxidation_filter = list(column = "Modifications", pattern = "Oxidation", 
+    oxidation_filter = list(col_name = "Modifications", pattern = "Oxidation", 
                             filter = removeOxidationMpeptides, drop_column = TRUE)
     
     input = MSstatsPreprocess(input, annotation,
