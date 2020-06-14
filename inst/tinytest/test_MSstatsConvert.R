@@ -14,8 +14,6 @@ tmt_object = MSstatsConvert:::.MSstatsFormat(data_channel)
 labelfree_object = MSstatsConvert:::.MSstatsFormat(data_no_channel)
 labelled_object = MSstatsConvert:::.MSstatsFormat(data_no_channel_LH)
 
-# Fails with data that is not in MSstats format
-expect_error(MSstatsConvert:::.MSstatsFormat(data_invalid))
 # Has the right format for MSstats data
 expect_true(is(labelled_object, "MSstatsValidated"))
 expect_true(is(labelfree_object, "MSstatsValidated"))
