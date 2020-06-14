@@ -60,7 +60,7 @@ tinytest::expect_identical(
 )
 ## MSstats: missing condition
 missing_condition = MSstatsConvert:::.makeAnnotation(dataset, annotation_2, Run = "Rawfile")
-tinytest::expect_error(MSstatsConvert:::.mergeAnnotation(dataset, missing_condition))
+tinytest::expect_message(MSstatsConvert:::.mergeAnnotation(dataset, missing_condition))
 ## MSstatsTMT: missing channel
 missing_channel = MSstatsConvert:::.makeAnnotation(dataset, annotation_4, Run = "Rawfile")
 tinytest::expect_error(MSstatsConvert:::.mergeAnnotation(dataset_tmt, missing_channel))

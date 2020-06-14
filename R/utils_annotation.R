@@ -44,8 +44,8 @@
     }
     if (any(is.na(input$Condition))) {
         msg = "Condition in the input file must match condition in annotation"
-        getOption("MSstatsLog")("ERROR", msg)
-        stop(msg)
+        getOption("MSstatsLog")("WARN", msg)
+        getOption("MSstatsMsg")("WARN", msg)
     }
     input
 }
