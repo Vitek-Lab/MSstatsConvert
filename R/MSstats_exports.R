@@ -80,7 +80,7 @@ MaxQtoMSstatsFormat = function(
                               remove_single_feature_proteins = removeProtein_with1Peptide,
                               pattern_filtering = list(oxidation = oxidation_filter),
                               feature_cleaning = list(
-                                  handle_feature_with_few_measurements = fewMeasurements,
+                                  handle_features_with_few_measurements = fewMeasurements,
                                   summarize_multiple_psms = summaryforMultipleRows
                               ),
                               columns_to_fill = list("PrecursorCharge" = NA,
@@ -435,7 +435,7 @@ SkylinetoMSstatsFormat = function(
                             fill_value = NA_real_, handle_na = "keep",
                             filter = TRUE, drop_column = TRUE)
     qval_filter = list(score_column = "DetectionQValue", 
-                       score_threshol = qvalue_cutoff, direction = "smaller",
+                       score_threshold = qvalue_cutoff, direction = "smaller",
                        behavior = "fill", fill_value = 0, handle_na = "keep",
                        filter = filter_with_Qvalue, drop_column = TRUE)
     
