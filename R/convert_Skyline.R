@@ -24,8 +24,7 @@
                 "BioReplicate", "Run", "Intensity", "StandardType")
     sl_cols = c(sl_cols, "Fraction", "DetectionQValue", "Truncated")
     sl_input = sl_input[, intersect(sl_cols, colnames(sl_input)), with = FALSE]
-    non_missing = sapply(sl_input, function(x) !all(is.na(x))) | colnames(sl_input) == "StandardType"
-    sl_input[, non_missing, with = FALSE]
+    sl_input
 }
 
 
@@ -36,7 +35,7 @@
 .handleIsotopicPeaks = function(input, aggregate = FALSE) {
     if (.checkDDA(input) & aggregate) {
         input = .summarizeMultipleMeasurements(input, 
-                                               function(x) sum(x, na.rm = TRUE),
+                                               sum,
                                                c("ProteinName",
                                                  "PeptideSequence",
                                                  "PrecursorCharge",
