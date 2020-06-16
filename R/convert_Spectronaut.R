@@ -8,7 +8,12 @@
   
   spec_input = getInputFile(msstats_object, "input")
   spec_input = spec_input[FFrgLossType == "noloss", ]
-  spec_input = spec_input[!(FExcludedFromQuantification), ]
+  
+  if (is.character(spec_input$FExcludedFromQuantification)) {
+      spec_input = spec_input[FExcludedFromQuantification == "False", ]
+  } else {
+      spec_input = spec_input[!(FExcludedFromQuantification), ]
+  }
   # XIC quality. TODO: explain in documentation
   
   f_charge_col = .findAvailable(c("FCharge", "FFrgZ"), colnames(spec_input))
