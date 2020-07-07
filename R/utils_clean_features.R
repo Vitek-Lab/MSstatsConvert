@@ -120,14 +120,14 @@
 #' @return `data.table`
 #' @keywords internal
 .handleSingleFeaturePerProtein = function(input, remove_single_feature) {
-    ProteinName = NULL
+    ProteinName = n_obs = NULL
     
     feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
                                   "FragmentIon", "ProductCharge"),
                                 colnames(input))
     counts = unique(input[, c(feature_columns, "ProteinName"), with = FALSE])
     counts = counts[, list(n_obs = .N), by = "ProteinName"]
-    counts = unique(counts[counts$n_obs > 1L, list(ProteinName)])
+    counts = unique(counts[n_obs > 1L, list(ProteinName)])
     if (remove_single_feature & nrow(counts) > 0) {
         input = merge(input, counts, by = "ProteinName", sort = FALSE)
         getOption("MSstatsLog")("INFO", "Proteins with a single feature are removed")
