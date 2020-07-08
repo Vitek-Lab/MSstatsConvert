@@ -494,7 +494,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
     
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PeptideSequence", "Charge"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         score_filtering = list(pgq = pq_filter, psm_q = qval_filter),
@@ -502,6 +502,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
                                 summarize_multiple_psms = summaryforMultipleRows,
                                 remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
+    colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
     input

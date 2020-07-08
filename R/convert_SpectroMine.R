@@ -18,7 +18,7 @@
   colnames(sm_input) = .updateColnames(sm_input, 
                                        c("PGProteinAccessions", "PMoleculeID", 
                                          "PPCharge", "PSMQvalue", "RFileName"),
-                                       c("ProteinName", "PeptideSequence", "Charge",
+                                       c("ProteinName", "PeptideSequence", "PrecursorCharge",
                                          "Qvalue", "Run"))
   sm_input = sm_input[(sm_input$ProteinName != "") & (!is.na(sm_input$ProteinName)), ]
   sm_input = melt(sm_input, measure.vars = channels,
