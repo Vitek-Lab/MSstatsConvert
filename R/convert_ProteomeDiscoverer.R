@@ -95,7 +95,7 @@
                     variable.name = "Channel", value.name = "Intensity")
     pd_input$Channel = .standardizeColnames(pd_input$Channel)
     pd_input$Channel = gsub("Abundance", "", pd_input$Channel)
-    pd_input$Channel = gsub(":", pd_input$Channel)
+    pd_input$Channel = gsub(":", "", pd_input$Channel)
     pd_input$Intensity = ifelse(pd_input$Intensity == 0, NA, pd_input$Intensity)
     pd_input = pd_input[(pd_input$ProteinName != "") & (!is.na(pd_input$ProteinName)), ]
     if (remove_shared) {
