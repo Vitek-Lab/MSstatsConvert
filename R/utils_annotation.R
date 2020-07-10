@@ -16,7 +16,7 @@
         if (all(colnames(annotation) %in% joint_columns)) {
             NULL
         } else {
-            return(annotation)
+            return(annotation[, !duplicated(colnames(annotation)), with = FALSE])
         }
         # TODO: checks
     } else {
