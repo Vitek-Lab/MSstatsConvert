@@ -12,6 +12,9 @@
                                                    unname(all_columns),
                                                    names(all_columns))
         }
+        if (is.element("Channel", colnames(annotation))) {
+            annotation$Channel = .standardizeColnames(annotation$Channel)
+        }
         joint_columns = intersect(colnames(input), colnames(annotation)) 
         if (all(colnames(annotation) %in% joint_columns)) {
             NULL
