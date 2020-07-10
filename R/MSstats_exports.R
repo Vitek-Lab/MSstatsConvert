@@ -125,8 +125,8 @@ MaxQtoMSstatsTMTFormat = function(
         input, annotation, 
         feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
-        remove_single_feature_proteins = few_measurements,
-        list(handle_features_with_few_measurements = rmPSM_withfewMea_withinRun,
+        remove_single_feature_proteins = rmProtein_with1Feature,
+        list(handle_features_with_few_measurements = few_measurements,
              summarize_multiple_psms = summaryforMultipleRows,
              remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
