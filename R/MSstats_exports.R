@@ -117,7 +117,7 @@ MaxQtoMSstatsTMTFormat = function(
                           "MSstatsTMT", "MaxQuant", ...)
     input = MSstatsClean(input, protein_id_col = which.proteinid, 
                          remove_by_site = rmProt_Only.identified.by.site,
-                         channel_columns = "Reporter.intensity.corrected")
+                         channel_columns = "Reporterintensitycorrected")
     annotation = .makeAnnotation(input, annotation)
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
@@ -130,7 +130,7 @@ MaxQtoMSstatsTMTFormat = function(
              summarize_multiple_psms = summaryforMultipleRows,
              remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
-    colnames(input) = .updateColnames(colnames(input), "PrecursorCharge", "Charge")
+    colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
     input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
                       "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
     input
