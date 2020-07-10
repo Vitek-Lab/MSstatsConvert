@@ -12,7 +12,7 @@
   if (is.character(spec_input$FExcludedFromQuantification)) {
       spec_input = spec_input[FExcludedFromQuantification == "False", ]
   } else {
-      spec_input = spec_input[!(FExcludedFromQuantification), ]
+      spec_input = spec_input[!(as.logical(FExcludedFromQuantification)), ]
   }
   # XIC quality. TODO: explain in documentation
   
