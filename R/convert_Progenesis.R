@@ -31,13 +31,11 @@
     prog_input$PeptideSequence = paste(prog_input$Sequence,
                                        prog_input$Modifications,
                                        sep = "")
-    prog_input = prog_input[!duplicated(prog_input), ] # dubious performance-wise
     if (is.element("Useinquantitation", colnames(prog_input))) {
         if (!is.logical(prog_input$Useinquantitation)) {
             prog_input$Useinquantitation = prog_input$Useinquantitation == "True"
         }
         prog_input = prog_input[(Useinquantitation), ]
-        # TODO: consider character version if these files ever import this columns as character
         prog_input = prog_input[, !(colnames(prog_input) == "Useinquantitation"),
                                 with = FALSE]
     }
