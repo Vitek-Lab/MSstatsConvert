@@ -17,8 +17,8 @@
         prog_input = prog_input[-skip, ]
         colnames(prog_input) = as.character(unlist(prog_input[1, ]))
         prog_input = prog_input[-1, ]
-        colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     }
+    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     protein_col = .findAvailable(c("Protein", "Accession"), 
                                  colnames(prog_input))
     colnames(prog_input) = .updateColnames(prog_input, 
