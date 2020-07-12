@@ -441,7 +441,7 @@ SkylinetoMSstatsFormat = function(
     
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmetIon", "ProductCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         score_filtering = list(truncated = truncated_filter, qval = qval_filter),
