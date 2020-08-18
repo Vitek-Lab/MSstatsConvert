@@ -19,7 +19,7 @@
                       .SDcols = c("FragmentIon", "Intensity")]
   os_input[, c("PeptideSequence", "FragmentIon")] = os_input[, lapply(list(PeptideSequence, FragmentIon),
                                                                    function(x) gsub(":", "_", x))]
-  os_input[["Intensity"]] = as.numeric(os_input[["Intensity"]])
+  os_input[["Intensity"]] = as.numeric(as.character(os_input[["Intensity"]]))
   os_input$Intensity[os_input$Intensity < 1] = NA
   os_input
 }

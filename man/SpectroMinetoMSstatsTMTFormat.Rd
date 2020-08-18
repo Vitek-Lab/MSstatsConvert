@@ -2,7 +2,7 @@
 % Please edit documentation in R/MSstats_exports.R
 \name{SpectroMinetoMSstatsTMTFormat}
 \alias{SpectroMinetoMSstatsTMTFormat}
-\title{Import data from Spectromine}
+\title{Import data from SpectroMine}
 \usage{
 SpectroMinetoMSstatsTMTFormat(
   input,
@@ -42,5 +42,5 @@ SpectroMinetoMSstatsTMTFormat(
 \code{data.frame} of class \code{MSstatsTMT}
 }
 \description{
-Import data from Spectromine
+Import data from SpectroMine
 }

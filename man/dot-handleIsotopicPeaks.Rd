@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{input}{data.table preprocessed by one of the \verb{cleanRaw*} functions.}
+
+\item{aggregate}{if TRUE, isotopic peaks will be summed.}
 }
 \value{
 data.table

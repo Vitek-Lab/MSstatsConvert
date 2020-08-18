@@ -10,6 +10,8 @@
 .filterFewMeasurements = function(input, min_intensity, handle_few,
                                   feature_columns) {
     Intensity = n_obs = NULL
+    feature_columns = setdiff(feature_columns, c("Run", "Condition", "BioReplicate",
+                                                 "StandardType", "IsotopeLabelType"))
     counts = input[, list(n_obs = sum(Intensity > min_intensity, 
                                       na.rm = TRUE)),
                    by = feature_columns]
@@ -26,7 +28,6 @@
     }
     merge(input, unique(counts[, feature_columns, with = FALSE]),
           by = feature_columns, sort = FALSE)
-
 }
 
 
@@ -45,7 +46,7 @@
                                       "PeptideSequence", "PrecursorCharge",
                                       "IsotopeLabelType")), 
                         with = FALSE])
-    feature_columns = c(feature_columns, "Run")
+    feature_columns = unique(c(feature_columns, "Run"))
     input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
                   by = feature_columns]
     merge(input, info, by = intersect(colnames(input), colnames(info)), sort = FALSE)
@@ -58,7 +59,9 @@
 #' for `MSstatsImport` for details.
 #' @return `data.table`
 #' @keywords internal 
-.cleanByFeature = function(input, feature_columns, cleaning_control) {   
+.cleanByFeature = function(input, feature_columns, cleaning_control) {
+    feature_columns = c(feature_columns, c("BioReplicate", "Condition", "StandardType"))
+    feature_columns = intersect(colnames(input), feature_columns)
     if (is.element("Channel", colnames(input))) {
         .cleanByFeatureTMT(input, feature_columns, 
                            cleaning_control[["summarize_multiple_psms"]],

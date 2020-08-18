@@ -23,8 +23,8 @@
                     "+ Only.identified.by.site proteins are removed.")
     }
     
-    mq_input = .filterManyColumns(mq_input, filter_cols, "\\+")
-    mq_pg = .filterManyColumns(mq_pg, filter_cols, "\\+")
+    mq_input = .filterManyColumns(mq_input, filter_cols, "+")
+    mq_pg = .filterManyColumns(mq_pg, filter_cols, "+")
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     

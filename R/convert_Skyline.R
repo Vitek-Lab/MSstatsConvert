@@ -10,7 +10,7 @@
     sl_input = sl_input[, !(colnames(sl_input) == "PeptideSequence"), with = FALSE]
     colnames(sl_input) = .updateColnames(sl_input, "PeptideModifiedSequence",
                                          "PeptideSequence")
-    sl_input[["Intensity"]] = as.numeric(sl_input[["Intensity"]])
+    sl_input[["Intensity"]] = as.numeric(as.character(sl_input[["Intensity"]]))
     if (is.element("DetectionQValue", colnames(sl_input))) {
         sl_input[["DetectionQValue"]] = as.numeric(as.character(sl_input[["DetectionQValue"]]))    
     }
@@ -30,16 +30,16 @@
 
 #' Handle isotopic peaks
 #' @param input data.table preprocessed by one of the `cleanRaw*` functions.
+#' @param aggregate if TRUE, isotopic peaks will be summed.
 #' @return data.table
 #' @keywords internal
 .handleIsotopicPeaks = function(input, aggregate = FALSE) {
     if (.checkDDA(input) & aggregate) {
-        input = .summarizeMultipleMeasurements(input, 
-                                               sum,
-                                               c("ProteinName",
-                                                 "PeptideSequence",
-                                                 "PrecursorCharge",
-                                                 "Run"))
+        feature_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run")
+        feature_cols = c(feature_cols, c("BioReplicate", "Condition", "StandardType", 
+                                         "IsotopeLabelType", "DetectionQValue"))
+        feature_cols = intersect(feature_cols, colnames(input))
+        input = .summarizeMultipleMeasurements(input, sum, feature_cols)
         getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
         getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
     }
@@ -48,7 +48,7 @@
 
 
 #' Check validity of DDA data
-#' @inherit .handleIsotopicPeaks
+#' @param input data.table preprocessed by one of the `cleanRaw*` functions.
 #' @return logical
 #' @keywords internal
 .checkDDA = function(input) {

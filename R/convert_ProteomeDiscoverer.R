@@ -25,6 +25,7 @@
     pd_input = getInputFile(msstats_object, "input")
     protein_id_column = .standardizeColnames(protein_id_column)
     sequence_column = .standardizeColnames(sequence_column)
+    quantification_column = .standardizeColnames(quantification_column)
     
     quantification_column = .findAvailable(c("Intensity", "Area"),
                                            colnames(pd_input),
@@ -34,7 +35,8 @@
                                          "ProteinGroupAccessions"),
                                        colnames(pd_input),
                                        protein_id_column)
-    sequence_column = .findAvailable(c("Sequence", "AnnotatedSequence"), colnames(pd_input), 
+    sequence_column = .findAvailable(c("Sequence", "AnnotatedSequence"), 
+                                     colnames(pd_input), 
                                      sequence_column)
     if (remove_shared) {
         pd_input = pd_input[XProteins == "1", ]

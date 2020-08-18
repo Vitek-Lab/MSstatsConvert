@@ -51,6 +51,6 @@
                                   variable.name = "Run",
                                   value.name = "Intensity",
                                   value.factor = FALSE)
-    prog_input$Intensity = as.numeric(prog_input$Intensity)
+    prog_input$Intensity = as.numeric(as.character(prog_input$Intensity))
     prog_input
 }

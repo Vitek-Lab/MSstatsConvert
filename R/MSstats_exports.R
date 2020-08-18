@@ -76,14 +76,15 @@ MaxQtoMSstatsFormat = function(
     
     input = MSstatsPreprocess(input, annotation,
                               feature_columns = c("PeptideSequence", "PrecursorCharge"),
-                              remove_shared_peptides = TRUE, 
+                              remove_shared_peptides = useUniquePeptide, 
                               remove_single_feature_proteins = removeProtein_with1Peptide,
-                              pattern_filtering = list(oxidation = oxidation_filter),
+                              pattern_filtering = list(oxidation = oxidation_filter,
+                                                       m = m_filter),
                               feature_cleaning = list(
                                   handle_features_with_few_measurements = fewMeasurements,
                                   summarize_multiple_psms = summaryforMultipleRows
                               ),
-                              columns_to_fill = list("PrecursorCharge" = NA,
+                              columns_to_fill = list("FragmentIon" = NA,
                                                      "ProductCharge" = NA,
                                                      "IsotopeLabelType" = "L"))
     input
@@ -131,8 +132,8 @@ MaxQtoMSstatsTMTFormat = function(
              remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
-    input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
-                      "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
+    # input = input[, c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture", 
+    #                   "TechRepMixture", "Run", "Channel", "BioReplicate", "Condition", "Intensity")]
     input
 }
 
@@ -165,8 +166,9 @@ OpenMStoMSstatsFormat = function(
                             "FragmentIon", "ProductCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
-        list(handle_features_with_few_measurements = fewMeasurements,
-             summarize_multiple_psms = summaryforMultipleRows)
+        feature_cleaning = list(
+            handle_features_with_few_measurements = fewMeasurements,
+            summarize_multiple_psms = summaryforMultipleRows)
     )
     input
 }
@@ -278,14 +280,14 @@ ProgenesistoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), "MSstats", "Progenesis", ...)
     annotation = .makeAnnotation(input, annotation)
-    input = MSstatsClean(input, unique(annotation$Run), TRUE)
+    input = MSstatsClean(input, unique(as.character(annotation$Run)), TRUE)
     
     oxidation_filter = list(col_name = "PeptideSequence", pattern = "Oxidation", 
-                            filter = TRUE, drop_column = FALSE)
+                            filter = removeOxidationMpeptides, drop_column = FALSE)
     
     input = MSstatsPreprocess(
         input, annotation, 
-        c("PeptideSequence", "PrecursorCharge"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Peptide,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -331,8 +333,10 @@ PDtoMSstatsFormat = function(
                          remove_shared = useNumProteinsColumn)
     annotation = .makeAnnotation(input, annotation)
     
-    oxidation_filter = list(col_name = "PeptideSequence", pattern = "Oxidation", 
-                            filter = TRUE, drop_column = FALSE)
+    oxidation_filter = list(col_name = "PeptideSequence", 
+                            pattern = "Oxidation", 
+                            filter = removeOxidationMpeptides, 
+                            drop_column = FALSE)
     
     input = MSstatsPreprocess(
         input, annotation, 
@@ -344,7 +348,7 @@ PDtoMSstatsFormat = function(
         pattern_filtering = list(oxidation = oxidation_filter),
         columns_to_fill = list("FragmentIon" = NA, "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
-    colnames(input) = .updateColnames(colnames(input), "PeptideSequence",
+    colnames(input) = .updateColnames(input, "PeptideSequence",
                                       "PeptideModifiedSequence")
     input
 }
@@ -419,7 +423,7 @@ SkylinetoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), "MSstats", "Skyline", ...)
     input = MSstatsClean(input)
-    annotation = .makeAnnotation(input, annotation)
+    annotation = .makeAnnotation(input, annotation, Run = "FileName")
     
     decoy_filter = list(col_name = "ProteinName",
                         filter_symbols = c("DECOY", "Decoys"),
@@ -441,7 +445,7 @@ SkylinetoMSstatsFormat = function(
     
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmetIon", "ProductCharge"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         score_filtering = list(truncated = truncated_filter, qval = qval_filter),
@@ -451,11 +455,13 @@ SkylinetoMSstatsFormat = function(
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
                                 summarize_multiple_psms = sum)
     )
+    input$IsotopeLabelType = ifelse(input$IsotopeLabelType == "light", "L", "H")
+    input = .fillValues(input, list("FragmentIon" = "sum", "ProductCharge" = NA))
     input
 }
 
 
-#' Import data from Spectromine
+#' Import data from SpectroMine
 #'
 #' @param input data name of SpectroMine PSM output. Read PSM sheet.
 #' @param annotation data frame which contains column Run, Fraction, TechRepMixture, Mixture, Channel, BioReplicate, Condition. Refer to the example 'annotation.mine' for the meaning of each column.
