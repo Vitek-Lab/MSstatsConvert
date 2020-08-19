@@ -34,14 +34,16 @@
 #' @return data.table
 #' @keywords internal
 .handleIsotopicPeaks = function(input, aggregate = FALSE) {
-    if (.checkDDA(input) & aggregate) {
-        feature_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run")
-        feature_cols = c(feature_cols, c("BioReplicate", "Condition", "StandardType", 
-                                         "IsotopeLabelType", "DetectionQValue"))
-        feature_cols = intersect(feature_cols, colnames(input))
-        input = .summarizeMultipleMeasurements(input, sum, feature_cols)
-        getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
-        getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
+    if (aggregate) {
+        if (.checkDDA(input)) {
+            feature_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run")
+            feature_cols = c(feature_cols, c("BioReplicate", "Condition", "StandardType", 
+                                             "IsotopeLabelType", "DetectionQValue"))
+            feature_cols = intersect(feature_cols, colnames(input))
+            input = .summarizeMultipleMeasurements(input, sum, feature_cols)
+            getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
+            getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
+        }
     }
     input
 }
