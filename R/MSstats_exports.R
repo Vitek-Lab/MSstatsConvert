@@ -192,7 +192,7 @@ OpenMStoMSstatsTMTFormat = function(
     rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE,
     summaryforMultiplePSMs = sum, ...
 ) {
-    input = MSstatsImport(list(input = input), "MSstats", "OpenMS", ...)
+    input = MSstatsImport(list(input = input), "MSstatsTMT", "OpenMS", ...)
     input = MSstatsClean(input)
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
@@ -201,9 +201,9 @@ OpenMStoMSstatsTMTFormat = function(
         feature_columns = c("PeptideSequence", "PrecursorCharge", "Reference", "RetentionTime"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
-        list(handle_features_with_few_measurements = few_measurements,
-             summarize_multiple_psms = summaryforMultiplePSMs,
-             remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
+        feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
+                                summarize_multiple_psms = summaryforMultiplePSMs,
+                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
     cols = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture",  "Fraction",
