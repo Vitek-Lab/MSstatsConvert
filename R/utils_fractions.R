@@ -21,9 +21,11 @@
 .combineFractions = function(input) {
     techrun = feature = id = Mixture = TechRepMixture = Run = NULL
     
+    cols = intersect(colnames(input), c("ProteinName", "PeptideSequence", 
+                                        "Charge", "PrecursorCharge"))
     input[, techrun := paste(Mixture, TechRepMixture, sep = "_")]
     input[, feature := do.call(".combine", .SD), 
-          .SDcols = c("ProteinName", "PeptideSequence", "PrecursorCharge")]
+          .SDcols = cols]
     input[, id := paste(feature, Run, sep = "_")]
     
     unoverlapped_list = vector("list", length(unique(input$techrun)))
@@ -84,14 +86,16 @@
 #' @return `data.table`
 #' @keywords internal
 .filterOverlapped = function(input, summary_function, overlapped_features) {
-    Intensity = id = agg_intensity = NULL
+    Intensity = id = agg_intensity = max_intensity = NULL
     
     overlapped = merge(input, overlapped_features, by = "feature", sort = FALSE)
-    overlapped = overlapped[, list(agg_intensity = summary_function(Intensity, na.rm = TRUE)),
-                            by = c("feature", "id")]
-    maximized = overlapped[, list(max_intensity = max(agg_intensity)), by = "feature"]
-    overlapped = merge(overlapped, maximized, by = "feature", sort = FALSE)
+    overlapped[, agg_intensity := summary_function(Intensity, na.rm = TRUE),
+               by = c("feature", "id")]
+    overlapped[, max_intensity := max(agg_intensity),
+               by = "feature"]
     overlapped = overlapped[overlapped$agg_intensity != overlapped$max_intensity]
     # TODO: there is a better pattern for this
-    input[!(id %in% overlapped$id), ]
+    input[!(id %in% overlapped$id), 
+          !(colnames(input) %in% c("agg_intensity", "max_intensiy")), 
+          with = FALSE]
 }
