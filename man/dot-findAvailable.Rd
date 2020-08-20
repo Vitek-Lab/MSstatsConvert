@@ -12,7 +12,7 @@
 \item{option_set}{set of values that includes one of the \code{possibilities}}
 
 \item{fall_back}{if there is none of the \code{possibilities} in \code{option_set},
-default to \code{fall_back}}
+or there are multiple hits, default to \code{fall_back}}
 }
 \value{
 same as option_set, usually character
