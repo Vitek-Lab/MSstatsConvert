@@ -23,7 +23,7 @@
 #' @param possibilities possible legal values of a variable
 #' @param option_set set of values that includes one of the `possibilities`
 #' @param fall_back if there is none of the `possibilities` in `option_set`,
-#' default to `fall_back`
+#' or there are multiple hits, default to `fall_back`
 #' @return same as option_set, usually character
 #' @keywords internal
 .findAvailable = function(possibilities, option_set, fall_back = NULL) {
@@ -41,6 +41,4 @@
     } else {
         chosen
     }
-    # TODO: throw + log error here if couldn't find
-    # TODO: there should be a specific value that will be chosen if it's among chosen
 }
