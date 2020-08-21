@@ -6,6 +6,9 @@
   PeptideSequence = FragmentIon = Intensity = NULL
   
   os_input = getInputFile(msstats_object, "input")
+  os_input = os_input[, c("ProteinName", "FullPeptideName", "Charge", 
+                          "filename", "aggr_Fragment_Annotation", "aggr_Peak_Area",
+                          "m_score", "decoy"), with = FALSE]
   colnames(os_input) = .updateColnames(
     os_input,
     c("FullPeptideName", "Charge", "filename", "aggr_Fragment_Annotation", "aggr_Peak_Area"),
@@ -13,8 +16,9 @@
   os_input = os_input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                           "Run", "FragmentIon", "Intensity",
                           "m_score", "decoy"), with = FALSE]
+  os_input$Intensity = as.character(os_input$Intensity)
   os_input = os_input[, lapply(.SD, 
-                               function(x) unlist(tstrsplit(x, ";", fixed = TRUE))),
+                               function(x) unlist(tstrsplit(x, split = ";", fixed = TRUE))),
                       by = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run", "m_score", "decoy"),
                       .SDcols = c("FragmentIon", "Intensity")]
   os_input[, c("PeptideSequence", "FragmentIon")] = os_input[, lapply(list(PeptideSequence, FragmentIon),

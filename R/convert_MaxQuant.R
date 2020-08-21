@@ -63,10 +63,8 @@
     mq_input = mq_input[, mq_cols, with = FALSE]
     
     if (getDataType(msstats_object) == "MSstatsTMT") {
-        mq_input$PSM = paste(mq_input$PeptideSequence, 
-                             mq_input$PrecursorCharge, 
-                             1:nrow(mq_input),
-                             sep = "_") # TODO: document why this is done
+        mq_input[, PSM := paste(PeptideSequence, PrecursorCharge, 
+                                1:nrow(mq_input), sep = "_")]
         mq_input = melt(mq_input, measure.vars = channels,
                         id.vars = c("ProteinName", "PeptideSequence", 
                                     "PrecursorCharge", "PSM", "Run", "Score"),
