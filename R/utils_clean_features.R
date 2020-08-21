@@ -10,14 +10,18 @@
 .filterFewMeasurements = function(input, min_intensity, handle_few,
                                   feature_columns) {
     Intensity = n_obs = NULL
-    feature_columns = setdiff(feature_columns, c("Run", "Condition", "BioReplicate",
-                                                 "StandardType", "IsotopeLabelType"))
+    annotation_cols = c("Run", "Condition", "BioReplicate",
+                        "StandardType", "IsotopeLabelType")
+    if (is.element("Channel", colnames(input))) {
+        annotation_cols = annotation_cols[-1]
+    }
+    feature_columns = setdiff(feature_columns, annotation_cols)
     counts = input[, list(n_obs = sum(Intensity > min_intensity, 
                                       na.rm = TRUE)),
                    by = feature_columns]
     if (handle_few == "remove") {
         counts = counts[n_obs > 2, ]
-        msg = "Features with 1 or two measurements across runs are removed"
+        msg = "Features with one or two measurements across runs are removed"
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
     } else {
@@ -111,7 +115,7 @@
     input = .filterFewMeasurements(input, 1, remove_few,
                                    unique(c("ProteinName", feature_columns, "Run")))
     input = .aggregatePSMstoPeptideIons(input, feature_columns, summary_function)
-    input$PSM = paste(input$PeptideSequence, input$Charge, sep = "_")
+    input$PSM = paste(input$PeptideSequence, input$PrecursorCharge, sep = "_")
     input
 }
 
@@ -123,16 +127,14 @@
 #' @return `data.table`
 #' @keywords internal
 .handleSingleFeaturePerProtein = function(input, remove_single_feature) {
-    ProteinName = n_obs = NULL
-    
-    feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
-                                  "FragmentIon", "ProductCharge"),
-                                colnames(input))
-    counts = unique(input[, c(feature_columns, "ProteinName"), with = FALSE])
-    counts = counts[, list(n_obs = .N), by = "ProteinName"]
-    counts = unique(counts[n_obs > 1L, list(ProteinName)])
-    if (remove_single_feature & nrow(counts) > 0) {
-        input = merge(input, counts, by = "ProteinName", sort = FALSE)
+    if (remove_single_feature) {
+        feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
+                                      "FragmentIon", "ProductCharge", "Charge"),
+                                    colnames(input))
+        input[, feature := do.call(".combine", feature_columns)]
+        input[, feature_count := uniqueN(feature), by = "ProteinName"]
+        input = input[feature_count > 1]
+        input = input[, !(colnames(input) %in% c("feature_count", "feature")), with = FALSE]
         getOption("MSstatsLog")("INFO", "Proteins with a single feature are removed")
         getOption("MSstatsMsg")("INFO", "Proteins with a single feature are removed")
     }
