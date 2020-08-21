@@ -66,7 +66,7 @@ MaxQtoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(evidence = evidence, protein_groups = proteinGroups), 
                           type = "MSstats", tool = "MaxQuant", ...)
-    input = MSstatsClean(input, protein_id_col = proteinID)
+    input = MSstatsClean(input, protein_id_col = proteinID, remove_by_site = TRUE)
     annotation = .makeAnnotation(input, annotation, "Run" = "Rawfile")
     
     m_filter = list(col_name = "PeptideSequence", pattern = "M", 
@@ -206,9 +206,9 @@ OpenMStoMSstatsTMTFormat = function(
                                 remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
     )
     colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
-    cols = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture",  "Fraction",
-             "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")
-    input = input[, intersect(cols, colnames(input))]
+    # cols = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture",  "Fraction",
+    #          "TechRepMixture", "Run", "Channel", "Condition", "BioReplicate", "Intensity")
+    # input = input[, intersect(cols, colnames(input))]
     input
 }
 
@@ -242,13 +242,13 @@ OpenSWATHtoMSstatsFormat = function(
     m_score_filter = list(score_column = "m_score", score_threshold = mscore_cutoff, 
                           direction = "smaller", behavior = "remove", 
                           handle_na = "remove", fill_value = NA,
-                          filter = TRUE, drop_column = TRUE)
+                          filter = filter_with_mscore, drop_column = TRUE)
     decoy_filter = list(col_name = "decoy", filter_symbols = 1, 
                         filter = TRUE, drop_column = TRUE)
     
     input = MSstatsPreprocess(
         input, annotation, 
-        c("PeptideSequence", "PrecursorCharge", "FragmentIon"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -380,7 +380,8 @@ PDtoMSstatsTMTFormat <- function(
 ) {
     input = MSstatsImport(list(input = input), "MSstatsTMT", "ProteomeDiscoverer", ...)
     input = MSstatsClean(input, protein_id_column = which.proteinid,
-                         remove_shared = useNumProteinsColumn)
+                         remove_shared = useNumProteinsColumn,
+                         remove_protein_groups = useNumProteinsColumn)
     annotation = .makeAnnotation(input, annotation)
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
