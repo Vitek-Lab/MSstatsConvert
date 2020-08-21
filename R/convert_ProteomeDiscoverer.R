@@ -1,9 +1,10 @@
 #' Clean raw Proteome Discoverer data
 #' @inheritParams .cleanRawPDMSstats
 .cleanRawPD = function(msstats_object, quantification_column, protein_id_column,
-                       sequence_column, remove_shared) {
+                       sequence_column, remove_shared, remove_protein_groups = TRUE) {
     if (getDataType(msstats_object) == "MSstatsTMT") {
-        .cleanRawPDTMT(msstats_object, remove_shared, protein_id_column)
+        .cleanRawPDTMT(msstats_object, remove_shared, 
+                       remove_protein_groups, protein_id_column)
     } else {
         .cleanRawPDMSstats(msstats_object, quantification_column, 
                            protein_id_column, sequence_column, remove_shared)
@@ -27,7 +28,7 @@
     sequence_column = .standardizeColnames(sequence_column)
     quantification_column = .standardizeColnames(quantification_column)
     
-    quantification_column = .findAvailable(c("Intensity", "Area"),
+    quantification_column = .findAvailable(c("Intensity", "Area", "PrecursorArea"),
                                            colnames(pd_input),
                                            quantification_column)
     protein_id_column = .findAvailable(c("Protein.Accessions", 
@@ -60,10 +61,13 @@
 
 #' Clean raw TMT data from Proteome Discoverer
 #' @inheritParams .cleanRawPDMSstats
+#' @param remove_protein_groups if TRUE, proteins with numProteins > 1 will be removed.
 #' @importFrom data.table melt
 #' @return `data.table`
 #' @keywords internal
-.cleanRawPDTMT = function(msstats_object, remove_shared = TRUE, protein_id_column = "ProteinAccessions") {
+.cleanRawPDTMT = function(msstats_object, remove_shared = TRUE, 
+                          remove_protein_groups = TRUE,
+                          protein_id_column = "ProteinAccessions") {
     pd_input = getInputFile(msstats_object, "input")
     protein_id_column = .standardizeColnames(protein_id_column)
     if (!is.element(protein_id_column, colnames(pd_input))) {
@@ -99,10 +103,13 @@
     pd_input$Channel = gsub("Abundance", "", pd_input$Channel)
     pd_input$Channel = gsub(":", "", pd_input$Channel)
     pd_input$Intensity = ifelse(pd_input$Intensity == 0, NA, pd_input$Intensity)
-    pd_input = pd_input[(pd_input$ProteinName != "") & (!is.na(pd_input$ProteinName)), ]
+    pd_input = pd_input[(ProteinName != "") & (!is.na(ProteinName)), ]
+    if (remove_protein_groups) {
+        pd_input = pd_input[numProtein == 1]
+    }
     if (remove_shared) {
         if ("UNIQUE" %in% toupper(pd_input[["QuanInof"]])) {
-            pd_input = pd_input[toupper(pd_input$QuanInfo) == 'UNIQUE', ]
+            pd_input = pd_input[toupper(QuanInfo) == 'UNIQUE', ]
         }
     }
     pd_input
