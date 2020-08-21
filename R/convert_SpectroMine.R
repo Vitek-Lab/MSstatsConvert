@@ -20,7 +20,9 @@
                                          "PPCharge", "PSMQvalue", "RFileName"),
                                        c("ProteinName", "PeptideSequence", "PrecursorCharge",
                                          "Qvalue", "Run"))
-  sm_input = sm_input[(sm_input$ProteinName != "") & (!is.na(sm_input$ProteinName)), ]
+  sm_input = sm_input[(ProteinName != "") & (!is.na(ProteinName)), ]
+  sm_input[, PSM := paste(PeptideSequence, PrecursorCharge, 
+                          1:nrow(sm_input), sep = "_")]
   sm_input = melt(sm_input, measure.vars = channels,
                   id.vars = setdiff(colnames(sm_input), channels),
                   variable.name = "Channel", value.name = "Intensity")
@@ -28,7 +30,5 @@
   sm_input$Channel = gsub("Raw", "", sm_input$Channel)
   sm_input$Channel = gsub(".", "", sm_input$Channel, fixed = TRUE)
   sm_input$Intensity = ifelse(sm_input$Intensity == 0, NA, sm_input$Intensity)
-  sm_input$PSM = paste(sm_input$PeptideSequence, sm_input$Charge, 
-                       1:nrow(sm_input), sep = "_")
   sm_input
 }
