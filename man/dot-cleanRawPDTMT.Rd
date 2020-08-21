@@ -7,6 +7,7 @@
 .cleanRawPDTMT(
   msstats_object,
   remove_shared = TRUE,
+  remove_protein_groups = TRUE,
   protein_id_column = "ProteinAccessions"
 )
 }
@@ -14,6 +15,8 @@
 \item{msstats_object}{an object of class \code{MSstatsSpectroMineFiles}.}
 
 \item{remove_shared}{lgl, if TRUE, shared peptides will be removed.}
+
+\item{remove_protein_groups}{if TRUE, proteins with numProteins > 1 will be removed.}
 
 \item{protein_id_column}{chr, name of a column with protein IDs.}
 }

@@ -35,7 +35,8 @@ MSstatsClean(msstats_object, ...)
   quantification_column,
   protein_id_column,
   sequence_column,
-  remove_shared
+  remove_shared,
+  remove_protein_groups = TRUE
 )
 
 \S4method{MSstatsClean}{MSstatsSkylineFiles}(msstats_object)
