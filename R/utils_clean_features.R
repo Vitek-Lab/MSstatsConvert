@@ -196,33 +196,22 @@
 #' @return data.table
 #' @keywords internal
 .aggregatePSMstoPeptideIons = function(input, feature_columns, summary_function = sum) {
-    Feature = keep = n_measurements = NULL
+    Feature = keep = n_psms = PSM = NULL
     
-    feature_columns = c("ProteinName", feature_columns, "Run")
-    n_channels = length(unique(input$Channel))
+    feature_columns = unique(c("ProteinName", feature_columns, "Run"))
+    input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
+    input[, Feature := do.call(".combine", .SD), 
+          .SDcols = feature_columns]
     
-    counts = input[, list(n_measurements = .N),
-                   by = feature_columns]
-    duplicated = counts[n_measurements > n_channels, ]
-    not_duplicated = merge(input, counts[n_measurements <= n_channels, 
-                                         feature_columns, with = FALSE],
-                           by = feature_columns, sort = FALSE)
-    duplicated = merge(input, duplicated[, feature_columns, with = FALSE], 
-                       by = feature_columns, sort = FALSE)
-    duplicated[, Feature := do.call(".combine", .SD), 
-               .SDcols = feature_columns]
-    
-    cols = intersect(colnames(duplicated),
+    cols = intersect(colnames(input),
                      c("Feature", "PSM", "Channel", "Intensity", "Run", "Score",
-                       "IsolationInterference", "IonsScore"))
-    duplicated[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
+                       "IsolationInterference", "IonsScore", "n_psms"))
+    input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
                by = feature_columns, .SDcols = cols]
-    duplicated = duplicated[duplicated$PSM == duplicated$keep, 
-                            !(colnames(duplicated) %in% c("keep", "Feature")), 
-                            with = FALSE]
-    not_duplicated = not_duplicated[, !(colnames(not_duplicated) %in% c("keep", "Feature")), with = FALSE]
-    input = rbind(duplicated, not_duplicated)
-    
+    input = input[PSM == keep, 
+                  !(colnames(input) %in% c("keep", "Feature")), 
+                  with = FALSE]
+
     msg = "PSMs have been aggregated to peptide ions."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
@@ -237,43 +226,59 @@
 .summarizeMultiplePSMs = function(input, summary_function) {
     Intensity = Score = IsolationInterference = IonsScore = NULL
     
-    unique_counts = input[, list(n_unique = uniqueN(Intensity)),
-                          by = c("Feature", "Run", "Channel")]
-    if (all(unique_counts$n_unique == 1L)) {
-        return(input$PSM[1])
-    }
-    
-    if ("Score" %in% colnames(input)) {
-        by_score = input[, list(score = unique(Score)),
-                         by = c("Feature", "Run", "PSM")]
-        if (uniqueN(by_score$score) != 1) {
-            return(by_score$PSM[which.max(by_score$score)])
+    if (unique(input$n_psms) == 1) {
+        return(unique(input$PSM))
+    } else {
+        unique_counts = input[, list(n_unique = uniqueN(Intensity)),
+                              by = c("Feature", "Run", "Channel")]
+        if (all(unique_counts$n_unique == 1L)) {
+            return(input$PSM[1])
         }
-    }
-    
-    if ("IsolationInterference" %in% colnames(input)) {
-        by_score = input[, list(score = unique(IsolationInterference)),
-                         by = c("Feature", "Run", "PSM")]
-        if (uniqueN(by_score$score) != 1) {
-            return(by_score$PSM[which.min(by_score$score)])
+        
+        nonmissing_counts = input[, list(n_nonmissing = sum(!is.na(Intensity))),
+                                  by = c("Feature", "Run", "PSM")]
+        is_max = nonmissing_counts$n_nonmissing == max(nonmissing_counts$n_nonmissing, na.rm = TRUE)
+        if (sum(is_max) == 1) {
+            return(nonmissing_counts$PSM[which.max(nonmissing_counts$n_nonmissing)])
+        } else {
+            input = input[PSM %in% unique(nonmissing_counts$PSM[is_max])]
         }
-    }
-    
-    if ("IonsScore" %in% colnames(input)) {
-        by_score = input[, list(score = unique(IonsScore)),
-                         by = c("Feature", "Run", "PSM")]
-        if (uniqueN(by_score$score) != 1) {
-            return(by_score$PSM[which.max(by_score$score)])
+        
+        if ("Score" %in% colnames(input)) {
+            by_score = input[, list(score = unique(Score)),
+                             by = c("Feature", "Run", "PSM")]
+            is_max = by_score$score == max(by_score$score, na.rm = TRUE)
+            if (sum(is_max) == 1) {
+                return(by_score$PSM[which.max(by_score$score)])
+            } else {
+                input = input[PSM %in% unique(by_score$PSM[is_max])]
+            }
         }
+        
+        if ("IsolationInterference" %in% colnames(input)) {
+            by_score = input[, list(score = unique(IsolationInterference)),
+                             by = c("Feature", "Run", "PSM")]
+            is_min = by_score$score == min(by_score$score, na.rm = TRUE)
+            if (sum(is_min) == 1) {
+                return(by_score$PSM[which.min(by_score$score)])
+            } else {
+                input = input[PSM %in% unique(by_score$PSM[is_min])]
+            }
+        }
+        
+        if ("IonsScore" %in% colnames(input)) {
+            by_score = input[, list(score = unique(IonsScore)),
+                             by = c("Feature", "Run", "PSM")]
+            is_max = sum(by_score$score == max(by_score$score, na.rm = TRUE))
+            if (sum(is_max) == 1) {
+                return(by_score$PSM[which.max(by_score$score)])
+            } else {
+                input = input[PSM %in% unique(by_score$PSM[is_max])]
+            }
+        }
+        
+        by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
+                       by = c("Feature", "Run", "PSM")]
+        return(by_max$PSM[which.max(by_max$Intensity)])
     }
-    
-    nonmissing_counts = input[, list(n_nonmissing = sum(!is.na(Intensity))),
-                              by = c("Feature", "Run", "PSM")]
-    if (uniqueN(nonmissing_counts$n_nonmissing) != 1) {
-        return(nonmissing_counts$PSM[which.max(nonmissing_counts$n_nonmissing)])
-    }
-    
-    by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
-                   by = c("Feature", "Run", "PSM")]
-    return(by_max$PSM[which.max(by_max$Intensity)])
 }
