@@ -33,26 +33,35 @@
     for (technical_run in unique(input$techrun)) {
         single_run = input[input$techrun == technical_run & !is.na(input$Intensity), ]
         features_to_remove = .getOverlappingFeatures(single_run)
-        msg = paste("For peptides overlapped between fractions of",
-                    technical_run, "use the fraction with maximal average abundance.")
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
         if (nrow(features_to_remove) > 0) {
-            single_run = .filterOverlapped(single_run, mean, features_to_remove)
+            single_run = .filterOverlapped(single_run, function(x, ...) sum(!is.na(x), ...), 
+                                           features_to_remove)
             features_to_remove = .getOverlappingFeatures(single_run)
             msg = paste("For peptides overlapped between fractions of",
-                        technical_run, "use the fraction with maximal summation abundance.")
+                        technical_run, "use the fraction with biggest number of measurements")
             getOption("MSstatsLog")("INFO", msg)
             getOption("MSstatsMsg")("INFO", msg)
             if (nrow(features_to_remove) > 0) {
-                single_run = .filterOverlapped(single_run, sum, features_to_remove)
+                single_run = .filterOverlapped(single_run, mean, features_to_remove)
                 features_to_remove = .getOverlappingFeatures(single_run)
+                msg = paste("For peptides overlapped between fractions of",
+                            technical_run, "use the fraction with maximal average abundance.")
+                getOption("MSstatsLog")("INFO", msg)
+                getOption("MSstatsMsg")("INFO", msg)
                 if (nrow(features_to_remove) > 0) {
-                    single_run = .filterOverlapped(single_run, max, features_to_remove)
+                    single_run = .filterOverlapped(single_run, sum, features_to_remove)
+                    features_to_remove = .getOverlappingFeatures(single_run)
                     msg = paste("For peptides overlapped between fractions of",
-                                technical_run, "use the fraction with maximal abundance.")
+                                technical_run, "use the fraction with maximal summation abundance.")
                     getOption("MSstatsLog")("INFO", msg)
                     getOption("MSstatsMsg")("INFO", msg)
+                    if (nrow(features_to_remove) > 0) {
+                        single_run = .filterOverlapped(single_run, max, features_to_remove)
+                        msg = paste("For peptides overlapped between fractions of",
+                                    technical_run, "use the fraction with maximal abundance.")
+                        getOption("MSstatsLog")("INFO", msg)
+                        getOption("MSstatsMsg")("INFO", msg)
+                    }
                 }
             }
         }
@@ -96,6 +105,6 @@
     overlapped = overlapped[overlapped$agg_intensity != overlapped$max_intensity]
     # TODO: there is a better pattern for this
     input[!(id %in% overlapped$id), 
-          !(colnames(input) %in% c("agg_intensity", "max_intensiy")), 
+          !(colnames(input) %in% c("agg_intensity", "max_intensity")), 
           with = FALSE]
 }
