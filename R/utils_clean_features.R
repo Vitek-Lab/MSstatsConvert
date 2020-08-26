@@ -113,7 +113,7 @@
                               remove_few, remove_any_missing) {
     input = .removeAnyMissingInRun(input, feature_columns, remove_any_missing)
     input = .filterFewMeasurements(input, 1, remove_few,
-                                   unique(c("ProteinName", feature_columns, "Run")))
+                                   unique(c("ProteinName", "PSM", "Run")))
     input = .aggregatePSMstoPeptideIons(input, feature_columns, summary_function)
     input$PSM = paste(input$PeptideSequence, input$PrecursorCharge, sep = "_")
     input
