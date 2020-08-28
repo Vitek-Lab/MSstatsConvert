@@ -207,11 +207,11 @@
                      c("Feature", "PSM", "Channel", "Intensity", "Run", "Score",
                        "IsolationInterference", "IonsScore", "n_psms"))
     input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
-               by = feature_columns, .SDcols = cols]
+          by = feature_columns, .SDcols = cols]
     input = input[PSM == keep, 
                   !(colnames(input) %in% c("keep", "Feature")), 
                   with = FALSE]
-
+    
     msg = "PSMs have been aggregated to peptide ions."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
