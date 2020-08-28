@@ -53,10 +53,18 @@
                                 technical_run, "use the fraction with maximal abundance.")
                     getOption("MSstatsLog")("INFO", msg)
                     getOption("MSstatsMsg")("INFO", msg)
+                    if (data.table::uniqueN(input$Run) > 1) {
+                        single_run = single_run[, list(Intensity = mean(Intensity, na.rm = TRUE)),
+                                                by = setdiff(colnames(single_run), 
+                                                             c("Run", "Intensity",
+                                                               "Fraction", "id", "n_psms",
+                                                               "QuanInfo", "IonsScore",
+                                                               "IsolationInterference"))]
+                    }
                 }
             }
         }
-        unoverlapped_list[[technical_run]] = single_run[, !(colnames(single_run) %in% c("feature", "techrun", "id")),
+        unoverlapped_list[[technical_run]] = single_run[, !(colnames(single_run) %in% c("feature", "run", "Fraction", "techrun", "id")),
                                                         with = FALSE]
     }
     input = rbindlist(unoverlapped_list)
