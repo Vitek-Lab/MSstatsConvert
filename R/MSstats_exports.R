@@ -387,7 +387,7 @@ PDtoMSstatsTMTFormat <- function(
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     input = MSstatsPreprocess(
         input, annotation, 
-        feature_columns = c("PSM"),
+        feature_columns = c("PeptideSequence", "PrecursorCharge"),
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
