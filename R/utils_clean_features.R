@@ -226,7 +226,7 @@
 .summarizeMultiplePSMs = function(input, summary_function) {
     Intensity = Score = IsolationInterference = IonsScore = NULL
     
-    if (unique(input$n_psms) == 1) {
+    if (all(unique(input$n_psms) == 1)) {
         return(unique(input$PSM))
     } else {
         unique_counts = input[, list(n_unique = uniqueN(Intensity)),
