@@ -4,15 +4,17 @@
 #' @keywords internal
 .cleanRawOpenMS = function(msstats_object) {
   om_input = getInputFile(msstats_object, "input")
-  om_input[["Intensity"]] = as.numeric(om_input[["Intensity"]])
+  om_input[, Intensity := as.numeric(as.character(Intensity))]
   
   if (getDataType(msstats_object) == "MSstats") {
     if (!is.element("IsotopeLabelType", colnames(om_input))) {
       om_input = .fillValues(om_input, c("IsotopeLabelType" = "L"))
     }
   } else {
-    om_input$PSM = paste(om_input$PSM, 1:nrow(om_input), sep = "_")  
-    om_input$Intensity = ifelse(om_input$Intensity == 0, NA, om_input$Intensity)
+    om_input[, PSM := do.call(".combine", .SD), 
+             .SDcols = c("PeptideSequence", "Charge",
+                         "Reference", "RetentionTime")]
+    om_input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
   }
   
   all_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Charge",
