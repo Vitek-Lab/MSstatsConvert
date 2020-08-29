@@ -20,8 +20,7 @@
   all_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", "Charge",
                "FragmentIon", "ProductCharge", "PSM", "IsotopeLabelType",
                "Condition", "BioReplicate", "Run", "Channel", "Intensity",
-               "Mixture", "TechRepMixture", "TechReplicate",
-               "Fraction", "Reference", "RetentionTime")
+               "Mixture", "TechRepMixture", "TechReplicate", "Fraction")
   cols = intersect(all_cols, colnames(om_input))
   om_input = om_input[, cols, with = FALSE]
   colnames(om_input) = .updateColnames(om_input, "Charge", "PrecursorCharge")
