@@ -12,8 +12,7 @@
     }
   } else {
     om_input[, PSM := do.call(".combine", .SD), 
-             .SDcols = c("PeptideSequence", "Charge",
-                         "Reference", "RetentionTime")]
+             .SDcols = c("PeptideSequence", "Charge", "RetentionTime")]
     om_input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
   }
   
