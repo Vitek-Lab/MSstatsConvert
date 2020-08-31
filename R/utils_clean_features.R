@@ -33,10 +33,9 @@
 #' @keywords internal
 .cleanByFeatureMSstats = function(input, feature_columns, summary_function,
                                   handle_few_measurements) {
-    feature_columns = unique(c(feature_columns, "Run"))
     input = .filterFewMeasurements(input, 1, "keep", feature_columns)
     input = .summarizeMultipleMeasurements(input, summary_function,
-                                           feature_columns)
+                                           c(feature_columns, "Run"))
     input = .filterFewMeasurements(input, 0, handle_few_measurements,
                                    feature_columns)
     input
@@ -89,7 +88,6 @@
                                       "PeptideSequence", "PrecursorCharge",
                                       "IsotopeLabelType")), 
                         with = FALSE])
-    feature_columns = unique(c(feature_columns, "Run"))
     input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
                   by = feature_columns]
     merge(input, info, by = intersect(colnames(input), colnames(info)), sort = FALSE)
@@ -142,11 +140,11 @@
 #' @keywords internal
 .removeMissingAllChannels = function(input, feature_columns) {
     Intensity = NotAllMissing = NULL
-    cols = c("ProteinName", feature_columns, "Run")
-    non_missing = input[, list(NotAllMissing = !(all(is.na(Intensity)) | all(Intensity == 0))),
-                        by = cols]
-    non_missing = unique(non_missing[(NotAllMissing), cols, with = FALSE])
-    input = merge(input, non_missing, by = cols, sort = FALSE)
+    cols = unique(c(feature_columns, "Run"))
+    input[, NotAllMissing := !(all(is.na(Intensity)) | all(Intensity == 0)),
+          by = cols]
+    input = input[(NotAllMissing)]
+    input = input[, colnames(input) != "NotAllMissing", with = FALSE]
     msg = "PSMs, that have all zero intensities across channels in each run, are removed."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
