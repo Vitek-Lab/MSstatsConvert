@@ -10,15 +10,15 @@
     sl_input = sl_input[, !(colnames(sl_input) == "PeptideSequence"), with = FALSE]
     colnames(sl_input) = .updateColnames(sl_input, "PeptideModifiedSequence",
                                          "PeptideSequence")
-    sl_input[["Intensity"]] = as.numeric(as.character(sl_input[["Intensity"]]))
+    sl_input[, Intensity := as.numeric(as.character(Intensity))]
     if (is.element("DetectionQValue", colnames(sl_input))) {
-        sl_input[["DetectionQValue"]] = as.numeric(as.character(sl_input[["DetectionQValue"]]))    
+        sl_input[, DetectionQValue := as.numeric(as.character(DetectionQValue))]
     }
-    if (is.character(sl_input[["Truncated"]])) {
-        sl_input[["Truncated"]] = sl_input[["Truncated"]] == "True"
+    if (is.character(sl_input$Truncated) | is.factor(sl_input$Truncated)) {
+        sl_input[, Truncated := as.character(Truncated) == "True"]
     }
-    sl_input[["Truncated"]] = as.integer(sl_input[["Truncated"]])
-    
+    sl_input[, Truncated := as.integer(Truncated)]
+
     sl_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                 "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition",
                 "BioReplicate", "Run", "Intensity", "StandardType")
