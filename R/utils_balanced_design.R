@@ -1,3 +1,4 @@
+#' @keywords internal
 .makeBalancedDesign = function(input, fill_missing) {
     is_tmt = is.element("Channel", colnames(input))
     if (is_tmt) {
@@ -40,6 +41,9 @@
     }
 }
 
+
+#' @keywords internal
+#' @importFrom data.table rbindlist
 .getFullDesign = function(input) {
     fractions = unique(input$Fraction)
     by_fraction = vector("list", length(fractions))
@@ -56,7 +60,12 @@
     data.table::rbindlist(by_fraction)
 }
 
+
+#' @keywords internal
+#' @importFrom data.table uniqueN
 .getMissingRunsPerFeature = function(input) {
+    n_measurements = NULL
+    
     n_runs = data.table::uniqueN(input$Run)
     any_missing = input[, list(n_measurements = data.table::uniqueN(Run)),
                         by = c("Fraction", "IsotopeLabelType", "feature")]
@@ -65,6 +74,7 @@
 }
 
 
+#' @keywords internal
 .checkDuplicatedMeasurements = function(input) {
     n_measurements = feature = NULL
     counts = input[, list(n_measurements = .N),
@@ -79,4 +89,3 @@
         stop(msg)
     }
 }
-

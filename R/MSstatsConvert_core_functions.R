@@ -224,6 +224,15 @@ MSstatsPreprocess = function(
 }
 
 
+#' Creates balanced design by removing overlapping fractions and filling incomplete rows
+#' 
+#' @param input `data.table` processed by the `MSstatsPreprocess` function
+#' @param feature_columns str, names of columns that define spectral features
+#' @param fill_incomplete if TRUE (default), Intensity values for missing runs
+#' will be added as NA
+#' 
+#' @export
+#' 
 MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE) {
     feature = NULL
     

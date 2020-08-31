@@ -4,7 +4,7 @@
 \alias{.handleFractions}
 \title{Check if there are overlapping features and remove if needed}
 \usage{
-.handleFractions(input, feature_columns)
+.handleFractions(input)
 }
 \arguments{
 \item{input}{data.table preprocessed by one of the .cleanRaw* functions and
