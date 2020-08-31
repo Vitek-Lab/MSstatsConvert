@@ -229,14 +229,13 @@
     if (all(unique(input$n_psms) == 1)) {
         return(unique(input$PSM))
     } else {
-        unique_counts = input[, list(n_unique = uniqueN(Intensity)),
-                              by = c("Feature", "Run", "Channel")]
-        if (all(unique_counts$n_unique == 1L)) {
+        unique_counts = nrow(unique(input[, colnames(input) != "PSM", with = FALSE]))
+        if (unique_counts == (nrow(input) / unique(input$n_psms))) {
             return(input$PSM[1])
         }
         
         nonmissing_counts = input[, list(n_nonmissing = sum(!is.na(Intensity))),
-                                  by = c("Feature", "Run", "PSM")]
+                                  by = c("PSM")]
         is_max = nonmissing_counts$n_nonmissing == max(nonmissing_counts$n_nonmissing, na.rm = TRUE)
         if (sum(is_max, na.rm = TRUE) == 1) {
             return(nonmissing_counts$PSM[which.max(nonmissing_counts$n_nonmissing)])
@@ -246,7 +245,7 @@
         
         if ("Score" %in% colnames(input)) {
             by_score = input[, list(score = unique(Score)),
-                             by = c("Feature", "Run", "PSM")]
+                             by = c("PSM")]
             is_max = by_score$score == max(by_score$score, na.rm = TRUE)
             if (sum(is_max, na.rm = TRUE) == 1) {
                 return(by_score$PSM[which.max(by_score$score)])
@@ -257,7 +256,7 @@
         
         if ("IsolationInterference" %in% colnames(input)) {
             by_score = input[, list(score = unique(IsolationInterference)),
-                             by = c("Feature", "Run", "PSM")]
+                             by = c("PSM")]
             is_min = by_score$score == min(by_score$score, na.rm = TRUE)
             if (sum(is_min, na.rm = TRUE) == 1) {
                 return(by_score$PSM[which.min(by_score$score)])
@@ -268,7 +267,7 @@
         
         if ("IonsScore" %in% colnames(input)) {
             by_score = input[, list(score = unique(IonsScore)),
-                             by = c("Feature", "Run", "PSM")]
+                             by = c("PSM")]
             is_max = sum(by_score$score == max(by_score$score, na.rm = TRUE))
             if (sum(is_max, na.rm = TRUE) == 1) {
                 return(by_score$PSM[which.max(by_score$score)])
@@ -278,7 +277,7 @@
         }
         
         by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
-                       by = c("Feature", "Run", "PSM")]
+                       by = c("PSM")]
         return(by_max$PSM[which.max(by_max$Intensity)])
     }
 }
