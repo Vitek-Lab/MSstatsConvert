@@ -29,11 +29,12 @@ DIAUmpiretoMSstatsFormat = function(
                          use_pept = useSelectedPep)
     annotation = .makeAnnotation(input, 
                                  annotation)
+    feature_columns = c("PeptideSequence", "FragmentIon")
     
     input = MSstatsPreprocess(
         input, 
         annotation,
-        c("PeptideSequence", "FragmentIon"),
+        feature_columns,
         remove_shared_peptides = TRUE, 
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -41,6 +42,7 @@ DIAUmpiretoMSstatsFormat = function(
         columns_to_fill = list("PrecursorCharge" = NA,
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
+    input = MSstatsBalancedDesign(input, feature_columns)
     
     input
 }
@@ -89,10 +91,11 @@ MaxQtoMSstatsFormat = function(
                             filter = removeOxidationMpeptides, 
                             drop_column = TRUE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge")
     input = MSstatsPreprocess(
         input, 
         annotation,
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide, 
         remove_single_feature_proteins = removeProtein_with1Peptide,
         pattern_filtering = list(oxidation = oxidation_filter,
@@ -102,7 +105,7 @@ MaxQtoMSstatsFormat = function(
         columns_to_fill = list("FragmentIon" = NA,
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     input
 }
 
@@ -141,15 +144,16 @@ MaxQtoMSstatsTMTFormat = function(
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows))
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     colnames(input) = .updateColnames(input, 
                                       "PrecursorCharge", 
                                       "Charge")
@@ -183,16 +187,17 @@ OpenMStoMSstatsFormat = function(
     annotation = .makeAnnotation(input, 
                                  annotation)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge", 
+                        "FragmentIon", "ProductCharge")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", 
-                            "FragmentIon", "ProductCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
                                 summarize_multiple_psms = summaryforMultipleRows))
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     input
 }
 
@@ -220,15 +225,17 @@ OpenMStoMSstatsTMTFormat = function(
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge")
     input = MSstatsPreprocess(
         input, 
         NULL, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultiplePSMs)
     )
+    input = MSstatsBalancedDesign(input, feature_columns)
     
     colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
     # cols = c("ProteinName", "PeptideSequence", "Charge", "PSM", "Mixture",  "Fraction",
@@ -280,10 +287,11 @@ OpenSWATHtoMSstatsFormat = function(
                         filter = TRUE, 
                         drop_column = TRUE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -292,6 +300,7 @@ OpenSWATHtoMSstatsFormat = function(
         exact_filtering = list(decoy = decoy_filter),
         columns_to_fill = c("ProductCharge" = NA, 
                             "IsotopeLabelType" = "L"))
+    input = MSstatsBalancedDesign(input, feature_columns)
     input
 }
 
@@ -327,10 +336,11 @@ ProgenesistoMSstatsFormat = function(
                             filter = removeOxidationMpeptides, 
                             drop_column = FALSE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Peptide,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -339,7 +349,7 @@ ProgenesistoMSstatsFormat = function(
         columns_to_fill = list("FragmentIon" = NA, 
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     colnames(input) = .updateColnames(input, 
                                       "PeptideSequence",
                                       "PeptideModifiedSequence")
@@ -388,10 +398,11 @@ PDtoMSstatsFormat = function(
                             filter = removeOxidationMpeptides, 
                             drop_column = FALSE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Peptide,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -400,7 +411,7 @@ PDtoMSstatsFormat = function(
         columns_to_fill = list("FragmentIon" = NA, 
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     colnames(input) = .updateColnames(input, 
                                       "PeptideSequence",
                                       "PeptideModifiedSequence")
@@ -443,6 +454,7 @@ PDtoMSstatsTMTFormat <- function(
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge")
     input = MSstatsPreprocess(
         input,
         annotation, 
@@ -452,7 +464,7 @@ PDtoMSstatsTMTFormat <- function(
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows)
     )
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     colnames(input) = .updateColnames(input,
                                       "PrecursorCharge", 
                                       "Charge")
@@ -523,10 +535,11 @@ SkylinetoMSstatsFormat = function(
                        filter = filter_with_Qvalue, 
                        drop_column = TRUE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         score_filtering = list(truncated = truncated_filter, 
@@ -537,8 +550,8 @@ SkylinetoMSstatsFormat = function(
         aggregate_isotopic = TRUE,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
                                 summarize_multiple_psms = sum))
-    
-    input$IsotopeLabelType = ifelse(input$IsotopeLabelType == "light", "L", "H")
+    input[, IsotopeLabelType := ifelse(IsotopeLabelType == "light", "L", "H")] # what if labeled differently?
+    input = MSstatsBalancedDesign(input, feature_columns)
     input
 }
 
@@ -591,17 +604,18 @@ SpectroMinetoMSstatsTMTFormat <- function(
                        filter = filter_with_Qvalue, 
                        drop_column = TRUE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge") 
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         score_filtering = list(pgq = pq_filter, psm_q = qval_filter),
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows)
     )
-    
+    input = MSstatsBalancedDesign(input, feature_columns)
     colnames(input) = .updateColnames(input, 
                                       "PrecursorCharge", 
                                       "Charge")
@@ -658,10 +672,11 @@ SpectronauttoMSstatsFormat = function(
                        filter = filter_with_Qvalue, 
                        drop_column = TRUE)
     
+    feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
     input = MSstatsPreprocess(
         input, 
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge"),
+        feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
@@ -669,5 +684,6 @@ SpectronauttoMSstatsFormat = function(
         score_filtering = list(pgq = pq_filter, 
                                psm_q = qval_filter),
         columns_to_fill = list("IsotopeLabelType" = "L"))
+    input = MSstatsBalancedDesign(input, feature_columns)
     input
 }
