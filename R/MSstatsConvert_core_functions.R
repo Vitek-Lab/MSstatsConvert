@@ -222,5 +222,17 @@ MSstatsPreprocess = function(
     input = .fillValues(input, columns_to_fill)
     input = .handleFractions(input)
     input[, Intensity := ifelse(is.finite(Intensity), Intensity, NA)]
+    input
+}
+
+
+MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE) {
+    # feature_columns + proteinName?
+    input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
+    input = .handleFractions(input, feature_columns)
+    input = .makeBalancedDesign(input, fill_incomplete)
+    input = input[, colnames(input) != "feature", with = FALSE]
     .MSstatsFormat(input)
 }
+
+
