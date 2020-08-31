@@ -7,7 +7,6 @@
 OpenMStoMSstatsTMTFormat(
   input,
   useUniquePeptide = TRUE,
-  rmPSM_withMissing_withinRun = FALSE,
   rmPSM_withfewMea_withinRun = TRUE,
   rmProtein_with1Feature = FALSE,
   summaryforMultiplePSMs = sum,
@@ -19,8 +18,6 @@ OpenMStoMSstatsTMTFormat(
 
 \item{useUniquePeptide}{TRUE(default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.}
 
-\item{rmPSM_withMissing_withinRun}{TRUE will remove PSM with any missing value within each Run. Defaut is FALSE.}
-
 \item{rmPSM_withfewMea_withinRun}{only for rmPSM_withMissing_withinRun = FALSE. TRUE(default) will remove the features that have 1 or 2 measurements within each Run.}
 
 \item{rmProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.}
@@ -28,6 +25,8 @@ OpenMStoMSstatsTMTFormat(
 \item{summaryforMultiplePSMs}{sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.}
 
 \item{...}{additional parameters to \code{data.table::fread}.}
+
+\item{rmPSM_withMissing_withinRun}{TRUE will remove PSM with any missing value within each Run. Defaut is FALSE.}
 }
 \value{
 \code{data.frame} of class \code{MSstatsTMT}.

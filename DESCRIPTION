@@ -1,6 +1,6 @@
 Package: MSstatsConvert
 Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
   person("Meena", "Choi", email = "mnchoi67@gmail.com", role = c("aut", "cre")),
   person("Tsung-Heng", "Tsai", email = "tsai.tsungheng@gmail.com", role = "aut"), 
@@ -39,6 +39,7 @@ Collate:
     'MSstats_exports.R'
     'utils_MSstatsConvert.R'
     'utils_annotation.R'
+    'utils_balanced_design.R'
     'utils_checks.R'
     'utils_classes.R'
     'utils_clean_features.R'

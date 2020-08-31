@@ -115,7 +115,6 @@ MaxQtoMSstatsFormat = function(
 #' @param which.proteinid Use 'Proteins'(default) column for protein name. 'Leading.proteins' or 'Leading.razor.proteins' or 'Gene.names' can be used instead to get the protein ID with single protein. However, those can potentially have the shared peptides.
 #' @param rmProt_Only.identified.by.site TRUE will remove proteins with '+' in 'Only.identified.by.site' column from proteinGroups.txt, which was identified only by a modification site. FALSE is the default.
 #' @param useUniquePeptide TRUE(default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-#' @param rmPSM_withMissing_withinRun TRUE will remove PSM with any missing value within each Run. Defaut is FALSE.
 #' @param rmPSM_withfewMea_withinRun only for rmPSM_withMissing_withinRun = FALSE. TRUE(default) will remove the features that have 1 or 2 measurements within each Run.
 #' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
 #' @param summaryforMultipleRows sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
@@ -127,8 +126,8 @@ MaxQtoMSstatsFormat = function(
 MaxQtoMSstatsTMTFormat = function(
     evidence, proteinGroups, annotation, which.proteinid = 'Proteins',
     rmProt_Only.identified.by.site = FALSE, useUniquePeptide = TRUE,
-    rmPSM_withMissing_withinRun = FALSE, rmPSM_withfewMea_withinRun = TRUE,
-    rmProtein_with1Feature = FALSE, summaryforMultipleRows = sum, ...
+    rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE, 
+    summaryforMultipleRows = sum, ...
 ) {
     input = MSstatsImport(list(evidence = evidence,
                                protein_groups = proteinGroups), 
@@ -149,8 +148,7 @@ MaxQtoMSstatsTMTFormat = function(
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
-                                summarize_multiple_psms = summaryforMultipleRows,
-                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun))
+                                summarize_multiple_psms = summaryforMultipleRows))
     
     colnames(input) = .updateColnames(input, 
                                       "PrecursorCharge", 
@@ -213,9 +211,8 @@ OpenMStoMSstatsFormat = function(
 #' @export
 #' 
 OpenMStoMSstatsTMTFormat = function(
-    input, useUniquePeptide = TRUE, rmPSM_withMissing_withinRun = FALSE,
-    rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE,
-    summaryforMultiplePSMs = sum, ...
+    input, useUniquePeptide = TRUE, rmPSM_withfewMea_withinRun = TRUE, 
+    rmProtein_with1Feature = FALSE, summaryforMultiplePSMs = sum, ...
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstatsTMT", "OpenMS", ...)
@@ -230,8 +227,7 @@ OpenMStoMSstatsTMTFormat = function(
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
-                                summarize_multiple_psms = summaryforMultiplePSMs,
-                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
+                                summarize_multiple_psms = summaryforMultiplePSMs)
     )
     
     colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
@@ -433,8 +429,8 @@ PDtoMSstatsFormat = function(
 PDtoMSstatsTMTFormat <- function(
     input, annotation, which.proteinid = 'Protein.Accessions', 
     useNumProteinsColumn = TRUE, useUniquePeptide = TRUE, 
-    rmPSM_withMissing_withinRun = FALSE, rmPSM_withfewMea_withinRun = TRUE, 
-    rmProtein_with1Feature = FALSE, summaryforMultipleRows = sum, ...
+    rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE, 
+    summaryforMultipleRows = sum, ...
 ) {
     input = MSstatsImport(list(input = input),
                           "MSstatsTMT", "ProteomeDiscoverer", ...)
@@ -454,8 +450,7 @@ PDtoMSstatsTMTFormat <- function(
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
-                                summarize_multiple_psms = summaryforMultipleRows,
-                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
+                                summarize_multiple_psms = summaryforMultipleRows)
     )
     
     colnames(input) = .updateColnames(input,
@@ -569,9 +564,8 @@ SkylinetoMSstatsFormat = function(
 #' 
 SpectroMinetoMSstatsTMTFormat <- function(
     input, annotation, filter_with_Qvalue = TRUE, qvalue_cutoff = 0.01,
-    useUniquePeptide = TRUE, rmPSM_withMissing_withinRun = FALSE,
-    rmPSM_withfewMea_withinRun = TRUE, rmProtein_with1Feature = FALSE,
-    summaryforMultipleRows = sum, ...
+    useUniquePeptide = TRUE, rmPSM_withfewMea_withinRun = TRUE, 
+    rmProtein_with1Feature = FALSE, summaryforMultipleRows = sum, ...
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstatsTMT", "SpectroMine", ...)
@@ -607,8 +601,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
         remove_single_feature_proteins = rmProtein_with1Feature,
         score_filtering = list(pgq = pq_filter, psm_q = qval_filter),
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
-                                summarize_multiple_psms = summaryforMultipleRows,
-                                remove_psms_with_any_missing = rmPSM_withMissing_withinRun)
+                                summarize_multiple_psms = summaryforMultipleRows)
     )
     
     colnames(input) = .updateColnames(input, 
@@ -643,8 +636,7 @@ SpectronauttoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "Spectronaut", ...)
-    input = MSstatsClean(input, i
-                         ntensity = intensity)
+    input = MSstatsClean(input, intensity = intensity)
     annotation = .makeAnnotation(input, 
                                  annotation, 
                                  "Run" = "RFileName", 

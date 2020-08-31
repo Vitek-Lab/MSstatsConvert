@@ -10,7 +10,6 @@ PDtoMSstatsTMTFormat(
   which.proteinid = "Protein.Accessions",
   useNumProteinsColumn = TRUE,
   useUniquePeptide = TRUE,
-  rmPSM_withMissing_withinRun = FALSE,
   rmPSM_withfewMea_withinRun = TRUE,
   rmProtein_with1Feature = FALSE,
   summaryforMultipleRows = sum,
@@ -29,8 +28,6 @@ BioReplicate, Condition columns or a path to file. Refer to the example 'annotat
 
 \item{useUniquePeptide}{lgl, if TRUE (default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.}
 
-\item{rmPSM_withMissing_withinRun}{lgl, if TRUE, will remove PSM with any missing value within each Run. Default is FALSE.}
-
 \item{rmPSM_withfewMea_withinRun}{lgl, only for rmPSM_withMissing_withinRun = FALSE. TRUE (default) will remove the features that have 1 or 2 measurements within each Run.}
 
 \item{rmProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.}
@@ -38,6 +35,8 @@ BioReplicate, Condition columns or a path to file. Refer to the example 'annotat
 \item{summaryforMultipleRows}{sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.}
 
 \item{...}{additional parameters to \code{data.table::fread}.}
+
+\item{rmPSM_withMissing_withinRun}{lgl, if TRUE, will remove PSM with any missing value within each Run. Default is FALSE.}
 }
 \value{
 \code{data.frame} of class \code{MSstatsTMT}

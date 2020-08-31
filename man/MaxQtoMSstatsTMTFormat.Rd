@@ -11,7 +11,6 @@ MaxQtoMSstatsTMTFormat(
   which.proteinid = "Proteins",
   rmProt_Only.identified.by.site = FALSE,
   useUniquePeptide = TRUE,
-  rmPSM_withMissing_withinRun = FALSE,
   rmPSM_withfewMea_withinRun = TRUE,
   rmProtein_with1Feature = FALSE,
   summaryforMultipleRows = sum,
@@ -30,8 +29,6 @@ MaxQtoMSstatsTMTFormat(
 \item{rmProt_Only.identified.by.site}{TRUE will remove proteins with '+' in 'Only.identified.by.site' column from proteinGroups.txt, which was identified only by a modification site. FALSE is the default.}
 
 \item{useUniquePeptide}{TRUE(default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.}
-
-\item{rmPSM_withMissing_withinRun}{TRUE will remove PSM with any missing value within each Run. Defaut is FALSE.}
 
 \item{rmPSM_withfewMea_withinRun}{only for rmPSM_withMissing_withinRun = FALSE. TRUE(default) will remove the features that have 1 or 2 measurements within each Run.}
 

@@ -1,3 +1,48 @@
+#' Perform by-feature operations.
+#' @param input `data.table` preprocessed by one of the cleanRaw* functions.
+#' @param feature_columns character vector of names of columns that define features.
+#' @param cleaning_control named list of two or three elements. See the documentation
+#' for `MSstatsImport` for details.
+#' @return `data.table`
+#' @keywords internal 
+.cleanByFeature = function(input, feature_columns, cleaning_control) {
+    if (is.element("Channel", colnames(input))) {
+        .cleanByFeatureTMT(input, feature_columns, 
+                           cleaning_control[["summarize_multiple_psms"]],
+                           cleaning_control[["handle_features_with_few_measurements"]])
+    } else {
+        .cleanByFeatureMSstats(input, feature_columns,
+                               cleaning_control[["summarize_multiple_psms"]],
+                               cleaning_control[["handle_features_with_few_measurements"]])
+    }
+}
+
+
+#' A set of common operations for converters: remove few features and aggregate
+#' 
+#' This function aggregates duplicated measurements per run for all features
+#' and removes features that have only missing or less than three measurements 
+#' across runs. 
+#' 
+#' @param input `data.table` pre-processed by one of the .cleanRaw* functions.
+#' @param summary_function function that will be used to aggregate multiple 
+#' measurement per feature in a single run.
+#' @param handle_few_measurements lgl, if TRUE, features with less than three
+#' measurements across runs will be removed.
+#' @return `data.table`
+#' @keywords internal
+.cleanByFeatureMSstats = function(input, feature_columns, summary_function,
+                                  handle_few_measurements) {
+    feature_columns = unique(c(feature_columns, "Run"))
+    input = .filterFewMeasurements(input, 1, "keep", feature_columns)
+    input = .summarizeMultipleMeasurements(input, summary_function,
+                                           feature_columns)
+    input = .filterFewMeasurements(input, 0, handle_few_measurements,
+                                   feature_columns)
+    input
+}
+
+
 #' Remove features with a small number of (non-missing) measurements across runs
 #' @param input `data.table` pre-processed by one of the .cleanRaw* functions.
 #' @param min_intensity minimum intensity that will be considered non-missing.
@@ -10,12 +55,6 @@
 .filterFewMeasurements = function(input, min_intensity, handle_few,
                                   feature_columns) {
     Intensity = n_obs = NULL
-    annotation_cols = c("Run", "Condition", "BioReplicate",
-                        "StandardType", "IsotopeLabelType")
-    if (is.element("Channel", colnames(input))) {
-        annotation_cols = annotation_cols[-1]
-    }
-    feature_columns = setdiff(feature_columns, annotation_cols)
     counts = input[, list(n_obs = sum(Intensity > min_intensity, 
                                       na.rm = TRUE)),
                    by = feature_columns]
@@ -56,52 +95,6 @@
     merge(input, info, by = intersect(colnames(input), colnames(info)), sort = FALSE)
 }
 
-#' Perform by-feature operations.
-#' @param input `data.table` preprocessed by one of the cleanRaw* functions.
-#' @param feature_columns character vector of names of columns that define features.
-#' @param cleaning_control named list of two or three elements. See the documentation
-#' for `MSstatsImport` for details.
-#' @return `data.table`
-#' @keywords internal 
-.cleanByFeature = function(input, feature_columns, cleaning_control) {
-    feature_columns = c(feature_columns, c("BioReplicate", "Condition", "StandardType"))
-    feature_columns = intersect(colnames(input), feature_columns)
-    if (is.element("Channel", colnames(input))) {
-        .cleanByFeatureTMT(input, feature_columns, 
-                           cleaning_control[["summarize_multiple_psms"]],
-                           cleaning_control[["handle_features_with_few_measurements"]],
-                           cleaning_control[["remove_psms_with_any_missing"]])
-    } else {
-        .cleanByFeatureMSstats(input, feature_columns,
-                               cleaning_control[["summarize_multiple_psms"]],
-                               cleaning_control[["handle_features_with_few_measurements"]])
-    }
-}
-
-
-#' A set of common operations for converters: remove few features and aggregate
-#' 
-#' This function aggregates duplicated measurements per run for all features
-#' and removes features that have only missing or less than three measurements 
-#' across runs. 
-#' 
-#' @param input `data.table` pre-processed by one of the .cleanRaw* functions.
-#' @param summary_function function that will be used to aggregate multiple 
-#' measurement per feature in a single run.
-#' @param handle_few_measurements lgl, if TRUE, features with less than three
-#' measurements across runs will be removed.
-#' @return `data.table`
-#' @keywords internal
-.cleanByFeatureMSstats = function(input, feature_columns, summary_function,
-                                  handle_few_measurements) {   
-    input = .filterFewMeasurements(input, 1, "keep", feature_columns)
-    input = .summarizeMultipleMeasurements(input, summary_function,
-                                           feature_columns)
-    input = .filterFewMeasurements(input, 0, handle_few_measurements,
-                                   feature_columns)
-    input
-}
-
 
 #' Perform by-feature operations for TMT data.
 #' @inheritParams .cleanByFeatureMSstats
@@ -111,11 +104,12 @@
 #' @keywords internal
 .cleanByFeatureTMT = function(input, feature_columns, summary_function,
                               remove_few, remove_any_missing) {
-    input = .removeAnyMissingInRun(input, feature_columns, remove_any_missing)
+    PSM = PeptideSequence = PrecursorCharge = NULL
+    
     input = .filterFewMeasurements(input, 1, remove_few,
-                                   unique(c("ProteinName", "PSM", "Run")))
+                                   unique(c("PSM", "Run")))
     input = .aggregatePSMstoPeptideIons(input, feature_columns, summary_function)
-    input$PSM = paste(input$PeptideSequence, input$PrecursorCharge, sep = "_")
+    input[, PSM := paste(PeptideSequence, PrecursorCharge, sep = "_")]
     input
 }
 
@@ -159,29 +153,6 @@
     input
 }
 
-#' Remove features that have any missing values from a run.
-#' @param input `data.table` pre-processed by one of the cleanRaw* functions.
-#' @param feature_columns character vector of names of columns that define features.
-#' @param remove if TRUE, features will be removed.
-#' @keywords internal
-.removeAnyMissingInRun = function(input, feature_columns, remove) {
-    Intensity = n_not_missing = NULL
-    
-    # TODO: probably this code will be more general with all(!is.na(Intensity))
-    if (remove) {
-        cols = c("ProteinName", feature_columns, "Run")
-        n_channels = length(unique(input$Channel))
-        counts = input[, list(n_not_missing = sum(!is.na(Intensity))),
-                       by = cols]
-        counts = unique(counts[n_not_missing == n_channels, cols, with = FALSE])
-        input = merge(input, counts, by = cols, sort = FALSE)
-        msg = "Rows which has any missing value within a run were removed from that run."
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
-    }
-    input
-}
-
 
 #' @keywords internal
 .combine = function(...) {
@@ -196,20 +167,20 @@
 #' @return data.table
 #' @keywords internal
 .aggregatePSMstoPeptideIons = function(input, feature_columns, summary_function = sum) {
-    Feature = keep = n_psms = PSM = NULL
+    feature = keep = n_psms = PSM = NULL
     
-    feature_columns = unique(c("ProteinName", feature_columns, "Run"))
+    feature_columns = unique(c(feature_columns, "Run"))
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
-    input[, Feature := do.call(".combine", .SD), 
+    input[, feature := do.call(".combine", .SD), 
           .SDcols = feature_columns]
     
     cols = intersect(colnames(input),
-                     c("Feature", "PSM", "Channel", "Intensity", "Run", "Score",
+                     c("feature", "PSM", "Channel", "Intensity", "Run", "Score",
                        "IsolationInterference", "IonsScore", "n_psms"))
     input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
           by = feature_columns, .SDcols = cols]
     input = input[PSM == keep, 
-                  !(colnames(input) %in% c("keep", "Feature")), 
+                  !(colnames(input) %in% c("keep", "feature")), 
                   with = FALSE]
     
     msg = "PSMs have been aggregated to peptide ions."

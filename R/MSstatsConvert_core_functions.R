@@ -202,8 +202,7 @@ MSstatsPreprocess = function(
     input, annotation, feature_columns, remove_shared_peptides = TRUE,
     remove_single_feature_proteins = TRUE,
     feature_cleaning = list(handle_features_with_few_measurements = "remove",
-                            summarize_multiple_psms = max,
-                            remove_psms_with_any_missing = FALSE),
+                            summarize_multiple_psms = max),
     score_filtering = list(), exact_filtering = list(), 
     pattern_filtering = list(), columns_to_fill = list(), 
     aggregate_isotopic = FALSE, ...
