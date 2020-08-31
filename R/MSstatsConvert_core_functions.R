@@ -221,6 +221,6 @@ MSstatsPreprocess = function(
     input = .mergeAnnotation(input, annotation)
     input = .fillValues(input, columns_to_fill)
     input = .handleFractions(input)
-    input$Intensity = ifelse(is.finite(input$Intensity), input$Intensity, NA)
+    input[, Intensity := ifelse(is.finite(Intensity), Intensity, NA)]
     .MSstatsFormat(input)
 }

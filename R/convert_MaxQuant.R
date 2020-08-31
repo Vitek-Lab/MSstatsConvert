@@ -78,6 +78,6 @@
                                           c("PSM", "Run"))
     }
     
-    mq_input = mq_input[!is.na(mq_input[["Intensity"]]), ]
+    mq_input = mq_input[!is.na(Intensity), ]
     mq_input
 }
