@@ -17,7 +17,10 @@
         }
         annotation[, !duplicated(colnames(annotation)), with = FALSE]
     } else {
-        NULL
+        cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
+                 "Mixture", "TechRepMixture")
+        cols = intersect(cols, colnames(input))
+        unique(input[, cols, with = FALSE])
     }
 }
 
