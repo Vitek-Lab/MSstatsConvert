@@ -3,7 +3,7 @@
 #' merged with annotation.
 #' @return `data.table`
 #' @keywords internal
-.handleFractions = function(input, feature_columns) {
+.handleFractions = function(input) {
     if (is.element("Channel", colnames(input))) {
         fractions = unique(input$Fraction)
         if (length(fractions) > 1) {
@@ -11,12 +11,13 @@
             msg = "Fractions belonging to same mixture have been combined."
             getOption("MSstatsLog")("INFO", msg)
             getOption("MSstatsMsg")("INFO", msg)
+        } else {
+            input$Fraction = 1
         }
     } else {
-        input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
         input = .handleFractionsLF(input)
     }
-    input[, colnames(input) != "feature", with = FALSE]
+    input
 }
 
 #' Remove peptide ions overlapped among multiple fractions of the same biological mixture
@@ -65,11 +66,11 @@
                 }
             }
         }
-        unoverlapped_list[[technical_run]] = single_run[, !(colnames(single_run) %in% c("run", "Fraction", "techrun", "id")),
+        unoverlapped_list[[technical_run]] = single_run[, !(colnames(single_run) %in% c("run", "techrun", "id")),
                                                         with = FALSE]
     }
     input = rbindlist(unoverlapped_list)
-    input$Run = paste(input$Mixture, input$TechRepMixture, sep = "_")
+    input[, Run := paste(Mixture, TechRepMixture, sep = "_")]
     input
 }
 
@@ -218,7 +219,6 @@
         input[, fraction_keep := .getCorrectFraction(.SD), 
               by = "feature", 
               .SDcols = c("feature", "Fraction", "Run", "Intensity")] # by = c("LABEL", "PROTEINNAME", "feature")?
-        # input = input[Fraction == fraction_keep, ] # ?
         input[, Intensity := ifelse(Fraction != fraction_keep, NA, Intensity)]
         input[, !(colnames(input) == "fraction_keep"), with = FALSE]
     }

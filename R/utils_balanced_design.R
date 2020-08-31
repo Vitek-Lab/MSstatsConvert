@@ -1,20 +1,30 @@
 .makeBalancedDesign = function(input, fill_missing) {
-    if (is.element("Channel", colnames(input))) {
+    is_tmt = is.element("Channel", colnames(input))
+    if (is_tmt) {
         input$IsotopeLabelType = "L"
+    } else {
+        input$Channel = 1
     }
     if (fill_missing) {
+        cols = intersect(colnames(input), 
+                         c("ProteinName", "feature", "PeptideSequence", 
+                           "PrecursorCharge", "FragmentIon", "ProductCharge", 
+                           "Fraction"))
+        annotation_cols = intersect(colnames(input), 
+                                    c("Run", "Condition", "BioReplicate", "Channel",
+                                      "Mixture", "TechRepMixture", "TechReplicate"))
         all_possibilities = .getFullDesign(input)
         all_possibilities = merge(
             all_possibilities, 
-            unique(input[, list(ProteinName, feature, PeptideSequence, PrecursorCharge,
-                                FragmentIon, ProductCharge, Fraction)]), 
+            unique(input[, cols, with = FALSE]), 
             all.x = TRUE, by = c("feature", "Fraction"))
         all_possibilities = merge(
             all_possibilities, 
-            unique(input[, list(Run, Condition, BioReplicate)]),
-            all.x = TRUE, by = "Run")
-        input = merge(all_possibilities, unique(input[, list(feature, Run, IsotopeLabelType, Fraction, Intensity)]),
-                      all.x = TRUE, by = c("feature", "Run", "IsotopeLabelType", "Fraction"))
+            unique(input[, annotation_cols, with = FALSE]),
+            all.x = TRUE, by = c("Run", "Channel"))
+        input = merge(all_possibilities, 
+                      unique(input[, list(feature, Run, Channel, IsotopeLabelType, Fraction, Intensity)]),
+                      all.x = TRUE, by = c("feature", "Run", "Channel", "IsotopeLabelType", "Fraction"))
         # TODO: log, whether any changes were made here
     } else {
         any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
@@ -23,25 +33,27 @@
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
     }
-    if (is.element("Channel", colnames(input))) {
+    if (is_tmt) {
         input[, colnames(input) != "IsotopeLabelType", with = FALSE]
     } else {
-        input
+        input[, colnames(input) != "Channel", with = FALSE]
     }
 }
 
 .getFullDesign = function(input) {
     fractions = unique(input$Fraction)
     by_fraction = vector("list", length(fractions))
+    channels = unique(input$Channel)
     for (fraction_id in seq_along(fractions)) {
         fraction = fractions[fraction_id]
         by_fraction[[fraction_id]] = data.table::as.data.table(
-            expand.grid(IsotopeLabelType = unique(input[Fraction == fraction, IsotopeLabelType]),
+            expand.grid(IsotopeLabelType = unique(input[, IsotopeLabelType]),
                         feature = unique(input[Fraction == fraction, feature]),
-                        Run = unique(input[Fraction == fraction, Run])))
+                        Run = unique(input[Fraction == fraction, Run]),
+                        Channel = channels))
         by_fraction[[fraction_id]]$Fraction = fraction
     }
-    rbindlist(by_fraction)
+    data.table::rbindlist(by_fraction)
 }
 
 .getMissingRunsPerFeature = function(input) {
