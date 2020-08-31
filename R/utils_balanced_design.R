@@ -4,9 +4,6 @@
     }
     if (fill_missing) {
         all_possibilities = .getFullDesign(input)
-        all_possibilities = merge(all_possibilities,
-                                  unique(input[, list(feature, IsotopeLabelType)]),
-                                  all.x = TRUE, by = c("feature", "IsotopeLabelType"))
         all_possibilities = merge(
             all_possibilities, 
             unique(input[, list(ProteinName, feature, PeptideSequence, PrecursorCharge,
@@ -16,8 +13,8 @@
             all_possibilities, 
             unique(input[, list(Run, Condition, BioReplicate)]),
             all.x = TRUE, by = "Run")
-        input = merge(all_possibilities, input[, list(feature, Run, IsotopeLabelType, Fraction, Intensity)],
-                      all.x = TRUE, by = c("feature", "Run", "IsotopeLabelType"))
+        input = merge(all_possibilities, unique(input[, list(feature, Run, IsotopeLabelType, Fraction, Intensity)]),
+                      all.x = TRUE, by = c("feature", "Run", "IsotopeLabelType", "Fraction"))
         # TODO: log, whether any changes were made here
     } else {
         any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
