@@ -15,13 +15,7 @@
         if (is.element("Channel", colnames(annotation))) {
             annotation$Channel = .standardizeColnames(annotation$Channel)
         }
-        joint_columns = intersect(colnames(input), colnames(annotation)) 
-        if (all(colnames(annotation) %in% joint_columns)) {
-            NULL
-        } else {
-            return(annotation[, !duplicated(colnames(annotation)), with = FALSE])
-        }
-        # TODO: checks
+        annotation[, !duplicated(colnames(annotation)), with = FALSE]
     } else {
         NULL
     }
@@ -43,7 +37,10 @@
             }
         }
         cols = intersect(colnames(input), colnames(annotation))
-        input = merge(input, annotation, by = cols, all.x = TRUE, sort = FALSE)
+        cols = setdiff(cols, c("Run", "Channel"))
+        annotation_cols = intersect(c("Run", "Channel"), colnames(input))
+        input = merge(input[, !(colnames(input) %in% cols), with = FALSE], 
+                      annotation, by = annotation_cols, all.x = TRUE, sort = FALSE)
     }
     if (any(is.na(input$Condition))) {
         msg = "Condition in the input file must match condition in annotation"
