@@ -536,9 +536,7 @@ SkylinetoMSstatsFormat = function(
                                irt = irt_filter),
         aggregate_isotopic = TRUE,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
-                                summarize_multiple_psms = sum),
-        columns_to_fill = list(FragmentIon = "sum", 
-                               "ProductCharge" = NA))
+                                summarize_multiple_psms = sum))
     
     input$IsotopeLabelType = ifelse(input$IsotopeLabelType == "light", "L", "H")
     input
