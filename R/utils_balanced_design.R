@@ -1,10 +1,10 @@
 #' @keywords internal
 .makeBalancedDesign = function(input, fill_missing) {
     is_tmt = is.element("Channel", colnames(input))
-
+    
     if (fill_missing) {
         cols = intersect(colnames(input), 
-                         c("ProteinName", "feature", "PeptideSequence", 
+                         c("ProteinName", "feature", "PeptideSequence", "PSM", 
                            "PrecursorCharge", "FragmentIon", "ProductCharge"))
         annotation_cols = intersect(colnames(input), 
                                     c("Run", "Condition", "BioReplicate", "Channel",
@@ -14,6 +14,8 @@
         if (is_tmt) {
             group_col = "Run"
             measurement_col = "Channel"
+            cols = intersect(c(cols, "Fraction"),
+                             colnames(input))
         } else {
             group_col = "Fraction"
             measurement_col = "Run"
@@ -30,8 +32,7 @@
             all.x = TRUE, by = unique(c("Run", measurement_col)))
         input = merge(all_possibilities, 
                       unique(input[, c(intensity_ids, "Intensity"), with = FALSE]),
-                      all.x = TRUE, by = intensity_ids)
-        # TODO: log, whether any changes were made here
+                      all.x = TRUE, by = intensity_ids)        # TODO: log, whether any changes were made here
     } else {
         any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
         msg = paste("The following features have missing values in at least one run.",

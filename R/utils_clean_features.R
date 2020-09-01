@@ -122,7 +122,7 @@
         feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
                                       "FragmentIon", "ProductCharge", "Charge"),
                                     colnames(input))
-        input[, feature := do.call(".combine", feature_columns)]
+        input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
         input[, feature_count := uniqueN(feature), by = "ProteinName"]
         input = input[feature_count > 1]
         input = input[, !(colnames(input) %in% c("feature_count", "feature")), with = FALSE]
