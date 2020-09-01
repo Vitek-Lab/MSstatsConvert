@@ -100,7 +100,8 @@
     }
     
     if (filter) {
-        msg = paste("Sequences containing", pattern, "are removed")
+        msg = paste("Sequences containing", 
+                    paste(pattern, sep = ", ", collapse = ", "), "are removed")
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
         pattern_filter = !grepl(pattern, input[[col_name]])
