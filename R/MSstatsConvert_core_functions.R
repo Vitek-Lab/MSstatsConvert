@@ -234,12 +234,17 @@ MSstatsPreprocess = function(
 #' 
 #' @export
 #' 
-MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE) {
+MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
+                                 handle_fractions = TRUE) {
     feature = NULL
     
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
-    input = .handleFractions(input)
-    input = .makeBalancedDesign(input, fill_incomplete)
+    if (handle_fractions) {
+        input = .handleFractions(input)
+    } 
+    if (fill_incomplete) {
+        input = .makeBalancedDesign(input, TRUE)
+    }
     input = input[, colnames(input) != "feature", with = FALSE]
     .MSstatsFormat(input)
 }

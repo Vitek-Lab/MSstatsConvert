@@ -1,31 +1,36 @@
 #' @keywords internal
 .makeBalancedDesign = function(input, fill_missing) {
     is_tmt = is.element("Channel", colnames(input))
-    if (is_tmt) {
-        input$IsotopeLabelType = "L"
-    } else {
-        input$Channel = 1
-    }
+
     if (fill_missing) {
         cols = intersect(colnames(input), 
                          c("ProteinName", "feature", "PeptideSequence", 
-                           "PrecursorCharge", "FragmentIon", "ProductCharge", 
-                           "Fraction"))
+                           "PrecursorCharge", "FragmentIon", "ProductCharge"))
         annotation_cols = intersect(colnames(input), 
                                     c("Run", "Condition", "BioReplicate", "Channel",
                                       "Mixture", "TechRepMixture", "TechReplicate"))
-        all_possibilities = .getFullDesign(input)
+        intensity_ids = intersect(c("feature", "Run", "Channel", "IsotopeLabelType",
+                                    "Fraction"), colnames(input))
+        if (is_tmt) {
+            group_col = "Run"
+            measurement_col = "Channel"
+        } else {
+            group_col = "Fraction"
+            measurement_col = "Run"
+        }
+        all_possibilities = .getFullDesign(input, group_col, "feature",
+                                           measurement_col, is_tmt)
         all_possibilities = merge(
             all_possibilities, 
-            unique(input[, cols, with = FALSE]), 
-            all.x = TRUE, by = c("feature", "Fraction"))
+            unique(input[, c(cols, group_col), with = FALSE]), 
+            all.x = TRUE, by = c("feature", group_col))
         all_possibilities = merge(
             all_possibilities, 
             unique(input[, annotation_cols, with = FALSE]),
-            all.x = TRUE, by = c("Run", "Channel"))
+            all.x = TRUE, by = unique(c("Run", measurement_col)))
         input = merge(all_possibilities, 
-                      unique(input[, list(feature, Run, Channel, IsotopeLabelType, Fraction, Intensity)]),
-                      all.x = TRUE, by = c("feature", "Run", "Channel", "IsotopeLabelType", "Fraction"))
+                      unique(input[, c(intensity_ids, "Intensity"), with = FALSE]),
+                      all.x = TRUE, by = intensity_ids)
         # TODO: log, whether any changes were made here
     } else {
         any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
@@ -34,30 +39,37 @@
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
     }
-    if (is_tmt) {
-        input[, colnames(input) != "IsotopeLabelType", with = FALSE]
-    } else {
-        input[, colnames(input) != "Channel", with = FALSE]
-    }
+    input
 }
 
 
 #' @keywords internal
 #' @importFrom data.table rbindlist
-.getFullDesign = function(input) {
-    fractions = unique(input$Fraction)
-    by_fraction = vector("list", length(fractions))
-    channels = unique(input$Channel)
-    for (fraction_id in seq_along(fractions)) {
-        fraction = fractions[fraction_id]
-        by_fraction[[fraction_id]] = data.table::as.data.table(
-            expand.grid(IsotopeLabelType = unique(input[, IsotopeLabelType]),
-                        feature = unique(input[Fraction == fraction, feature]),
-                        Run = unique(input[Fraction == fraction, Run]),
-                        Channel = channels))
-        by_fraction[[fraction_id]]$Fraction = fraction
+.getFullDesign = function(input, group_col, feature_col, measurement_col, is_tmt) {
+    if (is_tmt) {
+        labels = "L"
+    } else {
+        labels = unique(input[["IsotopeLabelType"]])
     }
-    data.table::rbindlist(by_fraction)
+    groups = unique(input[[group_col]])
+    by_group = vector("list", length(groups))
+    measurements = unique(input[[measurement_col]])
+    for (group_id in seq_along(groups)) {
+        group = groups[group_id]
+        group_filter = input[[group_col]] == group
+        by_group[[group_id]] = data.table::as.data.table(
+            expand.grid(labels = labels,
+                        features = unique(input[[feature_col]][group_filter]),
+                        measurements = measurements))
+        by_group[[group_id]]$group = group
+    }
+    result = data.table::rbindlist(by_group)
+    colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
+    if (is_tmt) {
+        result[, 2:4, with = FALSE]
+    } else {
+        result
+    }
 }
 
 
