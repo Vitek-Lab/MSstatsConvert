@@ -42,6 +42,8 @@
                                              "IsotopeLabelType", "DetectionQValue"))
             feature_cols = intersect(feature_cols, colnames(input))
             input = .summarizeMultipleMeasurements(input, sum, feature_cols)
+            input[, FragmentIon := NA]
+            input[, ProductCharge := NA]
             getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
             getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
         }
