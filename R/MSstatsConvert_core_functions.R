@@ -213,6 +213,7 @@ MSstatsPreprocess = function(
                         feature_cleaning)
     annotation = .makeAnnotation(input, annotation, ...)
     input = .handleFiltering(input, score_filtering, exact_filtering, pattern_filtering)
+    input = .filterFewMeasurements(input, 1, "keep", feature_columns)
     input = .handleSharedPeptides(input, remove_shared_peptides)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
     input = .cleanByFeature(input, feature_columns, feature_cleaning)

@@ -33,7 +33,6 @@
 #' @keywords internal
 .cleanByFeatureMSstats = function(input, feature_columns, summary_function,
                                   handle_few_measurements) {
-    input = .filterFewMeasurements(input, 1, "keep", feature_columns)
     input = .summarizeMultipleMeasurements(input, summary_function,
                                            c(feature_columns, "Run"))
     input = .filterFewMeasurements(input, 0, handle_few_measurements,
