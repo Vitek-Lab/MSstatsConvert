@@ -503,7 +503,7 @@ SkylinetoMSstatsFormat = function(
                                  Run = "FileName")
     
     decoy_filter = list(col_name = "ProteinName",
-                        filter_symbols = c("DECOY", "Decoys"),
+                        pattern = c("DECOY", "Decoys"),
                         filter = TRUE, 
                         drop_column = FALSE)
     
@@ -544,9 +544,9 @@ SkylinetoMSstatsFormat = function(
         remove_single_feature_proteins = removeProtein_with1Feature,
         score_filtering = list(truncated = truncated_filter, 
                                qval = qval_filter),
-        pattern_filtering = list(oxidation = oxidation_filter),
-        exact_filtering = list(decoy = decoy_filter, 
-                               irt = irt_filter),
+        pattern_filtering = list(decoy = decoy_filter, 
+                                 oxidation = oxidation_filter),
+        exact_filtering = list(irt = irt_filter),
         aggregate_isotopic = TRUE,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
                                 summarize_multiple_psms = sum))
