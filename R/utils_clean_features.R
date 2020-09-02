@@ -7,36 +7,23 @@
 #' @keywords internal 
 .cleanByFeature = function(input, feature_columns, cleaning_control) {
     if (is.element("Channel", colnames(input))) {
-        .cleanByFeatureTMT(input, feature_columns, 
-                           cleaning_control[["summarize_multiple_psms"]],
-                           cleaning_control[["handle_features_with_few_measurements"]])
+        input = .filterFewMeasurements(
+            input, 0, 
+            cleaning_control[["handle_features_with_few_measurements"]],
+            unique(c("PSM", "Run")))
+        input = .aggregatePSMstoPeptideIons(
+            input, feature_columns, 
+            cleaning_control[["summarize_multiple_psms"]])
+        input
     } else {
-        .cleanByFeatureMSstats(input, feature_columns,
-                               cleaning_control[["summarize_multiple_psms"]],
-                               cleaning_control[["handle_features_with_few_measurements"]])
+        input = .summarizeMultipleMeasurements(
+            input, cleaning_control[["summarize_multiple_psms"]],
+            c(feature_columns, "Run"))
+        input = .filterFewMeasurements(
+            input, 0, 
+            cleaning_control[["handle_features_with_few_measurements"]],
+            feature_columns)
     }
-}
-
-
-#' A set of common operations for converters: remove few features and aggregate
-#' 
-#' This function aggregates duplicated measurements per run for all features
-#' and removes features that have only missing or less than three measurements 
-#' across runs. 
-#' 
-#' @param input `data.table` pre-processed by one of the .cleanRaw* functions.
-#' @param summary_function function that will be used to aggregate multiple 
-#' measurement per feature in a single run.
-#' @param handle_few_measurements lgl, if TRUE, features with less than three
-#' measurements across runs will be removed.
-#' @return `data.table`
-#' @keywords internal
-.cleanByFeatureMSstats = function(input, feature_columns, summary_function,
-                                  handle_few_measurements) {
-    input = .summarizeMultipleMeasurements(input, summary_function,
-                                           c(feature_columns, "Run"))
-    input = .filterFewMeasurements(input, 0, handle_few_measurements,
-                                   feature_columns)
     input
 }
 
@@ -52,23 +39,23 @@
 #' @keywords internal
 .filterFewMeasurements = function(input, min_intensity, handle_few,
                                   feature_columns) {
-    Intensity = n_obs = NULL
-    counts = input[, list(n_obs = sum(Intensity > min_intensity, 
-                                      na.rm = TRUE)),
-                   by = feature_columns]
-    if (handle_few == "remove") {
-        counts = counts[n_obs > 2, ]
-        msg = "Features with one or two measurements across runs are removed"
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
-    } else {
-        counts = counts[n_obs > 0, ]
-        msg = "Features with all missing measurements across runs are removed"
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
+    if (is.element("Channel", colnames(input))) {
+        feature_columns = c("PSM", "Run")
     }
-    merge(input, unique(counts[, feature_columns, with = FALSE]),
-          by = feature_columns, sort = FALSE)
+    Intensity = n_obs = NULL
+    input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
+          by = feature_columns]
+    if (handle_few == "remove") {
+        cutoff = 2
+        msg = "Features with one or two measurements across runs are removed"
+    } else {
+        cutoff = 0
+        msg = "Features with all missing measurements across runs are removed"
+    }
+    input = input[n_obs > cutoff]
+    getOption("MSstatsLog")("INFO", msg)
+    getOption("MSstatsMsg")("INFO", msg)
+    input[, colnames(input) != "n_obs"]
 }
 
 
@@ -90,24 +77,6 @@
     input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
                   by = feature_columns]
     merge(input, info, by = intersect(colnames(input), colnames(info)), sort = FALSE)
-}
-
-
-#' Perform by-feature operations for TMT data.
-#' @inheritParams .cleanByFeatureMSstats
-#' @param remove_any_missing If TRUE, features that have any missing values in a
-#' run will be removed from that run.
-#' @return `data.table`
-#' @keywords internal
-.cleanByFeatureTMT = function(input, feature_columns, summary_function,
-                              remove_few, remove_any_missing) {
-    PSM = PeptideSequence = PrecursorCharge = NULL
-    
-    input = .filterFewMeasurements(input, 1, remove_few,
-                                   unique(c("PSM", "Run")))
-    input = .aggregatePSMstoPeptideIons(input, feature_columns, summary_function)
-    input[, PSM := paste(PeptideSequence, PrecursorCharge, sep = "_")]
-    input
 }
 
 
@@ -179,7 +148,7 @@
     input = input[PSM == keep, 
                   !(colnames(input) %in% c("keep", "feature")), 
                   with = FALSE]
-    
+    input[, PSM := paste(PeptideSequence, PrecursorCharge, sep = "_")]
     msg = "PSMs have been aggregated to peptide ions."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
