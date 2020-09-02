@@ -42,22 +42,6 @@ tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(to_filter, 0, "remove", c("PeptideSequence", "Charge")),
     to_filter[!(PeptideSequence %in% c("a", "b", "c"))]
 )
-# Handling missing values in Channels ----
-## Removes PSMs that have missing values in all channels in a run
-tinytest::expect_equal(
-    MSstatsConvert:::.removeMissingAllChannels(to_filter_channel, c("PeptideSequence", "Charge")),
-    to_filter_channel[!(PeptideSequence == "a" & Run == 1), ]
-)
-## Removes PSMs with any missing values
-tinytest::expect_equal(
-    MSstatsConvert:::.removeAnyMissingInRun(to_filter_channel, c("PeptideSequence", "Charge"), TRUE),
-    to_filter_channel[!(PeptideSequence == "a" & Run %in% 1:2)]
-)
-## Do not remove if remove = FALSE
-tinytest::expect_equal(
-    MSstatsConvert:::.removeAnyMissingInRun(to_filter_channel, c("PeptideSequence", "Charge"), FALSE),
-    to_filter_channel
-)
 # Aggregating / summarizing features ----
 to_aggregate = data.table::data.table(PeptideSequence = "A", 
                                       Run = rep(1:3, each = 2),

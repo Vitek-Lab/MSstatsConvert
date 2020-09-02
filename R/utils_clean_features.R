@@ -101,24 +101,6 @@
     input
 }
 
-#' Remove features for which all channels are missing in one run.
-#' @param input data.table preprocessed by one of the cleanRaw* functions.
-#' @param feature_columns chr, vector of names of columns that define features.
-#' @return `data.table`
-#' @keywords internal
-.removeMissingAllChannels = function(input, feature_columns) {
-    Intensity = NotAllMissing = NULL
-    cols = unique(c(feature_columns, "Run"))
-    input[, NotAllMissing := !(all(is.na(Intensity)) | all(Intensity == 0)),
-          by = cols]
-    input = input[(NotAllMissing)]
-    input = input[, colnames(input) != "NotAllMissing", with = FALSE]
-    msg = "PSMs, that have all zero intensities across channels in each run, are removed."
-    getOption("MSstatsLog")("INFO", msg)
-    getOption("MSstatsMsg")("INFO", msg)
-    input
-}
-
 
 #' @keywords internal
 .combine = function(...) {
