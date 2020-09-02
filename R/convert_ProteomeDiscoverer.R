@@ -31,7 +31,7 @@
     quantification_column = .findAvailable(c("Intensity", "Area", "PrecursorArea"),
                                            colnames(pd_input),
                                            quantification_column)
-    protein_id_column = .findAvailable(c("Protein.Accessions", 
+    protein_id_column = .findAvailable(c("ProteinAccessions", 
                                          "MasterProteinAccessions",
                                          "ProteinGroupAccessions"),
                                        colnames(pd_input),
@@ -108,7 +108,7 @@
         pd_input = pd_input[numProtein == 1]
     }
     if (remove_shared) {
-        if ("UNIQUE" %in% toupper(pd_input[["QuanInof"]])) {
+        if ("UNIQUE" %in% toupper(pd_input[["QuanInfo"]])) {
             pd_input = pd_input[toupper(QuanInfo) == 'UNIQUE', ]
         }
     }
