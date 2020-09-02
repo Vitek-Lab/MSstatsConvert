@@ -131,7 +131,9 @@
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
     if (any(input$n_psms)) {
         input = input[, .(Intensity = mean(Intensity, na.rm = TRUE)),
-                      by = setdiff(colnames(input), c("PSM", "Intensity", "n_psms"))]
+                      by = setdiff(colnames(input), c("PSM", "Intensity", "n_psms",
+                                                      "IsolationInterference", "Score",
+                                                      "IonsScore"))]
     }
     input[, PSM := do.call(".combine", .SD), .SDcols = feature_columns]
     msg = "PSMs have been aggregated to peptide ions."
