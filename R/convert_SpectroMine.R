@@ -30,7 +30,5 @@
   sm_input$Channel = gsub("Raw", "", sm_input$Channel)
   sm_input$Channel = gsub(".", "", sm_input$Channel, fixed = TRUE)
   sm_input$Intensity = ifelse(sm_input$Intensity == 0, NA, sm_input$Intensity)
-  sm_input = .filterFewMeasurements(sm_input, 0, "keep", 
-                                    c("PSM", "Run"))
   sm_input
 }

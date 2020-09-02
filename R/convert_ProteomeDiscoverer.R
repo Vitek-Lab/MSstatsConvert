@@ -112,7 +112,5 @@
             pd_input = pd_input[toupper(QuanInfo) == 'UNIQUE', ]
         }
     }
-    pd_input = .filterFewMeasurements(pd_input, 0, "keep", 
-                                      c("PSM", "Run"))
     pd_input
 }

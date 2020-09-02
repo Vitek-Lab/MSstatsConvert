@@ -23,10 +23,5 @@
   cols = intersect(all_cols, colnames(om_input))
   om_input = om_input[, cols, with = FALSE]
   colnames(om_input) = .updateColnames(om_input, "Charge", "PrecursorCharge")
-  
-  if (getDataType(msstats_object) == "MSstatsTMT") {
-    om_input = .filterFewMeasurements(om_input, 0, "keep", 
-                                      c("PSM", "Run"))
-  }
   unique(om_input)
 }
