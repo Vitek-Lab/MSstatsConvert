@@ -119,22 +119,25 @@
     
     feature_columns = unique(c(feature_columns, "Run"))
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
-    input[, feature := do.call(".combine", .SD), 
-          .SDcols = feature_columns]
-    
+
     cols = intersect(colnames(input),
-                     c("feature", "PSM", "Channel", "Intensity", "Run", "Score",
+                     c("PSM", "Channel", "Intensity", "Run", "Score",
                        "IsolationInterference", "IonsScore", "n_psms"))
     input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
           by = feature_columns, .SDcols = cols]
-    input = input[PSM == keep, 
+    input = input[(PSM == keep) | is.na(keep), 
                   !(colnames(input) %in% c("keep", "feature")), 
                   with = FALSE]
-    input[, PSM := paste(PeptideSequence, PrecursorCharge, sep = "_")]
+    input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
+    if (any(input$n_psms)) {
+        input = input[, .(Intensity = mean(Intensity, na.rm = TRUE)),
+                      by = setdiff(colnames(input), c("PSM", "Intensity"))]
+    }
+    input[, PSM := do.call(".combine", .SD), .SDcols = feature_columns]
     msg = "PSMs have been aggregated to peptide ions."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
-    input
+    input[, colnames(input) != "n_psms", with = FALSE]
 }
 
 #' Pick one PSM from a data.table of several PSMs.
@@ -197,6 +200,11 @@
         
         by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
                        by = c("PSM")]
-        return(by_max$PSM[which.max(by_max$Intensity)])
+        is_max = sum(by_max$Intensity == max(by_max$Intensity))
+        if (sum(is_max, na.rm = TRUE) == 1) {
+            return(by_max$PSM[which.max(by_max$Intensity)])
+        } else {
+            return(NA)
+        }
     }
 }
