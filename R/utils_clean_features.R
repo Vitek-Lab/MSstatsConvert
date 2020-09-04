@@ -76,7 +76,7 @@
                         with = FALSE])
     if (is.element("isZero", colnames(input))) {
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE),
-                             isZero = all(isZero)), 
+                             isZero = all(isZero | is.na(Intensity))), 
                       by = feature_columns]
     } else {
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
