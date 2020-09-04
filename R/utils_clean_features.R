@@ -55,7 +55,7 @@
     input = input[n_obs > cutoff]
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
-    input[, colnames(input) != "n_obs"]
+    input[, colnames(input) != "n_obs", with = FALSE]
 }
 
 
@@ -74,8 +74,14 @@
                                       "PeptideSequence", "PrecursorCharge",
                                       "IsotopeLabelType")), 
                         with = FALSE])
-    input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
-                  by = feature_columns]
+    if (is.element("isZero", colnames(input))) {
+        input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE),
+                             isZero = all(isZero)), 
+                      by = feature_columns]
+    } else {
+        input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
+                      by = feature_columns]
+    }
     merge(input, info, by = intersect(colnames(input), colnames(info)), sort = FALSE)
 }
 

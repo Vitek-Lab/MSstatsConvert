@@ -91,7 +91,7 @@
 #' @param drop lgl, if TRUE, the `column` will be dropped.
 #' @return data.table
 #' @keywords internal
-.filterByPattern = function(input, col_name, pattern, filter, drop) {
+.filterByPattern = function(input, col_name, patterns, filter, drop) {
     if (!is.element(col_name, colnames(input))) {
         msg = paste(col_name, "not found in input columns")
         getOption("MSstatsLog")("WARN", msg)
@@ -101,10 +101,13 @@
     
     if (filter) {
         msg = paste("Sequences containing", 
-                    paste(pattern, sep = ", ", collapse = ", "), "are removed")
+                    paste(patterns, sep = ", ", collapse = ", "), "are removed")
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
-        pattern_filter = !grepl(pattern, input[[col_name]])
+        pattern_filter = rep(TRUE, nrow(input))
+        for (pattern in patterns) {
+            pattern_filter = pattern_filter & !grepl(pattern, input[[col_name]])
+        }
     } else {
         pattern_filter = rep(TRUE, nrow(input))
     }

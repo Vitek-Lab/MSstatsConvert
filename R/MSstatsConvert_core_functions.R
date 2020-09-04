@@ -245,7 +245,13 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     if (fill_incomplete) {
         input = .makeBalancedDesign(input, TRUE)
     }
-    input = input[, colnames(input) != "feature", with = FALSE]
+    if (is.element("isZero", colnames(input))) {
+        input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), 
+                                    ifelse(isZero, 0, NA), Intensity)]
+        input[, Intensity := ifelse(!is.na(Intensity) & Intensity > 0 & Intensity < 1,
+                                    0, Intensity)]
+    }
+    input = input[, !(colnames(input) %in% c("feature", "isZero")), with = FALSE]
     .MSstatsFormat(input)
 }
 

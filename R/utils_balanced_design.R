@@ -30,8 +30,10 @@
             all_possibilities, 
             unique(input[, annotation_cols, with = FALSE]),
             all.x = TRUE, by = unique(c("Run", measurement_col)))
+        intensities = intersect(c(intensity_ids, "Intensity", "isZero"), 
+                                colnames(input))
         input = merge(all_possibilities, 
-                      unique(input[, c(intensity_ids, "Intensity"), with = FALSE]),
+                      unique(input[, intensities, with = FALSE]),
                       all.x = TRUE, by = intensity_ids)        # TODO: log, whether any changes were made here
     } else {
         any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
