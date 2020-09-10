@@ -180,14 +180,15 @@
             }
         }
         n_fractions = data.table::uniqueN(input$Fraction)
-        msg = paste("Multiple fractionations exist:",
-                    n_fractions, "fractionations per MS replicate.")
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
+        if (n_fractions > 1) {
+            msg = paste("Multiple fractionations exist:",
+                        n_fractions, "fractionations per MS replicate.")
+            getOption("MSstatsLog")("INFO", msg)
+            getOption("MSstatsMsg")("INFO", msg)
+        }
         
         input = .removeOverlappingFeatures(input)
         input = .checkOverlappedFeatures(input)
-        # TODO: check if there are still overlapped fractions here, stop if so?
     } else {
         input$Fraction = 1L
     }
@@ -220,7 +221,7 @@
               by = "feature", 
               .SDcols = c("feature", "Fraction", "Run", "Intensity")] # by = c("LABEL", "PROTEINNAME", "feature")?
         input[, Intensity := ifelse(Fraction != fraction_keep, NA, Intensity)]
-        input[, !(colnames(input) == "fraction_keep"), with = FALSE]
+        input = input[, !(colnames(input) == "fraction_keep"), with = FALSE]
     }
     input
 }
@@ -247,7 +248,7 @@
 .checkOverlappedFeatures = function(input) {
     n_fractions = Fraction = NULL 
     
-    count_fractions = input[, 
+    count_fractions = input[!is.na(Intensity), 
                             list(n_fractions = data.table::uniqueN(Fraction)),
                             by = "feature"]
     count_fractions = count_fractions[n_fractions > 1, ]
