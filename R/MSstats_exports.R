@@ -1,6 +1,6 @@
-standard_columns = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
-                     "FragmentIon", "ProductCharge", "IsotopeLabelType",
-                     "Condition", "BioReplicate", "Run", "Fraction", "Intensity" )
+standard_columns = c("ProteinName", "PeptideSequence", "PeptideModifiedSequence", 
+                     "PrecursorCharge", "FragmentIon", "ProductCharge", "IsotopeLabelType",
+                     "Condition", "BioReplicate", "Run", "Fraction", "Intensity")
 standard_columns_tmt = c("ProteinName", "PeptideSequence", "Charge", "PSM", 
                          "Mixture", "TechRepMixture", "Run", "Channel", 
                          "BioReplicate", "Condition", "Intensity" )
@@ -50,7 +50,7 @@ DIAUmpiretoMSstatsFormat = function(
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    input[, standard_columns]
+    input[, intersect(standard_columns, colnames(input))]
 }
 
 
@@ -112,7 +112,7 @@ MaxQtoMSstatsFormat = function(
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    input[, standard_columns]
+    input[, intersect(standard_columns, colnames(input))]
 }
 
 
@@ -202,7 +202,7 @@ OpenMStoMSstatsFormat = function(
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
                                 summarize_multiple_psms = summaryforMultipleRows))
     input = MSstatsBalancedDesign(input, feature_columns)
-    input[, standard_columns]
+    input[, intersect(standard_columns, colnames(input))]
     input
 }
 
@@ -303,7 +303,7 @@ OpenSWATHtoMSstatsFormat = function(
         columns_to_fill = c("ProductCharge" = NA, 
                             "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    input
+    input[, intersect(standard_columns, colnames(input))]
 }
 
 
@@ -355,7 +355,7 @@ ProgenesistoMSstatsFormat = function(
     colnames(input) = .updateColnames(input, 
                                       "PeptideSequence",
                                       "PeptideModifiedSequence")
-    input[, standard_columns]
+    input[, intersect(standard_columns, colnames(input))]
 }
 
 
@@ -417,7 +417,7 @@ PDtoMSstatsFormat = function(
     colnames(input) = .updateColnames(input, 
                                       "PeptideSequence",
                                       "PeptideModifiedSequence")
-    input[, standard_columns]
+    input[, intersect(standard_columns, colnames(input))]
 }
 
 
@@ -683,5 +683,5 @@ SpectronauttoMSstatsFormat = function(
                                psm_q = qval_filter),
         columns_to_fill = list("IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    input[, standard_columns]
+    input[, intersect(standard_columns, colnames(input))]
 }
