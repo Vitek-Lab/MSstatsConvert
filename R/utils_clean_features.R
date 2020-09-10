@@ -76,7 +76,7 @@
                         with = FALSE])
     if (is.element("isZero", colnames(input))) {
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE),
-                             isZero = all(isZero | is.na(Intensity))), 
+                             isZero = all(isZero | is.na(Intensity)) & !all(is.na(Intensity))), 
                       by = feature_columns]
     } else {
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
@@ -126,20 +126,32 @@
     feature_columns = unique(c(feature_columns, "Run"))
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
 
-    cols = intersect(colnames(input),
-                     c("PSM", "Channel", "Intensity", "Run", "Score",
-                       "IsolationInterference", "IonsScore", "n_psms"))
-    input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
-          by = feature_columns, .SDcols = cols]
-    input = input[(PSM == keep) | is.na(keep), 
-                  !(colnames(input) %in% c("keep", "feature")), 
-                  with = FALSE]
-    input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
-    if (any(input$n_psms)) {
-        input = input[, .(Intensity = mean(Intensity, na.rm = TRUE)),
-                      by = setdiff(colnames(input), c("PSM", "Intensity", "n_psms",
-                                                      "IsolationInterference", "Score",
-                                                      "IonsScore"))]
+    if (any(input$n_psms > 1)) {
+        input_duplicates = input[n_psms != 1]
+        input = input[n_psms == 1]
+        if (nrow(input_duplicates) > 0) {
+            cols = intersect(colnames(input_duplicates),
+                             c("PSM", "Channel", "Intensity", "Run", "Score",
+                               "IsolationInterference", "IonsScore", "n_psms"))
+            input_duplicates[, keep := .summarizeMultiplePSMs(.SD, summary_function),
+                             by = feature_columns, .SDcols = cols]
+        }
+        input = rbind(input, input_duplicates, fill = TRUE)
+        cols = intersect(colnames(input),
+                         c("PSM", "Channel", "Intensity", "Run", "Score",
+                           "IsolationInterference", "IonsScore", "n_psms"))
+        input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
+              by = feature_columns, .SDcols = cols]
+        input = input[(PSM == keep) | is.na(keep), 
+                      !(colnames(input) %in% c("keep", "feature")), 
+                      with = FALSE]
+        input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
+        if (any(input$n_psms > 1)) {
+            input = input[, .(Intensity = mean(Intensity, na.rm = TRUE)),
+                          by = setdiff(colnames(input), c("PSM", "Intensity", "n_psms",
+                                                          "IsolationInterference", "Score",
+                                                          "IonsScore"))]
+        }
     }
     input[, PSM := do.call(".combine", .SD), .SDcols = feature_columns]
     msg = "PSMs have been aggregated to peptide ions."
