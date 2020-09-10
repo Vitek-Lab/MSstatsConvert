@@ -153,7 +153,8 @@
                                                           "IonsScore"))]
         }
     }
-    input[, PSM := do.call(".combine", .SD), .SDcols = feature_columns]
+    input[, PSM := do.call(".combine", .SD), 
+          .SDcols = c("PeptideSequence", "PrecursorCharge")]
     msg = "PSMs have been aggregated to peptide ions."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
