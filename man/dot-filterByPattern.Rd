@@ -4,19 +4,19 @@
 \alias{.filterByPattern}
 \title{Handle oxidation or M-peptides.}
 \usage{
-.filterByPattern(input, col_name, pattern, filter, drop)
+.filterByPattern(input, col_name, patterns, filter, drop)
 }
 \arguments{
 \item{input}{\code{data.table} preprocessed by one of the .cleanRaw* functions.}
 
 \item{col_name}{chr, name of the column with peptide sequences.}
 
-\item{pattern}{chr, regular expression - matching peptides will be
-removed from the data.}
-
 \item{filter}{lgl, if TRUE, peptides will be actually filtered.}
 
 \item{drop}{lgl, if TRUE, the \code{column} will be dropped.}
+
+\item{pattern}{chr, regular expression - matching peptides will be
+removed from the data.}
 }
 \value{
 data.table

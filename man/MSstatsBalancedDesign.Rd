@@ -4,7 +4,12 @@
 \alias{MSstatsBalancedDesign}
 \title{Creates balanced design by removing overlapping fractions and filling incomplete rows}
 \usage{
-MSstatsBalancedDesign(input, feature_columns, fill_incomplete = TRUE)
+MSstatsBalancedDesign(
+  input,
+  feature_columns,
+  fill_incomplete = TRUE,
+  handle_fractions = TRUE
+)
 }
 \arguments{
 \item{input}{\code{data.table} processed by the \code{MSstatsPreprocess} function}
