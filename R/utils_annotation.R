@@ -2,8 +2,8 @@
 #' @param input data.table preprocessed by one of the .cleanRaw* functions
 #' @param annotation data.table 
 #' @param ... key-value pairs, where keys are names of columns of `annotation` 
-#' @keywords internal
-.makeAnnotation = function(input, annotation, ...) {
+#' @export
+MSstatsMakeAnnotation = function(input, annotation, ...) {
     if (!is.null(annotation)) {
         all_columns = unlist(list(...))
         annotation = .getDataTable(annotation)
