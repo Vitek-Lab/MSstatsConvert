@@ -38,7 +38,7 @@
     if (aggregate) {
         if (.checkDDA(input)) {
             feature_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
-                             "FragmentIon", "ProductCharge", "Run")
+                             "Run")
             feature_cols = c(feature_cols, c("BioReplicate", "Condition", "StandardType", 
                                              "IsotopeLabelType", "DetectionQValue"))
             feature_cols = intersect(feature_cols, colnames(input))
