@@ -36,6 +36,7 @@
 #' @keywords internal
 .handleIsotopicPeaks = function(input, aggregate = FALSE) {
     if (aggregate) {
+        input$isZero = ifelse(input$Intensity == 0, TRUE, input$isZero)
         if (.checkDDA(input)) {
             feature_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                              "Run")
