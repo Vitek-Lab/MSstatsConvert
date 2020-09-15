@@ -554,7 +554,7 @@ SkylinetoMSstatsFormat = function(
                                 summarize_multiple_psms = sum))
     input[, IsotopeLabelType := ifelse(IsotopeLabelType == "light", "L", "H")] # what if labeled differently?
     input = MSstatsBalancedDesign(input, feature_columns)
-    input[, intersect(c(standard_columns, "StandardType"), colnames(input))]
+    input[, intersect(standard_columns, colnames(input))]
 }
 
 
