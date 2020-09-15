@@ -104,3 +104,22 @@
         stop(msg)
     }
 }
+
+
+.fixMissingValues = function(input, fix_missing) {
+    if (is.element("isZero", colnames(input))) {
+        input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), 
+                                    ifelse(isZero, 0, NA), Intensity)]
+        input[, Intensity := ifelse(!is.na(Intensity) & Intensity > 0 & Intensity < 1,
+                                    0, Intensity)]
+    } else {
+        if (!is.null(fix_missing)) {
+            if (fix_missing == "zero_to_na") {
+                input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), NA, Intensity)]
+            } else {
+                input[, Intensity := ifelse(is.na(Intensity), 0, Intensity)]
+            }
+        }
+    }
+    input
+}

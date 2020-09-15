@@ -230,11 +230,15 @@ MSstatsPreprocess = function(
 #' @param feature_columns str, names of columns that define spectral features
 #' @param fill_incomplete if TRUE (default), Intensity values for missing runs
 #' will be added as NA
+#' @param fix_missing str, optional. Defaults to NULL, which means no action.
+#' If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".
+#' If "zero_to_na", Intensity values equal exactly to 0 will be converted to NA.
+#' If "na_to_zero", missing values will be replaced by zeros.
 #' 
 #' @export
 #' 
 MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
-                                 handle_fractions = TRUE) {
+                                 handle_fractions = TRUE, fix_missing = NULL) {
     feature = NULL
     
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
@@ -244,12 +248,7 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     if (fill_incomplete) {
         input = .makeBalancedDesign(input, TRUE)
     }
-    if (is.element("isZero", colnames(input))) {
-        input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), 
-                                    ifelse(isZero, 0, NA), Intensity)]
-        input[, Intensity := ifelse(!is.na(Intensity) & Intensity > 0 & Intensity < 1,
-                                    0, Intensity)]
-    }
+    input = .fixMissingValues(input, fix_missing)
     input = input[, !(colnames(input) %in% c("feature", "isZero")), with = FALSE]
     .MSstatsFormat(input)
 }

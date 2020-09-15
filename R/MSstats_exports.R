@@ -303,7 +303,8 @@ OpenSWATHtoMSstatsFormat = function(
         exact_filtering = list(decoy = decoy_filter),
         columns_to_fill = c("ProductCharge" = NA, 
                             "IsotopeLabelType" = "L"))
-    input = MSstatsBalancedDesign(input, feature_columns)
+    input = MSstatsBalancedDesign(input, feature_columns, 
+                                  fix_missing = "na_to_zero")
     input[, intersect(standard_columns, colnames(input))]
 }
 

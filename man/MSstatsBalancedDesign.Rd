@@ -8,7 +8,8 @@ MSstatsBalancedDesign(
   input,
   feature_columns,
   fill_incomplete = TRUE,
-  handle_fractions = TRUE
+  handle_fractions = TRUE,
+  fix_missing = NULL
 )
 }
 \arguments{
@@ -18,6 +19,11 @@ MSstatsBalancedDesign(
 
 \item{fill_incomplete}{if TRUE (default), Intensity values for missing runs
 will be added as NA}
+
+\item{fix_missing}{str, optional. Defaults to NULL, which means no action.
+If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".
+If "zero_to_na", Intensity values equal exactly to 0 will be converted to NA.
+If "na_to_zero", missing values will be replaced by zeros.}
 }
 \description{
 Creates balanced design by removing overlapping fractions and filling incomplete rows
