@@ -13,6 +13,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
+biocViews: MassSpectrometry, Proteomics, Software, DataImport
 Depends:
     R (>= 3.6)
 Imports: 
@@ -22,7 +23,9 @@ Imports:
     checkmate
 Suggests: 
     tinytest,
-    covr
+    covr,
+    knitr,
+    rmarkdown
 Collate: 
     'convert_Spectronaut.R'
     'convert_SpectroMine.R'
@@ -46,3 +49,4 @@ Collate:
     'utils_fractions.R'
     'utils_logging.R'
     'utils_shared_peptides.R'
+VignetteBuilder: knitr
