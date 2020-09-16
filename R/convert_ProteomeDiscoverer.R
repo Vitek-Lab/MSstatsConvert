@@ -1,4 +1,5 @@
 #' Clean raw Proteome Discoverer data
+#' @inheritParams .cleanRawPDTMT
 #' @inheritParams .cleanRawPDMSstats
 .cleanRawPD = function(msstats_object, quantification_column, protein_id_column,
                        sequence_column, remove_shared, remove_protein_groups = TRUE) {
@@ -68,6 +69,8 @@
 .cleanRawPDTMT = function(msstats_object, remove_shared = TRUE, 
                           remove_protein_groups = TRUE,
                           protein_id_column = "ProteinAccessions") {
+    ProteinName = numProtein = QuanInfo = NULL
+    
     pd_input = getInputFile(msstats_object, "input")
     protein_id_column = .standardizeColnames(protein_id_column)
     if (!is.element(protein_id_column, colnames(pd_input))) {

@@ -23,6 +23,8 @@
 \item{sequence_column}{chr, name of a column with peptide sequences.}
 
 \item{remove_shared}{lgl, if TRUE, shared peptides will be removed.}
+
+\item{remove_protein_groups}{if TRUE, proteins with numProteins > 1 will be removed.}
 }
 \description{
 Clean raw Proteome Discoverer data

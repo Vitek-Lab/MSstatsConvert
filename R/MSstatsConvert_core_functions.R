@@ -195,7 +195,7 @@ setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles", .cleanRawSpectr
 #' @param aggregate_isotopic logical. If `TRUE`, isotopic peaks will by summed.
 #' @param ... additional parameters to `data.table::fread`.
 #' 
-#' @return data.frame of class `MSstatsTMT`, `MSstatsLabelFree` or `MSstatsLabeled.`
+#' @return data.frame of class `MSstatsValidated`
 #' @export
 #' 
 MSstatsPreprocess = function(
@@ -207,6 +207,8 @@ MSstatsPreprocess = function(
     pattern_filtering = list(), columns_to_fill = list(), 
     aggregate_isotopic = FALSE, ...
 ) {
+    Intensity = NULL
+    
     .checkMSstatsParams(input, annotation, feature_columns,
                         remove_shared_peptides,
                         remove_single_feature_proteins,
@@ -230,6 +232,7 @@ MSstatsPreprocess = function(
 #' @param feature_columns str, names of columns that define spectral features
 #' @param fill_incomplete if TRUE (default), Intensity values for missing runs
 #' will be added as NA
+#' @param handle_fractions if TRUE (default), overlapping fractions will be resolved
 #' @param fix_missing str, optional. Defaults to NULL, which means no action.
 #' If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".
 #' If "zero_to_na", Intensity values equal exactly to 0 will be converted to NA.

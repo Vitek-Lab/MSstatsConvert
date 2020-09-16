@@ -10,7 +10,7 @@
 #' @keywords internal
 .cleanRawMaxQuant = function(msstats_object, protein_id_col, remove_by_site = FALSE,
                              channel_columns = "Reporterintensitycorrected") {
-    ProteinIDs = id = NULL
+    ProteinIDs = id = PSM = PeptideSequence = PrecursorCharge = Intensity = NULL
     
     mq_input = getInputFile(msstats_object, "evidence")
     mq_pg = getInputFile(msstats_object, "protein_groups")

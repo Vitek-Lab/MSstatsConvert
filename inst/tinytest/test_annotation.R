@@ -29,16 +29,16 @@ annotation_4 = data.table::data.table(
 )
 # Create annotation ----
 ## No annotation - return NULL
-tinytest::expect_null(MSstatsConvert:::.makeAnnotation(dataset, NULL))
+tinytest::expect_null(MSstatsConvert:::MSstatsMakeAnnotation(dataset, NULL))
 ## No additional information - return NULL
-tinytest::expect_null(MSstatsConvert:::.makeAnnotation(dataset, data.table::data.table(Run = 1:5)))
+tinytest::expect_null(MSstatsConvert:::MSstatsMakeAnnotation(dataset, data.table::data.table(Run = 1:5)))
 ## Annotation provided - return annotation
-tinytest::expect_identical(MSstatsConvert:::.makeAnnotation(dataset, annotation_1),
+tinytest::expect_identical(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_1),
                            annotation_1)
 ## Column names are updated
 tinytest::expect_true(
     is.element("Run",
-               colnames(MSstatsConvert:::.makeAnnotation(dataset, annotation_3,
+               colnames(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_3,
                                                          Run = "Rawfile")))
 )
 # Merge annotation ----
@@ -53,14 +53,14 @@ tinytest::expect_identical(
     merge(dataset, annotation_1, sort = FALSE)
 )
 ## MSstatsTMT: all is OK
-tmt_annotation = MSstatsConvert:::.makeAnnotation(dataset, annotation_3, Run = "Rawfile")
+tmt_annotation = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_3, Run = "Rawfile")
 tinytest::expect_identical(
     MSstatsConvert:::.mergeAnnotation(dataset_tmt, tmt_annotation),
     merge(dataset_tmt, tmt_annotation, sort = FALSE)
 )
 ## MSstats: missing condition
-missing_condition = MSstatsConvert:::.makeAnnotation(dataset, annotation_2, Run = "Rawfile")
+missing_condition = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_2, Run = "Rawfile")
 tinytest::expect_message(MSstatsConvert:::.mergeAnnotation(dataset, missing_condition))
 ## MSstatsTMT: missing channel
-missing_channel = MSstatsConvert:::.makeAnnotation(dataset, annotation_4, Run = "Rawfile")
+missing_channel = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_4, Run = "Rawfile")
 tinytest::expect_error(MSstatsConvert:::.mergeAnnotation(dataset_tmt, missing_channel))

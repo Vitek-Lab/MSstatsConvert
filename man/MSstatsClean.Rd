@@ -74,6 +74,8 @@ in TMT data.}
 
 \item{remove_shared}{lgl, if TRUE, shared peptides will be removed.}
 
+\item{remove_protein_groups}{if TRUE, proteins with numProteins > 1 will be removed.}
+
 \item{intensity}{chr, specifies which column will be used for Intensity.}
 }
 \description{

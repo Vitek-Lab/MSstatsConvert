@@ -1,5 +1,7 @@
 #' @keywords internal
 .makeBalancedDesign = function(input, fill_missing) {
+    feature = NULL
+    
     is_tmt = is.element("Channel", colnames(input))
     
     if (fill_missing) {
@@ -79,7 +81,7 @@
 #' @keywords internal
 #' @importFrom data.table uniqueN
 .getMissingRunsPerFeature = function(input) {
-    n_measurements = NULL
+    n_measurements = Run = NULL
     
     n_runs = data.table::uniqueN(input$Run)
     any_missing = input[, list(n_measurements = data.table::uniqueN(Run)),
@@ -107,6 +109,8 @@
 
 
 .fixMissingValues = function(input, fix_missing) {
+    Intensity = isZero = NULL
+    
     if (is.element("isZero", colnames(input))) {
         input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), 
                                     ifelse(isZero, 0, NA), Intensity)]

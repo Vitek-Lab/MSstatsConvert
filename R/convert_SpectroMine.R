@@ -4,6 +4,8 @@
 #' @return `data.table`
 #' @keywords internal
 .cleanRawSpectroMineTMT = function(msstats_object) {
+  PSM = PeptideSequence = PrecursorCharge = ProteinName = NULL
+  
   sm_input = getInputFile(msstats_object, "input")
   channels = .getChannelColumns(colnames(sm_input), "PSM", "Raw")
   if (length(channels) == 0L) {

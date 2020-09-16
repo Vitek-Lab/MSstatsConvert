@@ -60,7 +60,7 @@ will be added to the output \code{data.frame}.}
 \item{...}{additional parameters to \code{data.table::fread}.}
 }
 \value{
-data.frame of class \code{MSstatsTMT}, \code{MSstatsLabelFree} or \code{MSstatsLabeled.}
+data.frame of class \code{MSstatsValidated}
 }
 \description{
 Preprocess outputs from MS signal processing tools for analysis with MSstats

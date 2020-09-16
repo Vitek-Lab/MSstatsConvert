@@ -3,6 +3,8 @@
 #' @return data.table
 #' @keywords internal
 .cleanRawSkyline = function(msstats_object) {
+    Truncated = isZero = DetectionQValue = Intensity = NULL
+    
     sl_input = getInputFile(msstats_object, "input")
     colnames(sl_input) = .updateColnames(sl_input, c("FileName", "Area"),
                                          c("Run", "Intensity"))
@@ -35,6 +37,8 @@
 #' @return data.table
 #' @keywords internal
 .handleIsotopicPeaks = function(input, aggregate = FALSE) {
+    FragmentIon = ProductCharge = NULL
+    
     if (aggregate) {
         input$isZero = ifelse(input$Intensity == 0, TRUE, input$isZero)
         if (.checkDDA(input)) {

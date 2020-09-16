@@ -3,6 +3,8 @@
 #' @return data.table
 #' @keywords internal
 .cleanRawOpenMS = function(msstats_object) {
+  Intensity = PSM = NULL
+  
   om_input = getInputFile(msstats_object, "input")
   om_input[, Intensity := as.numeric(as.character(Intensity))]
   

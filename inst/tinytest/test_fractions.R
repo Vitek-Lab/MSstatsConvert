@@ -30,20 +30,12 @@ data_with_additional_cols$feature = do.call(".combine", list(data_with_additiona
 data_with_additional_cols$id = paste(data_with_additional_cols$feature, 
                                      data_with_additional_cols$Run, sep = "_")
 tinytest::expect_equal(
-    MSstatsConvert:::.getOverlappingFeatures(data_with_additional_cols)$feature,
+    MSstatsConvert:::.getOverlappingFeatures(data_with_additional_cols),
     c("A_B_3", "A_C_3", "A_D_3")
 )
 ## Non-overlapped feature is not considered
 tinytest::expect_equal(
     MSstatsConvert:::.filterOverlapped(data_with_additional_cols, summary_function = mean,
                                        MSstatsConvert:::.getOverlappingFeatures(data_with_additional_cols)),
-    data_with_additional_cols[-(3:4), ]
+    data_with_additional_cols[-(c(3:4, 19:20)), ]
 )
-## Correct features are chosen
-fractions_2 = data.table::copy(data_for_fractions)
-fractions_2[, Run := paste(Mixture, TechRepMixture, sep = "_")]
-tinytest::expect_equal(
-    MSstatsConvert:::.handleFractions(data.table::copy(data_for_fractions)),
-    fractions_2[c(1:2, 5:6, 11:12, 13, 15, 17)]
-)
-# MSstatsTMT:::.combine.fractions(data_for_fractions)?

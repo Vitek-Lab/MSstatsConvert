@@ -66,7 +66,7 @@
 #' @return `data.table`
 #' @keywords internal
 .summarizeMultipleMeasurements = function(input, aggregator, feature_columns) {
-    Intensity = NULL
+    Intensity = isZero = NULL
     
     info = unique(input[, intersect(colnames(input), 
                                     c("StandardType", "ProteinName", 
@@ -93,6 +93,8 @@
 #' @return `data.table`
 #' @keywords internal
 .handleSingleFeaturePerProtein = function(input, remove_single_feature) {
+    feature_count = feature = NULL
+    
     if (remove_single_feature) {
         feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
                                       "FragmentIon", "ProductCharge", "Charge"),
@@ -121,7 +123,7 @@
 #' @return data.table
 #' @keywords internal
 .aggregatePSMstoPeptideIons = function(input, feature_columns, summary_function = sum) {
-    feature = keep = n_psms = PSM = NULL
+    feature = keep = n_psms = PSM = Intensity = NULL
     
     feature_columns = unique(c(feature_columns, "Run"))
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
@@ -147,7 +149,7 @@
                       with = FALSE]
         input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
         if (any(input$n_psms > 1)) {
-            input = input[, .(Intensity = mean(Intensity, na.rm = TRUE)),
+            input = input[, list(Intensity = mean(Intensity, na.rm = TRUE)),
                           by = setdiff(colnames(input), c("PSM", "Intensity", "n_psms",
                                                           "IsolationInterference", "Score",
                                                           "IonsScore"))]
@@ -167,7 +169,7 @@
 #' if needed.
 #' @keywords internal
 .summarizeMultiplePSMs = function(input, summary_function) {
-    Intensity = Score = IsolationInterference = IonsScore = NULL
+    Intensity = Score = IsolationInterference = IonsScore = PSM = NULL
     
     if (all(unique(input$n_psms) == 1)) {
         return(unique(input$PSM))

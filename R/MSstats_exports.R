@@ -1,6 +1,8 @@
-standard_columns = c("ProteinName", "PeptideSequence", "PeptideModifiedSequence", 
-                     "PrecursorCharge", "FragmentIon", "ProductCharge", "IsotopeLabelType",
-                     "Condition", "BioReplicate", "Run", "StandardType", "Fraction", "Intensity")
+standard_columns = c("ProteinName", "PeptideSequence", 
+                     "PeptideModifiedSequence", "PrecursorCharge", 
+                     "FragmentIon", "ProductCharge", "IsotopeLabelType",
+                     "Condition", "BioReplicate", "Run", "StandardType", 
+                     "Fraction", "DetectionQValue", "", "Intensity")
 standard_columns_tmt = c("ProteinName", "PeptideSequence", "Charge", "PSM", 
                          "Mixture", "TechRepMixture", "Run", "Channel", 
                          "BioReplicate", "Condition", "Intensity" )
@@ -122,10 +124,10 @@ MaxQtoMSstatsFormat = function(
 #' @param evidence name of 'evidence.txt' data, which includes feature-level data.
 #' @param proteinGroups name of 'proteinGroups.txt' data.
 #' @param annotation data frame which contains column Run, Fraction, TechRepMixture, Mixture, Channel, BioReplicate, Condition. Refer to the example 'annotation.mq' for the meaning of each column.
-#' @param which.proteinid Use 'Proteins'(default) column for protein name. 'Leading.proteins' or 'Leading.razor.proteins' or 'Gene.names' can be used instead to get the protein ID with single protein. However, those can potentially have the shared peptides.
+#' @param which.proteinid Use 'Proteins' (default) column for protein name. 'Leading.proteins' or 'Leading.razor.proteins' or 'Gene.names' can be used instead to get the protein ID with single protein. However, those can potentially have the shared peptides.
 #' @param rmProt_Only.identified.by.site TRUE will remove proteins with '+' in 'Only.identified.by.site' column from proteinGroups.txt, which was identified only by a modification site. FALSE is the default.
 #' @param useUniquePeptide TRUE(default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-#' @param rmPSM_withfewMea_withinRun only for rmPSM_withMissing_withinRun = FALSE. TRUE(default) will remove the features that have 1 or 2 measurements within each Run.
+#' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
 #' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
 #' @param summaryforMultipleRows sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
 #' @param ... additional parameters to `data.table::fread`.
@@ -211,8 +213,7 @@ OpenMStoMSstatsFormat = function(
 #' Generate MSstatsTMT required input format for OpenMS output
 #' @param input MSstatsTMT report from OpenMS
 #' @param useUniquePeptide TRUE(default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-#' @param rmPSM_withMissing_withinRun TRUE will remove PSM with any missing value within each Run. Defaut is FALSE.
-#' @param rmPSM_withfewMea_withinRun only for rmPSM_withMissing_withinRun = FALSE. TRUE(default) will remove the features that have 1 or 2 measurements within each Run.
+#' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
 #' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
 #' @param summaryforMultiplePSMs sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
 #' @param ... additional parameters to `data.table::fread`.
@@ -431,10 +432,9 @@ PDtoMSstatsFormat = function(
 #' @param which.proteinid Use 'Proteins'(default) column for protein name. 'Leading.proteins' or 'Leading.razor.proteins' or 'Gene.names' can be used instead to get the protein ID with single protein. However, those can potentially have the shared peptides.
 #' @param useNumProteinsColumn logical, if TRUE, shared peptides will be removed.
 #' @param useUniquePeptide lgl, if TRUE (default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-#' @param rmPSM_withMissing_withinRun lgl, if TRUE, will remove PSM with any missing value within each Run. Default is FALSE.
-#' @param rmPSM_withfewMea_withinRun lgl, only for rmPSM_withMissing_withinRun = FALSE. TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
+#' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
 #' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
-#' @param summaryforMultipleRows sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
+#' @param summaryforMultipleRows sum (default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
 #' @param ... additional parameters to `data.table::fread`.
 #' 
 #' @return `data.frame` of class `MSstatsTMT`
@@ -553,7 +553,6 @@ SkylinetoMSstatsFormat = function(
         aggregate_isotopic = TRUE,
         feature_cleaning = list(handle_features_with_few_measurements = fewMeasurements,
                                 summarize_multiple_psms = sum))
-    input[, IsotopeLabelType := ifelse(IsotopeLabelType == "light", "L", "H")] # what if labeled differently?
     input = MSstatsBalancedDesign(input, feature_columns)
     input[, intersect(standard_columns, colnames(input))]
 }
@@ -566,8 +565,7 @@ SkylinetoMSstatsFormat = function(
 #' @param filter_with_Qvalue TRUE(default) will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with NA and will be considered as censored missing values for imputation purpose.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
 #' @param useUniquePeptide TRUE(default) removes peptides that are assigned for more than one proteins. We assume to use unique peptide for each protein.
-#' @param rmPSM_withMissing_withinRun TRUE will remove PSM with any missing value within each Run. Defaut is FALSE.
-#' @param rmPSM_withfewMea_withinRun only for rmPSM_withMissing_withinRun = FALSE. TRUE(default) will remove the features that have 1 or 2 measurements within each Run.
+#' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
 #' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
 #' @param summaryforMultipleRows sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
 #' @param ... additional parameters to `data.table::fread`.

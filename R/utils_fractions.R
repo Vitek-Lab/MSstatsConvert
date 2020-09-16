@@ -25,7 +25,7 @@
 #' @return `data.table`
 #' @keywords internal
 .handleFractionsTMT = function(input) {
-    techrun = feature = id = Mixture = TechRepMixture = Run = NULL
+    techrun = feature = id = Mixture = TechRepMixture = Run = Intensity = NULL
     
     input[, techrun := paste(Mixture, TechRepMixture, sep = "_")]
     input[, id := paste(feature, Run, sep = "_")]
@@ -115,7 +115,7 @@
 
 
 .checkMultiRun = function(input) {
-    Run = NULL
+    Run = Condition = BioReplicate = Intensity = feature = condition = NULL
     
     if (is.element("Fraction", colnames(input))) {
         return(list(has_fractions = TRUE, is_risky = FALSE))
@@ -196,6 +196,8 @@
 }
 
 .addFractions = function(input) {
+    Condition = BioReplicate = Run = CONDITION = Intensity = feature = Fraction = NULL
+    
     input$Fraction <- NA
     run_info = unique(input[, list(Condition, BioReplicate, Run,
                                    CONDITION = paste(Condition, BioReplicate, sep = "_"))])
@@ -214,7 +216,7 @@
 }
 
 .removeOverlappingFeatures = function(input) {
-    fraction_keep = Fraction = NULL
+    fraction_keep = Fraction = Intensity = NULL
     
     if (data.table::uniqueN(input$Fraction) > 1) {
         input[, fraction_keep := .getCorrectFraction(.SD), 
@@ -246,7 +248,7 @@
 }
 
 .checkOverlappedFeatures = function(input) {
-    n_fractions = Fraction = NULL 
+    n_fractions = Fraction = Intensity = NULL 
     
     count_fractions = input[!is.na(Intensity), 
                             list(n_fractions = data.table::uniqueN(Fraction)),
