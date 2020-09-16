@@ -1,3 +1,7 @@
+#' Fill missing rows to create balanced design
+#' @param input output of `MSstatsPreprocess`
+#' @param fill_missing if TRUE, missing Intensities values will be added to data 
+#' and marked as NA
 #' @keywords internal
 .makeBalancedDesign = function(input, fill_missing) {
     feature = NULL
@@ -38,16 +42,27 @@
                       unique(input[, intensities, with = FALSE]),
                       all.x = TRUE, by = intensity_ids)        # TODO: log, whether any changes were made here
     } else {
-        any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
-        msg = paste("The following features have missing values in at least one run.",
-                    paste(any_missing, sep = ",\n ", collapse = ",\n "))
-        getOption("MSstatsLog")("WARN", msg)
-        getOption("MSstatsMsg")("WARN", msg)
+        if (!is_tmt) {
+            any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
+            msg = paste("The following features have missing values in at least one run.",
+                        paste(any_missing, sep = ",\n ", collapse = ",\n "))
+            getOption("MSstatsLog")("WARN", msg)
+            getOption("MSstatsMsg")("WARN", msg)
+        }
     }
     input
 }
 
 
+#' Create a data.frame of each combination of values for given variables
+#' @param input output of `MSstatsPreprocess`
+#' @param group_col name of column in `input`. Combination of values of 
+#' `feature_col` and `measurement_col` will be created within each unique value
+#' of this column
+#' @param `feature_column` name of the column that labels features
+#' @param `measurement_col` name of a column with measurement labels - Runs in
+#' label-free case, Channels in TMT case.
+#' @param is_tmt if TRUE, data will be treated as coming from TMT experiment.
 #' @keywords internal
 #' @importFrom data.table rbindlist
 .getFullDesign = function(input, group_col, feature_col, measurement_col, is_tmt) {
@@ -78,19 +93,25 @@
 }
 
 
+#' Get names of missing runs
+#' @param input output of `MSstatsPreprocess`
 #' @keywords internal
 #' @importFrom data.table uniqueN
 .getMissingRunsPerFeature = function(input) {
     n_measurements = Run = NULL
     
+    grouping_cols = intersect(c("Fraction", "IsotopeLabelType", "feature"),
+                              colnames(input))
+    
     n_runs = data.table::uniqueN(input$Run)
     any_missing = input[, list(n_measurements = data.table::uniqueN(Run)),
-                        by = c("Fraction", "IsotopeLabelType", "feature")]
+                        by = grouping_cols]
     any_missing = any_missing[n_measurements < n_runs]
     any_missing
 }
 
-
+#' Check if there are duplicated measurements within run
+#' @param input output of `MSstatsPreprocess`
 #' @keywords internal
 .checkDuplicatedMeasurements = function(input) {
     n_measurements = feature = NULL
@@ -108,7 +129,13 @@
 }
 
 
-.fixMissingValues = function(input, fix_missing) {
+#' Change labels for missing values
+#' @param input output of `MSstatsPreprocess`
+#' @param fix_missing missing values can be labeled by `NA`, `0` or both.
+#' If `NULL`, data were processed by Skyline, so missing values will be denoted
+#' by both `NA` and `0`. If "na_to_zero", `NA` values will be replaced by `0`.
+#' If "zero_to_na", `0` values will be replaced by `NA`
+.fixMissingValues = function(input, fix_missing = NULL) {
     Intensity = isZero = NULL
     
     if (is.element("isZero", colnames(input))) {

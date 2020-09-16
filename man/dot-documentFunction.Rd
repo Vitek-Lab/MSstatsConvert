@@ -29,12 +29,6 @@ We assume to use unique peptide for each protein.}
 \item{removeMpeptides}{TRUE will remove the peptides including 'M' sequence. FALSE is default.}
 
 \item{removeProtein_with1Peptide}{TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.}
-
-\item{use_log_file}{lgl, if TRUE, messages from the converter functions will be written to a log file.}
-
-\item{append}{lgl, if TRUE, messages will be appended to an existing file.}
-
-\item{verbose}{lgl, if TRUE, messages from the converter functions will be printed to the console.}
 }
 \description{
 A dummy function to store shared documentation items.

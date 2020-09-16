@@ -1,5 +1,4 @@
 #' Clean raw output from MaxQuant
-#' 
 #' @param msstats_object object that inherits from MSstatsInputFiles class.
 #' @param protein_id_col character, name of a column with names of proteins.
 #' @param remove_by_site logical, if TRUE, proteins only identified by site will

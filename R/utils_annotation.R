@@ -1,30 +1,3 @@
-#' Create annotation
-#' @param input data.table preprocessed by one of the .cleanRaw* functions
-#' @param annotation data.table 
-#' @param ... key-value pairs, where keys are names of columns of `annotation` 
-#' @export
-MSstatsMakeAnnotation = function(input, annotation, ...) {
-    if (!is.null(annotation)) {
-        all_columns = unlist(list(...))
-        annotation = .getDataTable(annotation)
-        if (length(all_columns) > 0) {
-            colnames(annotation) = .updateColnames(annotation, 
-                                                   unname(all_columns),
-                                                   names(all_columns))
-        }
-        if (is.element("Channel", colnames(annotation))) {
-            annotation$Channel = .standardizeColnames(annotation$Channel)
-        }
-        annotation[, !duplicated(colnames(annotation)), with = FALSE]
-    } else {
-        cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
-                 "Mixture", "TechRepMixture")
-        cols = intersect(cols, colnames(input))
-        unique(input[, cols, with = FALSE])
-    }
-}
-
-
 #' Merge annotation with feature data
 #' @param data.table preprocessed by one of the .cleanRaw* functions.
 #' @param annotation data.table with annotation

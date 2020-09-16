@@ -109,11 +109,18 @@
           with = FALSE]
 }
 
+#' Get common values from two vectors of features
+#' @param features_1 vector of feature names
+#' @param features_2 vector of feature_names
+#' @keywords internal
 .countCommonFeatures = function(features_1, features_2) {
     data.table::uniqueN(intersect(as.character(features_1), as.character(features_2)))
 }
 
 
+#' Check if fractionation exists
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
 .checkMultiRun = function(input) {
     Run = Condition = BioReplicate = Intensity = feature = condition = NULL
     
@@ -158,6 +165,9 @@
 }
 
 
+#' Handle overlapping features
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
 .handleFractionsLF = function(input) {
     check_multi_run = .checkMultiRun(input)
     
@@ -195,6 +205,10 @@
     input
 }
 
+
+#' Add a Fraction column to the output of `MSstatsPreprocess`
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
 .addFractions = function(input) {
     Condition = BioReplicate = Run = CONDITION = Intensity = feature = Fraction = NULL
     
@@ -215,6 +229,10 @@
     input
 }
 
+
+#' Replace intensities of overlapped fractions with NA, keeping only one fraction
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
 .removeOverlappingFeatures = function(input) {
     fraction_keep = Fraction = Intensity = NULL
     
@@ -229,6 +247,10 @@
 }
 
 
+#' Get a name of fraction with the largest number of measurements or the largest
+#' average intensity
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
 .getCorrectFraction = function(input) {
     Intensity = Run = NULL
     
@@ -239,6 +261,7 @@
     if (length(which_max_measurements) == 1L) {
         return(unique(measurement_count$n_obs[which_max_measurements]))
     } else {
+        input = input[which_max_measurements]
         average_abundance = input[!is.na(Intensity) & Intensity > 0, 
                                   list(mean_abundance = mean(Intensity)),
                                   by = "Fraction"]
@@ -247,6 +270,10 @@
     }
 }
 
+
+#' Check if any features are measured in multiple fractions
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
 .checkOverlappedFeatures = function(input) {
     n_fractions = Fraction = Intensity = NULL 
     

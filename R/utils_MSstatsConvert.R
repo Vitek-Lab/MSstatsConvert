@@ -21,9 +21,6 @@ NULL
 #' @param removeProtein_with1Peptide TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.
 #' @param removeOxidationMpeptides TRUE will remove the peptides including 'oxidation (M)' in modification. FALSE is default.
 #' @param removeMpeptides TRUE will remove the peptides including 'M' sequence. FALSE is default.
-#' @param use_log_file lgl, if TRUE, messages from the converter functions will be written to a log file.
-#' @param append lgl, if TRUE, messages will be appended to an existing file.
-#' @param verbose lgl, if TRUE, messages from the converter functions will be printed to the console.
 #' 
 #' @keywords internal
 #' 
@@ -35,5 +32,5 @@ NULL
                              removeProtein_with1Protein,
                              removeOxidationMpeptides,
                              removeMpeptides) {
-    
+    NULL
 }

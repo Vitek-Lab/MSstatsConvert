@@ -14,8 +14,7 @@
   } else {
       spec_input = spec_input[!(as.logical(FExcludedFromQuantification)), ]
   }
-  # XIC quality. TODO: explain in documentation
-  
+
   f_charge_col = .findAvailable(c("FCharge", "FFrgZ"), colnames(spec_input))
   pg_qval_col = .findAvailable(c("PGQvalue"), colnames(spec_input))
   cols = c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon", 
