@@ -21,6 +21,16 @@ to_filter_channel$PSM = paste(to_filter_channel$PeptideSequence,
                               to_filter_channel$PrecursorCharge,
                               sep = "_")
 # Remove feature with few measurements ----
+# Filtering for TMT
+## Filter few works for TMT data - removes PSMs with less than 3 observations
+## across channels
+
+tinytest::expect_equal(
+    MSstatsConvert:::.filterFewMeasurements(
+        data.table::copy(to_filter[1:15]), 0, "remove", c("PeptideSequence", "PrecursorCharge")),
+    to_filter[(PeptideSequence %in% c("d", "e")), 
+              list(PeptideSequence, PrecursorCharge, Run, Intensity)]
+)
 ## Nothing is missing
 tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(
@@ -176,6 +186,19 @@ tinytest::expect_equal(
     data.table::setkey(to_filter_channel2[!(ProteinName == "B"), ], NULL)
 )
 
-# # Utility function ----
+# Utility function ----
 tinytest::expect_equal(MSstatsConvert:::.combine(c("A", "B"), c("A", "B")),
                        c("A_A", "B_B"))
+# Top-level function works
+clean_lf = MSstatsConvert:::.cleanByFeature(
+    to_filter, 
+    c("PeptideSequence", "PrecursorCharge"),
+    list(handle_features_with_few_measurements = "remove",
+         summarize_multiple_psms = max))
+clean_tmt = MSstatsConvert:::.cleanByFeature(
+    to_filter_channel, 
+    c("PeptideSequence", "PrecursorCharge"),
+    list(handle_features_with_few_measurements = "remove",
+         summarize_multiple_psms = max))
+tinytest::expect_equal(class(clean_lf)[1], "data.table")
+tinytest::expect_equal(class(clean_tmt)[1], "data.table")
