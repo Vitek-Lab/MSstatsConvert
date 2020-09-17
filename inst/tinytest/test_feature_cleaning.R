@@ -58,6 +58,41 @@ tinytest::expect_equal(
     MSstatsConvert:::.summarizeMultipleMeasurements(to_aggregate, max, c("PeptideSequence", "Run")),
     to_aggregate[c(2, 4, 6), ]
 )
+## Zeros are coded correctly
+### 
+with_zeros = data.table::data.table(
+    ProteinName = "A",
+    PeptideSequence = "a",
+    FragmentIon = rep(c("precursor", "precursor [M+1]", "precursor [M+2]"),
+                      times = 4),
+    Run = rep(1:4, each = 3),
+    Intensity = c(0, 2, 3, NA, NA, NA, 0, 0, NA, 0, 0, 0),
+    isZero = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE,
+               TRUE, TRUE, TRUE)
+)
+correct_result = data.table::data.table(
+    PeptideSequence = "a",
+    FragmentIon = NA,
+    ProductCharge = NA,
+    Run = 1:4,
+    Intensity = c(5, 0, 0, 0),
+    isZero = c(FALSE, FALSE, TRUE, TRUE),
+    ProteinName = "A"
+)
+MSstatsConvert:::.checkDDA(with_zeros)
+tinytest::expect_equal(
+    MSstatsConvert:::.summarizeMultipleMeasurements(with_zeros, sum, c("PeptideSequence", "Run")),
+    correct_result[, -(2:3), with = FALSE]
+)
+tinytest::expect_equal(
+    MSstatsConvert:::.handleIsotopicPeaks(with_zeros, TRUE),
+    correct_result[, c(7, 1, 4, 5, 6, 2, 3), with = FALSE]
+)
+tinytest::expect_equal(
+    MSstatsConvert:::.handleIsotopicPeaks(with_zeros, FALSE),
+    with_zeros
+)
+## TMT data
 to_aggregate_channel = data.table::copy(to_filter_channel)
 to_aggregate_channel$Run = rep(1:6, each = 25)
 to_aggregate_channel$PSM = paste(to_aggregate_channel$PeptideSequence,
@@ -101,6 +136,24 @@ to_aggregate_channel$Intensity[76:90] = 1:15
 tinytest::expect_equal(
     MSstatsConvert:::.summarizeMultiplePSMs(to_aggregate_channel[76:90, ], max),
     "f_3_18"
+)
+### Case 7: cannot decide - average intensities
+to_aggregate_channel2 = data.table::copy(to_aggregate_channel[PeptideSequence == "b"])
+to_aggregate_channel2$Intensity = 1
+to_aggregate_channel2[, IsolationInterference := NULL]
+to_aggregate_channel2[, IonsScore := NULL]
+to_aggregate_channel2[, Score := NULL]
+tinytest::expect_equal(
+    MSstatsConvert:::.summarizeMultiplePSMs(to_aggregate_channel2, max),
+    NA
+)
+tinytest::expect_equal(
+    MSstatsConvert:::.aggregatePSMstoPeptideIons(to_aggregate_channel2[1:10, ],
+                                                 c("PeptideSequence", "PrecursorCharge")),
+    to_aggregate_channel2[1:10, list(Intensity = mean(Intensity, na.rm = TRUE),
+                                     PSM = "b_3", Feature = "b_3"),
+                          by = c("ProteinName", "PeptideSequence", "PrecursorCharge",
+                                 "Run", "Channel", "Fraction")]
 )
 ## Aggregation works as expected
 to_aggregate_channel_2 = data.table::copy(to_aggregate_channel)
