@@ -138,7 +138,7 @@ tinytest::expect_equal(
     "f_3_18"
 )
 ### Case 7: cannot decide - average intensities
-to_aggregate_channel2 = data.table::copy(to_aggregate_channel[PeptideSequence == "b"])
+to_aggregate_channel2 = data.table::copy(to_aggregate_channel[PeptideSequence == "b"][1:10])
 to_aggregate_channel2$Intensity = 1
 to_aggregate_channel2[, IsolationInterference := NULL]
 to_aggregate_channel2[, IonsScore := NULL]
@@ -156,11 +156,8 @@ tinytest::expect_equal(
                                  "Run", "Channel", "Fraction")]
 )
 ## Aggregation works as expected
-to_aggregate_channel_2 = data.table::copy(to_aggregate_channel)
-to_aggregate_channel_2[, .(n_psms = data.table::uniqueN(PSM)), by = c("PeptideSequence", "PrecursorCharge")]
-
-aggregated = MSstatsConvert:::.aggregatePSMstoPeptideIons(to_aggregate_channel_2, c("PeptideSequence", "PrecursorCharge"), summary_function = sum)
-tinytest::expect_equal(nrow(aggregated), 5 * (data.table::uniqueN(to_aggregate_channel_2[, .(PeptideSequence, PrecursorCharge, Run)])))
+aggregated = MSstatsConvert:::.aggregatePSMstoPeptideIons(to_aggregate_channel, c("PeptideSequence", "PrecursorCharge"), summary_function = sum)
+tinytest::expect_equal(nrow(aggregated), 5 * (data.table::uniqueN(to_aggregate_channel[, .(PeptideSequence, PrecursorCharge, Run)])))
 # Removing proteins with just a single feature ----
 to_filter_channel2 = to_filter_channel[, !(colnames(to_filter_channel) %in% c("feature", "feature_count")), 
                                        with = FALSE]
