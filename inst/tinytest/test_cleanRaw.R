@@ -46,6 +46,11 @@ mq_import = MSstatsConvert::MSstatsImport(list(evidence = mq_ev,
                                                protein_groups = mq_pg),
                                           "MSstats", "MaxQuant")
 mq_cleaned = MSstatsConvert::MSstatsClean(mq_import, protein_id_col = "Proteins")
+mq_cleaned_site = MSstatsConvert::MSstatsClean(mq_import, 
+                                               protein_id_col = "Proteins",
+                                               remove_by_site = TRUE)
+tinytest::expect_true(nrow(mq_cleaned_site) < nrow(mq_cleaned))
+tinytest::expect_true(nrow(mq_cleaned_site) > 0)
 tinytest::expect_equal(
     ncol(MSstatsConvert::MSstatsClean(mq_import, protein_id_col = "Proteins")),
     8
