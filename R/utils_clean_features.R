@@ -174,11 +174,6 @@
     if (all(unique(input$n_psms) == 1)) {
         return(unique(input$PSM))
     } else {
-        unique_counts = nrow(unique(input[, colnames(input) != "PSM", with = FALSE]))
-        if (unique_counts == (nrow(input) / unique(input$n_psms))) {
-            return(input$PSM[1])
-        }
-        
         nonmissing_counts = input[, list(n_nonmissing = sum(!is.na(Intensity))),
                                   by = c("PSM")]
         is_max = nonmissing_counts$n_nonmissing == max(nonmissing_counts$n_nonmissing, na.rm = TRUE)
