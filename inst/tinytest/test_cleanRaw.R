@@ -1,0 +1,116 @@
+# DIAUmpire
+dia_frag = data.table::fread("./raw_data/DIAUmpire/dia_frag.csv")
+dia_pept = data.table::fread("./raw_data/DIAUmpire/dia_pept.csv")
+dia_prot = data.table::fread("./raw_data/DIAUmpire/dia_prot.csv")
+dia_import = MSstatsConvert::MSstatsImport(list(Fragments = dia_frag,
+                                                Peptides = dia_pept,
+                                                Proteins = dia_prot),
+                                           "MSstats", "DIAUmpire")
+dia_cleaned = MSstatsConvert::MSstatsClean(dia_import, TRUE, TRUE)
+tinytest::expect_equal(
+    ncol(dia_cleaned), 5    
+)
+tinytest::expect_true(
+    nrow(dia_cleaned) > 0    
+)
+# MaxQuant
+mq_ev = data.table::fread("./raw_data/MaxQuant/mq_ev.csv")
+mq_pg = data.table::fread("./raw_data/MaxQuant/mq_pg.csv")
+mq_import = MSstatsConvert::MSstatsImport(list(evidence = mq_ev, 
+                                               protein_groups = mq_pg),
+                                          "MSstats", "MaxQuant")
+mq_cleaned = MSstatsConvert::MSstatsClean(mq_import, protein_id_col = "Proteins")
+tinytest::expect_equal(
+    ncol(MSstatsConvert::MSstatsClean(mq_import, protein_id_col = "Proteins")),
+    8
+)
+tinytest::expect_true(nrow(mq_cleaned) > 0)
+# MaxQuantTMT
+mqtmt_ev = data.table::fread("./raw_data/MaxQuantTMT/mq_ev.csv")
+mqtmt_pg = data.table::fread("./raw_data/MaxQuantTMT/mq_pg.csv")
+mqtmt_import = MSstatsConvert::MSstatsImport(list(evidence = mqtmt_ev, 
+                                                  protein_groups = mqtmt_pg),
+                                             "MSstatsTMT", "MaxQuant")
+mqtmt_cleaned = MSstatsConvert::MSstatsClean(mqtmt_import, 
+                                             protein_id_col = "Proteins")
+tinytest::expect_equal(
+    ncol(mqtmt_cleaned),
+    8
+)
+tinytest::expect_true(nrow(mq_cleaned) > 0)
+# OpenMS
+openms_input = data.table::fread("./raw_data/OpenMS/openms_input.csv")
+openms_import = MSstatsConvert::MSstatsImport(list(input = openms_input), 
+                                              "MSstats", "OpenMS")
+openms_import2 = MSstatsConvert::MSstatsImport(list(input = openms_input[, -6]), 
+                                               "MSstats", "OpenMS")
+om_cleaned = MSstatsConvert::MSstatsClean(openms_import)
+tinytest::expect_equal(ncol(om_cleaned), 10)
+tinytest::expect_equal(ncol(MSstatsConvert::MSstatsClean(openms_import2)), 10)
+tinytest::expect_true(nrow(om_cleaned) > 0)
+# OpenMSTMT
+openmstmt_input = data.table::fread("./raw_data/OpenMSTMT/openmstmt_input.csv")
+openmstmt_import = MSstatsConvert::MSstatsImport(list(input = openmstmt_input), 
+                                                 "MSstatsTMT", "OpenMS")
+omtmt_cleaned = MSstatsConvert::MSstatsClean(openmstmt_import)
+tinytest::expect_equal(ncol(omtmt_cleaned), 12)
+tinytest::expect_true(nrow(omtmt_cleaned) > 0)
+# OpenSWATH
+openswath_input = data.table::fread("./raw_data/OpenSWATH/openswath_input.csv")
+openswath_import = MSstatsConvert::MSstatsImport(list(input = openswath_input), 
+                                                 "MSstats", "OpenSWATH")
+os_cleaned = MSstatsConvert::MSstatsClean(openswath_import)
+tinytest::expect_equal(ncol(os_cleaned), 8)
+tinytest::expect_true(nrow(os_cleaned) > 0)
+# PD
+pd_input = data.table::fread("./raw_data/PD/pd_input.csv")
+pd_import = MSstatsConvert::MSstatsImport(list(input = pd_input), 
+                                          "MSstats", "ProteomeDiscoverer")
+pd_cleaned = MSstatsConvert::MSstatsClean(
+    pd_import, protein_id_column = "ProteinGroupAccessions",
+    sequence_column = "Sequence", quantification_column = "Intensity",
+    remove_shared = TRUE)
+tinytest::expect_equal(
+    ncol(pd_cleaned), 5)
+tinytest::expect_true(nrow(pd_cleaned) > 0)
+# PD-TMT
+pdtmt_input = data.table::fread("./raw_data/PDTMT/pdtmt_input.csv")
+pdtmt_import = MSstatsConvert::MSstatsImport(list(input = pdtmt_input),
+                                             "MSstatsTMT", "ProteomeDiscoverer")
+pdtmt_cleaned = MSstatsConvert::MSstatsClean(pdtmt_import, 
+                                             protein_id_column = "ProteinGroupAccessions",
+                                             remove_shared = TRUE)
+tinytest::expect_equal(
+    ncol(pdtmt_cleaned), 11
+)
+tinytest::expect_true(nrow(pdtmt_cleaned) > 0)
+# Progenesis
+progenesis_input = data.table::fread("./raw_data/Progenesis/progenesis_input.csv")
+progenesis_import = MSstatsConvert::MSstatsImport(list(input = progenesis_input),
+                                                  "MSstats", "Progenesis")
+runs = unique(data.table::fread("./raw_data/Progenesis/progenesis_annot.csv")$Run)
+pg_cleaned = MSstatsConvert::MSstatsClean(progenesis_import, runs)
+tinytest::expect_equal(ncol(pg_cleaned), 5)
+tinytest::expect_true(nrow(pg_cleaned) > 0)
+# Skyline
+skyline_input = data.table::fread("./raw_data/Skyline/skyline_input.csv")
+skyline_import = MSstatsConvert::MSstatsImport(list(input = skyline_input), 
+                                               "MSstats", "Skyline")
+sl_cleaned = MSstatsConvert::MSstatsClean(skyline_import)
+tinytest::expect_equal(ncol(sl_cleaned), 13)
+tinytest::expect_true(nrow(sl_cleaned) > 0)
+# SpectroMine
+spectromine_input = data.table::fread("./raw_data/SpectroMine/spectromine_input.csv")
+spectromine_import = MSstatsConvert::MSstatsImport(list(input = spectromine_input), 
+                                                   "MSstatsTMT", "SpectroMine")
+sm_cleaned = MSstatsConvert::MSstatsClean(spectromine_import)
+tinytest::expect_equal(ncol(sm_cleaned), 9)
+tinytest::expect_true(nrow(sm_cleaned) > 0)
+# Spectronaut
+spectronaut_input = data.table::fread("./raw_data/Spectronaut/spectronaut_input.csv")
+spectronaut_import = MSstatsConvert::MSstatsImport(list(input = spectronaut_input), 
+                                                   "MSstats", "Spectronaut")
+sn_cleaned = MSstatsConvert::MSstatsClean(spectronaut_import,
+                                          intensity = "PeakArea")
+tinytest::expect_equal(ncol(sn_cleaned), 9)
+tinytest::expect_true(nrow(sn_cleaned) > 0)
