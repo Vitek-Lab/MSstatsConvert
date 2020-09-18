@@ -15,10 +15,10 @@ labelfree_object = MSstatsConvert:::.MSstatsFormat(data_no_channel)
 labelled_object = MSstatsConvert:::.MSstatsFormat(data_no_channel_LH)
 
 # Has the right format for MSstats data
-expect_true(is(labelled_object, "MSstatsValidated"))
-expect_true(is(labelfree_object, "MSstatsValidated"))
-expect_true(is(tmt_object, "MSstatsValidated"))
+tinytest::expect_true(is(labelled_object, "MSstatsValidated"))
+tinytest::expect_true(is(labelfree_object, "MSstatsValidated"))
+tinytest::expect_true(is(tmt_object, "MSstatsValidated"))
 # Inherits after data.frame
-expect_true(is(labelled_object, "data.frame"))
-expect_true(is(labelfree_object, "data.frame"))
-expect_true(is(tmt_object, "data.frame"))
+tinytest::expect_true(is(labelled_object, "data.frame"))
+tinytest::expect_true(is(labelfree_object, "data.frame"))
+tinytest::expect_true(is(tmt_object, "data.frame"))
