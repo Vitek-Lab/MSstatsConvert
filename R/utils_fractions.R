@@ -239,9 +239,8 @@
     if (data.table::uniqueN(input$Fraction) > 1) {
         input[, fraction_keep := .getCorrectFraction(.SD), 
               by = "feature", 
-              .SDcols = c("feature", "Fraction", "Run", "Intensity")] # by = c("LABEL", "PROTEINNAME", "feature")?
-        input[, Intensity := ifelse(Fraction != fraction_keep, NA, Intensity)]
-        input = input[!is.na(Intensity), ] ## Please remove my comment here or fix the code, We will make the balanced design later, so to find the unique feature per fraction, here remove row with NAs
+              .SDcols = c("feature", "Fraction", "Run", "Intensity")]
+        input = input[Fraction == fraction_keep]
         input = input[, !(colnames(input) == "fraction_keep"), with = FALSE]
     }
     input
