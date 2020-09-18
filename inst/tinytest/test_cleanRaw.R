@@ -95,22 +95,58 @@ tinytest::expect_equal(ncol(os_cleaned), 8)
 tinytest::expect_true(nrow(os_cleaned) > 0)
 # PD
 pd_input = data.table::fread("./raw_data/PD/pd_input.csv")
+pd_input_frac = data.table::copy(pd_input)
+pd_input_frac$Fraction = 1
 pd_import = MSstatsConvert::MSstatsImport(list(input = pd_input), 
                                           "MSstats", "ProteomeDiscoverer")
+pd_import_frac = MSstatsConvert::MSstatsImport(list(input = pd_input_frac), 
+                                               "MSstats", "ProteomeDiscoverer")
 pd_cleaned = MSstatsConvert::MSstatsClean(
     pd_import, protein_id_column = "ProteinGroupAccessions",
     sequence_column = "Sequence", quantification_column = "Intensity",
     remove_shared = TRUE)
-tinytest::expect_equal(
-    ncol(pd_cleaned), 5)
+pd_cleaned_frac = MSstatsConvert::MSstatsClean(
+    pd_import_frac, protein_id_column = "ProteinGroupAccessions",
+    sequence_column = "Sequence", quantification_column = "Intensity",
+    remove_shared = TRUE)
+tinytest::expect_equal(ncol(pd_cleaned), 5)
 tinytest::expect_true(nrow(pd_cleaned) > 0)
+tinytest::expect_equal(pd_cleaned, 
+                       pd_cleaned_frac[, 
+                                       colnames(pd_cleaned_frac) != "Fraction", 
+                                       with = FALSE])
 # PD-TMT
 pdtmt_input = data.table::fread("./raw_data/PDTMT/pdtmt_input.csv")
+pdtmt_input2 = data.table::copy(pdtmt_input)
+pdtmt_input2$ProteinMasterAccessions = pdtmt_input2$Protein.Accessions
+pdtmt_input2$X..Protein.Groups = pdtmt_input2$X..Proteins
+pdtmt_input3 = data.table::copy(pdtmt_input)
+pdtmt_input3$Quan.Info = as.character(pdtmt_input3$Quan.Info)
+pdtmt_input3$Quan.Info = "UNIQUE"
 pdtmt_import = MSstatsConvert::MSstatsImport(list(input = pdtmt_input),
                                              "MSstatsTMT", "ProteomeDiscoverer")
+pdtmt_import2 = MSstatsConvert::MSstatsImport(list(input = pdtmt_input2),
+                                              "MSstatsTMT", "ProteomeDiscoverer")
+pdtmt_import3 = MSstatsConvert::MSstatsImport(list(input = pdtmt_input3),
+                                              "MSstatsTMT", "ProteomeDiscoverer")
 pdtmt_cleaned = MSstatsConvert::MSstatsClean(pdtmt_import, 
-                                             protein_id_column = "ProteinGroupAccessions",
+                                             protein_id_column = "ProteinAccessions",
                                              remove_shared = TRUE)
+pdtmt_cleaned2 = MSstatsConvert::MSstatsClean(pdtmt_import2, 
+                                             protein_id_column = "ProteinMasterAccessions",
+                                             remove_shared = TRUE)
+pdtmt_cleaned3 = MSstatsConvert::MSstatsClean(pdtmt_import3, 
+                                              protein_id_column = "ProteinMasterAccessions",
+                                              remove_shared = TRUE)
+tinytest::expect_equal(pdtmt_cleaned, pdtmt_cleaned2)
+tinytest::expect_equal(pdtmt_cleaned[, colnames(pdtmt_cleaned) != "QuanInfo", 
+                                     with = FALSE], 
+                       pdtmt_cleaned3[, colnames(pdtmt_cleaned) != "QuanInfo", 
+                                      with = FALSE])
+tinytest::expect_error(MSstatsConvert::MSstatsClean(pdtmt_import, 
+                                                    protein_id_column = "ProteinAccessions",
+                                                    remove_shared = TRUE,
+                                                    intensity_columns_regexp = "Nothing"))
 tinytest::expect_equal(
     ncol(pdtmt_cleaned), 11
 )

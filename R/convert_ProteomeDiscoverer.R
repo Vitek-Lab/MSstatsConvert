@@ -2,10 +2,11 @@
 #' @inheritParams .cleanRawPDTMT
 #' @inheritParams .cleanRawPDMSstats
 .cleanRawPD = function(msstats_object, quantification_column, protein_id_column,
-                       sequence_column, remove_shared, remove_protein_groups = TRUE) {
+                       sequence_column, remove_shared, remove_protein_groups = TRUE,
+                       intensity_columns_regexp = "Abundance") {
     if (getDataType(msstats_object) == "MSstatsTMT") {
-        .cleanRawPDTMT(msstats_object, remove_shared, 
-                       remove_protein_groups, protein_id_column)
+        .cleanRawPDTMT(msstats_object, remove_shared, remove_protein_groups, 
+                       protein_id_column, intensity_columns_regexp)
     } else {
         .cleanRawPDMSstats(msstats_object, quantification_column, 
                            protein_id_column, sequence_column, remove_shared)
@@ -63,12 +64,16 @@
 #' Clean raw TMT data from Proteome Discoverer
 #' @inheritParams .cleanRawPDMSstats
 #' @param remove_protein_groups if TRUE, proteins with numProteins > 1 will be removed.
+#' @param intensity_columns_regexp regular expressions that defines intensity columns.
+#' Defaults to "Abundance", which means that columns that contain the word "Abundance"
+#' will be treated as corresponding to intensities for different channels.
 #' @importFrom data.table melt
 #' @return `data.table`
 #' @keywords internal
 .cleanRawPDTMT = function(msstats_object, remove_shared = TRUE, 
                           remove_protein_groups = TRUE,
-                          protein_id_column = "ProteinAccessions") {
+                          protein_id_column = "ProteinAccessions",
+                          intensity_columns_regexp = "Abundance") {
     ProteinName = numProtein = QuanInfo = NULL
     
     pd_input = getInputFile(msstats_object, "input")
@@ -80,12 +85,14 @@
     if (protein_id_column == "ProteinAccessions") {
         num_proteins = "XProteins"
     } else {
-        num_proteins = "XProteinsGroups"
+        num_proteins = "XProteinGroups"
     }
     
-    channels = .getChannelColumns(colnames(pd_input), "Abundance")
+    channels = .getChannelColumns(colnames(pd_input), intensity_columns_regexp)
     if (length(channels) == 0L) {
-        msg = "There is no channel intensity column in the input data, which should start with 'Abundance'."
+        msg = paste("There is no channel intensity column in the input data,",
+                    "which should start with the string provided in the",
+                    "intensity_columns_regexp parameter (default: 'Abundance')")
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
@@ -103,7 +110,7 @@
                     id.vars = setdiff(colnames(pd_input), channels),
                     variable.name = "Channel", value.name = "Intensity")
     pd_input$Channel = .standardizeColnames(pd_input$Channel)
-    pd_input$Channel = gsub("Abundance", "", pd_input$Channel)
+    pd_input$Channel = gsub(intensity_columns_regexp, "", pd_input$Channel)
     pd_input$Channel = gsub(":", "", pd_input$Channel)
     pd_input$Intensity = ifelse(pd_input$Intensity == 0, NA, pd_input$Intensity)
     pd_input = pd_input[(ProteinName != "") & (!is.na(ProteinName)), ]
