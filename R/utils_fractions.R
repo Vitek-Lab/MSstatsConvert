@@ -259,14 +259,14 @@
                               by = "Fraction"]
     which_max_measurements = which.max(measurement_count$n_obs)
     if (length(which_max_measurements) == 1L) {
-        return(unique(measurement_count$n_obs[which_max_measurements]))
+        return(unique(measurement_count$Fraction[which_max_measurements]))
     } else {
         input = input[which_max_measurements]
         average_abundance = input[!is.na(Intensity) & Intensity > 0, 
                                   list(mean_abundance = mean(Intensity)),
                                   by = "Fraction"]
         which_max_abundance = which.max(average_abundance$mean_abundance)
-        unique(average_abundance$mean_abundance[which_max_abundance])
+        unique(average_abundance$Fraction[which_max_abundance])
     }
 }
 
