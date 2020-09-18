@@ -9,14 +9,14 @@
     frag_input = getInputFile(msstats_object, "Fragments")
     pept_input = getInputFile(msstats_object, "Peptides")
     prot_input = getInputFile(msstats_object, "Proteins")
-
+    
     if (!is.element("Selected_fragments", colnames(pept_input)) | 
         !is.element("Selected_peptides", colnames(prot_input))) {
         msg = "Selected_fragments column is required. Please check it."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
-
+    
     pept_cols = c("PeptideKey", "Proteins", "Selected_fragments")
     pept_input = pept_input[, pept_cols, with = FALSE]
     pept_input = pept_input[pept_input[["Proteins"]] != "", ]
@@ -28,7 +28,7 @@
     pept_input = pept_input[, lapply(.(FragmentIon), 
                                      function(x) unlist(data.table::tstrsplit(x, "|", fixed = TRUE))),
                             by = .(ProteinName, PeptideSequence)] 
-        colnames(pept_input) = .updateColnames(pept_input, "V1", "FragmentIon")
+    colnames(pept_input) = .updateColnames(pept_input, "V1", "FragmentIon")
     pept_input = pept_input[pept_input[["FragmentIon"]] != "", ]
     # TOOD: It's possible to extract a function here for prot/pept input  
     pept_input[["ProteinName"]] = as.character(pept_input[["ProteinName"]])
@@ -63,6 +63,7 @@
         ## but doublecheck protein id : protein id in raw.frag is always one id.
         ## need to find shared peptides
         input = pept_input
+        input$ProteinName = gsub(";", "", input$ProteinName)
     } else if (!use_frag & !use_pept) {
         msg = "MSstats recommends to use at least selected fragments."
         getOption("MSstatsLog")("ERROR", msg)
