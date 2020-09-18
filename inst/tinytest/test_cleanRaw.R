@@ -6,13 +6,33 @@ dia_import = MSstatsConvert::MSstatsImport(list(Fragments = dia_frag,
                                                 Peptides = dia_pept,
                                                 Proteins = dia_prot),
                                            "MSstats", "DIAUmpire")
+dia_import2 = MSstatsConvert::MSstatsImport(
+    list(Fragments = dia_frag,
+         Peptides = dia_pept[, colnames(dia_pept) != "Selected_fragments", 
+                             with = FALSE],
+         Proteins = dia_prot),
+    "MSstats", "DIAUmpire")
+dia_import3 = MSstatsConvert::MSstatsImport(
+    list(Fragments = dia_frag,
+         Peptides = dia_pept,
+         Proteins = dia_prot[, colnames(dia_prot) != "Selected_peptides", 
+                             with = FALSE]),
+    "MSstats", "DIAUmpire")
+dia_frag2 = data.table::copy(dia_frag)
+dia_frag2$Fragment = gsub("\\+[0-9]+", "", dia_frag2$Fragment)
+dia_import4 = MSstatsConvert::MSstatsImport(
+    list(Fragments = dia_frag2,
+         Peptides = dia_pept,
+         Proteins = dia_prot),
+    "MSstats", "DIAUmpire")
 dia_cleaned = MSstatsConvert::MSstatsClean(dia_import, TRUE, TRUE)
-tinytest::expect_equal(
-    ncol(dia_cleaned), 5    
-)
-tinytest::expect_true(
-    nrow(dia_cleaned) > 0    
-)
+dia_cleaned2 = MSstatsConvert::MSstatsClean(dia_import4, TRUE, TRUE)
+tinytest::expect_equal(ncol(dia_cleaned), 5)
+tinytest::expect_true(nrow(dia_cleaned) > 0)
+tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import, FALSE, FALSE))
+tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import2, TRUE, TRUE))
+tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import3, TRUE, TRUE))
+tinytest::expect_equal(dia_cleaned, dia_cleaned2)
 # MaxQuant
 mq_ev = data.table::fread("./raw_data/MaxQuant/mq_ev.csv")
 mq_pg = data.table::fread("./raw_data/MaxQuant/mq_pg.csv")
@@ -88,29 +108,59 @@ tinytest::expect_true(nrow(pdtmt_cleaned) > 0)
 progenesis_input = data.table::fread("./raw_data/Progenesis/progenesis_input.csv")
 progenesis_import = MSstatsConvert::MSstatsImport(list(input = progenesis_input),
                                                   "MSstats", "Progenesis")
+progenesis_import2 = MSstatsConvert::MSstatsImport(
+    list(input = rbind(progenesis_input[1, ], progenesis_input)),
+    "MSstats", "Progenesis")
 runs = unique(data.table::fread("./raw_data/Progenesis/progenesis_annot.csv")$Run)
 pg_cleaned = MSstatsConvert::MSstatsClean(progenesis_import, runs)
+pg_cleaned2 = MSstatsConvert::MSstatsClean(progenesis_import2, runs) 
 tinytest::expect_equal(ncol(pg_cleaned), 5)
 tinytest::expect_true(nrow(pg_cleaned) > 0)
+tinytest::expect_equal(pg_cleaned, pg_cleaned2)
 # Skyline
 skyline_input = data.table::fread("./raw_data/Skyline/skyline_input.csv")
+skyline_input2 = data.table::copy(skyline_input)
+skyline_input2$DetectionQValue = 0.01
+skyline_input2$Truncated = ifelse(skyline_input2$Truncated, "True", "False")
+skyline_input3 = data.table::copy(skyline_input)
+skyline_input3$Fragment.Ion = rep(c("precursor", "a", "b"), times = nrow(skyline_input) / 3)
 skyline_import = MSstatsConvert::MSstatsImport(list(input = skyline_input), 
                                                "MSstats", "Skyline")
+skyline_import2 = MSstatsConvert::MSstatsImport(list(input = skyline_input2), 
+                                                "MSstats", "Skyline")
+skyline_import3 = MSstatsConvert::MSstatsImport(list(input = skyline_input3), 
+                                                "MSstats", "Skyline")
 sl_cleaned = MSstatsConvert::MSstatsClean(skyline_import)
+sl_cleaned2 = MSstatsConvert::MSstatsClean(skyline_import2)
 tinytest::expect_equal(ncol(sl_cleaned), 13)
 tinytest::expect_true(nrow(sl_cleaned) > 0)
+tinytest::expect_equal(sl_cleaned, sl_cleaned2[, colnames(sl_cleaned), with = F])
+tinytest::expect_error(MSstatsConvert:::SkylinetoMSstatsFormat(sl_input))
 # SpectroMine
 spectromine_input = data.table::fread("./raw_data/SpectroMine/spectromine_input.csv")
 spectromine_import = MSstatsConvert::MSstatsImport(list(input = spectromine_input), 
                                                    "MSstatsTMT", "SpectroMine")
+spectromine_import_error = MSstatsConvert::MSstatsImport(list(input = spectromine_input[, 1:19]),
+                                                         "MSstatsTMT", "SpectroMine")
 sm_cleaned = MSstatsConvert::MSstatsClean(spectromine_import)
 tinytest::expect_equal(ncol(sm_cleaned), 9)
 tinytest::expect_true(nrow(sm_cleaned) > 0)
+tinytest::expect_error(MSstatsConvert::MSstatsClean(spectromine_import_error))
 # Spectronaut
 spectronaut_input = data.table::fread("./raw_data/Spectronaut/spectronaut_input.csv")
+spectronaut_input2 = data.table::copy(spectronaut_input)
+spectronaut_input2$F.ExcludedFromQuantification = ifelse(
+    spectronaut_input2$F.ExcludedFromQuantification,
+    "True", "False"
+)
 spectronaut_import = MSstatsConvert::MSstatsImport(list(input = spectronaut_input), 
                                                    "MSstats", "Spectronaut")
+spectronaut_import2 = MSstatsConvert::MSstatsImport(list(input = spectronaut_input2), 
+                                                    "MSstats", "Spectronaut")
 sn_cleaned = MSstatsConvert::MSstatsClean(spectronaut_import,
                                           intensity = "PeakArea")
+sn_cleaned2 = MSstatsConvert::MSstatsClean(spectronaut_import2,
+                                           intensity = "PeakArea")
 tinytest::expect_equal(ncol(sn_cleaned), 9)
 tinytest::expect_true(nrow(sn_cleaned) > 0)
+tinytest::expect_equal(sn_cleaned, sn_cleaned2)
