@@ -68,6 +68,12 @@
         msg = "MSstats recommends to use at least selected fragments."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
+    } else {
+        input = frag_input
+        colnames(input) = .updateColnames(
+            input, 
+            c("Fragment", "Protein", "Peptide"), 
+            c("FragmentIon", "ProteinName", "PeptideSequence"))
     }
     input[["FragmentIon"]] = gsub("\\+", "_", input[["FragmentIon"]])
     
