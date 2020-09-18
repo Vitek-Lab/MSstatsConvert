@@ -1,9 +1,10 @@
 comment: false
 
 ignore:
-  - R/utils_logging.R
-  - R/MSstats_exports.R
-  - R/utils_check.R
+  - "R/utils_logging.R"
+  - "R/MSstats_exports.R"
+  - "R/utils_checks.R"
+  - "R/utils_MSstatsConvert.R"
 
 coverage:
   status:
