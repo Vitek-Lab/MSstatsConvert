@@ -66,28 +66,73 @@
 #' @keywords internal
 #' @importFrom data.table rbindlist
 .getFullDesign = function(input, group_col, feature_col, measurement_col, is_tmt) {
+    # if (is_tmt) {
+    #     labels = "L"
+    # } else {
+    #     labels = unique(input[["IsotopeLabelType"]])
+    # }
+    # groups = unique(input[[group_col]])
+    # by_group = vector("list", length(groups))
+    # measurements = unique(input[[measurement_col]])
+    # for (group_id in seq_along(groups)) {
+    #     group = groups[group_id]
+    #     group_filter = input[[group_col]] == group
+    #     by_group[[group_id]] = data.table::as.data.table(
+    #         expand.grid(labels = labels,
+    #                     features = unique(input[[feature_col]][group_filter]),
+    #                     measurements = measurements))
+    #     by_group[[group_id]]$group = group
+    # }
+    # result = data.table::rbindlist(by_group)
+    # colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
+    # if (is_tmt) {
+    #     result[, 2:4, with = FALSE]
+    # } else {
+    #     result
+    # }
+    
+    ## 2020 09 17 MC : I keep the codes above and change below. Please feel free to reorganize it and remove my comments
     if (is_tmt) {
         labels = "L"
+        
+        groups = unique(input[[group_col]])
+        by_group = vector("list", length(groups))
+        measurements = unique(input[[measurement_col]])
+        for (group_id in seq_along(groups)) {
+            group = groups[group_id]
+            group_filter = input[[group_col]] == group
+            by_group[[group_id]] = data.table::as.data.table(
+                expand.grid(labels = labels,
+                            features = unique(input[[feature_col]][group_filter]),
+                            measurements = measurements))
+            by_group[[group_id]]$group = group
+        }
+        result = data.table::rbindlist(by_group)
+        colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
+        
+        result[, 2:4, with = FALSE]
+        
     } else {
         labels = unique(input[["IsotopeLabelType"]])
-    }
-    groups = unique(input[[group_col]])
-    by_group = vector("list", length(groups))
-    measurements = unique(input[[measurement_col]])
-    for (group_id in seq_along(groups)) {
-        group = groups[group_id]
-        group_filter = input[[group_col]] == group
-        by_group[[group_id]] = data.table::as.data.table(
-            expand.grid(labels = labels,
-                        features = unique(input[[feature_col]][group_filter]),
-                        measurements = measurements))
-        by_group[[group_id]]$group = group
-    }
-    result = data.table::rbindlist(by_group)
-    colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
-    if (is_tmt) {
-        result[, 2:4, with = FALSE]
-    } else {
+        
+        groups = unique(input[[group_col]])
+        by_group = vector("list", length(groups))
+        measurements = unique(input[[measurement_col]])
+        
+        ## by each group, measurements=Run should be not overlapped,
+        ## for example, run1 should be belonged in group1, then run1 should not be in other groups
+        for (group_id in seq_along(groups)) {
+            group = groups[group_id]
+            group_filter = input[[group_col]] == group
+            by_group[[group_id]] = data.table::as.data.table(
+                expand.grid(labels = labels,
+                            features = unique(input[[feature_col]][group_filter]),
+                            measurements = unique(input[[measurement_col]][group_filter]))) ## change here
+            by_group[[group_id]]$group = group
+        }
+        result = data.table::rbindlist(by_group)
+        colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
+        
         result
     }
 }
