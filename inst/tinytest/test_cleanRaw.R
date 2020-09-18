@@ -182,7 +182,7 @@ sl_cleaned2 = MSstatsConvert::MSstatsClean(skyline_import2)
 tinytest::expect_equal(ncol(sl_cleaned), 13)
 tinytest::expect_true(nrow(sl_cleaned) > 0)
 tinytest::expect_equal(sl_cleaned, sl_cleaned2[, colnames(sl_cleaned), with = F])
-tinytest::expect_error(MSstatsConvert:::SkylinetoMSstatsFormat(sl_input))
+tinytest::expect_error(MSstatsConvert:::.checkDDA(MSstatsConvert::MSstatsClean(skyline_import3)))
 # SpectroMine
 spectromine_input = data.table::fread("./raw_data/SpectroMine/spectromine_input.csv")
 spectromine_import = MSstatsConvert::MSstatsImport(list(input = spectromine_input), 
