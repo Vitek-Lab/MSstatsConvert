@@ -27,6 +27,10 @@ tinytest::expect_equal(
                                                                  IsotopeLabelType, Run, Fraction), Intensity],
     test1_na$Intensity
 )
+### List of missing values is returned when fill_missing = FALSE
+tinytest::expect_message(MSstatsConvert:::.makeBalancedDesign(test1_nona, FALSE))
+tinytest::expect_equal(MSstatsConvert:::.getMissingRunsPerFeature(test1_nona)$feature,
+                       "a")
 ### All rows in one label are missing
 test2_na = data.table::copy(test_data_1)[order(ProteinName, feature, 
                                                IsotopeLabelType, Run, Fraction)]
