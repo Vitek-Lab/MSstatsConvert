@@ -257,11 +257,13 @@
     measurement_count = input[!is.na(Intensity) & Intensity > 0, 
                               list(n_obs = data.table::uniqueN(Run)),
                               by = "Fraction"]
-    which_max_measurements = which.max(measurement_count$n_obs)
+    #which_max_measurements = which.max(measurement_count$n_obs) ## this is issue, if two fractions has the same number of obs, still it choose one of them, which is the first max. So, can bo to the next step to select max mean feature.
+    which_max_measurements = which(measurement_count$n_obs == max(measurement_count$n_obs))
     if (length(which_max_measurements) == 1L) {
         return(unique(measurement_count$Fraction[which_max_measurements]))
     } else {
-        input = input[which_max_measurements]
+        #input = input[which_max_measurements]
+        input = input[Fraction %in% measurement_count$Fraction[which_max_measurements]] ## MC changed this
         average_abundance = input[!is.na(Intensity) & Intensity > 0, 
                                   list(mean_abundance = mean(Intensity)),
                                   by = "Fraction"]
