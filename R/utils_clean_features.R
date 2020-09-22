@@ -39,10 +39,8 @@
 #' @keywords internal
 .filterFewMeasurements = function(input, min_intensity, handle_few,
                                   feature_columns) {
-    if (is.element("Channel", colnames(input))) {
-        feature_columns = c("PSM", "Run")
-    }
     Intensity = n_obs = NULL
+    
     input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
           by = feature_columns]
     if (handle_few == "remove") {
@@ -123,7 +121,7 @@
 #' @return data.table
 #' @keywords internal
 .aggregatePSMstoPeptideIons = function(input, feature_columns, summary_function = sum) {
-    feature = keep = n_psms = PSM = Intensity = NULL
+    keep = n_psms = PSM = Intensity = NULL
     
     feature_columns = unique(c(feature_columns, "Run"))
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
