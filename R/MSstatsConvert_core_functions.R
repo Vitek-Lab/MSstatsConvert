@@ -247,7 +247,9 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
     if (handle_fractions) {
         input = .handleFractions(input)
-        input = .filterFewMeasurements(input, 1, "remove", feature_columns)
+        if (data.table::uniqueN(input$Fraction) > 1) {
+            input = .filterFewMeasurements(input, 1, "remove", feature_columns)
+        }
     } 
     input = .makeBalancedDesign(input, fill_incomplete)
     input = .fixMissingValues(input, fix_missing)
