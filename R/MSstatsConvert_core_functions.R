@@ -247,6 +247,8 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
     if (handle_fractions) {
         input = .handleFractions(input)
+        ## MC : add the step for filtering out few measurements. After handling fraction, some features have only 1 or 2 measurement. plz remove this comment, if you agree
+        input = .filterFewMeasurements(input, 1, "remove", feature_columns) ## ?? "remove" or "keep", or feature_cleaning$handle_features_with_few_measurements? pleaxe check
     } 
     if (fill_incomplete) {
         input = .makeBalancedDesign(input, TRUE)
