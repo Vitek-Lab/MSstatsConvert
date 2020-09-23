@@ -38,8 +38,17 @@
 #' @return data.table
 #' @keywords internal
 .filterFewMeasurements = function(input, min_intensity, handle_few,
-                                  feature_columns) {
+                                  feature_columns = NULL) {
     Intensity = n_obs = NULL
+    
+    if (is.null(feature_columns)) {
+        if (is.element("Channel", colnames(input))) {
+            feature_columns = c("PSM", "Run")
+        } else {
+            feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
+                                          "FragmentIon", "ProductCharge"))
+        }
+    }
     
     input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
           by = feature_columns]

@@ -215,7 +215,7 @@ MSstatsPreprocess = function(
                         feature_cleaning)
     input = .handleFiltering(input, score_filtering, exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
-    input = .filterFewMeasurements(input, 1, "keep", feature_columns)
+    input = .filterFewMeasurements(input, 1, "keep")
     input = .handleSharedPeptides(input, remove_shared_peptides)
     input = .cleanByFeature(input, feature_columns, feature_cleaning)
     input = .handleSingleFeaturePerProtein(input, remove_single_feature_proteins)
