@@ -185,57 +185,51 @@
     } else {
         nonmissing_counts = input[, list(n_nonmissing = sum(!is.na(Intensity))),
                                   by = c("PSM")]
-        max_ids = which.max(nonmissing_counts$n_nonmissing)
-        n_max = length(max_ids)
-        if (n_max == 1) {
-            return(nonmissing_counts$PSM[max_ids])
+        is_max = nonmissing_counts$n_nonmissing == max(nonmissing_counts$n_nonmissing, na.rm = TRUE)
+        if (sum(is_max, na.rm = TRUE) == 1) {
+            return(nonmissing_counts$PSM[which.max(nonmissing_counts$n_nonmissing)])
         } else {
-            input = input[PSM %in% unique(nonmissing_counts$PSM[max_ids])]
+            input = input[PSM %in% unique(nonmissing_counts$PSM[is_max])]
         }
         
         if ("Score" %in% colnames(input)) {
             by_score = input[, list(score = unique(Score)),
                              by = c("PSM")]
-            max_ids = which.max(by_score$score)
-            n_max = length(max_ids)
-            if (n_max == 1) {
-                return(by_score$PSM[max_ids])
+            is_max = by_score$score == max(by_score$score, na.rm = TRUE)
+            if (sum(is_max, na.rm = TRUE) == 1) {
+                return(by_score$PSM[which.max(by_score$score)])
             } else {
-                input = input[PSM %in% unique(by_score$PSM[max_ids])]
+                input = input[PSM %in% unique(by_score$PSM[is_max])]
             }
         }
         
-        if ("IsolationInterference" %in% colnames(input) &
-            all(!is.na(input$IsolationInterference))) {
+        if ("IsolationInterference" %in% colnames(input)) {
             by_score = input[, list(score = unique(IsolationInterference)),
                              by = c("PSM")]
-            min_ids = which.min(by_score$score)
-            n_min = length(min_ids)
-            if (n_min == 1) {
-                return(by_score$PSM[min_ids])
+            is_min = by_score$score == min(by_score$score, na.rm = TRUE)
+            if (sum(is_min, na.rm = TRUE) == 1) {
+                return(by_score$PSM[which.min(by_score$score)])
             } else {
-                input = input[PSM %in% unique(by_score$PSM[min_ids])]
+                input = input[PSM %in% unique(by_score$PSM[is_min])]
             }
         }
         
         if ("IonsScore" %in% colnames(input)) {
             by_score = input[, list(score = unique(IonsScore)),
                              by = c("PSM")]
-            max_ids = which.max(by_score$score)
-            n_max = length(max_ids)
-            if (n_max == 1) {
-                return(by_score$PSM[max_ids])
+            is_max = sum(by_score$score == max(by_score$score, na.rm = TRUE))
+            if (sum(is_max, na.rm = TRUE) == 1) {
+                return(by_score$PSM[which.max(by_score$score)])
             } else {
-                input = input[PSM %in% unique(by_score$PSM[max_ids])]
+                input = input[PSM %in% unique(by_score$PSM[is_max])]
             }
         }
         
         by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
                        by = c("PSM")]
-        max_ids = which.max(by_max$Intensity)
-        n_max = length(max_ids)
-        if (n_max == 1) {
-            return(by_max$PSM[max_ids])
+        is_max = sum(by_max$Intensity == max(by_max$Intensity, na.rm = TRUE))
+        if (sum(is_max, na.rm = TRUE) == 1) {
+            return(by_max$PSM[which.max(by_max$Intensity)])
         } else {
             return(NA)
         }
