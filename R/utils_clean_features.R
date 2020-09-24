@@ -45,7 +45,9 @@
         if (is.element("Channel", colnames(input))) {
             feature_columns = c("PSM", "Run")
         } else {
-            feature_columns = intersect(c("PeptideSequence", "PrecursorCharge",
+            feature_columns = intersect(colnames(input),
+                                        c("PeptideModifiedSequence", "Charge",
+                                          "PeptideSequence", "PrecursorCharge",
                                           "FragmentIon", "ProductCharge"))
         }
     }
