@@ -203,7 +203,8 @@
             }
         }
         
-        if ("IsolationInterference" %in% colnames(input)) {
+        if ("IsolationInterference" %in% colnames(input) &
+            !all(is.na(input$IsolationInterference))) {
             by_score = input[, list(score = unique(IsolationInterference)),
                              by = c("PSM")]
             is_min = by_score$score == min(by_score$score, na.rm = TRUE)
