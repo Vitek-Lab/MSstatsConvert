@@ -32,8 +32,7 @@
         colnames(prog_input) = as.character(unlist(prog_input[1, ]))
         prog_input = prog_input[-1, ]
     }
-    protein_col = MSstatsConvert:::.findAvailable(c("Protein", "Accession"), 
-                                                  colnames(prog_input))
+    protein_col = .findAvailable(c("Protein", "Accession"), colnames(prog_input))
     cols = which(colnames(prog_input) %in% c(protein_col, "Modifications", 
                                              "Sequence", "Charge"))
     cols = c(cols, raw_abundances_col_ids)
