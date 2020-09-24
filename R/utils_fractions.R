@@ -118,53 +118,6 @@
 }
 
 
-#' Check if fractionation exists
-#' @param input output of `MSstatsPreprocess`
-#' @keywords internal
-.checkMultiRun = function(input) {
-    Run = Condition = BioReplicate = Intensity = feature = condition = NULL
-    
-    if (is.element("Fraction", colnames(input))) {
-        return(list(has_fractions = TRUE, is_risky = FALSE))
-    } else {
-        count_techreps = input[, list(n_techreps = data.table::uniqueN(Run)),
-                               by = c("Condition", "BioReplicate")]
-        if (!any(count_techreps$n_techreps > 1)) {
-            has_fractions = FALSE
-            is_risky = FALSE
-        } else {
-            info = unique(input[, list(Condition, BioReplicate, Run)])
-            info[, condition := paste(Condition, BioReplicate, sep = "_")]
-            single_sample = unique(info[condition == unique(condition)[1],
-                                        list(Condition, BioReplicate)])
-            single_sample_data = input[!is.na(Intensity) & 
-                                           Condition == single_sample$Condition &
-                                           BioReplicate == single_sample$BioReplicate]
-            single_run_features = unique(single_sample_data[Run == unique(Run)[1], 
-                                                            as.character(feature)])
-            common = single_sample_data[, list(n_common = .countCommonFeatures(feature, single_run_features)), 
-                                        by = "Run"]
-            common$fraction = common$n_common / max(common$n_common)
-            overlap = common$fraction[-1]
-            
-            if (all(overlap > 0.5)) {
-                has_fractions = FALSE
-                is_risky = FALSE
-            } else if (all(overlap < 0.5)) {
-                has_fractions = TRUE
-                is_risky = FALSE
-            } else {
-                has_fractions = FALSE
-                is_risky = TRUE
-            }
-            
-        }
-    }
-    list(has_fractions = has_fractions,
-         is_risky = is_risky)
-}
-
-
 #' Handle overlapping features
 #' @param input output of `MSstatsPreprocess`
 #' @keywords internal
@@ -206,13 +159,60 @@
 }
 
 
+#' Check if fractionation exists
+#' @param input output of `MSstatsPreprocess`
+#' @keywords internal
+.checkMultiRun = function(input) {
+    Run = Condition = BioReplicate = Intensity = feature = condition = NULL
+    
+    if (is.element("Fraction", colnames(input))) {
+        return(list(has_fractions = TRUE, is_risky = FALSE))
+    } else {
+        count_techreps = input[, list(n_techreps = data.table::uniqueN(Run)),
+                               by = c("Condition", "BioReplicate")]
+        if (all(count_techreps$n_techreps == 1)) {
+            has_fractions = FALSE
+            is_risky = FALSE
+        } else {
+            info = unique(input[, list(Condition, BioReplicate, Run)])
+            info[, condition := paste(Condition, BioReplicate, sep = "_")]
+            single_sample = unique(info[condition == unique(condition)[1],
+                                        list(Condition, BioReplicate)])
+            single_sample_data = input[!is.na(Intensity) & 
+                                           Condition == single_sample$Condition &
+                                           BioReplicate == single_sample$BioReplicate]
+            single_run_features = unique(single_sample_data[Run == unique(Run)[1], 
+                                                            as.character(feature)])
+            common = single_sample_data[, list(n_common = .countCommonFeatures(feature, single_run_features)), 
+                                        by = "Run"]
+            common$fraction = common$n_common / max(common$n_common)
+            overlap = common$fraction[-1]
+            
+            if (all(overlap > 0.5)) {
+                has_fractions = FALSE
+                is_risky = FALSE
+            } else if (all(overlap < 0.5)) {
+                has_fractions = TRUE
+                is_risky = FALSE
+            } else {
+                has_fractions = FALSE
+                is_risky = TRUE
+            }
+            
+        }
+    }
+    list(has_fractions = has_fractions,
+         is_risky = is_risky)
+}
+
+
 #' Add a Fraction column to the output of `MSstatsPreprocess`
 #' @param input output of `MSstatsPreprocess`
 #' @keywords internal
 .addFractions = function(input) {
     Condition = BioReplicate = Run = CONDITION = Intensity = feature = Fraction = NULL
     
-    input$Fraction <- NA
+    input$Fraction = as.character(NA)
     run_info = unique(input[, list(Condition, BioReplicate, Run,
                                    CONDITION = paste(Condition, BioReplicate, sep = "_"))])
     single_condition = run_info[CONDITION == unique(CONDITION)[1], ]
@@ -223,7 +223,7 @@
                               list(Condition, BioReplicate, Run, Intensity)]
         count_features = data.table::dcast(same_features, Run ~ Condition + BioReplicate,
                                            fun.aggregate = length, value.var = "Intensity")
-        same_fraction = apply(count_features[, -1], 2, function(x) as.character(count_features[which.max(x)," Run"]))
+        same_fraction = apply(count_features[, -1], 2, function(x) as.character(count_features[which.max(x), "Run"]))
         input[Run %in% same_fraction, "Fraction"] = single_condition[Run == single_condition$Run[run_id], Fraction]
     }
     input
