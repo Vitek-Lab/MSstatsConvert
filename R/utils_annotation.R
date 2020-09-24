@@ -7,7 +7,7 @@
     input$Run = .standardizeColnames(input$Run)
     if (!is.null(annotation)) {
         if (is.element("Channel", colnames(input))) {
-            input$Channel = .standardizeColnames(input)
+            input$Channel = .standardizeColnames(input$Channel)
             if (!all(unique(annotation$Channel) %in% unique(input$Channel))) {
                 msg = "Please check the annotation file. The channel name must be matched with that in input data "
                 getOption("MSstatsLog")("ERROR", msg)
