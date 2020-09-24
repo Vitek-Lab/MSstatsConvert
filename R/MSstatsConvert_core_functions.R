@@ -268,7 +268,7 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
         annotation = .getDataTable(annotation)
     } else {
         cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
-                 "Mixture", "TechRepMixture", unname(old_columns))
+                 "Mixture", "TechRepMixture", unname(all_columns))
         cols = intersect(cols, colnames(input))
         annotation = unique(input[, cols, with = FALSE])
     }
