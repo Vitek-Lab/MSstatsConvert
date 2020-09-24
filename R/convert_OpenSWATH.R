@@ -9,7 +9,7 @@
   os_input = os_input[, c("ProteinName", "FullPeptideName", "Charge", 
                           "filename", "aggr_Fragment_Annotation", "aggr_Peak_Area",
                           "m_score", "decoy"), with = FALSE]
-  colnames(os_input) = .updateColnames(
+  data.table::setnames(
     os_input,
     c("FullPeptideName", "Charge", "filename", "aggr_Fragment_Annotation", "aggr_Peak_Area"),
     c("PeptideSequence", "PrecursorCharge", "Run", "FragmentIon", "Intensity"))

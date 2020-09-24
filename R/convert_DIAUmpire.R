@@ -21,14 +21,14 @@
     pept_input = pept_input[, pept_cols, with = FALSE]
     pept_input = pept_input[pept_input[["Proteins"]] != "", ]
     pept_input[["Selected_fragments"]] =  as.character(pept_input[["Selected_fragments"]])
-    colnames(pept_input) = .updateColnames(
+    data.table::setnames(
         pept_input,
         colnames(pept_input), 
         c("PeptideSequence", "ProteinName", "FragmentIon"))
     pept_input = pept_input[, lapply(.(FragmentIon), 
                                      function(x) unlist(data.table::tstrsplit(x, "|", fixed = TRUE))),
                             by = .(ProteinName, PeptideSequence)] 
-    colnames(pept_input) = .updateColnames(pept_input, "V1", "FragmentIon")
+    data.table::setnames(pept_input, "V1", "FragmentIon")
     pept_input = pept_input[pept_input[["FragmentIon"]] != "", ]
     # TOOD: It's possible to extract a function here for prot/pept input  
     pept_input[["ProteinName"]] = as.character(pept_input[["ProteinName"]])
@@ -38,12 +38,12 @@
     prot_input[["Selected_peptides"]] = as.character(prot_input[["Selected_peptides"]])
     prot_input[["Selected_peptides"]] = trimws(prot_input[["Selected_peptides"]],
                                                "both") # Is it needed?
-    colnames(prot_input) = .updateColnames(prot_input, colnames(prot_input),
-                                           c("ProteinName", "PeptideSequence"))
+    data.table::setnames(prot_input, colnames(prot_input),
+                         c("ProteinName", "PeptideSequence"))
     prot_input = prot_input[, lapply(.(PeptideSequence),
                                      function(x) (unlist(data.table::tstrsplit(x, "|", fixed = TRUE)))),
                             by = .(ProteinName)]
-    colnames(prot_input) = .updateColnames(prot_input, "V1", "PeptideSequence")
+    data.table::setnames(prot_input, "V1", "PeptideSequence")
     prot_input = prot_input[PeptideSequence != "", ]
     
     prot_input[["ProteinName"]] = gsub(";", "", prot_input[["ProteinName"]])
@@ -77,7 +77,7 @@
     frag_cols = intensity_cols | key_cols
     frag_input = frag_input[, frag_cols, with = FALSE]
     new_names = c("ProteinName", "PeptideSequence", "FragmentIon")
-    colnames(frag_input) = .updateColnames(
+    data.table::setnames(
         frag_input, frag_col_names[2:4], new_names)
     frag_input = .fixColumnTypes(
         frag_input, character_columns = c(new_names, "FragmentKey"))

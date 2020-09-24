@@ -8,11 +8,6 @@ tinytest::expect_equal(class(MSstatsConvert:::.getDataTable(test_path))[1], "dat
 tinytest::expect_equal(class(MSstatsConvert:::.getDataTable(test_df))[1], "data.table")
 ## When it's not a data.frame, a test 
 tinytest::expect_error(MSstatsConvert:::.getDataTable(numeric(10)))
-# Column names ----
-## Update colnames when needed
-tinytest::expect_equal(MSstatsConvert:::.updateColnames(test_df, "x", "z"), c("z", "y"))
-## Do not update, when the column doesn't exist
-tinytest::expect_equal(MSstatsConvert:::.updateColnames(test_df, "z", "z"), c("x", "y"))
 ## Remove unnecessary symbols from column names
 tinytest::expect_equal(MSstatsConvert:::.standardizeColnames("Col.name"), "Colname")
 tinytest::expect_equal(MSstatsConvert:::.standardizeColnames("[Col%name]"), "Colname")

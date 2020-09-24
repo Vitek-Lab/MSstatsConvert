@@ -6,12 +6,12 @@
     Truncated = isZero = DetectionQValue = Intensity = NULL
     
     sl_input = getInputFile(msstats_object, "input")
-    colnames(sl_input) = .updateColnames(sl_input, c("FileName", "Area"),
-                                         c("Run", "Intensity"))
+    data.table::setnames(sl_input, c("FileName", "Area"),
+                         c("Run", "Intensity"))
     
     sl_input = sl_input[, !(colnames(sl_input) == "PeptideSequence"), with = FALSE]
-    colnames(sl_input) = .updateColnames(sl_input, "PeptideModifiedSequence",
-                                         "PeptideSequence")
+    data.table::setnames(sl_input, "PeptideModifiedSequence",
+                         "PeptideSequence")
     sl_input[, Intensity := as.numeric(as.character(Intensity))]
     if (is.element("DetectionQValue", colnames(sl_input))) {
         sl_input[, DetectionQValue := as.numeric(as.character(DetectionQValue))]
@@ -20,7 +20,7 @@
         sl_input[, Truncated := as.character(Truncated) == "True"]
     }
     sl_input[, Truncated := as.integer(Truncated)]
-
+    
     sl_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                 "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition",
                 "BioReplicate", "Run", "Intensity", "StandardType")

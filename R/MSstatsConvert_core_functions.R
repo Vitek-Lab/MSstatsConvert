@@ -220,7 +220,7 @@ MSstatsPreprocess = function(
     input = .cleanByFeature(input, feature_columns, feature_cleaning)
     input = .handleSingleFeaturePerProtein(input, remove_single_feature_proteins)
     input = .mergeAnnotation(input, annotation)
-    input = .fillValues(input, columns_to_fill)
+    .fillValues(input, columns_to_fill)
     input[, Intensity := ifelse(is.finite(Intensity), Intensity, NA)]
     input
 }
@@ -274,9 +274,9 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
     }
     all_columns = unlist(list(...))
     if (length(all_columns) > 0) {
-        colnames(annotation) = .updateColnames(annotation, 
-                                               unname(all_columns),
-                                               names(all_columns))
+        data.table::setnames(annotation, 
+                             unname(all_columns),
+                             names(all_columns))
     }
     annotation = annotation[, !duplicated(colnames(annotation)), 
                             with = FALSE]

@@ -48,7 +48,7 @@
                             "Leadingrazorprotein")
         channels = character(0)
     }
-    colnames(mq_input) = .updateColnames(
+    data.table::setnames(
         mq_input, 
         c(protein_id, "Modifiedsequence", "Charge", "Rawfile"), 
         c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run"))

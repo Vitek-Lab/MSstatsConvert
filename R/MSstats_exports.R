@@ -160,9 +160,9 @@ MaxQtoMSstatsTMTFormat = function(
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows))
     input = MSstatsBalancedDesign(input, feature_columns)
-    colnames(input) = .updateColnames(input, 
-                                      "PrecursorCharge", 
-                                      "Charge")
+    data.table::setnames(input, 
+                         "PrecursorCharge", 
+                         "Charge")
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
@@ -240,7 +240,7 @@ OpenMStoMSstatsTMTFormat = function(
     )
     input = MSstatsBalancedDesign(input, feature_columns)
     
-    colnames(input) = .updateColnames(input, "PrecursorCharge", "Charge")
+    data.table::setnames(input, "PrecursorCharge", "Charge")
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
@@ -348,9 +348,9 @@ ProgenesistoMSstatsFormat = function(
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    colnames(input) = .updateColnames(input, 
-                                      "PeptideSequence",
-                                      "PeptideModifiedSequence")
+    data.table::setnames(input, 
+                         "PeptideSequence",
+                         "PeptideModifiedSequence")
     input[, intersect(standard_columns, colnames(input))]
 }
 
@@ -409,9 +409,9 @@ PDtoMSstatsFormat = function(
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    colnames(input) = .updateColnames(input, 
-                                      "PeptideSequence",
-                                      "PeptideModifiedSequence")
+    data.table::setnames(input, 
+                         "PeptideSequence",
+                         "PeptideModifiedSequence")
     input[, intersect(standard_columns, colnames(input))]
 }
 
@@ -460,9 +460,9 @@ PDtoMSstatsTMTFormat <- function(
                                 summarize_multiple_psms = summaryforMultipleRows)
     )
     input = MSstatsBalancedDesign(input, feature_columns)
-    colnames(input) = .updateColnames(input,
-                                      "PrecursorCharge", 
-                                      "Charge")
+    data.table::setnames(input,
+                         "PrecursorCharge", 
+                         "Charge")
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
@@ -606,9 +606,9 @@ SpectroMinetoMSstatsTMTFormat <- function(
                                 summarize_multiple_psms = summaryforMultipleRows)
     )
     input = MSstatsBalancedDesign(input, feature_columns)
-    colnames(input) = .updateColnames(input, 
-                                      "PrecursorCharge", 
-                                      "Charge")
+    data.table::setnames(input, 
+                         "PrecursorCharge", 
+                         "Charge")
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 

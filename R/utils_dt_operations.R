@@ -1,34 +1,17 @@
 #' Read file from a provided path or convert given data.frame to data.table
 #' @param input report from a signal processing tool or a path to it
 #' @param ... additional parameters for data.table::fread
-#' @importFrom data.table as.data.table fread
+#' @importFrom data.table as.data.table fread setDT
 #' @keywords internal
 .getDataTable = function(input, ...) {
     checkmate::checkTRUE(is.character(input) | inherits(input, "data.frame"))
     if (inherits(input, "data.frame")) {
-        input = as.data.table(input)
+        input = data.table::setDT(input)
     } else {
         input = data.table::fread(input, showProgress = FALSE, ...)
     }
     colnames(input) = .standardizeColnames(colnames(input))
     input
-}
-
-
-#' Update specified column names while retaining the rest
-#' @param input data.table preprocessed by one of the `cleanRaw*` functions.
-#' @param old_names chr, vector of column names that will be changed.
-#' @param new_names chr, vector of new columns names in order corresponding 
-#' to that in `old_names` parameter.
-#' @return character vector
-#' @keywords internal
-.updateColnames = function(input, old_names, new_names) {
-    column_update = new_names
-    names(column_update) = old_names
-    columns = colnames(input)
-    not_changing = setdiff(columns, names(column_update))
-    column_update[not_changing] = not_changing
-    unname(column_update[columns])
 }
 
 
@@ -66,10 +49,7 @@
 #' @return data.table
 #' @keywords internal
 .fillValues = function(input, fill_list) {
-    for (column in names(fill_list)) {
-        input[[column]] = fill_list[[column]]
-    }
-    input
+    input[, names(fill_list) := as.list(unname(fill_list))]
 }
 
 

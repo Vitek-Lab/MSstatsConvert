@@ -21,9 +21,9 @@
     colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     protein_col = .findAvailable(c("Protein", "Accession"), 
                                  colnames(prog_input))
-    colnames(prog_input) = .updateColnames(prog_input, 
-                                           c(protein_col, "Charge"), 
-                                           c("ProteinName", "PrecursorCharge"))
+    data.table::setnames(prog_input, 
+                         c(protein_col, "Charge"), 
+                         c("ProteinName", "PrecursorCharge"))
     
     nonmissing_prot = !is.na(prog_input$ProteinName) & prog_input$ProteinName != ""
     nonmissing_pept = !is.na(prog_input$Sequence) & prog_input$Sequence != ""

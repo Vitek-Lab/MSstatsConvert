@@ -50,7 +50,7 @@
         pd_cols = c(pd_cols, "Fraction")
     }
     pd_input = pd_input[, pd_cols, with = FALSE]
-    colnames(pd_input) = .updateColnames(
+    data.table::setnames(
         pd_input,
         c(protein_id_column, sequence_column, "SpectrumFile", quantification_column, "Charge"),
         c("ProteinName", "PeptideSequence", "Run", "Intensity", "PrecursorCharge"))
@@ -101,9 +101,9 @@
                           "IonsScore", "SpectrumFile", "QuanInfo", "IsolationInterference", channels),
                         colnames(pd_input))
     pd_input = pd_input[, pd_cols, with = FALSE]
-    colnames(pd_input) = .updateColnames(pd_input,
-                                         c(protein_id_column, num_proteins, "AnnotatedSequence", "SpectrumFile", "Charge"),
-                                         c("ProteinName", "numProtein", "PeptideSequence", "Run", "PrecursorCharge"))
+    data.table::setnames(pd_input,
+                         c(protein_id_column, num_proteins, "AnnotatedSequence", "SpectrumFile", "Charge"),
+                         c("ProteinName", "numProtein", "PeptideSequence", "Run", "PrecursorCharge"))
     pd_input$PSM = paste(pd_input$PeptideSequence, pd_input$PrecursorCharge,
                          1:nrow(pd_input), sep = "_")
     pd_input = melt(pd_input, measure.vars = channels, 

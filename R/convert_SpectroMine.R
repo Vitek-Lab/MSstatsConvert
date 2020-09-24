@@ -17,11 +17,11 @@
   sm_input = sm_input[, c("PGProteinAccessions", "PMoleculeID", "PPCharge",
                           "PGQValue", "PSMQvalue", "RFileName", channels),
                       with = FALSE]
-  colnames(sm_input) = .updateColnames(sm_input, 
-                                       c("PGProteinAccessions", "PMoleculeID", 
-                                         "PPCharge", "PSMQvalue", "RFileName"),
-                                       c("ProteinName", "PeptideSequence", "PrecursorCharge",
-                                         "Qvalue", "Run"))
+  data.table::setnames(sm_input, 
+                       c("PGProteinAccessions", "PMoleculeID", 
+                         "PPCharge", "PSMQvalue", "RFileName"),
+                       c("ProteinName", "PeptideSequence", "PrecursorCharge",
+                         "Qvalue", "Run"))
   sm_input = sm_input[(ProteinName != "") & (!is.na(ProteinName)), ]
   sm_input[, PSM := paste(PeptideSequence, PrecursorCharge, 
                           1:nrow(sm_input), sep = "_")]

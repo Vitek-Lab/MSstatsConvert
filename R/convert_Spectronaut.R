@@ -21,7 +21,7 @@
            f_charge_col, "RFileName", "EGQvalue", pg_qval_col, 
            paste0("F", intensity))
   spec_input = spec_input[, cols, with = FALSE]
-  colnames(spec_input) = .updateColnames(
+  data.table::setnames(
     spec_input, 
     c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon",
       f_charge_col, "RFileName", "EGQvalue", paste0("F", intensity)),
