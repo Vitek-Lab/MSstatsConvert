@@ -49,7 +49,9 @@
 #' @return data.table
 #' @keywords internal
 .fillValues = function(input, fill_list) {
-    input[, names(fill_list) := as.list(unname(fill_list))]
+    if (length(fill_list) > 0) {
+        input[, names(fill_list) := as.list(unname(fill_list))]
+    }
 }
 
 
