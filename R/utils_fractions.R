@@ -174,11 +174,24 @@
             has_fractions = FALSE
             is_risky = FALSE
         } else {
+            ## no fraction information, but multiple ms runs per sample
+            ## need to distinguish they are tech replicates or we miss fraction information
             info = unique(input[, list(Condition, BioReplicate, Run)])
             info[, condition := paste(Condition, BioReplicate, sep = "_")]
-            single_sample = unique(info[condition == unique(condition)[1],
+            
+            ## previously, just use the first condition as a reference. 
+            ## However, the first condition has very few measurements, can't recognized correctly.
+            ## add the part to select condition with max number of measurement
+            ## please recode or reorganize as you want and remove this comment
+            input[, condition := paste(Condition, BioReplicate, sep = "_")]
+            countcondition = input[, n_obs := sum(!is.na(Intensity) & Intensity > 1, na.rm = TRUE),
+                                        by = condition]
+            countcondition = unique(countcondition[, c('condition', 'n_obs')])
+            reference_condition = countcondition[which.max(countcondition$n_obs), ]
+            
+            single_sample = unique(info[condition == reference_condition$condition,
                                         list(Condition, BioReplicate)])
-            single_sample_data = input[!is.na(Intensity) & 
+            single_sample_data = input[!is.na(Intensity) & ## including Intensity < 1 ??
                                            Condition == single_sample$Condition &
                                            BioReplicate == single_sample$BioReplicate]
             single_run_features = unique(single_sample_data[Run == unique(Run)[1], 
