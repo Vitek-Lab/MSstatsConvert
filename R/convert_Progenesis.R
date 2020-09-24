@@ -22,7 +22,7 @@
     raw_abundances_col_ids = seq(raw_abundance_col_id,
                                  raw_abundance_col_id + length(runs) - 1)
     
-    if (TRUE) {
+    if (fix_colnames) {
         if (all(unique(prog_input[[1]][1:2]) == "")) {
             skip = 1:2
         } else {
