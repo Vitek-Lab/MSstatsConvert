@@ -56,7 +56,7 @@
                           behavior, handle_na = "keep", fill_value = NA,
                           filter = TRUE, drop = TRUE) {
     if (!is.element(score_column, colnames(input))) {
-        msg = paste(score_column, "not found in input columns")
+        msg = paste(score_column, "not found in input columns.")
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)
@@ -102,7 +102,7 @@
 #' @keywords internal
 .filterByPattern = function(input, col_name, patterns, filter, drop) {
     if (!is.element(col_name, colnames(input))) {
-        msg = paste(col_name, "not found in input columns")
+        msg = paste(col_name, "not found in input columns.")
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)
@@ -110,7 +110,7 @@
     
     if (filter) {
         msg = paste("Sequences containing", 
-                    paste(patterns, sep = ", ", collapse = ", "), "are removed")
+                    paste(patterns, sep = ", ", collapse = ", "), "are removed.")
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
         pattern_filter = rep(TRUE, nrow(input))
@@ -139,7 +139,7 @@
 #' @keywords internal
 .filterExact = function(input, col_name, filter_symbols, filter, drop) {
     if (!is.element(col_name, colnames(input))) {
-        msg = paste(col_name, "not found in input columns")
+        msg = paste(col_name, "not found in input columns.")
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)

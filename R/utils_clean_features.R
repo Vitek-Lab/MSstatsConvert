@@ -56,10 +56,10 @@
           by = feature_columns]
     if (handle_few == "remove") {
         cutoff = 2
-        msg = "Features with one or two measurements across runs are removed"
+        msg = "Features with one or two measurements across runs are removed."
     } else {
         cutoff = 0
-        msg = "Features with all missing measurements across runs are removed"
+        msg = "Features with all missing measurements across runs are removed."
     }
     input = input[n_obs > cutoff]
     getOption("MSstatsLog")("INFO", msg)
@@ -112,8 +112,8 @@
         input[, feature_count := uniqueN(feature), by = "ProteinName"]
         input = input[feature_count > 1]
         input = input[, !(colnames(input) %in% c("feature_count", "feature")), with = FALSE]
-        getOption("MSstatsLog")("INFO", "Proteins with a single feature are removed")
-        getOption("MSstatsMsg")("INFO", "Proteins with a single feature are removed")
+        getOption("MSstatsLog")("INFO", "Proteins with a single feature are removed.")
+        getOption("MSstatsMsg")("INFO", "Proteins with a single feature are removed.")
     }
     input
 }
