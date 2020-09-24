@@ -163,7 +163,8 @@
 #' @param input output of `MSstatsPreprocess`
 #' @keywords internal
 .checkMultiRun = function(input) {
-    Run = Condition = BioReplicate = Intensity = feature = condition = NULL
+    Run = Condition = BioReplicate = Intensity = NULL
+    feature = condition = n_obs = NULL
     
     if (is.element("Fraction", colnames(input))) {
         return(list(has_fractions = TRUE, is_risky = FALSE))
@@ -179,17 +180,15 @@
             info = unique(input[, list(Condition, BioReplicate, Run)])
             info[, condition := paste(Condition, BioReplicate, sep = "_")]
             
-            ## previously, just use the first condition as a reference. 
-            ## However, the first condition has very few measurements, can't recognized correctly.
-            ## add the part to select condition with max number of measurement
-            ## please recode or reorganize as you want and remove this comment
             input[, condition := paste(Condition, BioReplicate, sep = "_")]
-            countcondition = input[, n_obs := sum(!is.na(Intensity) & Intensity > 1, na.rm = TRUE),
-                                        by = condition]
-            countcondition = unique(countcondition[, c('condition', 'n_obs')])
-            reference_condition = countcondition[which.max(countcondition$n_obs), ]
-            
-            single_sample = unique(info[condition == reference_condition$condition,
+            measurement_count = input[, n_obs := sum(!is.na(Intensity) & 
+                                                         Intensity > 1, 
+                                                     na.rm = TRUE),
+                                      by = condition]
+            max_measurements = which.max(measurement_count$n_obs)[1]
+            ref = measurement_count$condition[max_measurements]
+
+            single_sample = unique(info[condition == ref,
                                         list(Condition, BioReplicate)])
             single_sample_data = input[!is.na(Intensity) & ## including Intensity < 1 ??
                                            Condition == single_sample$Condition &
