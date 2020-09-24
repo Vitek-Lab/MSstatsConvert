@@ -22,7 +22,7 @@
     raw_abundances_col_ids = seq(raw_abundance_col_id,
                                  raw_abundance_col_id + length(runs) - 1)
     
-    if (TRUE) {
+    if (fix_colnames) {
         if (all(unique(prog_input[[1]][1:2]) == "")) {
             skip = 1:2
         } else {
@@ -32,13 +32,12 @@
         colnames(prog_input) = as.character(unlist(prog_input[1, ]))
         prog_input = prog_input[-1, ]
     }
-    protein_col = MSstatsConvert:::.findAvailable(c("Protein", "Accession"), 
-                                                  colnames(prog_input))
+    protein_col = .findAvailable(c("Protein", "Accession"), colnames(prog_input))
     cols = which(colnames(prog_input) %in% c(protein_col, "Modifications", 
                                              "Sequence", "Charge"))
     cols = c(cols, raw_abundances_col_ids)
     prog_input = prog_input[, cols, with = FALSE]
-    colnames(prog_input) = MSstatsConvert:::.standardizeColnames(colnames(prog_input))
+    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     data.table::setnames(prog_input, 
                          c(protein_col, "Charge"), 
                          c("ProteinName", "PrecursorCharge"))
