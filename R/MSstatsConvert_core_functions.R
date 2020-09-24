@@ -222,6 +222,7 @@ MSstatsPreprocess = function(
     input = .mergeAnnotation(input, annotation)
     .fillValues(input, columns_to_fill)
     input[, Intensity := ifelse(is.finite(Intensity), Intensity, NA)]
+    input[, Intensity := ifelse(Intensity > 0 & Intensity <= 1, 0, Intensity)]
     input
 }
 
@@ -247,9 +248,7 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
     if (handle_fractions) {
         input = .handleFractions(input)
-        if (data.table::uniqueN(input$Fraction) > 1) {
-            input = .filterFewMeasurements(input, 1, "remove", feature_columns)
-        }
+        input = .filterFewMeasurements(input, 1, "remove", feature_columns)
     } 
     input = .makeBalancedDesign(input, fill_incomplete)
     input = .fixMissingValues(input, fix_missing)
