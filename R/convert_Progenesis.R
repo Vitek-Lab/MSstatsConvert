@@ -8,7 +8,21 @@
     Useinquantitation = NULL
     
     prog_input = getInputFile(msstats_object, "input")
-    if (fix_colnames) {
+    raw_abundance_col_id = which(colnames(prog_input) == "Rawabundance")
+    if (is.element("Rawabundance", colnames(prog_input)) &
+        is.element("Normalizedabundance", colnames(prog_input))) {
+        norm_abundance_col_id = which(colnames(prog_input) == "Normalizedabundance")
+        if ((raw_abundance_col_id - norm_abundance_col_id) != length(runs)) {
+            msg = paste("** Please check annotation file. The numbers of MS runs", 
+                        "in annotation and output are not matched.")
+            getOption("MSstatsLog")("ERROR", msg)
+            stop(msg)
+        }
+    }
+    raw_abundances_col_ids = seq(raw_abundance_col_id,
+                                 raw_abundance_col_id + length(runs) - 1)
+    
+    if (TRUE) {
         if (all(unique(prog_input[[1]][1:2]) == "")) {
             skip = 1:2
         } else {
@@ -18,12 +32,17 @@
         colnames(prog_input) = as.character(unlist(prog_input[1, ]))
         prog_input = prog_input[-1, ]
     }
-    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
-    protein_col = .findAvailable(c("Protein", "Accession"), 
-                                 colnames(prog_input))
+    protein_col = MSstatsConvert:::.findAvailable(c("Protein", "Accession"), 
+                                                  colnames(prog_input))
+    cols = which(colnames(prog_input) %in% c(protein_col, "Modifications", 
+                                             "Sequence", "Charge"))
+    cols = c(cols, raw_abundances_col_ids)
+    prog_input = prog_input[, cols, with = FALSE]
+    colnames(prog_input) = MSstatsConvert:::.standardizeColnames(colnames(prog_input))
     data.table::setnames(prog_input, 
                          c(protein_col, "Charge"), 
                          c("ProteinName", "PrecursorCharge"))
+    
     
     nonmissing_prot = !is.na(prog_input$ProteinName) & prog_input$ProteinName != ""
     nonmissing_pept = !is.na(prog_input$Sequence) & prog_input$Sequence != ""
