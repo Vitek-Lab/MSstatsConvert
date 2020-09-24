@@ -2,7 +2,7 @@ dataset = data.table::data.table(
     Run = rep(1:5, each = 2)
 )
 dataset_tmt = data.table::data.table(
-    Run = rep(1:5, each = 2),
+    Run = as.character(rep(1:5, each = 2)),
     Channel = rep(c("a", "b"), times = 5)
 )
 annotation_1 = data.table::data.table(
@@ -28,11 +28,16 @@ annotation_4 = data.table::data.table(
     Channel = c(rep(c("a", "b"), times = 4), "c")
 )
 # Create annotation ----
-## No annotation - return NULL
-tinytest::expect_null(MSstatsConvert:::MSstatsMakeAnnotation(dataset, NULL))
+## No annotation - return a subset of original data
+unique_runs = unique(dataset)
+unique_runs$Run = as.character(unique_runs$Run)
+tinytest::expect_equal(MSstatsConvert:::MSstatsMakeAnnotation(dataset, NULL),
+                       unique_runs)
 ## No additional information - return NULL
-tinytest::expect_null(MSstatsConvert:::MSstatsMakeAnnotation(dataset, data.table::data.table(Run = 1:5)))
+tinytest::expect_equal(MSstatsConvert:::MSstatsMakeAnnotation(dataset, data.table::data.table(Run = 1:5)),
+                       data.table::data.table(Run = as.character(1:5)))
 ## Annotation provided - return annotation
+annotation_1$Run = as.character(annotation_1$Run)
 tinytest::expect_identical(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_1),
                            annotation_1)
 ## Column names are updated
@@ -43,14 +48,16 @@ tinytest::expect_true(
 )
 # Merge annotation ----
 ## MSstats version: no new information in annotation
+dataset_chr = dataset
+dataset_chr$Run = as.character(dataset_chr$Run)
 tinytest::expect_identical(
     MSstatsConvert:::.mergeAnnotation(dataset, NULL),
-    dataset
+    dataset_chr
 )
 ## MSstats: annotation provided
 tinytest::expect_identical(
     MSstatsConvert:::.mergeAnnotation(dataset, annotation_1),
-    merge(dataset, annotation_1, sort = FALSE)
+    merge(dataset_chr, annotation_1, sort = FALSE)
 )
 ## MSstatsTMT: all is OK
 tmt_annotation = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_3, Run = "Rawfile")
