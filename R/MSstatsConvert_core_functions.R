@@ -265,21 +265,24 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
 #' @export
 MSstatsMakeAnnotation = function(input, annotation, ...) {
     if (!is.null(annotation)) {
-        all_columns = unlist(list(...))
         annotation = .getDataTable(annotation)
-        if (length(all_columns) > 0) {
-            colnames(annotation) = .updateColnames(annotation, 
-                                                   unname(all_columns),
-                                                   names(all_columns))
-        }
-        if (is.element("Channel", colnames(annotation))) {
-            annotation$Channel = .standardizeColnames(annotation$Channel)
-        }
-        annotation[, !duplicated(colnames(annotation)), with = FALSE]
     } else {
         cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
                  "Mixture", "TechRepMixture")
         cols = intersect(cols, colnames(input))
-        unique(input[, cols, with = FALSE])
+        annotation = unique(input[, cols, with = FALSE])
     }
+    all_columns = unlist(list(...))
+    if (length(all_columns) > 0) {
+        colnames(annotation) = .updateColnames(annotation, 
+                                               unname(all_columns),
+                                               names(all_columns))
+    }
+    annotation = annotation[, !duplicated(colnames(annotation)), 
+                            with = FALSE]
+    if (is.element("Channel", colnames(annotation))) {
+        annotation$Channel = .standardizeColnames(annotation$Channel)
+    }
+    annotation$Run = .standardizeColnames(annotation$Run)
+    annotation
 }
