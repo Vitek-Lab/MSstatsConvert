@@ -2,7 +2,7 @@ standard_columns = c("ProteinName", "PeptideSequence",
                      "PeptideModifiedSequence", "PrecursorCharge", 
                      "FragmentIon", "ProductCharge", "IsotopeLabelType",
                      "Condition", "BioReplicate", "Run", "StandardType", 
-                     "Fraction", "DetectionQValue", "", "Intensity")
+                     "Fraction", "DetectionQValue", "Intensity")
 standard_columns_tmt = c("ProteinName", "PeptideSequence", "Charge", "PSM", 
                          "Mixture", "TechRepMixture", "Run", "Channel", 
                          "BioReplicate", "Condition", "Intensity" )
@@ -200,7 +200,6 @@ OpenMStoMSstatsFormat = function(
                                 summarize_multiple_psms = summaryforMultipleRows))
     input = MSstatsBalancedDesign(input, feature_columns)
     input[, intersect(standard_columns, colnames(input))]
-    input
 }
 
 
