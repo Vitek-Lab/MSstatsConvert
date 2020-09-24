@@ -4,8 +4,10 @@
 #' @return data.table
 #' @keywords internal 
 .mergeAnnotation = function(input, annotation) {
+    input$Run = .standardizeColnames(input$Run)
     if (!is.null(annotation)) {
         if (is.element("Channel", colnames(input))) {
+            input$Channel = .standardizeColnames(input)
             if (!all(unique(annotation$Channel) %in% unique(input$Channel))) {
                 msg = "Please check the annotation file. The channel name must be matched with that in input data "
                 getOption("MSstatsLog")("ERROR", msg)
