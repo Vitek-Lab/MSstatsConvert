@@ -10,7 +10,8 @@
   protein_id_column,
   sequence_column,
   remove_shared,
-  remove_protein_groups = TRUE
+  remove_protein_groups = TRUE,
+  intensity_columns_regexp = "Abundance"
 )
 }
 \arguments{
@@ -25,6 +26,10 @@
 \item{remove_shared}{lgl, if TRUE, shared peptides will be removed.}
 
 \item{remove_protein_groups}{if TRUE, proteins with numProteins > 1 will be removed.}
+
+\item{intensity_columns_regexp}{regular expressions that defines intensity columns.
+Defaults to "Abundance", which means that columns that contain the word "Abundance"
+will be treated as corresponding to intensities for different channels.}
 }
 \description{
 Clean raw Proteome Discoverer data

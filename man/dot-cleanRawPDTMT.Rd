@@ -8,7 +8,8 @@
   msstats_object,
   remove_shared = TRUE,
   remove_protein_groups = TRUE,
-  protein_id_column = "ProteinAccessions"
+  protein_id_column = "ProteinAccessions",
+  intensity_columns_regexp = "Abundance"
 )
 }
 \arguments{
@@ -19,6 +20,10 @@
 \item{remove_protein_groups}{if TRUE, proteins with numProteins > 1 will be removed.}
 
 \item{protein_id_column}{chr, name of a column with protein IDs.}
+
+\item{intensity_columns_regexp}{regular expressions that defines intensity columns.
+Defaults to "Abundance", which means that columns that contain the word "Abundance"
+will be treated as corresponding to intensities for different channels.}
 }
 \value{
 \code{data.table}

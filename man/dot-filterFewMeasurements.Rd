@@ -4,7 +4,12 @@
 \alias{.filterFewMeasurements}
 \title{Remove features with a small number of (non-missing) measurements across runs}
 \usage{
-.filterFewMeasurements(input, min_intensity, handle_few, feature_columns)
+.filterFewMeasurements(
+  input,
+  min_intensity,
+  handle_few,
+  feature_columns = NULL
+)
 }
 \arguments{
 \item{input}{\code{data.table} pre-processed by one of the .cleanRaw* functions.}
