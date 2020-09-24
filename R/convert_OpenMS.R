@@ -24,6 +24,6 @@
                "Mixture", "TechRepMixture", "TechReplicate", "Fraction")
   cols = intersect(all_cols, colnames(om_input))
   om_input = om_input[, cols, with = FALSE]
-  data.table::setnames(om_input, "Charge", "PrecursorCharge")
+  data.table::setnames(om_input, "Charge", "PrecursorCharge", skip_absent = TRUE)
   unique(om_input)
 }

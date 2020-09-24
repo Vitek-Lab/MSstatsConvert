@@ -12,7 +12,8 @@
   data.table::setnames(
     os_input,
     c("FullPeptideName", "Charge", "filename", "aggr_Fragment_Annotation", "aggr_Peak_Area"),
-    c("PeptideSequence", "PrecursorCharge", "Run", "FragmentIon", "Intensity"))
+    c("PeptideSequence", "PrecursorCharge", "Run", "FragmentIon", "Intensity"),
+    skip_absent = TRUE)
   os_input = os_input[, c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                           "Run", "FragmentIon", "Intensity",
                           "m_score", "decoy"), with = FALSE]

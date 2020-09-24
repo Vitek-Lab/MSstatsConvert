@@ -51,7 +51,8 @@
     data.table::setnames(
         mq_input, 
         c(protein_id, "Modifiedsequence", "Charge", "Rawfile"), 
-        c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run"))
+        c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run"),
+        skip_absent = TRUE)
     mq_input[["PeptideSequence"]] = gsub("_", "", mq_input[["PeptideSequence"]])
     mq_cols = c("ProteinName", "Sequence", "PeptideSequence", "Modifications", 
                 "PrecursorCharge", "Run", "Intensity", 

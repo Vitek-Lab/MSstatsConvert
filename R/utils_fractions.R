@@ -264,7 +264,7 @@
 #' @param input output of `MSstatsPreprocess`
 #' @keywords internal
 .getCorrectFraction = function(input) {
-    Intensity = Run = NULL
+    Intensity = Run = Fraction = NULL
     
     measurement_count = input[!is.na(Intensity) & Intensity > 0, 
                               list(n_obs = data.table::uniqueN(Run)),

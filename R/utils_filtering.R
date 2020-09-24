@@ -13,17 +13,26 @@
                                filtering[["direction"]], filtering[["behavior"]], 
                                filtering[["handle_na"]], filtering[["fill_value"]],
                                filtering[["filter"]], filtering[["drop_column"]])
+        # msg = .getFilteringMessage(input, "score", filtering)
+        # getOption("MSstatsLog")("INFO", msg)
+        # getOption("MSstatsMsg")("INFO", msg)
     }
     for (filtering in exact_filtering) {
         input = .filterExact(input, filtering[["col_name"]], 
                              filtering[["filter_symbols"]],
                              filtering[["filter"]], filtering[["drop_column"]])
+        # msg = .getFilteringMessage(input, "exact", filtering)
+        # getOption("MSstatsLog")("INFO", msg)
+        # getOption("MSstatsMsg")("INFO", msg)
     }
     for (filtering in pattern_filtering) {
         input = .filterByPattern(input, filtering[["col_name"]], 
                                  filtering[["pattern"]], 
                                  filtering[["filter"]], 
                                  filtering[["drop_column"]])
+        # msg = .getFilteringMessage(input, "pattern", filtering)
+        # getOption("MSstatsLog")("INFO", msg)
+        # getOption("MSstatsMsg")("INFO", msg)
     }
     input
 }

@@ -7,11 +7,11 @@
     
     sl_input = getInputFile(msstats_object, "input")
     data.table::setnames(sl_input, c("FileName", "Area"),
-                         c("Run", "Intensity"))
+                         c("Run", "Intensity"), skip_absent = TRUE)
     
     sl_input = sl_input[, !(colnames(sl_input) == "PeptideSequence"), with = FALSE]
     data.table::setnames(sl_input, "PeptideModifiedSequence",
-                         "PeptideSequence")
+                         "PeptideSequence", skip_absent = TRUE)
     sl_input[, Intensity := as.numeric(as.character(Intensity))]
     if (is.element("DetectionQValue", colnames(sl_input))) {
         sl_input[, DetectionQValue := as.numeric(as.character(DetectionQValue))]

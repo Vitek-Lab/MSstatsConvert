@@ -21,7 +21,7 @@
                        c("PGProteinAccessions", "PMoleculeID", 
                          "PPCharge", "PSMQvalue", "RFileName"),
                        c("ProteinName", "PeptideSequence", "PrecursorCharge",
-                         "Qvalue", "Run"))
+                         "Qvalue", "Run"), skip_absent = TRUE)
   sm_input = sm_input[(ProteinName != "") & (!is.na(ProteinName)), ]
   sm_input[, PSM := paste(PeptideSequence, PrecursorCharge, 
                           1:nrow(sm_input), sep = "_")]

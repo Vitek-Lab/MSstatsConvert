@@ -40,7 +40,8 @@
     colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     data.table::setnames(prog_input, 
                          c(protein_col, "Charge"), 
-                         c("ProteinName", "PrecursorCharge"))
+                         c("ProteinName", "PrecursorCharge"),
+                         skip_absent = TRUE)
     
     
     nonmissing_prot = !is.na(prog_input$ProteinName) & prog_input$ProteinName != ""

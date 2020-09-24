@@ -24,11 +24,12 @@
     data.table::setnames(
         pept_input,
         colnames(pept_input), 
-        c("PeptideSequence", "ProteinName", "FragmentIon"))
+        c("PeptideSequence", "ProteinName", "FragmentIon"),
+        skip_absent = TRUE)
     pept_input = pept_input[, lapply(.(FragmentIon), 
                                      function(x) unlist(data.table::tstrsplit(x, "|", fixed = TRUE))),
                             by = .(ProteinName, PeptideSequence)] 
-    data.table::setnames(pept_input, "V1", "FragmentIon")
+    data.table::setnames(pept_input, "V1", "FragmentIon", skip_absent = TRUE)
     pept_input = pept_input[pept_input[["FragmentIon"]] != "", ]
     # TOOD: It's possible to extract a function here for prot/pept input  
     pept_input[["ProteinName"]] = as.character(pept_input[["ProteinName"]])
@@ -39,11 +40,13 @@
     prot_input[["Selected_peptides"]] = trimws(prot_input[["Selected_peptides"]],
                                                "both") # Is it needed?
     data.table::setnames(prot_input, colnames(prot_input),
-                         c("ProteinName", "PeptideSequence"))
+                         c("ProteinName", "PeptideSequence"),
+                         skip_absent = TRUE)
     prot_input = prot_input[, lapply(.(PeptideSequence),
                                      function(x) (unlist(data.table::tstrsplit(x, "|", fixed = TRUE)))),
                             by = .(ProteinName)]
-    data.table::setnames(prot_input, "V1", "PeptideSequence")
+    data.table::setnames(prot_input, "V1", "PeptideSequence", 
+                         skip_absent = TRUE)
     prot_input = prot_input[PeptideSequence != "", ]
     
     prot_input[["ProteinName"]] = gsub(";", "", prot_input[["ProteinName"]])
@@ -77,8 +80,8 @@
     frag_cols = intensity_cols | key_cols
     frag_input = frag_input[, frag_cols, with = FALSE]
     new_names = c("ProteinName", "PeptideSequence", "FragmentIon")
-    data.table::setnames(
-        frag_input, frag_col_names[2:4], new_names)
+    data.table::setnames(frag_input, frag_col_names[2:4], new_names,
+                         skip_absent = TRUE)
     frag_input = .fixColumnTypes(
         frag_input, character_columns = c(new_names, "FragmentKey"))
     

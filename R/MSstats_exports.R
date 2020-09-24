@@ -160,9 +160,7 @@ MaxQtoMSstatsTMTFormat = function(
         feature_cleaning = list(handle_features_with_few_measurements = few_measurements,
                                 summarize_multiple_psms = summaryforMultipleRows))
     input = MSstatsBalancedDesign(input, feature_columns)
-    data.table::setnames(input, 
-                         "PrecursorCharge", 
-                         "Charge")
+    data.table::setnames(input, "PrecursorCharge", "Charge", skip_absent = TRUE)
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
@@ -240,7 +238,7 @@ OpenMStoMSstatsTMTFormat = function(
     )
     input = MSstatsBalancedDesign(input, feature_columns)
     
-    data.table::setnames(input, "PrecursorCharge", "Charge")
+    data.table::setnames(input, "PrecursorCharge", "Charge", skip_absent = TRUE)
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
@@ -348,9 +346,8 @@ ProgenesistoMSstatsFormat = function(
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    data.table::setnames(input, 
-                         "PeptideSequence",
-                         "PeptideModifiedSequence")
+    data.table::setnames(input, "PeptideSequence", "PeptideModifiedSequence",
+                         skip_absent = TRUE)
     input[, intersect(standard_columns, colnames(input))]
 }
 
@@ -409,9 +406,8 @@ PDtoMSstatsFormat = function(
                                "ProductCharge" = NA,
                                "IsotopeLabelType" = "L"))
     input = MSstatsBalancedDesign(input, feature_columns)
-    data.table::setnames(input, 
-                         "PeptideSequence",
-                         "PeptideModifiedSequence")
+    data.table::setnames(input, "PeptideSequence", "PeptideModifiedSequence",
+                         skip_absent = TRUE)
     input[, intersect(standard_columns, colnames(input))]
 }
 
@@ -460,9 +456,7 @@ PDtoMSstatsTMTFormat <- function(
                                 summarize_multiple_psms = summaryforMultipleRows)
     )
     input = MSstatsBalancedDesign(input, feature_columns)
-    data.table::setnames(input,
-                         "PrecursorCharge", 
-                         "Charge")
+    data.table::setnames(input, "PrecursorCharge", "Charge", skip_absent = TRUE)
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
@@ -606,9 +600,7 @@ SpectroMinetoMSstatsTMTFormat <- function(
                                 summarize_multiple_psms = summaryforMultipleRows)
     )
     input = MSstatsBalancedDesign(input, feature_columns)
-    data.table::setnames(input, 
-                         "PrecursorCharge", 
-                         "Charge")
+    data.table::setnames(input, "PrecursorCharge", "Charge", skip_absent = TRUE)
     input[, intersect(standard_columns_tmt, colnames(input))]
 }
 
