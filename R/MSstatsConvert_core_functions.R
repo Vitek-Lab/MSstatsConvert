@@ -263,19 +263,20 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
 #' @param ... key-value pairs, where keys are names of columns of `annotation` 
 #' @export
 MSstatsMakeAnnotation = function(input, annotation, ...) {
+    all_columns = unlist(list(...))
     if (!is.null(annotation)) {
         annotation = .getDataTable(annotation)
     } else {
         cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
-                 "Mixture", "TechRepMixture")
+                 "Mixture", "TechRepMixture", unname(old_columns))
         cols = intersect(cols, colnames(input))
         annotation = unique(input[, cols, with = FALSE])
     }
-    all_columns = unlist(list(...))
     if (length(all_columns) > 0) {
         data.table::setnames(annotation, 
                              unname(all_columns),
-                             names(all_columns))
+                             names(all_columns),
+                             skip_absent = TRUE)
     }
     annotation = annotation[, !duplicated(colnames(annotation)), 
                             with = FALSE]
