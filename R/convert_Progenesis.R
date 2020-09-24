@@ -37,7 +37,7 @@
                                              "Sequence", "Charge"))
     cols = c(cols, raw_abundances_col_ids)
     prog_input = prog_input[, cols, with = FALSE]
-    colnames(prog_input) = MSstatsConvert:::.standardizeColnames(colnames(prog_input))
+    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     data.table::setnames(prog_input, 
                          c(protein_col, "Charge"), 
                          c("ProteinName", "PrecursorCharge"))
