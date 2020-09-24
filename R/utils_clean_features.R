@@ -205,7 +205,8 @@
             }
         }
         
-        if ("IsolationInterference" %in% colnames(input)) {
+        if ("IsolationInterference" %in% colnames(input) &
+            all(!is.na(input$IsolationInterference))) {
             by_score = input[, list(score = unique(IsolationInterference)),
                              by = c("PSM")]
             min_ids = which.min(by_score$score)
