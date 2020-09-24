@@ -33,11 +33,10 @@ DIAUmpiretoMSstatsFormat = function(
                                Peptides = raw.pep, 
                                Proteins = raw.pro), 
                           type = "MSstats", tool = "DIAUmpire", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input, 
                          use_frag = useSelectedFrag, 
                          use_pept = useSelectedPep)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     feature_columns = c("PeptideSequence", "FragmentIon")
     input = MSstatsPreprocess(
@@ -82,13 +81,12 @@ MaxQtoMSstatsFormat = function(
     input = MSstatsImport(list(evidence = evidence, 
                                protein_groups = proteinGroups), 
                           type = "MSstats", tool = "MaxQuant", ...)
-    annotation = MSstatsMakeAnnotation(input, 
-                                       annotation, 
-                                       "Run" = "Rawfile")
-    
     input = MSstatsClean(input, 
                          protein_id_col = proteinID, 
                          remove_by_site = TRUE)
+    annotation = MSstatsMakeAnnotation(input, 
+                                       annotation, 
+                                       "Run" = "Rawfile")
     
     m_filter = list(col_name = "PeptideSequence", 
                     pattern = "M", 
@@ -144,12 +142,11 @@ MaxQtoMSstatsTMTFormat = function(
     input = MSstatsImport(list(evidence = evidence,
                                protein_groups = proteinGroups), 
                           "MSstatsTMT", "MaxQuant", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input,
                          protein_id_col = which.proteinid, 
                          remove_by_site = rmProt_Only.identified.by.site,
                          channel_columns = "Reporterintensitycorrected")
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
@@ -190,9 +187,8 @@ OpenMStoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "OpenMS", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     feature_columns = c("PeptideSequence", "PrecursorCharge", 
                         "FragmentIon", "ProductCharge")
@@ -272,10 +268,8 @@ OpenSWATHtoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "OpenSWATH", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
-    # TODO: check the existence of m_score column earlier
     input = MSstatsClean(input)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     m_score_filter = list(score_column = "m_score", 
                           score_threshold = mscore_cutoff, 
@@ -330,11 +324,10 @@ ProgenesistoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "Progenesis", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input, 
                          unique(as.character(annotation$Run)), 
                          fix_colnames = TRUE)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     oxidation_filter = list(col_name = "PeptideSequence", 
                             pattern = "Oxidation", 
@@ -390,13 +383,12 @@ PDtoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "ProteomeDiscoverer", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input, 
                          quantification_column = which.quantification, 
                          protein_id_column = which.proteinid,
                          sequence_column = which.sequence, 
                          remove_shared = useNumProteinsColumn)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     oxidation_filter = list(col_name = "PeptideSequence", 
                             pattern = "Oxidation", 
@@ -449,12 +441,11 @@ PDtoMSstatsTMTFormat <- function(
 ) {
     input = MSstatsImport(list(input = input),
                           "MSstatsTMT", "ProteomeDiscoverer", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input, 
                          protein_id_column = which.proteinid,
                          remove_shared = useNumProteinsColumn,
                          remove_protein_groups = useNumProteinsColumn)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
@@ -499,11 +490,10 @@ SkylinetoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "Skyline", ...)
+    input = MSstatsClean(input)
     annotation = MSstatsMakeAnnotation(input, 
                                        annotation, 
                                        Run = "FileName")
-    
-    input = MSstatsClean(input)
     
     decoy_filter = list(col_name = "ProteinName",
                         pattern = c("DECOY", "Decoys"),
@@ -581,9 +571,8 @@ SpectroMinetoMSstatsTMTFormat <- function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstatsTMT", "SpectroMine", ...)
-    annotation = MSstatsMakeAnnotation(input, annotation)
-    
     input = MSstatsClean(input)
+    annotation = MSstatsMakeAnnotation(input, annotation)
     
     few_measurements = ifelse(rmPSM_withfewMea_withinRun, "remove", "keep")
     
@@ -647,14 +636,12 @@ SpectronauttoMSstatsFormat = function(
 ) {
     input = MSstatsImport(list(input = input), 
                           "MSstats", "Spectronaut", ...)
+    input = MSstatsClean(input, intensity = intensity)
     annotation = MSstatsMakeAnnotation(input, 
                                        annotation, 
                                        "Run" = "RFileName", 
                                        "Condition" = "RCondition", 
                                        "BioReplicate" = "RReplicate")
-    
-    input = MSstatsClean(input, intensity = intensity)
-
     
     pq_filter = list(score_column = "PGQvalue", 
                      score_threshold = 0.01, 
