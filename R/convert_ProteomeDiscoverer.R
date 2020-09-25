@@ -106,6 +106,7 @@
                          c(protein_id_column, num_proteins, "AnnotatedSequence", "SpectrumFile", "Charge"),
                          c("ProteinName", "numProtein", "PeptideSequence", "Run", "PrecursorCharge"),
                          skip_absent = TRUE)
+    pd_input = unique(pd_input)
     pd_input$PSM = paste(pd_input$PeptideSequence, pd_input$PrecursorCharge,
                          1:nrow(pd_input), sep = "_")
     pd_input = melt(pd_input, measure.vars = channels, 
