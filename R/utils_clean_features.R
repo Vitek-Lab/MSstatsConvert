@@ -215,7 +215,7 @@
             }
         }
         
-        if ("IonsScore" %in% colnames(input)) {
+        if ("IonsScore" %in% colnames(input) & !any(is.na(input$IonsScore))) {
             by_score = input[, list(score = unique(IonsScore)),
                              by = c("PSM")]
             is_max = sum(by_score$score == max(by_score$score, na.rm = TRUE))
