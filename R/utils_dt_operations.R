@@ -63,6 +63,7 @@
     col_names = gsub(" ", ".", col_names, fixed = TRUE)
     col_names = gsub("\\[|\\]|\\%", ".", col_names, fixed = FALSE)
     col_names = gsub("/", "", col_names, fixed = TRUE)
+    col_names = gsub("+", "", col_names, fixed = TRUE)
     col_names = gsub("#", "X.", col_names, fixed = TRUE)
     gsub("[\\.]+", "", col_names)
 }
