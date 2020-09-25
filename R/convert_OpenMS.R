@@ -7,6 +7,7 @@
   
   om_input = getInputFile(msstats_object, "input")
   om_input[, Intensity := as.numeric(as.character(Intensity))]
+  om_input = unique(om_input)
   
   if (getDataType(msstats_object) == "MSstats") {
     if (!is.element("IsotopeLabelType", colnames(om_input))) {

@@ -61,6 +61,7 @@
     mq_cols = intersect(c(mq_cols, channels),
                         colnames(mq_input))
     mq_input = mq_input[, mq_cols, with = FALSE]
+    mq_input = unique(mq_input)
     
     if (getDataType(msstats_object) == "MSstatsTMT") {
         mq_input[, PSM := paste(PeptideSequence, PrecursorCharge, 

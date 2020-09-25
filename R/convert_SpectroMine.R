@@ -23,6 +23,7 @@
                        c("ProteinName", "PeptideSequence", "PrecursorCharge",
                          "Qvalue", "Run"), skip_absent = TRUE)
   sm_input = sm_input[(ProteinName != "") & (!is.na(ProteinName)), ]
+  sm_input = unique(sm_input)
   sm_input[, PSM := paste(PeptideSequence, PrecursorCharge, 
                           1:nrow(sm_input), sep = "_")]
   sm_input = melt(sm_input, measure.vars = channels,
