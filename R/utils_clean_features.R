@@ -218,7 +218,7 @@
         if ("IonsScore" %in% colnames(input) & !any(is.na(input$IonsScore))) {
             by_score = input[, list(score = unique(IonsScore)),
                              by = c("PSM")]
-            is_max = sum(by_score$score == max(by_score$score, na.rm = TRUE))
+            is_max = by_score$score == max(by_score$score, na.rm = TRUE)
             if (sum(is_max, na.rm = TRUE) == 1) {
                 return(by_score$PSM[which.max(by_score$score)])
             } else {
@@ -228,7 +228,7 @@
         
         by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
                        by = c("PSM")]
-        is_max = sum(by_max$Intensity == max(by_max$Intensity, na.rm = TRUE))
+        is_max = by_max$Intensity == max(by_max$Intensity, na.rm = TRUE)
         if (sum(is_max, na.rm = TRUE) == 1) {
             return(by_max$PSM[which.max(by_max$Intensity)])
         } else {
