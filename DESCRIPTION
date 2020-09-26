@@ -12,7 +12,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 biocViews: MassSpectrometry, Proteomics, Software, DataImport
 Depends:
     R (>= 3.6)
@@ -37,7 +37,6 @@ Collate:
     'convert_MaxQuant.R'
     'convert_DIAUmpire.R'
     'MSstatsConvert_core_functions.R'
-    'MSstats_exports.R'
     'utils_MSstatsConvert.R'
     'utils_annotation.R'
     'utils_balanced_design.R'
