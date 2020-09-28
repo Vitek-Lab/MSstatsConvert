@@ -15,7 +15,7 @@ This package implements converter functions that are used by MSstats to import d
 This development version is only available on Github:
 
 ```
-source("https://install-github.me/Vitek-Lab/MSstatsConvert")
+devtools::install_github("Vitek-Lab/MSstatsConvert", ref = "minimum_working_version", build_vignettes = TRUE)
 ```
 
 ## Documentation and examples
