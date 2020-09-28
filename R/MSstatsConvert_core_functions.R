@@ -313,6 +313,10 @@ MSstatsPreprocess = function(
                         remove_shared_peptides,
                         remove_single_feature_proteins,
                         feature_cleaning)
+    .logConverterOptions(
+        feature_columns, remove_shared_peptides, remove_single_feature_proteins,
+        feature_cleaning
+    )
     input = .handleFiltering(input, score_filtering, 
                              exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)

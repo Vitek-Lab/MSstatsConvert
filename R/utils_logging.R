@@ -141,3 +141,35 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
                 "in", score_column, event, what)
     msg
 }
+
+
+#' Log information about converter options
+#' @inheritParams MSstatsPreprocess
+#' @return TRUE invisibly if message was logged 
+#' @keywords internal
+.logConverterOptions = function(feature_columns, remove_shared_peptides,
+                                        remove_single_feature_proteins,
+                                        feature_cleaning) {
+    init = "** The following options are used:"
+    features = paste("  - Features will be defined by the columns:",
+                     paste(feature_columns, sep = ", ", collapse = ", "))
+    if (remove_shared_peptides) {
+        shared = "  - Shared peptides will be removed"
+    } else {
+        shared = "  - Shared peptides will not be removed"
+    }
+    if (remove_single_feature_proteins) {
+        single = "  - Proteins with a single feature will be removed"
+    } else {
+        single = "  - Proteins with single feature will not be removed"
+    }
+    if (feature_cleaning[["handle_features_with_few_measurements"]] == "remove") {
+        few = "  - Features with less than 3 measurements will be removed"
+    } else {
+        few = "  - Features with less than 3 measurements will be kept"
+    }
+    msg = paste(init, features, shared, single, few, sep = "\n")
+    getOption("MSstatsLog")("INFO", msg)    
+    getOption("MSstatsMsg")("INFO", msg)
+    invisible(TRUE)
+}
