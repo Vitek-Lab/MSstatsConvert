@@ -29,7 +29,6 @@
 .fixColumnTypes = function(input, numeric_columns = NULL, 
                            character_columns = NULL,
                            factor_columns = NULL) {
-    # TODO: switch [[<- to [, .()]<-
     for (column in factor_columns) {
         input[[column]] = factor(input[[column]])
     }
