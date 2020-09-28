@@ -147,7 +147,7 @@
                           "feature", "Run")]
     counts = unique(counts[n_measurements > 1, as.character(feature)])
     if (length(counts) > 0) {
-        msg = paste("The following features have duplicated measurements",
+        msg = paste("** The following features have duplicated measurements",
                     "in some runs: please remove the duplicates.", "\n",
                     paste(counts, sep = ",\n ", collapse = ",\n "))
         # TODO: report separately for L and H

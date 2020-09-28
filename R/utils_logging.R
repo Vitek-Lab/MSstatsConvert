@@ -137,7 +137,7 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
         event = "are replaced with"
         what = fill_value
     } 
-    msg = paste(subject, "with values", direction, "than", score_threshold,
+    msg = paste("**", subject, "with values", direction, "than", score_threshold,
                 "in", score_column, event, what)
     msg
 }
@@ -170,6 +170,23 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     }
     msg = paste(init, features, shared, single, few, sep = "\n")
     getOption("MSstatsLog")("INFO", msg)    
+    getOption("MSstatsMsg")("INFO", msg)
+    invisible(TRUE)
+}
+
+
+#' Make a message about successful data cleaning/importing
+#' @param tool name of a signal processing tool
+#' @return TRUE invisibly if logging was sucessful
+#' @keywords internal
+.logSuccess = function(tool, event) {
+    if (event == "clean") {
+        what = "cleaned succesfully."
+    } else {
+        what = "imported succesfully."
+    }
+    msg = paste("** Raw data from", tool, "cleaned.")
+    getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     invisible(TRUE)
 }

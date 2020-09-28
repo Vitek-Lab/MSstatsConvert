@@ -7,12 +7,16 @@
                        remove_protein_groups = TRUE,
                        intensity_columns_regexp = "Abundance") {
     if (getDataType(msstats_object) == "MSstatsTMT") {
-        .cleanRawPDTMT(msstats_object, remove_shared, remove_protein_groups, 
-                       protein_id_column, intensity_columns_regexp)
+        cleaned_pd = .cleanRawPDTMT(msstats_object, remove_shared,
+                                    remove_protein_groups, 
+                                    protein_id_column, intensity_columns_regexp)
     } else {
-        .cleanRawPDMSstats(msstats_object, quantification_column, 
-                           protein_id_column, sequence_column, remove_shared)
+        cleaned_pd = .cleanRawPDMSstats(msstats_object, quantification_column, 
+                                        protein_id_column, sequence_column, 
+                                        remove_shared)
     }
+    .logSuccess("ProteomeDiscoverer", "clean")
+    cleaned_pd
 }
 
 #' Clean raw PD output

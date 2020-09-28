@@ -19,6 +19,10 @@
         input = .summarizeMultipleMeasurements(
             input, cleaning_control[["summarize_multiple_psms"]],
             c(feature_columns, "Run"))
+        msg = paste("** Multiple measurements in a feature and a run",
+                    "are summarized by summaryforMultipleRows")
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
         input = .filterFewMeasurements(
             input, 0, 
             cleaning_control[["handle_features_with_few_measurements"]],
@@ -56,10 +60,10 @@
           by = feature_columns]
     if (handle_few == "remove") {
         cutoff = 2
-        msg = "Features with one or two measurements across runs are removed."
+        msg = "** Features with one or two measurements across runs are removed."
     } else {
         cutoff = 0
-        msg = "Features with all missing measurements across runs are removed."
+        msg = "** Features with all missing measurements across runs are removed."
     }
     input = input[n_obs > cutoff]
     getOption("MSstatsLog")("INFO", msg)
@@ -92,10 +96,6 @@
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
                       by = feature_columns]
     }
-    msg = paste("** Multiple measurements in a feature and a run",
-                "are summarized by summaryforMultipleRows")
-    getOption("MSstatsLog")("INFO", msg)
-    getOption("MSstatsMsg")("INFO", msg)
     merge(input, info, 
           by = intersect(colnames(input), colnames(info)), sort = FALSE)
 }
@@ -179,7 +179,7 @@
     }
     input[, PSM := do.call(".combine", .SD), 
           .SDcols = c("PeptideSequence", "PrecursorCharge")]
-    msg = "PSMs have been aggregated to peptide ions."
+    msg = "** PSMs have been aggregated to peptide ions."
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     input[, colnames(input) != "n_psms", with = FALSE]

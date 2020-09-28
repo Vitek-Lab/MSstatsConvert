@@ -8,8 +8,8 @@
                                  peptide_column = "PeptideSequence") {
     if (remove_shared) {
         input = .removeSharedPeptides(input, protein_column, peptide_column)
-        getOption("MSstatsLog")("INFO", "Shared peptides are removed.")
-        getOption("MSstatsMsg")("INFO", "Shared peptides are removed.")
+        getOption("MSstatsLog")("INFO", "** Shared peptides are removed.")
+        getOption("MSstatsMsg")("INFO", "** Shared peptides are removed.")
     } 
     input
 }

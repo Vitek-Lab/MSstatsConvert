@@ -27,5 +27,6 @@
   om_input = om_input[, cols, with = FALSE]
   data.table::setnames(om_input, "Charge", "PrecursorCharge", 
                        skip_absent = TRUE)
+  .logSuccess("OpenMS", "clean")
   unique(om_input)
 }

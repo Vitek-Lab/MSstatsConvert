@@ -31,5 +31,6 @@
   )]
   os_input[, Intensity := as.numeric(as.character(Intensity))]
   os_input[, Intensity := ifelse(Intensity < 1, NA, Intensity)]
+  .logSuccess("OpenSWATH", "clean")
   os_input
 }

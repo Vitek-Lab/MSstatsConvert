@@ -9,7 +9,7 @@
         if (is.element("Channel", colnames(input))) {
             input$Channel = .standardizeColnames(input$Channel)
             if (!all(unique(annotation$Channel) %in% unique(input$Channel))) {
-                msg = paste("Please check the annotation file.",
+                msg = paste("** Please check the annotation file.",
                             "The channel name must be matched",
                             "with that in input data.")
                 getOption("MSstatsLog")("ERROR", msg)
@@ -27,7 +27,7 @@
         getOption("MSstatsMsg")("INFO", msg)
     }
     if (any(is.na(input$Condition))) {
-        msg = "Condition in the input file must match condition in annotation."
+        msg = "** Condition in the input file must match condition in annotation."
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
     }

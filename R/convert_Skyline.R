@@ -28,6 +28,7 @@
     sl_cols = c(sl_cols, "Fraction", "DetectionQValue", "Truncated")
     sl_input = sl_input[, intersect(sl_cols, colnames(sl_input)), with = FALSE]
     sl_input[, isZero := ((Intensity == 0) | (Intensity < 1)) & !is.na(Intensity)]
+    .logSuccess("Skyline", "clean")
     sl_input
 }
 

@@ -8,7 +8,7 @@
         fractions = unique(input$Fraction)
         if (length(fractions) > 1) {
             input = .handleFractionsTMT(input)
-            msg = "Fractions belonging to same mixture have been combined."
+            msg = "** Fractions belonging to same mixture have been combined."
             getOption("MSstatsLog")("INFO", msg)
             getOption("MSstatsMsg")("INFO", msg)
         } else {
@@ -39,7 +39,7 @@
             single_run = .filterOverlapped(single_run, mean, 
                                            features_to_remove)
             features_to_remove = .getOverlappingFeatures(single_run)
-            msg = paste("For peptides overlapped between fractions of",
+            msg = paste("** For peptides overlapped between fractions of",
                         technical_run, 
                         "use the fraction with maximal average abundance.")
             getOption("MSstatsLog")("INFO", msg)
@@ -48,7 +48,7 @@
                 single_run = .filterOverlapped(single_run, sum, 
                                                features_to_remove)
                 features_to_remove = .getOverlappingFeatures(single_run)
-                msg = paste("For peptides overlapped between fractions of",
+                msg = paste("** For peptides overlapped between fractions of",
                             technical_run,
                             "use the fraction with maximal summation abundance.")
                 getOption("MSstatsLog")("INFO", msg)
@@ -56,7 +56,7 @@
                 if (length(features_to_remove) > 0) {
                     single_run = .filterOverlapped(single_run, max, 
                                                    features_to_remove)
-                    msg = paste("For peptides overlapped between fractions of",
+                    msg = paste("** For peptides overlapped between fractions of",
                                 technical_run,
                                 "use the fraction with maximal abundance.")
                     getOption("MSstatsLog")("INFO", msg)
@@ -156,7 +156,7 @@
         }
         n_fractions = data.table::uniqueN(input$Fraction)
         if (n_fractions > 1) {
-            msg = paste("Multiple fractionations exist:",
+            msg = paste("** Multiple fractionations exist:",
                         n_fractions, "fractionations per MS replicate.")
             getOption("MSstatsLog")("INFO", msg)
             getOption("MSstatsMsg")("INFO", msg)
@@ -263,7 +263,7 @@
 #' @return data.table
 #' @keywords internal
 .removeOverlappingFeatures = function(input) {
-    fraction_keep = Fraction = Intensity = NULL
+    fraction_keep = Fraction = NULL
     
     if (data.table::uniqueN(input$Fraction) > 1) {
         input[, fraction_keep := .getCorrectFraction(.SD), 
@@ -288,13 +288,11 @@
     measurement_count = input[!is.na(Intensity) & Intensity > 0, 
                               list(n_obs = data.table::uniqueN(Run)),
                               by = "Fraction"]
-    #which_max_measurements = which.max(measurement_count$n_obs) ## this is issue, if two fractions has the same number of obs, still it choose one of them, which is the first max. So, can bo to the next step to select max mean feature.
     which_max_measurements = which(measurement_count$n_obs == max(measurement_count$n_obs))
     if (length(which_max_measurements) == 1L) {
         return(unique(measurement_count$Fraction[which_max_measurements]))
     } else {
-        #input = input[which_max_measurements]
-        input = input[Fraction %in% measurement_count$Fraction[which_max_measurements]] ## MC changed this
+        input = input[Fraction %in% measurement_count$Fraction[which_max_measurements]]
         average_abundance = input[!is.na(Intensity) & Intensity > 0, 
                                   list(mean_abundance = mean(Intensity)),
                                   by = "Fraction"]
@@ -317,7 +315,7 @@
     count_fractions = count_fractions[n_fractions > 1, ]
     if (nrow(count_fractions) > 1) {
         overlapped_features = unique(as.character(count_fractions$feature))
-        msg = paste("Those features are measured across all fractionations.",
+        msg = paste("** These features are measured across all fractionations.",
                     "Please keep only one intensity of listed features", 
                     "among fractionations from one sample.\n",
                     paste(overlapped_features, sep = ", ", collapse = ", "))

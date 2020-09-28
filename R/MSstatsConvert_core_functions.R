@@ -147,7 +147,7 @@ MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
                                   type = type, tool = tool, 
                                   version = tool_version)
     class = paste0("MSstats", tool, "Files")
-    
+    .logSuccess(tool, "import")
     methods::new(class, msstats_object)
 }
 

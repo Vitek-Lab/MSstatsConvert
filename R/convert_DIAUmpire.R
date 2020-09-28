@@ -15,7 +15,7 @@
     
     if (!is.element("Selected_fragments", colnames(pept_input)) | 
         !is.element("Selected_peptides", colnames(prot_input))) {
-        msg = "Selected_fragments column is required. Please check it."
+        msg = "** Selected_fragments column is required. Please check it."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
@@ -106,5 +106,6 @@
     frag_input[, Run := gsub("_Intensity", "", Run)]
     getOption("MSstatsMsg")("INFO", paste("** Extracted the data from selected",
                                           "fragments and/or peptides."))
+    .logSuccess("DIAUmpire", "clean")
     frag_input[!(is.na(ProteinName))]
 }

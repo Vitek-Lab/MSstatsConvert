@@ -18,11 +18,11 @@
     mq_pg = getInputFile(msstats_object, "protein_groups")
     
     filter_cols = c("Contaminant", "Potentialcontaminant", "Reverse")
-    msg = paste("+ Contaminant, + Reverse, + Potential.contaminant",
+    msg = paste("** + Contaminant, + Reverse, + Potential.contaminant",
                 "proteins are removed.")
     if (remove_by_site) {
         filter_cols = c(filter_cols, "Onlyidentifiedbysite")
-        msg = paste("+ Contaminant, + Reverse, + Potential.contaminant,", 
+        msg = paste("** + Contaminant, + Reverse, + Potential.contaminant,", 
                     "+ Only.identified.by.site proteins are removed.")
     }
     
@@ -32,7 +32,7 @@
     getOption("MSstatsMsg")("INFO", msg)
     
     mq_input[, ProteingroupIDs := as.integer(as.character(ProteingroupIDs))]
-
+    
     if (getDataType(msstats_object) == "MSstats") {
         mq_input = mq_input[ProteingroupIDs %in% unique(mq_pg[["id"]]), ]
     }
@@ -85,5 +85,6 @@
     }
     
     mq_input = mq_input[!is.na(Intensity), ]
+    .logSuccess("MaxQuant", "clean")
     mq_input
 }

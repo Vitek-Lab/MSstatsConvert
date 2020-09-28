@@ -72,5 +72,6 @@
                                   value.name = "Intensity",
                                   value.factor = FALSE)
     prog_input[, Intensity := as.numeric(as.character(Intensity))]
+    .logSuccess("Progenesis", "clean")
     prog_input
 }

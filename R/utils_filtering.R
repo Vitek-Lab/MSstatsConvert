@@ -49,7 +49,7 @@
                           behavior, handle_na = "keep", fill_value = NA,
                           filter = TRUE, drop = TRUE) {
     if (!is.element(score_column, colnames(input))) {
-        msg = paste(score_column, "not found in input columns.")
+        msg = paste("**", score_column, "not found in input columns.")
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)
