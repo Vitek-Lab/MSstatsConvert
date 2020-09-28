@@ -377,6 +377,10 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input = .fixMissingValues(input, fix_missing)
     input = input[, !(colnames(input) %in% c("feature", "isZero")), 
                   with = FALSE]
+    msg_final = paste("** Finished preprocessing. The dataset is ready",
+                      "to be processed by the MSstats::dataProcess function.")
+    getOption("MSstatsLog")("INFO", msg_final)
+    getOption("MSstatsMsg")("INFO", msg_final)
     .MSstatsFormat(input)
 }
 
