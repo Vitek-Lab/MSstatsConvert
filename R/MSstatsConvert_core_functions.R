@@ -361,8 +361,15 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     if (handle_fractions) {
         input = .handleFractions(input)
         input = .filterFewMeasurements(input, 1, "remove", feature_columns)
+        msg_fractions = "** Fractionation handled."
+        getOption("MSstatsLog")("INFO", msg_fractions)
+        getOption("MSstatsMsg")("INFO", msg_fractions)
     } 
     input = .makeBalancedDesign(input, fill_incomplete)
+    msg_balanced = paste("** Updated quantification data to make balanced design",
+                         "Missing values are denoted by NA")
+    getOption("MSstatsLog")("INFO", msg_balanced)
+    getOption("MSstatsMsg")("INFO", msg_balanced)
     input = .fixMissingValues(input, fix_missing)
     input = input[, !(colnames(input) %in% c("feature", "isZero")), 
                   with = FALSE]
@@ -399,11 +406,17 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
     all_columns = unlist(list(...))
     if (!is.null(annotation)) {
         annotation = .getDataTable(annotation)
+        msg = "** Using provided annotation."
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
     } else {
         cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
                  "Mixture", "TechRepMixture", unname(all_columns))
         cols = intersect(cols, colnames(input))
         annotation = unique(input[, cols, with = FALSE])
+        msg = "** Using annotation extracted from quantification data."
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
     }
     if (length(all_columns) > 0) {
         data.table::setnames(annotation, 
@@ -415,7 +428,14 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
                             with = FALSE]
     if (is.element("Channel", colnames(annotation))) {
         annotation$Channel = .standardizeColnames(annotation$Channel)
+        labels_msg = "Run and Channel"
+    } else {
+        labels_msg = "Run"
     }
     annotation$Run = .standardizeColnames(annotation$Run)
+    msg = paste("**", labels_msg, "labels were standardized to remove",
+                "symbols such as '.' or '%'.")
+    getOption("MSstatsLog")("INFO", msg)
+    getOption("MSstatsMsg")("INFO", msg)
     annotation
 }
