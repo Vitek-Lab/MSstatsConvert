@@ -98,3 +98,46 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     }
     invisible(TRUE)
 }
+
+
+#' Make a message about filtering based on fixed values
+#' @inheritParams .filterExact
+#' @return character - message
+#' @keywords internal
+.makeExactFilterMessage = function(col_name, filter_symbols, 
+                                   behavior, fill_value
+) {
+   if (behavior == "remove") {
+       subject = "Rows"
+       event = "are removed"
+       what = ""
+   } else {
+       subject = "Intensities"
+       event = "are replaced with"
+       what = fill_value
+   }
+    paste("**", subject, "with values of", col_name, "equal to", 
+          paste(filter_symbols, sep = ", ", collapse = ", "),
+          event, what)
+}
+
+
+#' Make a message about filtering based on a score
+#' @inheritParams .filterByScore
+#' @return character - message
+#' @keywords internal
+.makeScoreFilterMessage = function(score_column, score_threshold, direction,
+                                   behavior, fill_value) {
+    if (behavior == "remove") {
+        subject = "Rows"
+        event = "are removed"
+        what = ""
+    } else {
+        subject = "Intensities"
+        event = "are replaced with"
+        what = fill_value
+    } 
+    msg = paste(subject, "with values", direction, "than", score_threshold,
+                "in", score_column, event, what)
+    msg
+}
