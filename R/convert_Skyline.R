@@ -52,8 +52,8 @@
             input = .summarizeMultipleMeasurements(input, sum, feature_cols)
             input[, FragmentIon := NA]
             input[, ProductCharge := NA]
-            getOption("MSstatsLog")("INFO", "Three isotopic preaks per feature and run are summed")
-            getOption("MSstatsMsg")("INFO", "Three isotopic preaks per feature and run are summed")
+            getOption("MSstatsLog")("INFO", "** Three isotopic preaks per feature and run are summed")
+            getOption("MSstatsMsg")("INFO", "** Three isotopic preaks per feature and run are summed")
         }
     }
     input
@@ -74,7 +74,7 @@
     precursors = intersect(fragment_ions, 
                            c("precursor", "precursor [M+1]", "precursor [M+2]"))
     if (length(frags) > 0 & length(precursors) > 0) {
-        msg = paste("Please check precursors information.",
+        msg = paste("** Please check precursors information.",
                     "If your experiment is DIA, please remove the precursors.",
                     "If your experiments is DDA, please check the precursor information.")
         getOption("MSstatsLog")("ERROR", msg)
