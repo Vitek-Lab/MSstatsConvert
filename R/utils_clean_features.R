@@ -92,6 +92,10 @@
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
                       by = feature_columns]
     }
+    msg = paste("** Multiple measurements in a feature and a run",
+                "are summarized by summaryforMultipleRows")
+    getOption("MSstatsLog")("INFO", msg)
+    getOption("MSstatsMsg")("INFO", msg)
     merge(input, info, 
           by = intersect(colnames(input), colnames(info)), sort = FALSE)
 }
