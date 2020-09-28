@@ -56,21 +56,23 @@
                          skip_absent = TRUE)
     prot_input = prot_input[PeptideSequence != "", ]
     prot_input[, ProteinName := gsub(";", "", ProteinName)]
-
+    
     if (use_frag & use_pept) {
         input = merge(pept_input[, c(FALSE, TRUE, TRUE), with = FALSE], 
                       prot_input, all.x = TRUE, by = "PeptideSequence",
                       sort = FALSE)
+        getOption("MSstatsMsg")("INFO", "** Using selected fragments and peptides.")
     } else if (use_frag & !use_pept) { 
         input = pept_input
         input$ProteinName = gsub(";", "", input$ProteinName)
+        getOption("MSstatsMsg")("INFO", "** Using selected fragments.")
     } else {
-        msg = "MSstats recommends to use at least selected fragments."
+        msg = "** MSstats recommends to use at least selected fragments."
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
     input[, FragmentIon := gsub("\\+", "_", FragmentIon)]
-
+    
     intensity_cols = grepl("Intensity", colnames(frag_input))
     frag_col_names = c("FragmentKey", "Protein", "Peptide", "Fragment")
     key_cols = colnames(frag_input) %in% frag_col_names
@@ -102,5 +104,7 @@
                       id.vars = new_names, variable.name = "Run", 
                       value.name = "Intensity", value.factor = FALSE)
     frag_input[, Run := gsub("_Intensity", "", Run)]
+    getOption("MSstatsMsg")("INFO", paste("** Extracted the data from selected",
+                                          "fragments and/or peptides."))
     frag_input[!(is.na(ProteinName))]
 }
