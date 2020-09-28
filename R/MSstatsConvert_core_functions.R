@@ -381,6 +381,7 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
                       "to be processed by the MSstats::dataProcess function.")
     getOption("MSstatsLog")("INFO", msg_final)
     getOption("MSstatsMsg")("INFO", msg_final)
+    getOption("MSstatsLog")("INFO", "\n")
     .MSstatsFormat(input)
 }
 
