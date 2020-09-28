@@ -185,7 +185,7 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     } else {
         what = "imported succesfully."
     }
-    msg = paste("** Raw data from", tool, "cleaned.")
+    msg = paste("** Raw data from", tool, what)
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     invisible(TRUE)

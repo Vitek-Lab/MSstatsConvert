@@ -370,8 +370,8 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
         getOption("MSstatsMsg")("INFO", msg_fractions)
     } 
     input = .makeBalancedDesign(input, fill_incomplete)
-    msg_balanced = paste("** Updated quantification data to make balanced design",
-                         "Missing values are denoted by NA")
+    msg_balanced = paste("** Updated quantification data to make balanced design.",
+                         "Missing values are marked by NA")
     getOption("MSstatsLog")("INFO", msg_balanced)
     getOption("MSstatsMsg")("INFO", msg_balanced)
     input = .fixMissingValues(input, fix_missing)
