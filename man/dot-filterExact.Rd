@@ -4,17 +4,32 @@
 \alias{.filterExact}
 \title{Filter out specified symbols.}
 \usage{
-.filterExact(input, col_name, filter_symbols, filter, drop)
+.filterExact(
+  input,
+  col_name,
+  filter_symbols,
+  behavior,
+  fill_value,
+  filter,
+  drop
+)
 }
 \arguments{
 \item{input}{data.table preprocessed by one of the .cleanRaw* functions.}
 
+\item{col_name}{chr, name of the column that will be the base for filtering}
+
+\item{filter_symbols}{character vector of symbols that will be removed}
+
+\item{behavior}{chr, if "remove", values below/above the threshold will be
+removed, if "replace", they will be set to \code{fill_value}.}
+
+\item{fill_value}{if \code{behavior} = "replace", values below/above the threshold
+will be replaced with \code{fill_value}. Defaults to \code{NA}.}
+
 \item{filter}{lgl, if TRUE, decoy proteins will be removed from the data.}
 
 \item{drop}{lgl, if TRUE, column that contains decoy proteins will be dropped.}
-
-\item{decoy_column}{chr, name of the column that contains names of decoy
-proteins.}
 }
 \value{
 data.table

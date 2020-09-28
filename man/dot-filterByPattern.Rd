@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_filtering.R
 \name{.filterByPattern}
 \alias{.filterByPattern}
-\title{Handle oxidation or M-peptides.}
+\title{Handle filtering by pattern}
 \usage{
 .filterByPattern(input, col_name, patterns, filter, drop)
 }
@@ -22,6 +22,6 @@ removed from the data.}
 data.table
 }
 \description{
-Handle oxidation or M-peptides.
+Handle filtering by pattern
 }
 \keyword{internal}
