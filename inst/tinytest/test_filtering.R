@@ -37,29 +37,31 @@ tinytest::expect_identical(
 # Filter by exact values ----
 ## Warn when the column isn't there
 tinytest::expect_message(MSstatsConvert:::.filterExact(data_to_filter, "Not_there", 
-                                             "-", TRUE, TRUE))
+                                             "-", "remove", NULL, TRUE, TRUE))
 ## Filter and drop column
 tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
-                                               "-", TRUE, TRUE),
+                                               "-", "remove", NULL, TRUE, TRUE),
                  data_to_filter[1:25, -6])
 ## Filter so that nothing's left
 tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
-                                               c("+", "-"), TRUE, TRUE),
+                                               c("+", "-"), "remove", NULL, TRUE, TRUE),
                  data_to_filter[FALSE, -6])
 ## Filter, but don't drop the column
 tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
-                                               "+", TRUE, FALSE),
+                                               "+", "remove", NULL, TRUE, FALSE),
                  data_to_filter[26:50, ])
 ## Don't filter, but drop column
 tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
-                                               c("+", "-"), FALSE, TRUE),
+                                               c("+", "-"), "remove", NULL, FALSE, TRUE),
                  data_to_filter[, -6])
 ## Don't filter and don't drop column
 tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
-                                               c("+", "-"), FALSE, FALSE),
+                                               c("+", "-"), "remove", NULL, FALSE, FALSE),
                  data_to_filter)
 ## Filter and drop, but the symbol is not there
-tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", "R", TRUE, TRUE),
+tinytest::expect_identical(MSstatsConvert:::.filterExact(data_to_filter, "Symbol_1", 
+                                                         "R", "remove", 
+                                                         NULL, TRUE, TRUE),
                  data_to_filter[, -6])
 # Filter multiple columns by exact values ----
 ## Warn when the column isn't there
@@ -186,7 +188,9 @@ tinytest::expect_identical(
                                                 handle_na = "keep", fill_value = NA,
                                                 filter = FALSE, drop_column = TRUE)), 
                                       list(list(col_name = "Symbol_1", 
-                                                filter_symbols = "+", filter = TRUE, drop_column = TRUE)),
+                                                filter_symbols = "+", filter = TRUE,
+                                                behavior = "remove", fill_value = NULL,
+                                                drop_column = TRUE)),
                                       list(list(col_name = "Symbol_2", pattern = "\\+", 
                                                 filter = TRUE, drop_column = TRUE))),
     data_to_filter[(Score > 0.3 | is.na(Score)) & Symbol_1 == "-", 1:4]
@@ -199,7 +203,9 @@ tinytest::expect_equal(
                                                 handle_na = "keep", fill_value = NA,
                                                 filter = FALSE, drop_column = TRUE)), 
                                       list(list(col_name = "Symbol_1", 
-                                                filter_symbols = "+", filter = TRUE, drop_column = FALSE)),
+                                                filter_symbols = "+", filter = TRUE, 
+                                                behavior = "remove", fill_value = NULL,
+                                                drop_column = FALSE)),
                                       list(list(col_name = "Symbol_1", pattern = "\\+", 
                                                 filter = TRUE, drop_column = TRUE))),
     data_to_filter[(Score > 0.3 | is.na(Score)) & Symbol_1 == "-", c(1:4, 7)]
