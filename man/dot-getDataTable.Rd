@@ -11,6 +11,9 @@
 
 \item{...}{additional parameters for data.table::fread}
 }
+\value{
+data.table
+}
 \description{
 Read file from a provided path or convert given data.frame to data.table
 }

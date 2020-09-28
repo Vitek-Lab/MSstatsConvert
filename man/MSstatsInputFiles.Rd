@@ -45,8 +45,8 @@ In some cases, multiple files are used, for example \code{MaxQuant} outputs
 \item{\code{type}}{character: "MSstats" or "MSstatsTMT".}
 
 \item{\code{tool}}{character: name of a signal processing tools that generated the
-output. Possible values are: DIAUmpire, MaxQuant, OpenMS, OpenSWATH, Progenesis,
-ProteomeDiscoverer, Skyline, SpectroMine, Spectronaut.}
+output. Possible values are: DIAUmpire, MaxQuant, OpenMS, OpenSWATH,
+Progenesis, ProteomeDiscoverer, Skyline, SpectroMine, Spectronaut.}
 
 \item{\code{version}}{description of a software version of the signal processing tool.
 Not implemented yet.}

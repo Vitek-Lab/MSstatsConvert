@@ -20,6 +20,9 @@ of this column}
 \item{`measurement_col`}{name of a column with measurement labels - Runs in
 label-free case, Channels in TMT case.}
 }
+\value{
+data.table
+}
 \description{
 Create a data.frame of each combination of values for given variables
 }

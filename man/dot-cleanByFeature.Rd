@@ -11,8 +11,8 @@
 
 \item{feature_columns}{character vector of names of columns that define features.}
 
-\item{cleaning_control}{named list of two or three elements. See the documentation
-for \code{MSstatsImport} for details.}
+\item{cleaning_control}{named list of two or three elements.
+See the documentation for \code{MSstatsImport} for details.}
 }
 \value{
 \code{data.table}

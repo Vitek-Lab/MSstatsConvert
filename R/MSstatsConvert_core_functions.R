@@ -6,8 +6,8 @@
 #' `evidence` and `proteinGroups` files.
 #' @slot type character: "MSstats" or "MSstatsTMT".
 #' @slot tool character: name of a signal processing tools that generated the
-#' output. Possible values are: DIAUmpire, MaxQuant, OpenMS, OpenSWATH, Progenesis,
-#' ProteomeDiscoverer, Skyline, SpectroMine, Spectronaut.
+#' output. Possible values are: DIAUmpire, MaxQuant, OpenMS, OpenSWATH, 
+#' Progenesis, ProteomeDiscoverer, Skyline, SpectroMine, Spectronaut.
 #' @slot version description of a software version of the signal processing tool.
 #' Not implemented yet.
 #' @rdname MSstatsInputFiles
@@ -55,7 +55,19 @@ setClass("MSstatsSpectronautFiles", contains = "MSstatsInputFiles")
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
 #' @rdname getInputFile
-#' @keywords internal
+#' @return data.table
+#' @export
+#' @examples
+#' evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+#'                             package = "MSstatsConvert")
+#' pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+#'                       package = "MSstatsConvert")
+#' evidence = read.csv(evidence_path)
+#' pg = read.csv(pg_path)
+#' imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+#'                          "MSstats", "MaxQuant")
+#' class(imported)
+#' head(getInputFile(imported, "evidence"))
 setGeneric("getInputFile", 
            function(msstats_object, file_type) standardGeneric("getInputFile"), 
            signature = "msstats_object")
@@ -65,11 +77,26 @@ setGeneric("getInputFile",
 #' @export 
 #' @rdname getInputFile
 setMethod("getInputFile", "MSstatsInputFiles", 
-          function(msstats_object, file_type = "input") msstats_object@files[[file_type]])
+          function(msstats_object, file_type = "input") 
+              msstats_object@files[[file_type]])
 
 #' Get type of dataset from an MSstatsInputFiles object.
 #' @rdname getDataType
 #' @keywords internal
+#' @export
+#' @return character - label of a data type. Currently, "MSstats" or "MSstatsTMT"
+#' @examples
+#' evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+#'                             package = "MSstatsConvert")
+#' pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+#'                       package = "MSstatsConvert")
+#' evidence = read.csv(evidence_path)
+#' pg = read.csv(pg_path)
+#' imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+#'                          "MSstats", "MaxQuant")
+#' class(imported)
+#' getDataType(imported) # "MSstats"
+#' 
 setGeneric("getDataType", 
            function(msstats_object) standardGeneric("getDataType"))
 #' @param msstats_object object that inherits from `MSstatsInputFiles` class.
@@ -86,12 +113,24 @@ setMethod("getDataType", "MSstatsInputFiles",
 #' Interpretation of this parameter depends on values of parameters `type` and `tool`.
 #' @param type chr, "MSstats" or "MSstatsTMT".
 #' @param tool chr, name of a signal processing tool that generated input files.
-#' @param tool_version currently ignored. In the future, this parameter will allow
+#' @param tool_version not implemented yet. In the future, this parameter will allow
 #' handling different versions of each signal processing tools.
 #' @param ... optional additional parameters to `data.table::fread`.
 #' 
 #' @return an object of class `MSstatsInputFiles`.
 #' @export
+#' 
+#' @examples 
+#' evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+#'                             package = "MSstatsConvert")
+#' pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+#'                       package = "MSstatsConvert")
+#' evidence = read.csv(evidence_path)
+#' pg = read.csv(pg_path)
+#' imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+#'                          "MSstats", "MaxQuant")
+#' class(imported)
+#' head(getInputFile(imported, "evidence"))
 #' 
 MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
     checkmate::assertChoice(tool, 
@@ -105,7 +144,8 @@ MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
     input_files = lapply(input_files, .getDataTable, ...)
     
     msstats_object = methods::new("MSstatsInputFiles", files = input_files,
-                                  type = type, tool = tool, version = tool_version)
+                                  type = type, tool = tool, 
+                                  version = tool_version)
     class = paste0("MSstats", tool, "Files")
     
     methods::new(class, msstats_object)
@@ -116,6 +156,20 @@ MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
 #' @param ... additional parameter to specific cleaning functions.
 #' @rdname MSstatsClean
 #' @export
+#' @return data.table
+#' 
+#' @examples 
+#' evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+#'                             package = "MSstatsConvert")
+#' pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+#'                       package = "MSstatsConvert")
+#' evidence = read.csv(evidence_path)
+#' pg = read.csv(pg_path)
+#' imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+#'                          "MSstats", "MaxQuant")
+#' cleaned_data = MSstatsClean(imported, protein_id_col = "Proteins")
+#' head(cleaned_data)
+#' 
 setGeneric("MSstatsClean", function(msstats_object, ...) {
     standardGeneric("MSstatsClean")
 })
@@ -123,47 +177,64 @@ setGeneric("MSstatsClean", function(msstats_object, ...) {
 #' @include convert_DIAUmpire.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawDIAUmpire
-setMethod("MSstatsClean", signature = "MSstatsDIAUmpireFiles", .cleanRawDIAUmpire)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsDIAUmpireFiles", 
+          .cleanRawDIAUmpire)
 #' Clean MaxQuant files
 #' @include convert_MaxQuant.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawMaxQuant
-setMethod("MSstatsClean", signature = "MSstatsMaxQuantFiles", .cleanRawMaxQuant)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsMaxQuantFiles", 
+          .cleanRawMaxQuant)
 #' Clean OpenMS files
 #' @include convert_OpenMS.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawOpenMS
-setMethod("MSstatsClean", signature = "MSstatsOpenMSFiles", .cleanRawOpenMS)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsOpenMSFiles", 
+          .cleanRawOpenMS)
 #' Clean OpenSWATH files
 #' @include convert_OpenSWATH.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawOpenSWATH
-setMethod("MSstatsClean", signature = "MSstatsOpenSWATHFiles", .cleanRawOpenSWATH)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsOpenSWATHFiles", 
+          .cleanRawOpenSWATH)
 #' Clean Progenesis files
 #' @include convert_Progenesis.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawProgenesis
-setMethod("MSstatsClean", signature = "MSstatsProgenesisFiles", .cleanRawProgenesis)
+setMethod("MSstatsClean", signature = "MSstatsProgenesisFiles", 
+          .cleanRawProgenesis)
 #' Clean ProteomeDiscoverer files
 #' @include convert_ProteomeDiscoverer.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawPD
-setMethod("MSstatsClean", signature = "MSstatsProteomeDiscovererFiles", .cleanRawPD)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsProteomeDiscovererFiles", 
+          .cleanRawPD)
 #' Clean Skyline files
 #' @include convert_Skyline.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSkyline
-setMethod("MSstatsClean", signature = "MSstatsSkylineFiles", .cleanRawSkyline)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsSkylineFiles", 
+          .cleanRawSkyline)
 #' Clean SpectroMine files
 #' @include convert_SpectroMine.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSpectroMineTMT
-setMethod("MSstatsClean", signature = "MSstatsSpectroMineFiles", .cleanRawSpectroMineTMT)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsSpectroMineFiles", 
+          .cleanRawSpectroMineTMT)
 #' Clean Spectronaut files
 #' @include convert_Spectronaut.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSpectronaut
-setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles", .cleanRawSpectronaut)
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles", 
+          .cleanRawSpectronaut)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats
@@ -195,8 +266,37 @@ setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles", .cleanRawSpectr
 #' @param aggregate_isotopic logical. If `TRUE`, isotopic peaks will by summed.
 #' @param ... additional parameters to `data.table::fread`.
 #' 
-#' @return data.frame of class `MSstatsValidated`
+#' @return data.table
 #' @export
+#' 
+#' @examples 
+#' evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+#'                             package = "MSstatsConvert")
+#' pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+#'                       package = "MSstatsConvert")
+#' evidence = read.csv(evidence_path)
+#' pg = read.csv(pg_path)
+#' imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+#'                          "MSstats", "MaxQuant")
+#' cleaned_data = MSstatsClean(imported, protein_id_col = "Proteins")
+#' annot_path = system.file("tinytest/raw_data/MaxQuant/annotation.csv", 
+#'                          package = "MSstatsConvert")
+#' mq_annot = MSstatsMakeAnnotation(cleaned_data, read.csv(annot_path),
+#'                                  Run = "Rawfile")
+#'                                
+#' # To filter M-peptides and oxidatin peptides 
+#' m_filter = list(col_name = "PeptideSequence", pattern = "M", 
+#'                 filter = TRUE, drop_column = FALSE)
+#' oxidation_filter = list(col_name = "Modifications", pattern = "Oxidation", 
+#'                         filter = TRUE, drop_column = TRUE)
+#' msstats_format = MSstatsPreprocess(
+#' cleaned_data, mq_annot, 
+#' feature_columns = c("PeptideSequence", "PrecursorCharge"),
+#' columns_to_fill = list(FragmentIon = NA, ProductCharge = NA),
+#' pattern_filtering = list(oxidation = oxidation_filter, m = m_filter)
+#' )
+#' # Output in the standard MSstats format
+#' head(msstats_format)
 #' 
 MSstatsPreprocess = function(
     input, annotation, feature_columns, remove_shared_peptides = TRUE,
@@ -213,7 +313,8 @@ MSstatsPreprocess = function(
                         remove_shared_peptides,
                         remove_single_feature_proteins,
                         feature_cleaning)
-    input = .handleFiltering(input, score_filtering, exact_filtering, pattern_filtering)
+    input = .handleFiltering(input, score_filtering, 
+                             exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
     input = .filterFewMeasurements(input, 1, "keep")
     input = .handleSharedPeptides(input, remove_shared_peptides)
@@ -240,6 +341,17 @@ MSstatsPreprocess = function(
 #' If "na_to_zero", missing values will be replaced by zeros.
 #' 
 #' @export
+#' @return data.frame of class `MSstatsValidated`
+#' 
+#' @examples
+#' unbalanced_data = system.file("tinytest/raw_data/unbalanced_data.csv", 
+#'                               package = "MSstatsConvert")
+#' unbalanced_data = data.table::as.data.table(read.csv(unbalanced_data))
+#' balanced = MSstatsBalancedDesign(unbalanced_data, 
+#'                                  c("PeptideSequence", "PrecursorCharge",
+#'                                    "FragmentIon", "ProductCharge"))
+#' dim(balanced) # Now balanced has additional rows (with Intensity = NA)
+#' # for runs that were not included in the unbalanced_data table
 #' 
 MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
                                  handle_fractions = TRUE, fix_missing = NULL) {
@@ -252,16 +364,37 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     } 
     input = .makeBalancedDesign(input, fill_incomplete)
     input = .fixMissingValues(input, fix_missing)
-    input = input[, !(colnames(input) %in% c("feature", "isZero")), with = FALSE]
+    input = input[, !(colnames(input) %in% c("feature", "isZero")), 
+                  with = FALSE]
     .MSstatsFormat(input)
 }
 
 
 #' Create annotation
-#' @param input data.table preprocessed by one of the .cleanRaw* functions
+#' 
+#' @param input data.table preprocessed by the MSstatsClean function
 #' @param annotation data.table 
 #' @param ... key-value pairs, where keys are names of columns of `annotation` 
+#' 
+#' @return data.table
 #' @export
+#' 
+#' @examples 
+#' evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+#'                             package = "MSstatsConvert")
+#' pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+#'                       package = "MSstatsConvert")
+#' evidence = read.csv(evidence_path)
+#' pg = read.csv(pg_path)
+#' imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+#'                          "MSstats", "MaxQuant")
+#' cleaned_data = MSstatsClean(imported, protein_id_col = "Proteins")
+#' annot_path = system.file("tinytest/raw_data/MaxQuant/annotation.csv", 
+#'                          package = "MSstatsConvert")
+#' mq_annot = MSstatsMakeAnnotation(cleaned_data, read.csv(annot_path),
+#'                                  Run = "Rawfile")
+#' head(mq_annot)
+#' 
 MSstatsMakeAnnotation = function(input, annotation, ...) {
     all_columns = unlist(list(...))
     if (!is.null(annotation)) {

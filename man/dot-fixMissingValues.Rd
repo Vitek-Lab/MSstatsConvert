@@ -14,6 +14,10 @@ If \code{NULL}, data were processed by Skyline, so missing values will be denote
 by both \code{NA} and \code{0}. If "na_to_zero", \code{NA} values will be replaced by \code{0}.
 If "zero_to_na", \code{0} values will be replaced by \code{NA}}
 }
+\value{
+data.table
+}
 \description{
 Change labels for missing values
 }
+\keyword{internal}

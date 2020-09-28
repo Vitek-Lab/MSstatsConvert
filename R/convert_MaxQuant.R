@@ -7,15 +7,19 @@
 #' in TMT data.
 #' @return data.table
 #' @keywords internal
-.cleanRawMaxQuant = function(msstats_object, protein_id_col, remove_by_site = FALSE,
-                             channel_columns = "Reporterintensitycorrected") {
-    ProteinIDs = id = PSM = PeptideSequence = PrecursorCharge = Intensity = NULL
+.cleanRawMaxQuant = function(msstats_object, protein_id_col, 
+                             remove_by_site = FALSE,
+                             channel_columns = "Reporterintensitycorrected"
+) {
+    ProteinIDs = id = PSM = PeptideSequence = NULL
+    ProteingroupIDs = PrecursorCharge = Intensity = NULL
     
     mq_input = getInputFile(msstats_object, "evidence")
     mq_pg = getInputFile(msstats_object, "protein_groups")
     
     filter_cols = c("Contaminant", "Potentialcontaminant", "Reverse")
-    msg = "+ Contaminant, + Reverse, + Potential.contaminant, proteins are removed."
+    msg = paste("+ Contaminant, + Reverse, + Potential.contaminant",
+                "proteins are removed.")
     if (remove_by_site) {
         filter_cols = c(filter_cols, "Onlyidentifiedbysite")
         msg = paste("+ Contaminant, + Reverse, + Potential.contaminant,", 
@@ -27,10 +31,10 @@
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     
-    mq_input[["ProteingroupIDs"]] = suppressWarnings(as.integer(as.character(mq_input[["ProteingroupIDs"]])))
-    
+    mq_input[, ProteingroupIDs := as.integer(as.character(ProteingroupIDs))]
+
     if (getDataType(msstats_object) == "MSstats") {
-        mq_input = mq_input[mq_input[["ProteingroupIDs"]] %in% unique(mq_pg[["id"]]), ] # skip this in tmt case?
+        mq_input = mq_input[ProteingroupIDs %in% unique(mq_pg[["id"]]), ]
     }
     
     mq_input = merge(mq_input, 
@@ -44,7 +48,8 @@
                                     colnames(mq_input), "Proteins")
         channels = .getChannelColumns(colnames(mq_input), channel_columns)
     } else {
-        protein_id = ifelse(protein_id_col == "Proteins", "uniquefromProteinGroups",
+        protein_id = ifelse(protein_id_col == "Proteins", 
+                            "uniquefromProteinGroups",
                             "Leadingrazorprotein")
         channels = character(0)
     }
@@ -54,10 +59,10 @@
         c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run"),
         skip_absent = TRUE)
     mq_input[["PeptideSequence"]] = gsub("_", "", mq_input[["PeptideSequence"]])
-    mq_cols = c("ProteinName", "Sequence", "PeptideSequence", "Modifications", 
+    mq_cols = c("ProteinName", "PeptideSequence", "Modifications", 
                 "PrecursorCharge", "Run", "Intensity", 
                 "Fraction", "TechReplicate", "Run", "BioReplicate",
-                "PSM", "Score") # TODO: + Retention.time? - Modifications? BioReplicate?
+                "PSM", "Score")
     mq_cols = intersect(c(mq_cols, channels),
                         colnames(mq_input))
     mq_input = mq_input[, mq_cols, with = FALSE]
@@ -72,9 +77,11 @@
                         variable.name = "Channel", value.name = "Intensity")
         mq_input$Channel = gsub(channel_columns, "channel", mq_input$Channel)
         mq_input$Channel = .standardizeColnames(mq_input$Channel)
-        mq_input$Intensity = ifelse(mq_input$Intensity == 0, NA, mq_input$Intensity)
+        mq_input$Intensity = ifelse(mq_input$Intensity == 0, NA,
+                                    mq_input$Intensity)
         mq_input = .filterFewMeasurements(mq_input, 0, "keep", 
-                                          c("PeptideSequence", "PrecursorCharge", "Run"))
+                                          c("PeptideSequence", 
+                                            "PrecursorCharge", "Run"))
     }
     
     mq_input = mq_input[!is.na(Intensity), ]

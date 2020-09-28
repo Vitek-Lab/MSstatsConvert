@@ -11,6 +11,9 @@
 
 \item{...}{messages - ignored}
 }
+\value{
+NULL invisibly
+}
 \description{
 A convenience function written to save time on checking if messages should
 be printed or logs should be written to a file.

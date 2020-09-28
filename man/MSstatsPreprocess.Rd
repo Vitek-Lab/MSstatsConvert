@@ -60,8 +60,38 @@ will be added to the output \code{data.frame}.}
 \item{...}{additional parameters to \code{data.table::fread}.}
 }
 \value{
-data.frame of class \code{MSstatsValidated}
+data.table
 }
 \description{
 Preprocess outputs from MS signal processing tools for analysis with MSstats
+}
+\examples{
+evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+                            package = "MSstatsConvert")
+pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+                      package = "MSstatsConvert")
+evidence = read.csv(evidence_path)
+pg = read.csv(pg_path)
+imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+                         "MSstats", "MaxQuant")
+cleaned_data = MSstatsClean(imported, protein_id_col = "Proteins")
+annot_path = system.file("tinytest/raw_data/MaxQuant/annotation.csv", 
+                         package = "MSstatsConvert")
+mq_annot = MSstatsMakeAnnotation(cleaned_data, read.csv(annot_path),
+                                 Run = "Rawfile")
+                               
+# To filter M-peptides and oxidatin peptides 
+m_filter = list(col_name = "PeptideSequence", pattern = "M", 
+                filter = TRUE, drop_column = FALSE)
+oxidation_filter = list(col_name = "Modifications", pattern = "Oxidation", 
+                        filter = TRUE, drop_column = TRUE)
+msstats_format = MSstatsPreprocess(
+cleaned_data, mq_annot, 
+feature_columns = c("PeptideSequence", "PrecursorCharge"),
+columns_to_fill = list(FragmentIon = NA, ProductCharge = NA),
+pattern_filtering = list(oxidation = oxidation_filter, m = m_filter)
+)
+# Output in the standard MSstats format
+head(msstats_format)
+
 }

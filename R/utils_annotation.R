@@ -9,7 +9,9 @@
         if (is.element("Channel", colnames(input))) {
             input$Channel = .standardizeColnames(input$Channel)
             if (!all(unique(annotation$Channel) %in% unique(input$Channel))) {
-                msg = "Please check the annotation file. The channel name must be matched with that in input data."
+                msg = paste("Please check the annotation file.",
+                            "The channel name must be matched",
+                            "with that in input data.")
                 getOption("MSstatsLog")("ERROR", msg)
                 stop(msg)
             }
@@ -18,7 +20,8 @@
         cols = setdiff(cols, c("Run", "Channel"))
         annotation_cols = intersect(c("Run", "Channel"), colnames(input))
         input = merge(input[, !(colnames(input) %in% cols), with = FALSE], 
-                      annotation, by = annotation_cols, all.x = TRUE, sort = FALSE)
+                      annotation, 
+                      by = annotation_cols, all.x = TRUE, sort = FALSE)
     }
     if (any(is.na(input$Condition))) {
         msg = "Condition in the input file must match condition in annotation."

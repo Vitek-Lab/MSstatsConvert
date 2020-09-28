@@ -11,6 +11,9 @@
 
 \item{features_2}{vector of feature_names}
 }
+\value{
+character vector of common values of \code{features_1} and \code{features_2}
+}
 \description{
 Get common values from two vectors of features
 }

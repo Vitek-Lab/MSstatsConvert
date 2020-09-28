@@ -12,6 +12,9 @@
 \item{summary_function}{function that will be used to aggregate intensities
 if needed.}
 }
+\value{
+character - label of a chosen PSM
+}
 \description{
 Pick one PSM from a data.table of several PSMs.
 }

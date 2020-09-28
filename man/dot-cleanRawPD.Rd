@@ -31,6 +31,9 @@
 Defaults to "Abundance", which means that columns that contain the word "Abundance"
 will be treated as corresponding to intensities for different channels.}
 }
+\value{
+data.table
+}
 \description{
 Clean raw Proteome Discoverer data
 }

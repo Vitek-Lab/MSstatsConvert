@@ -11,6 +11,8 @@
 }
 \value{
 logical
+
+logical, TRUE means that the \code{input} dataset comes from a DDA experiment
 }
 \description{
 Check validity of DDA data

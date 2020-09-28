@@ -10,6 +10,10 @@ average intensity}
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+character - label of the fraction that has most measurements or
+highest mean intensity for a given feature
+}
 \description{
 Get a name of fraction with the largest number of measurements or the largest
 average intensity

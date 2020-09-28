@@ -9,6 +9,9 @@
 \arguments{
 \item{...}{ignored}
 }
+\value{
+none, sets options called MSstatsLog and MSstatsMsg
+}
 \description{
 Set default logging object when package is loaded
 }

@@ -9,7 +9,8 @@
     data.table::setnames(sl_input, c("FileName", "Area"),
                          c("Run", "Intensity"), skip_absent = TRUE)
     
-    sl_input = sl_input[, !(colnames(sl_input) == "PeptideSequence"), with = FALSE]
+    sl_input = sl_input[, !(colnames(sl_input) == "PeptideSequence"), 
+                        with = FALSE]
     data.table::setnames(sl_input, "PeptideModifiedSequence",
                          "PeptideSequence", skip_absent = TRUE)
     sl_input[, Intensity := as.numeric(as.character(Intensity))]
@@ -61,6 +62,7 @@
 #' Check validity of DDA data
 #' @param input data.table preprocessed by one of the `cleanRaw*` functions.
 #' @return logical
+#' @return logical, TRUE means that the `input` dataset comes from a DDA experiment
 #' @keywords internal
 .checkDDA = function(input) {
     fragment_ions = as.character(unique(input[["FragmentIon"]]))

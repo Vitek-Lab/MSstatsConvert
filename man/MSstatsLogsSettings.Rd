@@ -22,7 +22,8 @@ to an existing log file.}
 to the console.}
 
 \item{log_file_path}{character. Path to a file to which information about
-data processing will be saved. If not provided, such a file will be created automatically.
+data processing will be saved.
+If not provided, such a file will be created automatically.
 If \code{append = TRUE}, has to be a valid path to a file.}
 }
 \value{
@@ -30,4 +31,16 @@ TRUE invisibly in case of successful logging setup.
 }
 \description{
 Set how MSstats will log information from data processing
+}
+\examples{
+# No logging and no messages
+MSstatsLogsSettings(FALSE, FALSE, FALSE)
+# Log, but do not display messages
+MSstatsLogsSettings(TRUE, FALSE, FALSE)
+# Log to an existing file
+file.create("new_log.log")
+MSstatsLogsSettings(TRUE, TRUE, log_file_path = "new_log.log")
+# Do not log, but display messages
+MSstatsLogsSettings(FALSE)
+
 }

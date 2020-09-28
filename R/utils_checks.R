@@ -1,5 +1,6 @@
 #' Check validity of parameters to the `MSstatsImport` function.
 #' @inheritParams MSstatsImport
+#' @return none, throws an error if any of the assertions fail
 #' @keywords internal
 .checkMSstatsParams = function(input, annotation, 
                                feature_columns,
@@ -8,13 +9,16 @@
                                feature_cleaning) {
     checkmate::assertDataTable(input)
     checkmate::assertTRUE(is.character(annotation) | 
-                              inherits(annotation, "data.frame") | is.null(annotation))
+                              inherits(annotation, "data.frame") | 
+                              is.null(annotation))
     checkmate::assertCharacter(feature_columns, min.len = 1)
     checkmate::assertLogical(remove_shared_peptides)
-    checkmate::assertChoice(feature_cleaning[["handle_features_with_few_measurements"]], 
-                            c("remove", "keep"))
+    checkmate::assertChoice(
+        feature_cleaning[["handle_features_with_few_measurements"]], 
+        c("remove", "keep"))
     checkmate::assertLogical(remove_single_feature_proteins)
-    checkmate::assertLogical(feature_cleaning[["remove_psms_with_all_missing"]], null.ok = TRUE)
+    checkmate::assertLogical(feature_cleaning[["remove_psms_with_all_missing"]],
+                             null.ok = TRUE)
     checkmate::assertFunction(feature_cleaning[["summarize_multiple_psms"]])
 }
 

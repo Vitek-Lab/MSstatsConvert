@@ -9,6 +9,9 @@
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+data.table
+}
 \description{
 Check if any features are measured in multiple fractions
 }

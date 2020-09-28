@@ -2,6 +2,7 @@
 #' @param input report from a signal processing tool or a path to it
 #' @param ... additional parameters for data.table::fread
 #' @importFrom data.table as.data.table fread setDT
+#' @return data.table
 #' @keywords internal
 .getDataTable = function(input, ...) {
     checkmate::checkTRUE(is.character(input) | inherits(input, "data.frame"))
@@ -79,7 +80,8 @@
     all_patterns = unlist(list(...))
     channel_filter = rep(TRUE, length(col_names))
     for (pattern in all_patterns) {
-        channel_filter = channel_filter & grepl(pattern, col_names, fixed = TRUE)
+        channel_filter = channel_filter & grepl(pattern, col_names, 
+                                                fixed = TRUE)
     }
     col_names[channel_filter]
 }

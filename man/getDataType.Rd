@@ -13,9 +13,24 @@ getDataType(msstats_object)
 \item{msstats_object}{object that inherits from \code{MSstatsInputFiles} class.}
 }
 \value{
+character - label of a data type. Currently, "MSstats" or "MSstatsTMT"
+
 character "MSstats" or "MSstatsTMT".
 }
 \description{
 Get type of dataset from an MSstatsInputFiles object.
+}
+\examples{
+evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+                            package = "MSstatsConvert")
+pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+                      package = "MSstatsConvert")
+evidence = read.csv(evidence_path)
+pg = read.csv(pg_path)
+imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+                         "MSstats", "MaxQuant")
+class(imported)
+getDataType(imported) # "MSstats"
+
 }
 \keyword{internal}

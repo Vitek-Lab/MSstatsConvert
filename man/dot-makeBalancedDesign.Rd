@@ -12,6 +12,9 @@
 \item{fill_missing}{if TRUE, missing Intensities values will be added to data
 and marked as NA}
 }
+\value{
+data.table
+}
 \description{
 Fill missing rows to create balanced design
 }

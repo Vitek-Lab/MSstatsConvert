@@ -9,6 +9,9 @@
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+character vector of feature labels
+}
 \description{
 Check if there are duplicated measurements within run
 }

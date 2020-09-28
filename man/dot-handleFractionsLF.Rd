@@ -9,6 +9,9 @@
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+data.table
+}
 \description{
 Handle overlapping features
 }

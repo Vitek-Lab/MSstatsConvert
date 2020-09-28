@@ -20,6 +20,9 @@
 
 \item{peptide_column}{chr, name of the column with peptide sequences.}
 }
+\value{
+data.table
+}
 \description{
 Handle shared peptides.
 }

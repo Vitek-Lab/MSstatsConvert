@@ -14,7 +14,7 @@ Interpretation of this parameter depends on values of parameters \code{type} and
 
 \item{tool}{chr, name of a signal processing tool that generated input files.}
 
-\item{tool_version}{currently ignored. In the future, this parameter will allow
+\item{tool_version}{not implemented yet. In the future, this parameter will allow
 handling different versions of each signal processing tools.}
 
 \item{...}{optional additional parameters to \code{data.table::fread}.}
@@ -24,4 +24,17 @@ an object of class \code{MSstatsInputFiles}.
 }
 \description{
 Import files from signal processing tools.
+}
+\examples{
+evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+                            package = "MSstatsConvert")
+pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+                      package = "MSstatsConvert")
+evidence = read.csv(evidence_path)
+pg = read.csv(pg_path)
+imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+                         "MSstats", "MaxQuant")
+class(imported)
+head(getInputFile(imported, "evidence"))
+
 }

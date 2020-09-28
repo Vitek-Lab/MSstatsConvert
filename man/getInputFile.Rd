@@ -16,8 +16,21 @@ getInputFile(msstats_object, file_type)
 }
 \value{
 data.table
+
+data.table
 }
 \description{
 Get one of files contained in an instance of \code{MSstatsInputFiles} class.
 }
-\keyword{internal}
+\examples{
+evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+                            package = "MSstatsConvert")
+pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+                      package = "MSstatsConvert")
+evidence = read.csv(evidence_path)
+pg = read.csv(pg_path)
+imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+                         "MSstats", "MaxQuant")
+class(imported)
+head(getInputFile(imported, "evidence"))
+}

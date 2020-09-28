@@ -7,12 +7,32 @@
 MSstatsMakeAnnotation(input, annotation, ...)
 }
 \arguments{
-\item{input}{data.table preprocessed by one of the .cleanRaw* functions}
+\item{input}{data.table preprocessed by the MSstatsClean function}
 
 \item{annotation}{data.table}
 
 \item{...}{key-value pairs, where keys are names of columns of \code{annotation}}
 }
+\value{
+data.table
+}
 \description{
 Create annotation
+}
+\examples{
+evidence_path = system.file("tinytest/raw_data/MaxQuant/mq_ev.csv", 
+                            package = "MSstatsConvert")
+pg_path = system.file("tinytest/raw_data/MaxQuant/mq_pg.csv", 
+                      package = "MSstatsConvert")
+evidence = read.csv(evidence_path)
+pg = read.csv(pg_path)
+imported = MSstatsImport(list(evidence = evidence, protein_groups = pg),
+                         "MSstats", "MaxQuant")
+cleaned_data = MSstatsClean(imported, protein_id_col = "Proteins")
+annot_path = system.file("tinytest/raw_data/MaxQuant/annotation.csv", 
+                         package = "MSstatsConvert")
+mq_annot = MSstatsMakeAnnotation(cleaned_data, read.csv(annot_path),
+                                 Run = "Rawfile")
+head(mq_annot)
+
 }

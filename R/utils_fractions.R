@@ -36,37 +36,46 @@
         single_run = input[techrun == technical_run & !is.na(Intensity), ]
         features_to_remove = .getOverlappingFeatures(single_run)
         if (length(features_to_remove) > 0) {
-            single_run = .filterOverlapped(single_run, mean, features_to_remove)
+            single_run = .filterOverlapped(single_run, mean, 
+                                           features_to_remove)
             features_to_remove = .getOverlappingFeatures(single_run)
             msg = paste("For peptides overlapped between fractions of",
-                        technical_run, "use the fraction with maximal average abundance.")
+                        technical_run, 
+                        "use the fraction with maximal average abundance.")
             getOption("MSstatsLog")("INFO", msg)
             getOption("MSstatsMsg")("INFO", msg)
             if (length(features_to_remove) > 0) {
-                single_run = .filterOverlapped(single_run, sum, features_to_remove)
+                single_run = .filterOverlapped(single_run, sum, 
+                                               features_to_remove)
                 features_to_remove = .getOverlappingFeatures(single_run)
                 msg = paste("For peptides overlapped between fractions of",
-                            technical_run, "use the fraction with maximal summation abundance.")
+                            technical_run,
+                            "use the fraction with maximal summation abundance.")
                 getOption("MSstatsLog")("INFO", msg)
                 getOption("MSstatsMsg")("INFO", msg)
                 if (length(features_to_remove) > 0) {
-                    single_run = .filterOverlapped(single_run, max, features_to_remove)
+                    single_run = .filterOverlapped(single_run, max, 
+                                                   features_to_remove)
                     msg = paste("For peptides overlapped between fractions of",
-                                technical_run, "use the fraction with maximal abundance.")
+                                technical_run,
+                                "use the fraction with maximal abundance.")
                     getOption("MSstatsLog")("INFO", msg)
                     getOption("MSstatsMsg")("INFO", msg)
                     if (data.table::uniqueN(input$Run) > 1) {
-                        single_run = single_run[, list(Intensity = mean(Intensity, na.rm = TRUE)),
-                                                by = setdiff(colnames(single_run), 
-                                                             c("Run", "Intensity",
-                                                               "Fraction", "id", "n_psms",
-                                                               "QuanInfo", "IonsScore",
-                                                               "IsolationInterference"))]
+                        single_run = single_run[
+                            , list(Intensity = mean(Intensity, na.rm = TRUE)),
+                            by = setdiff(colnames(single_run), 
+                                         c("Run", "Intensity",
+                                           "Fraction", "id", "n_psms",
+                                           "QuanInfo", "IonsScore",
+                                           "IsolationInterference"))
+                            ]
                     }
                 }
             }
         }
-        unoverlapped_list[[technical_run]] = single_run[, !(colnames(single_run) %in% c("run", "techrun", "id")),
+        output_cols = !(colnames(single_run) %in% c("run", "techrun", "id"))
+        unoverlapped_list[[technical_run]] = single_run[, output_cols,
                                                         with = FALSE]
     }
     input = rbindlist(unoverlapped_list)
@@ -112,14 +121,17 @@
 #' Get common values from two vectors of features
 #' @param features_1 vector of feature names
 #' @param features_2 vector of feature_names
+#' @return character vector of common values of `features_1` and `features_2`
 #' @keywords internal
 .countCommonFeatures = function(features_1, features_2) {
-    data.table::uniqueN(intersect(as.character(features_1), as.character(features_2)))
+    data.table::uniqueN(intersect(as.character(features_1), 
+                                  as.character(features_2)))
 }
 
 
 #' Handle overlapping features
 #' @param input output of `MSstatsPreprocess`
+#' @return data.table
 #' @keywords internal
 .handleFractionsLF = function(input) {
     check_multi_run = .checkMultiRun(input)
@@ -161,6 +173,9 @@
 
 #' Check if fractionation exists
 #' @param input output of `MSstatsPreprocess`
+#' @return list of two elements: `has_fractions` (logical) indicates if 
+#' fractions was detected in the `input` dataset, `is_risky` (logical)
+#' indicates if there was a problem with detecting fractionation.
 #' @keywords internal
 .checkMultiRun = function(input) {
     Run = Condition = BioReplicate = Intensity = NULL
@@ -187,7 +202,7 @@
                                       by = condition]
             max_measurements = which.max(measurement_count$n_obs)[1]
             ref = measurement_count$condition[max_measurements]
-
+            
             single_sample = unique(info[condition == ref,
                                         list(Condition, BioReplicate)])
             single_sample_data = input[!is.na(Intensity) & ## including Intensity < 1 ??
@@ -220,6 +235,7 @@
 
 #' Add a Fraction column to the output of `MSstatsPreprocess`
 #' @param input output of `MSstatsPreprocess`
+#' @return data.table
 #' @keywords internal
 .addFractions = function(input) {
     Condition = BioReplicate = Run = CONDITION = Intensity = feature = Fraction = NULL
@@ -244,6 +260,7 @@
 
 #' Replace intensities of overlapped fractions with NA, keeping only one fraction
 #' @param input output of `MSstatsPreprocess`
+#' @return data.table
 #' @keywords internal
 .removeOverlappingFeatures = function(input) {
     fraction_keep = Fraction = Intensity = NULL
@@ -262,6 +279,8 @@
 #' Get a name of fraction with the largest number of measurements or the largest
 #' average intensity
 #' @param input output of `MSstatsPreprocess`
+#' @return character - label of the fraction that has most measurements or
+#' highest mean intensity for a given feature
 #' @keywords internal
 .getCorrectFraction = function(input) {
     Intensity = Run = Fraction = NULL
@@ -287,6 +306,7 @@
 
 #' Check if any features are measured in multiple fractions
 #' @param input output of `MSstatsPreprocess`
+#' @return data.table
 #' @keywords internal
 .checkOverlappedFeatures = function(input) {
     n_fractions = Fraction = Intensity = NULL 

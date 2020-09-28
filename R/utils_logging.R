@@ -5,6 +5,7 @@
 #' 
 #' @param level log level 
 #' @param ... messages - ignored
+#' @return NULL invisibly
 #' @keywords internal
 .nullAppender = function(level, ...) {
     invisible(NULL)
@@ -14,6 +15,7 @@
 #' Set default logging object when package is loaded
 #' @param ... ignored
 #' @importFrom log4r file_appender console_appender
+#' @return none, sets options called MSstatsLog and MSstatsMsg
 #' @keywords internal
 .onLoad = function(...) {
     logs = getOption("MSstatsLog")
@@ -41,11 +43,23 @@
 #' @param verbose logical. If TRUE, information about data processing wil be printed
 #' to the console.
 #' @param log_file_path character. Path to a file to which information about 
-#' data processing will be saved. If not provided, such a file will be created automatically.
+#' data processing will be saved. 
+#' If not provided, such a file will be created automatically.
 #' If `append = TRUE`, has to be a valid path to a file.
 #' 
 #' @return TRUE invisibly in case of successful logging setup.
 #' @export
+#' 
+#' @examples 
+#' # No logging and no messages
+#' MSstatsLogsSettings(FALSE, FALSE, FALSE)
+#' # Log, but do not display messages
+#' MSstatsLogsSettings(TRUE, FALSE, FALSE)
+#' # Log to an existing file
+#' file.create("new_log.log")
+#' MSstatsLogsSettings(TRUE, TRUE, log_file_path = "new_log.log")
+#' # Do not log, but display messages
+#' MSstatsLogsSettings(FALSE)
 #' 
 MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
                                verbose = TRUE, log_file_path = NULL) {
@@ -68,7 +82,8 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
                         append = append)
             } else {
                 time_now = Sys.time()
-                path = paste0("./MSstats_log_", gsub("[ :\\-]", "_", time_now), ".log")
+                path = paste0("./MSstats_log_", gsub("[ :\\-]", "_", time_now), 
+                              ".log")
                 options("MSstatsLog" = log4r::file_appender(path))
             }
         }

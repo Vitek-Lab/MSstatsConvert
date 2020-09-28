@@ -9,9 +9,11 @@
 \arguments{
 \item{msstats_object}{Object that inherits from MSstatsInputFiles class.}
 
-\item{use_frag}{TRUE will use the selected fragment for each peptide. 'Selected_fragments' column is required.}
+\item{use_frag}{TRUE will use the selected fragment for each peptide.
+'Selected_fragments' column is required.}
 
-\item{use_pept}{TRUE will use the selected fragment for each protein 'Selected_peptides' column is required.}
+\item{use_pept}{TRUE will use the selected fragment for each protein
+'Selected_peptides' column is required.}
 }
 \value{
 data.table

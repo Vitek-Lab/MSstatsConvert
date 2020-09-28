@@ -9,6 +9,9 @@
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+data.table
+}
 \description{
 Add a Fraction column to the output of \code{MSstatsPreprocess}
 }

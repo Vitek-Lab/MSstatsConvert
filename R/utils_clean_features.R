@@ -1,8 +1,8 @@
 #' Perform by-feature operations.
 #' @param input `data.table` preprocessed by one of the cleanRaw* functions.
 #' @param feature_columns character vector of names of columns that define features.
-#' @param cleaning_control named list of two or three elements. See the documentation
-#' for `MSstatsImport` for details.
+#' @param cleaning_control named list of two or three elements. 
+#' See the documentation for `MSstatsImport` for details.
 #' @return `data.table`
 #' @keywords internal 
 .cleanByFeature = function(input, feature_columns, cleaning_control) {
@@ -85,13 +85,15 @@
                         with = FALSE])
     if (is.element("isZero", colnames(input))) {
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE),
-                             isZero = all(isZero | is.na(Intensity)) & !all(is.na(Intensity))), 
+                             isZero = all(isZero | is.na(Intensity)) &
+                                 !all(is.na(Intensity))), 
                       by = feature_columns]
     } else {
         input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
                       by = feature_columns]
     }
-    merge(input, info, by = intersect(colnames(input), colnames(info)), sort = FALSE)
+    merge(input, info, 
+          by = intersect(colnames(input), colnames(info)), sort = FALSE)
 }
 
 
@@ -111,9 +113,12 @@
         input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
         input[, feature_count := uniqueN(feature), by = "ProteinName"]
         input = input[feature_count > 1]
-        input = input[, !(colnames(input) %in% c("feature_count", "feature")), with = FALSE]
-        getOption("MSstatsLog")("INFO", "Proteins with a single feature are removed.")
-        getOption("MSstatsMsg")("INFO", "Proteins with a single feature are removed.")
+        input = input[, !(colnames(input) %in% c("feature_count", "feature")), 
+                      with = FALSE]
+        getOption("MSstatsLog")("INFO", 
+                                "Proteins with a single feature are removed.")
+        getOption("MSstatsMsg")("INFO", 
+                                "Proteins with a single feature are removed.")
     }
     input
 }
@@ -131,12 +136,14 @@
 #' if needed.
 #' @return data.table
 #' @keywords internal
-.aggregatePSMstoPeptideIons = function(input, feature_columns, summary_function = sum) {
+.aggregatePSMstoPeptideIons = function(input, feature_columns, 
+                                       summary_function = sum
+) {
     keep = n_psms = PSM = Intensity = NULL
     
     feature_columns = unique(c(feature_columns, "Run"))
     input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
-
+    
     if (any(input$n_psms > 1)) {
         input_duplicates = input[n_psms != 1]
         input = input[n_psms == 1]
@@ -144,7 +151,8 @@
             cols = intersect(colnames(input_duplicates),
                              c("PSM", "Channel", "Intensity", "Run", "Score",
                                "IsolationInterference", "IonsScore", "n_psms"))
-            input_duplicates[, keep := .summarizeMultiplePSMs(.SD, summary_function),
+            input_duplicates[, keep := .summarizeMultiplePSMs(.SD, 
+                                                              summary_function),
                              by = feature_columns, .SDcols = cols]
         }
         input = rbind(input, input_duplicates, fill = TRUE)
@@ -159,9 +167,10 @@
         input[, n_psms := data.table::uniqueN(PSM), by = feature_columns]
         if (any(input$n_psms > 1)) {
             input = input[, list(Intensity = mean(Intensity, na.rm = TRUE)),
-                          by = setdiff(colnames(input), c("PSM", "Intensity", "n_psms",
-                                                          "IsolationInterference", "Score",
-                                                          "IonsScore"))]
+                          by = setdiff(colnames(input), 
+                                       c("PSM", "Intensity", "n_psms",
+                                         "IsolationInterference", "Score",
+                                         "IonsScore"))]
         }
     }
     input[, PSM := do.call(".combine", .SD), 
@@ -176,6 +185,7 @@
 #' @param input data.table preprocessed by one of the .cleanRaw* functions.
 #' @param summary_function function that will be used to aggregate intensities
 #' if needed.
+#' @return character - label of a chosen PSM
 #' @keywords internal
 .summarizeMultiplePSMs = function(input, summary_function) {
     Intensity = Score = IsolationInterference = IonsScore = PSM = NULL
@@ -185,7 +195,8 @@
     } else {
         nonmissing_counts = input[, list(n_nonmissing = sum(!is.na(Intensity))),
                                   by = c("PSM")]
-        is_max = nonmissing_counts$n_nonmissing == max(nonmissing_counts$n_nonmissing, na.rm = TRUE)
+        is_max = nonmissing_counts$n_nonmissing == max(nonmissing_counts$n_nonmissing, 
+                                                       na.rm = TRUE)
         if (sum(is_max, na.rm = TRUE) == 1) {
             return(nonmissing_counts$PSM[which.max(nonmissing_counts$n_nonmissing)])
         } else {
@@ -226,7 +237,8 @@
             }
         }
         
-        by_max = input[, list(Intensity = summary_function(Intensity, na.rm = TRUE)),
+        by_max = input[, list(Intensity = summary_function(Intensity, 
+                                                           na.rm = TRUE)),
                        by = c("PSM")]
         is_max = by_max$Intensity == max(by_max$Intensity, na.rm = TRUE)
         if (sum(is_max, na.rm = TRUE) == 1) {

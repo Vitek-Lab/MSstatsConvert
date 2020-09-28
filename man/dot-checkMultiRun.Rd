@@ -9,6 +9,11 @@
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+list of two elements: \code{has_fractions} (logical) indicates if
+fractions was detected in the \code{input} dataset, \code{is_risky} (logical)
+indicates if there was a problem with detecting fractionation.
+}
 \description{
 Check if fractionation exists
 }

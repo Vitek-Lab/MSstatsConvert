@@ -2,6 +2,7 @@
 #' @param input output of `MSstatsPreprocess`
 #' @param fill_missing if TRUE, missing Intensities values will be added to data 
 #' and marked as NA
+#' @return data.table
 #' @keywords internal
 .makeBalancedDesign = function(input, fill_missing) {
     feature = NULL
@@ -40,7 +41,7 @@
                                 colnames(input))
         input = merge(all_possibilities, 
                       unique(input[, intensities, with = FALSE]),
-                      all.x = TRUE, by = intensity_ids)        # TODO: log, whether any changes were made here
+                      all.x = TRUE, by = intensity_ids)
     } else {
         if (!is_tmt) {
             any_missing = as.character(unique(.getMissingRunsPerFeature(input)[, feature]))
@@ -63,9 +64,12 @@
 #' @param `measurement_col` name of a column with measurement labels - Runs in
 #' label-free case, Channels in TMT case.
 #' @param is_tmt if TRUE, data will be treated as coming from TMT experiment.
-#' @keywords internal
 #' @importFrom data.table rbindlist
-.getFullDesign = function(input, group_col, feature_col, measurement_col, is_tmt) {
+#' @return data.table
+#' @keywords internal
+.getFullDesign = function(input, group_col, feature_col, 
+                          measurement_col, is_tmt
+) {
     if (is_tmt) {
         labels = "L"
         
@@ -82,7 +86,8 @@
             by_group[[group_id]]$group = group
         }
         result = data.table::rbindlist(by_group)
-        colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
+        colnames(result) = c("IsotopeLabelType", feature_col, 
+                             measurement_col, group_col)
         
         result[, 2:4, with = FALSE]
         
@@ -93,19 +98,20 @@
         by_group = vector("list", length(groups))
         measurements = unique(input[[measurement_col]])
         
-        ## by each group, measurements=Run should be not overlapped,
-        ## for example, run1 should be belonged in group1, then run1 should not be in other groups
         for (group_id in seq_along(groups)) {
             group = groups[group_id]
             group_filter = input[[group_col]] == group
             by_group[[group_id]] = data.table::as.data.table(
-                expand.grid(labels = labels,
-                            features = unique(input[[feature_col]][group_filter]),
-                            measurements = unique(input[[measurement_col]][group_filter]))) ## change here
+                expand.grid(
+                    labels = labels,
+                    features = unique(input[[feature_col]][group_filter]),
+                    measurements = unique(input[[measurement_col]][group_filter])
+                ))
             by_group[[group_id]]$group = group
         }
         result = data.table::rbindlist(by_group)
-        colnames(result) = c("IsotopeLabelType", feature_col, measurement_col, group_col)
+        colnames(result) = c("IsotopeLabelType", feature_col, 
+                             measurement_col, group_col)
         
         result
     }
@@ -114,8 +120,9 @@
 
 #' Get names of missing runs
 #' @param input output of `MSstatsPreprocess`
-#' @keywords internal
 #' @importFrom data.table uniqueN
+#' @return data.table
+#' @keywords internal
 .getMissingRunsPerFeature = function(input) {
     n_measurements = Run = NULL
     
@@ -131,15 +138,17 @@
 
 #' Check if there are duplicated measurements within run
 #' @param input output of `MSstatsPreprocess`
+#' @return character vector of feature labels
 #' @keywords internal
 .checkDuplicatedMeasurements = function(input) {
     n_measurements = feature = NULL
     counts = input[, list(n_measurements = .N),
-                   by = c("Fraction", "ProteinName", "IsotopeLabelType", "feature", "Run")]
+                   by = c("Fraction", "ProteinName", "IsotopeLabelType", 
+                          "feature", "Run")]
     counts = unique(counts[n_measurements > 1, as.character(feature)])
     if (length(counts) > 0) {
-        msg = paste("The following features have duplicated measurements in some runs:",
-                    "please remove the duplicates.", "\n",
+        msg = paste("The following features have duplicated measurements",
+                    "in some runs: please remove the duplicates.", "\n",
                     paste(counts, sep = ",\n ", collapse = ",\n "))
         # TODO: report separately for L and H
         getOption("MSstatsLog")("WARN", msg)
@@ -147,25 +156,29 @@
     }
 }
 
-    
+
 #' Change labels for missing values
 #' @param input output of `MSstatsPreprocess`
 #' @param fix_missing missing values can be labeled by `NA`, `0` or both.
 #' If `NULL`, data were processed by Skyline, so missing values will be denoted
 #' by both `NA` and `0`. If "na_to_zero", `NA` values will be replaced by `0`.
 #' If "zero_to_na", `0` values will be replaced by `NA`
+#' @return data.table
+#' @keywords internal
 .fixMissingValues = function(input, fix_missing = NULL) {
     Intensity = isZero = NULL
     
     if (is.element("isZero", colnames(input))) {
         input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), 
                                     ifelse(isZero, 0, NA), Intensity)]
-        input[, Intensity := ifelse(!is.na(Intensity) & Intensity > 0 & Intensity < 1,
+        input[, Intensity := ifelse(!is.na(Intensity) & Intensity > 0 & 
+                                        Intensity < 1,
                                     0, Intensity)]
     } else {
         if (!is.null(fix_missing)) {
             if (fix_missing == "zero_to_na") {
-                input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), NA, Intensity)]
+                input[, Intensity := ifelse(Intensity == 0 & !is.na(Intensity), 
+                                            NA, Intensity)]
             } else {
                 input[, Intensity := ifelse(is.na(Intensity), 0, Intensity)]
             }

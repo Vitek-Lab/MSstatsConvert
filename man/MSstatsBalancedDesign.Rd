@@ -27,6 +27,20 @@ If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".
 If "zero_to_na", Intensity values equal exactly to 0 will be converted to NA.
 If "na_to_zero", missing values will be replaced by zeros.}
 }
+\value{
+data.frame of class \code{MSstatsValidated}
+}
 \description{
 Creates balanced design by removing overlapping fractions and filling incomplete rows
+}
+\examples{
+unbalanced_data = system.file("tinytest/raw_data/unbalanced_data.csv", 
+                              package = "MSstatsConvert")
+unbalanced_data = data.table::as.data.table(read.csv(unbalanced_data))
+balanced = MSstatsBalancedDesign(unbalanced_data, 
+                                 c("PeptideSequence", "PrecursorCharge",
+                                   "FragmentIon", "ProductCharge"))
+dim(balanced) # Now balanced has additional rows (with Intensity = NA)
+# for runs that were not included in the unbalanced_data table
+
 }

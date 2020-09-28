@@ -1,8 +1,10 @@
 #' Clean raw Proteome Discoverer data
 #' @inheritParams .cleanRawPDTMT
 #' @inheritParams .cleanRawPDMSstats
+#' @return data.table
 .cleanRawPD = function(msstats_object, quantification_column, protein_id_column,
-                       sequence_column, remove_shared, remove_protein_groups = TRUE,
+                       sequence_column, remove_shared, 
+                       remove_protein_groups = TRUE,
                        intensity_columns_regexp = "Abundance") {
     if (getDataType(msstats_object) == "MSstatsTMT") {
         .cleanRawPDTMT(msstats_object, remove_shared, remove_protein_groups, 
@@ -21,8 +23,9 @@
 #' @param remove_shared lgl, if TRUE, shared peptides will be removed.
 #' @return data.table
 #' @keywords internal
-.cleanRawPDMSstats = function(msstats_object, quantification_column, protein_id_column,
-                              sequence_column, remove_shared) {
+.cleanRawPDMSstats = function(msstats_object, quantification_column, 
+                              protein_id_column, sequence_column, remove_shared
+) {
     XProteins = NULL
     
     pd_input = getInputFile(msstats_object, "input")
@@ -52,8 +55,10 @@
     pd_input = pd_input[, pd_cols, with = FALSE]
     data.table::setnames(
         pd_input,
-        c(protein_id_column, sequence_column, "SpectrumFile", quantification_column, "Charge"),
-        c("ProteinName", "PeptideSequence", "Run", "Intensity", "PrecursorCharge"),
+        c(protein_id_column, sequence_column, "SpectrumFile", 
+          quantification_column, "Charge"),
+        c("ProteinName", "PeptideSequence", "Run", 
+          "Intensity", "PrecursorCharge"),
         skip_absent = TRUE)
     pd_input[["PeptideSequence"]] = paste(pd_input[["PeptideSequence"]], 
                                           pd_input[["Modifications"]], 
@@ -80,8 +85,10 @@
     pd_input = getInputFile(msstats_object, "input")
     protein_id_column = .standardizeColnames(protein_id_column)
     if (!is.element(protein_id_column, colnames(pd_input))) {
-        protein_id_column = .findAvailable(c("ProteinAccessions", "MasterProteinAccessions"),
-                                           colnames(pd_input), "ProteinAccessions")
+        protein_id_column = .findAvailable(c("ProteinAccessions", 
+                                             "MasterProteinAccessions"),
+                                           colnames(pd_input), 
+                                           "ProteinAccessions")
     }
     if (protein_id_column == "ProteinAccessions") {
         num_proteins = "XProteins"
@@ -98,13 +105,17 @@
         stop(msg)
     }
     
-    pd_cols = intersect(c(protein_id_column, num_proteins, "AnnotatedSequence", "Charge", "PrecursorCharge",
-                          "IonsScore", "SpectrumFile", "QuanInfo", "IsolationInterference", channels),
+    pd_cols = intersect(c(protein_id_column, num_proteins, "AnnotatedSequence", 
+                          "Charge", "PrecursorCharge", "IonsScore", 
+                          "SpectrumFile", "QuanInfo", 
+                          "IsolationInterference", channels),
                         colnames(pd_input))
     pd_input = pd_input[, pd_cols, with = FALSE]
     data.table::setnames(pd_input,
-                         c(protein_id_column, num_proteins, "AnnotatedSequence", "SpectrumFile", "Charge"),
-                         c("ProteinName", "numProtein", "PeptideSequence", "Run", "PrecursorCharge"),
+                         c(protein_id_column, num_proteins, "AnnotatedSequence", 
+                           "SpectrumFile", "Charge"),
+                         c("ProteinName", "numProtein", "PeptideSequence", 
+                           "Run", "PrecursorCharge"),
                          skip_absent = TRUE)
     pd_input = unique(pd_input)
     pd_input$PSM = paste(pd_input$PeptideSequence, pd_input$PrecursorCharge,

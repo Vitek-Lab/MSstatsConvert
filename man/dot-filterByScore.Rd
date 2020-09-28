@@ -37,6 +37,9 @@ will be replaced with \code{fill_value}. Defaults to \code{NA}.}
 
 \item{drop}{if TRUE, \code{score_column} will be removed.}
 }
+\value{
+data.table
+}
 \description{
 Filter PSMs / proteins by a given score column.
 }

@@ -5,7 +5,7 @@
 #' @return data.table
 #' @keywords internal
 .cleanRawProgenesis = function(msstats_object, runs, fix_colnames = TRUE) {
-    Useinquantitation = NULL
+    Useinquantitation = Intensity = NULL
     
     prog_input = getInputFile(msstats_object, "input")
     raw_abundance_col_id = which(colnames(prog_input) == "Rawabundance")
@@ -33,7 +33,8 @@
         prog_input = prog_input[-1, ]
     }
     colnames(prog_input) = .standardizeColnames(colnames(prog_input))
-    protein_col = .findAvailable(c("Protein", "Accession"), colnames(prog_input))
+    protein_col = .findAvailable(c("Protein", "Accession"), 
+                                 colnames(prog_input))
     cols = which(colnames(prog_input) %in% c(protein_col, "Modifications", 
                                              "Sequence", "Charge",
                                              "Useinquantitation"))
@@ -70,6 +71,6 @@
                                   variable.name = "Run",
                                   value.name = "Intensity",
                                   value.factor = FALSE)
-    prog_input$Intensity = as.numeric(as.character(prog_input$Intensity))
+    prog_input[, Intensity := as.numeric(as.character(Intensity))]
     prog_input
 }

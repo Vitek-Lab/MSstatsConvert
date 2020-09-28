@@ -9,6 +9,9 @@
 \arguments{
 \item{input}{output of \code{MSstatsPreprocess}}
 }
+\value{
+data.table
+}
 \description{
 Replace intensities of overlapped fractions with NA, keeping only one fraction
 }

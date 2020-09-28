@@ -51,6 +51,7 @@
 #' will be replaced with `fill_value`. Defaults to `NA`.
 #' @param filter If TRUE, filtering will be performed.
 #' @param drop if TRUE, `score_column` will be removed.
+#' @return data.table
 #' @keywords internal
 .filterByScore = function(input, score_column, score_threshold, direction,
                           behavior, handle_na = "keep", fill_value = NA,

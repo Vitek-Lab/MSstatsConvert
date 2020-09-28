@@ -13,6 +13,9 @@
   feature_cleaning
 )
 }
+\value{
+none, throws an error if any of the assertions fail
+}
 \description{
 Check validity of parameters to the \code{MSstatsImport} function.
 }
