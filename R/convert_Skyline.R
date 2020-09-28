@@ -20,7 +20,7 @@
     if (is.character(sl_input$Truncated) | is.factor(sl_input$Truncated)) {
         sl_input[, Truncated := as.character(Truncated) == "True"]
     }
-    sl_input[, Truncated := as.integer(Truncated)]
+    sl_input[, Truncated := as.character(Truncated)]
     
     sl_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                 "FragmentIon", "ProductCharge", "IsotopeLabelType", "Condition",
