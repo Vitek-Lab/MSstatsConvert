@@ -53,37 +53,36 @@
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)
-    }
-    
-    if (filter) {
-        if (direction == "greater") {
-            score_filter = input[[score_column]] >= score_threshold
-        } else {
-            score_filter = input[[score_column]] <= score_threshold
+    } else {
+        if (filter) {
+            if (direction == "greater") {
+                score_filter = input[[score_column]] >= score_threshold
+            } else {
+                score_filter = input[[score_column]] <= score_threshold
+            }
+            
+            if (handle_na == "keep") {
+                score_filter = score_filter | is.na(input[[score_column]])
+            } else{
+                score_filter = score_filter & !is.na(input[[score_column]])
+            }
+            
+            if (behavior == "remove") {
+                input = input[score_filter, ]    
+            } else {
+                input[!score_filter, "Intensity"] = fill_value
+            }
+            
+            msg = .makeScoreFilterMessage(score_column, score_threshold, direction,
+                                          behavior, fill_value)
+            getOption("MSstatsLog")("INFO", msg)
+            getOption("MSstatsMsg")("INFO", msg)
         }
         
-        if (handle_na == "keep") {
-            score_filter = score_filter | is.na(input[[score_column]])
-        } else{
-            score_filter = score_filter & !is.na(input[[score_column]])
+        if (drop) {
+            input = input[, !(colnames(input) == score_column), with = FALSE]
         }
-        
-        if (behavior == "remove") {
-            input = input[score_filter, ]    
-        } else {
-            input[!score_filter, "Intensity"] = fill_value
-        }
-        
-        msg = .makeScoreFilterMessage(score_column, score_threshold, direction,
-                                      behavior, fill_value)
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
     }
-    
-    if (drop) {
-        input = input[, !(colnames(input) == score_column), with = FALSE]
-    }
-    
     input
 }
 
