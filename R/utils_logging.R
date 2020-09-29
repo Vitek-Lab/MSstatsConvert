@@ -157,22 +157,22 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     features = paste("  - Features will be defined by the columns:",
                      paste(feature_columns, sep = ", ", collapse = ", "))
     if (remove_shared_peptides) {
-        shared = "  - Shared peptides will be removed"
+        shared = "  - Shared peptides will be removed."
     } else {
-        shared = "  - Shared peptides will not be removed"
+        shared = "  - Shared peptides will not be removed."
     }
     if (remove_single_feature_proteins) {
-        single = "  - Proteins with a single feature will be removed"
+        single = "  - Proteins with a single feature will be removed."
     } else {
-        single = "  - Proteins with single feature will not be removed"
+        single = "  - Proteins with single feature will not be removed."
     }
     what = ifelse(is_tmt, "within each run", "across runs")
     if (feature_cleaning[["remove_features_with_few_measurements"]]) {
         few = paste("  - Features with less than 3 measurements", 
-                    what, "will be removed")
+                    what, "will be removed.")
     } else {
         few = paste("  - Features with less than 3 measurements", 
-                    what, "will be kept")
+                    what, "will be kept.")
     }
     msg = paste(init, features, shared, single, few, sep = "\n")
     getOption("MSstatsLog")("INFO", msg)    
