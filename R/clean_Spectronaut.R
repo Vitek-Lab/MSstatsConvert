@@ -24,9 +24,9 @@
   data.table::setnames(
     spec_input, 
     c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon",
-      f_charge_col, "RFileName", "EGQvalue", paste0("F", intensity)),
+      f_charge_col, "RFileName", paste0("F", intensity)),
     c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
-      "ProductCharge", "Run", "Qvalue", "Intensity"), skip_absent = TRUE)
+      "ProductCharge", "Run", "Intensity"), skip_absent = TRUE)
   .logSuccess("Spectronaut", "clean")
   spec_input
 }
