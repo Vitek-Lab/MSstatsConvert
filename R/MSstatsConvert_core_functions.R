@@ -174,62 +174,62 @@ setGeneric("MSstatsClean", function(msstats_object, ...) {
     standardGeneric("MSstatsClean")
 })
 #' Clean DIAUmpire files
-#' @include convert_DIAUmpire.R
+#' @include clean_DIAUmpire.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawDIAUmpire
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsDIAUmpireFiles", 
           .cleanRawDIAUmpire)
 #' Clean MaxQuant files
-#' @include convert_MaxQuant.R
+#' @include clean_MaxQuant.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawMaxQuant
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsMaxQuantFiles", 
           .cleanRawMaxQuant)
 #' Clean OpenMS files
-#' @include convert_OpenMS.R
+#' @include clean_OpenMS.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawOpenMS
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsOpenMSFiles", 
           .cleanRawOpenMS)
 #' Clean OpenSWATH files
-#' @include convert_OpenSWATH.R
+#' @include clean_OpenSWATH.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawOpenSWATH
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsOpenSWATHFiles", 
           .cleanRawOpenSWATH)
 #' Clean Progenesis files
-#' @include convert_Progenesis.R
+#' @include clean_Progenesis.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawProgenesis
 setMethod("MSstatsClean", signature = "MSstatsProgenesisFiles", 
           .cleanRawProgenesis)
 #' Clean ProteomeDiscoverer files
-#' @include convert_ProteomeDiscoverer.R
+#' @include clean_ProteomeDiscoverer.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawPD
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsProteomeDiscovererFiles", 
           .cleanRawPD)
 #' Clean Skyline files
-#' @include convert_Skyline.R
+#' @include clean_Skyline.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSkyline
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsSkylineFiles", 
           .cleanRawSkyline)
 #' Clean SpectroMine files
-#' @include convert_SpectroMine.R
+#' @include clean_SpectroMine.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSpectroMineTMT
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsSpectroMineFiles", 
           .cleanRawSpectroMineTMT)
 #' Clean Spectronaut files
-#' @include convert_Spectronaut.R
+#' @include clean_Spectronaut.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawSpectronaut
 #' @return data.table
