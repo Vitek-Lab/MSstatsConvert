@@ -4,7 +4,11 @@
 \alias{MSstatsSaveSessionInfo}
 \title{Save session information}
 \usage{
-MSstatsSaveSessionInfo(path = NULL, append = TRUE)
+MSstatsSaveSessionInfo(
+  path = NULL,
+  append = TRUE,
+  base = "MSstats_session_info_"
+)
 }
 \arguments{
 \item{path}{optional path to output file. If not provided, "MSstats_session_info"
@@ -12,6 +16,8 @@ and current timestamp will be used as a file name}
 
 \item{append}{if TRUE and file given by the \code{path} parameter already exists,
 session info will be appended to the file}
+
+\item{base}{beginning of a file name}
 }
 \value{
 TRUE invisibly after session info was saved
