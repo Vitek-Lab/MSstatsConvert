@@ -33,3 +33,35 @@
     }
     input
 }
+
+
+#' Check if the annotation is valid
+#' @param input data.table processed by the MSstatsClean function
+#' @param annotation annotation created by the MSstatsMakeAnnotation function
+#' @return TRUE invisibly if the annotation is correct, throws an error otherwise
+#' @keywords internal
+.checkAnnotation = function(input, annotation) {
+    if (is.element("Channel", input)) {
+        missing_cols = setdiff(
+            c("Run", "TechRepMixture", "Fraction", "Mixture", 
+              "Channel", "Condition", "BioReplicate"),
+            colnames(input)
+        )
+    } else {
+        missing_cols = setdiff(c("Run", "Condition", "BioReplicate"),
+                               colnames(annotation))
+        counts = annotation[, list(n_rows = .N), by = "Run"]
+        if (any(counts$n_rows > 1)) {
+            stop(paste("** Please check annotation.",
+                       "Each MS run (Raw.file) can\'t have multiple",
+                       "conditions or BioReplicates."))
+        }
+    }
+    if (length(missing_cols) == 0) {
+        stop(paste("** Columns", paste(missing_cols, sep = ", ", 
+                                       collapse = ", "),
+                   "missing in the annotation.", 
+                   "Please check the annotation file."))
+    }
+    invisible(TRUE)
+}
