@@ -181,7 +181,7 @@ This function accepts several parameters, and each corresponds to a preprocessin
   - `score_filtering`, `exact_filtering` and `pattern_filtering` parameters are optional parameters that can be used to perform data filtering. An example is given below.
   
 
-```{r }
+```{r}
 maxquant_annotation = read.csv(system.file(
   "tinytest/raw_data/MaxQuant/annotation.csv",
   package = "MSstatsConvert"

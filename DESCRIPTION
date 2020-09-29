@@ -1,19 +1,19 @@
 Package: MSstatsConvert
 Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
-Version: 0.0.1
+Version: 0.99.0
 Authors@R: c(
   person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = c("aut","cre")),
   person("Meena", "Choi", email = "mnchoi67@gmail.com", role = "aut"),
   person("Ting", "Huang", email = "thuang0703@gmail.com", role = "aut"),
   person("Olga", "Vitek", , email = "o.vitek@northeastern.edu", role = "aut")) 
 Description: MSstatsConvert provides tools for importing reports of Mass Spectrometry data processing tools
-    into R format suitable for statistical analysis using the MSstats package.
+    into R format suitable for statistical analysis using the MSstats and MSstatsTMT packages.
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-biocViews: MassSpectrometry, Proteomics, Software, DataImport
+biocViews: MassSpectrometry, Proteomics, Software, DataImport, QualityControl
 Depends:
     R (>= 3.6)
 Imports: 
