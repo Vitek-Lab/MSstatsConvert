@@ -13,7 +13,9 @@
                         with = FALSE]
     data.table::setnames(sl_input, "PeptideModifiedSequence",
                          "PeptideSequence", skip_absent = TRUE)
-    sl_input[, Intensity := as.numeric(as.character(Intensity))]
+    suppressWarnings({
+        sl_input[, Intensity := as.numeric(as.character(Intensity))]
+    })
     if (is.element("DetectionQValue", colnames(sl_input))) {
         sl_input[, DetectionQValue := as.numeric(as.character(DetectionQValue))]
     }
