@@ -10,7 +10,7 @@ MSstatsPreprocess(
   feature_columns,
   remove_shared_peptides = TRUE,
   remove_single_feature_proteins = TRUE,
-  feature_cleaning = list(handle_features_with_few_measurements = "remove",
+  feature_cleaning = list(remove_features_with_few_measurements = TRUE,
     summarize_multiple_psms = max),
   score_filtering = list(),
   exact_filtering = list(),
@@ -42,14 +42,14 @@ return a scalar and accept an \code{na.rm} parameter. For \code{MSstatsTMT} conv
 setting \code{remove_psms_with_any_missing} will remove features which have missing
 values in a run from that run.}
 
-\item{score_filtering}{a list of named lists. Each element consists of parameters
-to the \code{.filterByScore} function.}
+\item{score_filtering}{a list of named lists that specify filtering options.
+Details are provided in the vignette.}
 
-\item{exact_filtering}{a list of named lists. Each element consists of parameters
-to the \code{.filterExact} function.}
+\item{exact_filtering}{a list of named lists that specify filtering options.
+Details are provided in the vignette.}
 
-\item{pattern_filtering}{a list of named lists. Each element consists of parameters
-to the \code{.filterByPattern} function.}
+\item{pattern_filtering}{a list of named lists that specify filtering options.
+Details are provided in the vignette.}
 
 \item{columns_to_fill}{a named list of scalars. If provided, columns with
 names defined by the names of this list and values corresponding to its elements

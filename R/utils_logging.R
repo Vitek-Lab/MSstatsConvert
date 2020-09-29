@@ -163,7 +163,7 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     } else {
         single = "  - Proteins with single feature will not be removed"
     }
-    if (feature_cleaning[["handle_features_with_few_measurements"]] == "remove") {
+    if (feature_cleaning[["remove_features_with_few_measurements"]]) {
         few = "  - Features with less than 3 measurements will be removed"
     } else {
         few = "  - Features with less than 3 measurements will be kept"

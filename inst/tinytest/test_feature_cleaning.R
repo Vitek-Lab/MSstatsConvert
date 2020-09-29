@@ -27,20 +27,20 @@ to_filter_channel$PSM = paste(to_filter_channel$PeptideSequence,
 
 tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(
-        data.table::copy(to_filter[1:15]), 0, "remove", c("PeptideSequence", "PrecursorCharge")),
+        data.table::copy(to_filter[1:15]), 0, TRUE, c("PeptideSequence", "PrecursorCharge")),
     to_filter[(PeptideSequence %in% c("d", "e")), 
               list(PeptideSequence, PrecursorCharge, Run, Intensity)]
 )
 ## Nothing is missing
 tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(
-        data.table::copy(to_filter), 0, "remove", c("PeptideSequence", "PrecursorCharge")),
+        data.table::copy(to_filter), 0, TRUE, c("PeptideSequence", "PrecursorCharge")),
     to_filter
 )
 ## With a threshold:
 tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(
-        data.table::copy(to_filter), 1, "remove", c("PeptideSequence", "PrecursorCharge")),
+        data.table::copy(to_filter), 1, TRUE, c("PeptideSequence", "PrecursorCharge")),
     to_filter[!(PeptideSequence %in% c("a", "b"))]
 )
 ## With missing values
@@ -50,13 +50,13 @@ to_filter$Intensity[3] = NA
 ## Remove only features that have all missing values
 tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(
-        data.table::copy(to_filter), 0, "keep", c("PeptideSequence", "PrecursorCharge")),
+        data.table::copy(to_filter), 0, FALSE, c("PeptideSequence", "PrecursorCharge")),
     to_filter[PeptideSequence != "a", ]
 )
 ## Remove all features with less than three non-missing values
 tinytest::expect_equal(
     MSstatsConvert:::.filterFewMeasurements(
-        data.table::copy(to_filter), 0, "remove", c("PeptideSequence", "PrecursorCharge")),
+        data.table::copy(to_filter), 0, TRUE, c("PeptideSequence", "PrecursorCharge")),
     to_filter[!(PeptideSequence %in% c("a", "b", "c"))]
 )
 # Aggregating / summarizing features ----
@@ -193,12 +193,12 @@ tinytest::expect_equal(MSstatsConvert:::.combine(c("A", "B"), c("A", "B")),
 clean_lf = MSstatsConvert:::.cleanByFeature(
     to_filter, 
     c("PeptideSequence", "PrecursorCharge"),
-    list(handle_features_with_few_measurements = "remove",
+    list(remove_features_with_few_measurements = TRUE,
          summarize_multiple_psms = max))
 clean_tmt = MSstatsConvert:::.cleanByFeature(
     to_filter_channel, 
     c("PeptideSequence", "PrecursorCharge"),
-    list(handle_features_with_few_measurements = "remove",
+    list(remove_features_with_few_measurements = TRUE,
          summarize_multiple_psms = max))
 tinytest::expect_equal(class(clean_lf)[1], "data.table")
 tinytest::expect_equal(class(clean_tmt)[1], "data.table")

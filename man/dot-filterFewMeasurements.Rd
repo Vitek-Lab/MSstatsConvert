@@ -7,7 +7,7 @@
 .filterFewMeasurements(
   input,
   min_intensity,
-  handle_few,
+  remove_few,
   feature_columns = NULL
 )
 }
@@ -16,8 +16,8 @@
 
 \item{min_intensity}{minimum intensity that will be considered non-missing.}
 
-\item{handle_few}{chr, if "remove", features that have less than three
-measurements will be removed. If "keep", only features with all missing runs
+\item{remove_few}{logical, if TRUE, features that have less than three
+measurements will be removed. If FALSE, only features with all missing runs
 will be removed.}
 
 \item{features_columns}{chr, vector of names of columns that define features.}

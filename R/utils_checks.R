@@ -13,9 +13,9 @@
                               is.null(annotation))
     checkmate::assertCharacter(feature_columns, min.len = 1)
     checkmate::assertLogical(remove_shared_peptides)
-    checkmate::assertChoice(
-        feature_cleaning[["handle_features_with_few_measurements"]], 
-        c("remove", "keep"))
+    checkmate::assertLogical(
+        feature_cleaning[["remove_features_with_few_measurements"]], 
+        )
     checkmate::assertLogical(remove_single_feature_proteins)
     checkmate::assertLogical(feature_cleaning[["remove_psms_with_all_missing"]],
                              null.ok = TRUE)

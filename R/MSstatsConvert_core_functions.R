@@ -254,12 +254,12 @@ setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles",
 #' return a scalar and accept an `na.rm` parameter. For `MSstatsTMT` converters,
 #' setting `remove_psms_with_any_missing` will remove features which have missing
 #' values in a run from that run. 
-#' @param score_filtering a list of named lists. Each element consists of parameters
-#' to the `.filterByScore` function. 
-#' @param exact_filtering a list of named lists. Each element consists of parameters
-#' to the `.filterExact` function.
-#' @param pattern_filtering a list of named lists. Each element consists of parameters
-#' to the `.filterByPattern` function.
+#' @param score_filtering a list of named lists that specify filtering options.
+#' Details are provided in the vignette.
+#' @param exact_filtering a list of named lists that specify filtering options.
+#' Details are provided in the vignette.
+#' @param pattern_filtering a list of named lists that specify filtering options.
+#' Details are provided in the vignette.
 #' @param columns_to_fill a named list of scalars. If provided, columns with
 #' names defined by the names of this list and values corresponding to its elements
 #' will be added to the output `data.frame`.
@@ -301,7 +301,7 @@ setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles",
 MSstatsPreprocess = function(
     input, annotation, feature_columns, remove_shared_peptides = TRUE,
     remove_single_feature_proteins = TRUE,
-    feature_cleaning = list(handle_features_with_few_measurements = "remove",
+    feature_cleaning = list(remove_features_with_few_measurements = TRUE,
                             summarize_multiple_psms = max),
     score_filtering = list(), exact_filtering = list(), 
     pattern_filtering = list(), columns_to_fill = list(), 
@@ -320,7 +320,7 @@ MSstatsPreprocess = function(
     input = .handleFiltering(input, score_filtering, 
                              exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
-    input = .filterFewMeasurements(input, 1, "keep")
+    input = .filterFewMeasurements(input, 1, FALSE)
     input = .handleSharedPeptides(input, remove_shared_peptides)
     input = .cleanByFeature(input, feature_columns, feature_cleaning)
     input = .handleSingleFeaturePerProtein(input, remove_single_feature_proteins)
@@ -364,7 +364,7 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
     if (handle_fractions) {
         input = .handleFractions(input)
-        input = .filterFewMeasurements(input, 1, "remove", feature_columns)
+        input = .filterFewMeasurements(input, 1, TRUE, feature_columns)
         msg_fractions = "** Fractionation handled."
         getOption("MSstatsLog")("INFO", msg_fractions)
         getOption("MSstatsMsg")("INFO", msg_fractions)
@@ -446,6 +446,6 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
                 "symbols such as '.' or '%'.")
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
-    .checkAnnotation(input, annotation)
+    .checkAnnotation(annotation)
     annotation
 }

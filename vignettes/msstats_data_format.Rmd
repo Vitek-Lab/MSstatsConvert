@@ -190,7 +190,7 @@ This function accepts several parameters, and each corresponds to a preprocessin
   - `remove_single_feature_proteins` is a logical parameter that indicates if proteins
   that only have a single feature should be removed from the analysis (`TRUE`),
   - `feature_cleaning` is a list, that currently consists of two named elements:
-  `handle_features_with_few_measurements` should be equal "remove" or "keep". In the first case,
+  `remove_features_with_few_measurements` should be equal to TRUE or FALSE. In the first case,
   feature that have less than three measurements across runs (or channels in a run for TMT data)
   will be removed. "keep" means that only features with no non-missing measurements will be removed. The `summarize_multiple_psms` element should be a function that will be used to aggregate multiple feature measurements within a single MS run,
   - `aggregate_isotopic` is a logical parameter - `TRUE` means that isotopic peaks will be aggregated (currently only used for Skyline input),
@@ -228,7 +228,7 @@ maxquant_processed = MSstatsPreprocess(
   remove_single_feature_proteins = FALSE,
   pattern_filtering = list(oxidation = oxidation_filter,
                            m = m_filter),
-  feature_cleaning = list(handle_features_with_few_measurements = "remove",
+  feature_cleaning = list(remove_features_with_few_measurements = TRUE,
                           summarize_multiple_psms = max),
   columns_to_fill = list("FragmentIon" = NA,
                          "ProductCharge" = NA,
@@ -243,7 +243,7 @@ openms_processed = MSstatsPreprocess(
   feature_columns_tmt,
   remove_shared_peptides = TRUE,
   remove_single_feature_proteins = TRUE,
-  feature_cleaning = list(handle_features_with_few_measurements = "remove",
+  feature_cleaning = list(remove_features_with_few_measurements = TRUE,
                           summarize_multiple_psms = max)
 )
 head(openms_processed)

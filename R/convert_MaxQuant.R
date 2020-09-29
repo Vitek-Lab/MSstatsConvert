@@ -79,7 +79,7 @@
         mq_input$Channel = .standardizeColnames(mq_input$Channel)
         mq_input$Intensity = ifelse(mq_input$Intensity == 0, NA,
                                     mq_input$Intensity)
-        mq_input = .filterFewMeasurements(mq_input, 0, "keep", 
+        mq_input = .filterFewMeasurements(mq_input, 0, FALSE, 
                                           c("PeptideSequence", 
                                             "PrecursorCharge", "Run"))
     }

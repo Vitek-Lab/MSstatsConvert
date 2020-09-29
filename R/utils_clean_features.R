@@ -9,7 +9,7 @@
     if (is.element("Channel", colnames(input))) {
         input = .filterFewMeasurements(
             input, 0, 
-            cleaning_control[["handle_features_with_few_measurements"]],
+            cleaning_control[["remove_features_with_few_measurements"]],
             unique(c("PSM", "Run")))
         input = .aggregatePSMstoPeptideIons(
             input, feature_columns, 
@@ -28,7 +28,7 @@
         getOption("MSstatsMsg")("INFO", msg)
         input = .filterFewMeasurements(
             input, 0, 
-            cleaning_control[["handle_features_with_few_measurements"]],
+            cleaning_control[["remove_features_with_few_measurements"]],
             feature_columns)
     }
     input
@@ -38,13 +38,13 @@
 #' Remove features with a small number of (non-missing) measurements across runs
 #' @param input `data.table` pre-processed by one of the .cleanRaw* functions.
 #' @param min_intensity minimum intensity that will be considered non-missing.
-#' @param handle_few chr, if "remove", features that have less than three 
-#' measurements will be removed. If "keep", only features with all missing runs
+#' @param remove_few logical, if TRUE, features that have less than three 
+#' measurements will be removed. If FALSE, only features with all missing runs
 #' will be removed.
 #' @param features_columns chr, vector of names of columns that define features. 
 #' @return data.table
 #' @keywords internal
-.filterFewMeasurements = function(input, min_intensity, handle_few,
+.filterFewMeasurements = function(input, min_intensity, remove_few,
                                   feature_columns = NULL) {
     Intensity = n_obs = NULL
     
@@ -61,7 +61,7 @@
     
     input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
           by = feature_columns]
-    if (handle_few == "remove") {
+    if (remove_few) {
         cutoff = 2
         msg = "** Features with one or two measurements across runs are removed."
     } else {
