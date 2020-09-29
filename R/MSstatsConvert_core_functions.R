@@ -446,5 +446,6 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
                 "symbols such as '.' or '%'.")
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
+    .checkAnnotation(input, annotation)
     annotation
 }
