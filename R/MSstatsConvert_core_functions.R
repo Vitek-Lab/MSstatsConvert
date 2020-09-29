@@ -315,7 +315,7 @@ MSstatsPreprocess = function(
                         feature_cleaning)
     .logConverterOptions(
         feature_columns, remove_shared_peptides, remove_single_feature_proteins,
-        feature_cleaning
+        feature_cleaning, is.element("Channel", colnames(input))
     )
     input = .handleFiltering(input, score_filtering, 
                              exact_filtering, pattern_filtering)
@@ -377,8 +377,12 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input = .fixMissingValues(input, fix_missing)
     input = input[, !(colnames(input) %in% c("feature", "isZero")), 
                   with = FALSE]
+    
+    target_function = ifelse(is.element("Channel", colnames(input)),
+                             "MSstatsTMT::proteinSummarization", 
+                             "MSstats::dataProcess")
     msg_final = paste("** Finished preprocessing. The dataset is ready",
-                      "to be processed by the MSstats::dataProcess function.")
+                      "to be processed by the", target_function, "function.")
     getOption("MSstatsLog")("INFO", msg_final)
     getOption("MSstatsMsg")("INFO", msg_final)
     getOption("MSstatsLog")("INFO", "\n")

@@ -8,7 +8,8 @@
   feature_columns,
   remove_shared_peptides,
   remove_single_feature_proteins,
-  feature_cleaning
+  feature_cleaning,
+  is_tmt = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ that will be used to aggregate multiple feature measurements in a run. It should
 return a scalar and accept an \code{na.rm} parameter. For \code{MSstatsTMT} converters,
 setting \code{remove_psms_with_any_missing} will remove features which have missing
 values in a run from that run.}
+
+\item{is_tmt}{If TRUE, the dataset comes from a TMT experiment}
 }
 \value{
 TRUE invisibly if message was logged

@@ -109,15 +109,15 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
 .makeExactFilterMessage = function(col_name, filter_symbols, 
                                    behavior, fill_value
 ) {
-   if (behavior == "remove") {
-       subject = "Rows"
-       event = "are removed"
-       what = ""
-   } else {
-       subject = "Intensities"
-       event = "are replaced with"
-       what = fill_value
-   }
+    if (behavior == "remove") {
+        subject = "Rows"
+        event = "are removed"
+        what = ""
+    } else {
+        subject = "Intensities"
+        event = "are replaced with"
+        what = fill_value
+    }
     paste("**", subject, "with values of", col_name, "equal to", 
           paste(filter_symbols, sep = ", ", collapse = ", "),
           event, what)
@@ -147,11 +147,12 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
 
 #' Log information about converter options
 #' @inheritParams MSstatsPreprocess
+#' @param is_tmt If TRUE, the dataset comes from a TMT experiment
 #' @return TRUE invisibly if message was logged 
 #' @keywords internal
 .logConverterOptions = function(feature_columns, remove_shared_peptides,
-                                        remove_single_feature_proteins,
-                                        feature_cleaning) {
+                                remove_single_feature_proteins,
+                                feature_cleaning, is_tmt = FALSE) {
     init = "** The following options are used:"
     features = paste("  - Features will be defined by the columns:",
                      paste(feature_columns, sep = ", ", collapse = ", "))
@@ -165,10 +166,13 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     } else {
         single = "  - Proteins with single feature will not be removed"
     }
+    what = ifelse(is_tmt, "within each run", "across runs")
     if (feature_cleaning[["remove_features_with_few_measurements"]]) {
-        few = "  - Features with less than 3 measurements will be removed"
+        few = paste("  - Features with less than 3 measurements", 
+                    what, "will be removed")
     } else {
-        few = "  - Features with less than 3 measurements will be kept"
+        few = paste("  - Features with less than 3 measurements", 
+                    what, "will be kept")
     }
     msg = paste(init, features, shared, single, few, sep = "\n")
     getOption("MSstatsLog")("INFO", msg)    
@@ -183,9 +187,9 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
 #' @keywords internal
 .logSuccess = function(tool, event) {
     if (event == "clean") {
-        what = "cleaned succesfully."
+        what = "cleaned successfully."
     } else {
-        what = "imported succesfully."
+        what = "imported successfully."
     }
     msg = paste("** Raw data from", tool, what)
     getOption("MSstatsLog")("INFO", msg)
@@ -199,16 +203,18 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
 #' and current timestamp will be used as a file name
 #' @param append if TRUE and file given by the `path` parameter already exists,
 #' session info will be appended to the file
+#' @param base beginning of a file name
 #' @return TRUE invisibly after session info was saved
 #' @export
 #' @importFrom utils sessionInfo
 #' @examples 
 #' MSstatsSaveSessionInfo("session_info.txt")
 #' 
-MSstatsSaveSessionInfo = function(path = NULL, append = TRUE) {
+MSstatsSaveSessionInfo = function(path = NULL, append = TRUE, 
+                                  base = "MSstats_session_info_") {
     if (is.null(path)) {
         time_now = Sys.time()
-        path = paste0("./MSstats_session_info_", 
+        path = paste0(base, 
                       gsub("[ :\\-]", "_", time_now), ".log")
     }
     session_info = utils::sessionInfo()

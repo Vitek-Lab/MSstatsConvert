@@ -61,12 +61,17 @@
     
     input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
           by = feature_columns]
+    
+    what = ifelse(is.element("Channel", colnames(input)),
+                  "channels within each run", "runs")
     if (remove_few) {
         cutoff = 2
-        msg = "** Features with one or two measurements across runs are removed."
+        msg = paste("** Features with one or two measurements across", 
+                    what, "are removed.")
     } else {
         cutoff = 0
-        msg = "** Features with all missing measurements across runs are removed."
+        msg = paste("** Features with all missing measurements across", 
+                    what, "are removed.")
     }
     input = input[n_obs > cutoff]
     getOption("MSstatsLog")("INFO", msg)
