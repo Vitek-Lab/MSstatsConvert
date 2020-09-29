@@ -4,11 +4,9 @@
 \alias{.checkAnnotation}
 \title{Check if the annotation is valid}
 \usage{
-.checkAnnotation(input, annotation)
+.checkAnnotation(annotation)
 }
 \arguments{
-\item{input}{data.table processed by the MSstatsClean function}
-
 \item{annotation}{annotation created by the MSstatsMakeAnnotation function}
 }
 \value{

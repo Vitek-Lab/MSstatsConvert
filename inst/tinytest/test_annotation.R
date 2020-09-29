@@ -1,31 +1,40 @@
 dataset = data.table::data.table(
-    Run = rep(1:5, each = 2)
+    Run = 1:5,
+    Condition = 1,
+    BioReplicate = 1
 )
 dataset_tmt = data.table::data.table(
     Run = as.character(rep(1:5, each = 2)),
     Channel = rep(c("a", "b"), times = 5)
 )
 annotation_1 = data.table::data.table(
-    Run = rep(1:5, each = 2),
-    TechRep = 1:10,
-    Condition = rep(c("A", "B"), times = 5)
+    Run = 1:5,
+    Condition = 1,
+    BioReplicate = 1
 )
 annotation_2 = data.table::data.table(
-    Rawfile = rep(1:4, each = 2),
-    TechRep = 1:8,
-    Condition = rep(c("A", "B"), times = 4)
+    Rawfile = 1:4,
+    Condition = 1,
+    BioReplicate = 1
 )
 annotation_3 = data.table::data.table(
     Rawfile = rep(1:5, each = 2),
-    TechRep = 1:10,
     Condition = rep(c("A", "B"), times = 5),
-    Channel = rep(c("a", "b"), times = 5)
+    Channel = rep(c("a", "b"), times = 5),
+    Mixture = 1,
+    TechRepMixture = 1,
+    Fraction = 1,
+    BioReplicate = 1
 )
 annotation_4 = data.table::data.table(
     Rawfile = c(rep(1:4, each = 2), 5),
     TechRep = 1:9,
     Condition = c(rep(c("A", "B"), times = 4), "A"),
-    Channel = c(rep(c("a", "b"), times = 4), "c")
+    Channel = c(rep(c("a", "b"), times = 4), "c"),
+    Mixture = 1,
+    TechRepMixture = 1,
+    Fraction = 1,
+    BioReplicate = 1
 )
 # Create annotation ----
 ## No annotation - return a subset of original data
@@ -34,8 +43,13 @@ unique_runs$Run = as.character(unique_runs$Run)
 tinytest::expect_equal(MSstatsConvert:::MSstatsMakeAnnotation(dataset, NULL),
                        unique_runs)
 ## No additional information - return NULL
-tinytest::expect_equal(MSstatsConvert:::MSstatsMakeAnnotation(dataset, data.table::data.table(Run = 1:5)),
-                       data.table::data.table(Run = as.character(1:5)))
+tinytest::expect_equal(MSstatsConvert:::MSstatsMakeAnnotation(
+    dataset, data.table::data.table(Run = 1:5,
+                                    Condition = 1,
+                                    BioReplicate = 1)),
+    data.table::data.table(Run = as.character(1:5),
+                           Condition = 1,
+                           BioReplicate = 1))
 ## Annotation provided - return annotation
 annotation_1$Run = as.character(annotation_1$Run)
 tinytest::expect_identical(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_1),
@@ -44,7 +58,7 @@ tinytest::expect_identical(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annot
 tinytest::expect_true(
     is.element("Run",
                colnames(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_3,
-                                                         Run = "Rawfile")))
+                                                               Run = "Rawfile")))
 )
 # Merge annotation ----
 ## MSstats version: no new information in annotation
@@ -71,3 +85,4 @@ tinytest::expect_message(MSstatsConvert:::.mergeAnnotation(dataset, missing_cond
 ## MSstatsTMT: missing channel
 missing_channel = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_4, Run = "Rawfile")
 tinytest::expect_error(MSstatsConvert:::.mergeAnnotation(dataset_tmt, missing_channel))
+
