@@ -16,11 +16,14 @@
             cleaning_control[["summarize_multiple_psms"]])
         input
     } else {
+        summary_str = deparse(cleaning_control[["summarize_multiple_psms"]])
+        summary_str = ifelse(grepl("sum", summary_str), "sum", "max")
+        
         input = .summarizeMultipleMeasurements(
             input, cleaning_control[["summarize_multiple_psms"]],
             c(feature_columns, "Run"))
         msg = paste("** Multiple measurements in a feature and a run",
-                    "are summarized by summaryforMultipleRows")
+                    "are summarized by summaryforMultipleRows:", summary_str)
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
         input = .filterFewMeasurements(
