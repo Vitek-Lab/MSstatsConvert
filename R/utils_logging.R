@@ -190,3 +190,28 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     getOption("MSstatsMsg")("INFO", msg)
     invisible(TRUE)
 }
+
+#' Save session information
+#' 
+#' @param path optional path to output file. If not provided, "MSstats_session_info" 
+#' and current timestamp will be used as a file name
+#' @param append if TRUE and file given by the `path` parameter already exists,
+#' session info will be appended to the file
+#' @return TRUE invisibly after session info was saved
+#' @export
+#' @importFrom utils sessionInfo
+#' @examples 
+#' MSstatsSaveSessionInfo("session_info.txt")
+#' 
+MSstatsSaveSessionInfo = function(path = NULL, append = TRUE) {
+    if (is.null(path)) {
+        time_now = Sys.time()
+        path = paste0("./MSstats_session_info_", 
+                      gsub("[ :\\-]", "_", time_now), ".log")
+    }
+    session_info = utils::sessionInfo()
+    sink(path, append = append)
+    print(session_info)
+    sink()
+    invisible(TRUE)
+}
