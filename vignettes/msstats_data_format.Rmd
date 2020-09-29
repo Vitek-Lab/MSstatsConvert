@@ -296,7 +296,7 @@ should consists of elements named
 
 Finally, after preprocessing, `MSstatsBalancedDesign` function can be applied to 
 handle fractions and create balanced design.
-For label-free and SRM data, it means that fractionation (or technical replicates) will be detected and features measured in multiple fractions (overlapped) will be assigned to a unique fraction. Then, the data will be adjusted so that within each fraction, every feature has a row for each run. If the intensity value is missing, it will be denoted by `NA`.
+For label-free and SRM data, it means that fractionation or technical replicates will be detected if these information is not provided. Features measured in multiple fractions (overlapped) will be assigned to a unique fraction. Then, the data will be adjusted so that within each fraction, every feature has a row for certain run. If the intensity value is missing, it will be denoted by `NA`.
 
 For TMT data, a unique fraction will be selected for each overlapped feature and the 
 data will adjusted so that within each run, every feature has a row for each channel.
