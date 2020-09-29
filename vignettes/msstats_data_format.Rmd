@@ -17,7 +17,7 @@ vignette: >
   
 # Purpose of MSstatsConvert
   
-The `MSstatsConvert` package is a member of the `MSstatst` family of packages.
+The `MSstatsConvert` package is a member of the `MSstatst` family of packages, MSstats and MSstatsTMT.
 It creates an abstraction for the steps in mass spectrometry (MS) data analysis 
 that are required before a dataset can be used for statistical modeling. 
 In short, the package is responsible for converting output from signal processing
@@ -35,7 +35,7 @@ This includes:
 `MSstatsConvert` allows for transforming any MS quantification result into a format
 required by `MSstats` and `MSstatsTMT` packages.
 Additionally, it provides built-in cleaning functions for outputs of `DIAUmpire`, `MaxQuant`,
-`OpenMS`, `OpenSWATH`, `Progenesis`, `ProteomeDiscoverer`, `Skyline`, `Spectromine` and `Spectronaut`.
+`OpenMS`, `OpenSWATH`, `Progenesis`, `ProteomeDiscoverer`, `Skyline`, `Spectromine`, and `Spectronaut`.
 These functions serve as a base for converter functions (called `*toMSstatsFormat` or 
 `*toMSstatsTMTFormat`) provided  by the `MSstats` and `MSstatsTMT` packages.
   
@@ -46,13 +46,13 @@ The following column are required.
 
   - `ProteinName`: column that indicates a protein ID. If the analysis is to be made 
   at the peptide-level, the column should store peptide IDs. Summarization performed 
-  by `MSstats` and `MSstatsTMT` packages is done separately for each protein,
+  by `MSstats` and `MSstatsTMT` packages is done separately for each ID in this column,
   - `PeptideSequence`, `PrecursorCharge`, `FragmentIon` and `ProductCharge`: these 
   four columns define a spectral feature (transition in SRM case). If information 
   for any of the columns is not available, it should be set to a constant value
   (for example `NA`),
   - `IsotopeLabelType`: column that indicates whether the measurement is based on an
-  endogenous peptide (indicated by value "L") or reference peptide (indicated by value "H"),
+  endogenous peptide (indicated by value "L" or "light") or reference peptide (indicated by value "H" or "heavy"),
   - `Run`: column that stores IDs of mass spectrometry runs. If annotation describing
   biological conditions and replicates is provided via a separate table, the run IDs
   should match `Run` IDs in the annotation,
@@ -60,9 +60,12 @@ The following column are required.
   For time-course experiments, this column will represent time points. If the design
   experiment includes both time points and distinct biological subjects, these labels
   should be a combination of subject and time point,
-  - `BioReplicate`: this column should contain a unique identifier for each biological replicate  in the experiment. For example, in a clinical proteomic investigation this should be a unique  patient ID. Patients from distinct groups (indicated by the `Condition` column) should have  distinct IDs,
-  - `Intensity`: column that stores untransformed (in particular, no log transformation) measurements of feature abundance in a given Run (and Channel in TMT case). 
-  They can be peak heights, peak areas under the curve or other quantitative representations
+  - `BioReplicate`: this column should contain a unique identifier for each biological replicate in the experiment. 
+  For example, in a clinical proteomic investigation this should be a unique  patient ID. 
+  Patients from distinct groups (indicated by the `Condition` column) should have distinct IDs,
+  - `Intensity`: column that stores untransformed (in particular, no log transformation) measurements of feature abundance 
+  in a given Run (and Channel in TMT case). 
+  They can be peak heights, peak areas under the curve, or other quantitative representations
   of feature abundance,
   - for TMT datasets, a `Channel` column is required. Similarly to the `Run` column,
   values in this column must correspond to values in the annotation file, if provided separately.
@@ -84,11 +87,18 @@ starting with "MSstats_log", followed by a timestamp.
   
 ```{r logs}
 library(MSstatsConvert)
-MSstatsLogsSettings(use_log_file = TRUE, append = FALSE) # default - creates a new file
+# default - creates a new file
+MSstatsLogsSettings(use_log_file = TRUE, append = FALSE) 
+
+# default - creates a new file
 MSstatsLogsSettings(use_log_file = TRUE, append = TRUE, 
-                    log_file_path = "log_file.log") # default - creates a new file
-MSstatsLogsSettings(use_log_file = FALSE, append = FALSE) # switches logging off
-MSstatsLogsSettings(use_log_file = FALSE, verbose = FALSE) # switches off logs and messages
+                    log_file_path = "log_file.log") 
+
+# switches logging off
+MSstatsLogsSettings(use_log_file = FALSE, append = FALSE) 
+
+# switches off logs and messages
+MSstatsLogsSettings(use_log_file = FALSE, verbose = FALSE) 
 ```
   
 # Importing and cleaning data
@@ -172,7 +182,7 @@ This function accepts several parameters, and each corresponds to a preprocessin
   - `feature_cleaning` is a list, that currently consists of two named elements:
   `handle_features_with_few_measurements` should be equal "remove" or "keep". In the first case,
   feature that have less than three measurements across runs (or channels in a run for TMT data)
-  will be removed. "keep" means that only features with no non-missing measurements will be removed. The `summarize_multiple_psms` element should be a function that will be used to aggregate duplicated feature measurements within a single MS run,
+  will be removed. "keep" means that only features with no non-missing measurements will be removed. The `summarize_multiple_psms` element should be a function that will be used to aggregate multiple feature measurements within a single MS run,
   - `aggregate_isotopic` is a logical parameter - `TRUE` means that isotopic peaks will be aggregated (currently only used for Skyline input),
   - `columns_to_fill` is an optional named list with names corresponding to columns 
   and values correponding to values that will be used for these columns. For example,
@@ -181,7 +191,7 @@ This function accepts several parameters, and each corresponds to a preprocessin
   - `score_filtering`, `exact_filtering` and `pattern_filtering` parameters are optional parameters that can be used to perform data filtering. An example is given below.
   
 
-```{r}
+```{r }
 maxquant_annotation = read.csv(system.file(
   "tinytest/raw_data/MaxQuant/annotation.csv",
   package = "MSstatsConvert"
