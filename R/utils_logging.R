@@ -46,6 +46,7 @@
 #' data processing will be saved. 
 #' If not provided, such a file will be created automatically.
 #' If `append = TRUE`, has to be a valid path to a file.
+#' @param base start of the file name.
 #' 
 #' @return TRUE invisibly in case of successful logging setup.
 #' @export
@@ -62,7 +63,8 @@
 #' MSstatsLogsSettings(FALSE)
 #' 
 MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
-                               verbose = TRUE, log_file_path = NULL) {
+                               verbose = TRUE, log_file_path = NULL,
+                               base = "MSstats_log_") {
     checkmate::assertLogical(use_log_file)
     checkmate::assertLogical(append)
     checkmate::assertLogical(verbose)
@@ -82,7 +84,7 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
                         append = append)
             } else {
                 time_now = Sys.time()
-                path = paste0("./MSstats_log_", gsub("[ :\\-]", "_", time_now), 
+                path = paste0(base, gsub("[ :\\-]", "_", time_now), 
                               ".log")
                 options("MSstatsLog" = log4r::file_appender(path))
             }

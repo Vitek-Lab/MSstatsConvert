@@ -8,7 +8,8 @@ MSstatsLogsSettings(
   use_log_file = TRUE,
   append = FALSE,
   verbose = TRUE,
-  log_file_path = NULL
+  log_file_path = NULL,
+  base = "MSstats_log_"
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ to the console.}
 data processing will be saved.
 If not provided, such a file will be created automatically.
 If \code{append = TRUE}, has to be a valid path to a file.}
+
+\item{base}{start of the file name.}
 }
 \value{
 TRUE invisibly in case of successful logging setup.
