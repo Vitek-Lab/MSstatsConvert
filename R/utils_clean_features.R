@@ -260,3 +260,18 @@
         }
     }
 }
+
+
+#' Fix invalid intensities: infinite to NA, between 0 and 1 to 0
+#' @param input data.table
+#' @return data.table
+#' @keywords internal
+adjustIntensities = function(input) {
+    Intensity = NULL
+    
+    if (is.element("isZero", colnames(input))) {
+        input[, isZero := ifelse(Intensity > 0 & Intensity <= 1, TRUE, isZero)]
+    }
+    input[, Intensity := ifelse(is.finite(Intensity), Intensity, NA)]
+    input[, Intensity := ifelse(Intensity > 0 & Intensity <= 1, 0, Intensity)]
+}

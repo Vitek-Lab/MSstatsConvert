@@ -326,8 +326,7 @@ MSstatsPreprocess = function(
     input = .handleSingleFeaturePerProtein(input, remove_single_feature_proteins)
     input = .mergeAnnotation(input, annotation)
     .fillValues(input, columns_to_fill)
-    input[, Intensity := ifelse(is.finite(Intensity), Intensity, NA)]
-    input[, Intensity := ifelse(Intensity > 0 & Intensity <= 1, 0, Intensity)]
+    .adjustIntensities(input)
     input
 }
 
