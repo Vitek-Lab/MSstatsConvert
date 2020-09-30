@@ -51,16 +51,20 @@
                                colnames(annotation))
         counts = annotation[, list(n_rows = .N), by = "Run"]
         if (any(counts$n_rows > 1)) {
-            stop(paste("** Please check annotation.",
-                       "Each MS run (Raw.file) can\'t have multiple",
-                       "conditions or BioReplicates."))
+            msg = paste("** Please check annotation.",
+                        "Each MS run (Raw.file) can\'t have multiple",
+                        "conditions or BioReplicates.")
+            getOption("MSstatsLog")("ERROR", msg)
+            stop(msg)
         }
     }
     if (length(missing_cols) > 0) {
-        stop(paste("** Columns", paste(missing_cols, sep = ", ", 
-                                       collapse = ", "),
-                   "missing in the annotation.", 
-                   "Please check the annotation file."))
+        msg = paste("** Columns", paste(missing_cols, sep = ", ", 
+                                        collapse = ", "),
+                    "missing in the annotation.", 
+                    "Please check the annotation file.")
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
     }
     invisible(TRUE)
 }
