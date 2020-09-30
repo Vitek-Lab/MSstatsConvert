@@ -49,14 +49,6 @@
     } else {
         missing_cols = setdiff(c("Run", "Condition", "BioReplicate"),
                                colnames(annotation))
-        counts = annotation[, list(n_rows = .N), by = "Run"]
-        if (any(counts$n_rows > 1)) {
-            msg = paste("** Please check annotation.",
-                        "Each MS run (Raw.file) can\'t have multiple",
-                        "conditions or BioReplicates.")
-            getOption("MSstatsLog")("ERROR", msg)
-            stop(msg)
-        }
     }
     if (length(missing_cols) > 0) {
         msg = paste("** Columns", paste(missing_cols, sep = ", ", 
@@ -65,6 +57,16 @@
                     "Please check the annotation file.")
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
+    }
+    if (!is.element("Channel", colnames(annotation))) {
+        counts = annotation[, list(n_rows = .N), by = "Run"]
+        if (any(counts$n_rows > 1)) {
+            msg = paste("** Please check annotation.",
+                        "Each MS run (Raw.file) can\'t have multiple",
+                        "conditions or BioReplicates.")
+            getOption("MSstatsLog")("ERROR", msg)
+            stop(msg)
+        }
     }
     invisible(TRUE)
 }

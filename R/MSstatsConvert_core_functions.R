@@ -424,7 +424,7 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
         getOption("MSstatsMsg")("INFO", msg)
     } else {
         cols = c("Run", "Channel", "Condition", "BioReplicate", "TechReplicate",
-                 "Mixture", "TechRepMixture", unname(all_columns))
+                 "Mixture", "TechRepMixture", "Fraction", unname(all_columns))
         cols = intersect(cols, colnames(input))
         annotation = unique(input[, cols, with = FALSE])
         msg = "** Using annotation extracted from quantification data."
@@ -439,6 +439,7 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
     }
     annotation = annotation[, !duplicated(colnames(annotation)), 
                             with = FALSE]
+    .checkAnnotation(annotation)
     if (is.element("Channel", colnames(annotation))) {
         annotation$Channel = .standardizeColnames(annotation$Channel)
         labels_msg = "Run and Channel"
@@ -450,6 +451,5 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
                 "symbols such as '.' or '%'.")
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
-    .checkAnnotation(annotation)
     annotation
 }
