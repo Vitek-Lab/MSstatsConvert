@@ -36,11 +36,12 @@
 
 
 #' Check if the annotation is valid
+#' @param input data processed by the MSstatsClean
 #' @param annotation annotation created by the MSstatsMakeAnnotation function
 #' @return TRUE invisibly if the annotation is correct, throws an error otherwise
 #' @keywords internal
-.checkAnnotation = function(annotation) {
-    if (is.element("Channel", colnames(annotation))) {
+.checkAnnotation = function(input, annotation) {
+    if (is.element("Channel", colnames(input))) {
         missing_cols = setdiff(
             c("Run", "TechRepMixture", "Fraction", "Mixture", 
               "Channel", "Condition", "BioReplicate"),
@@ -58,7 +59,7 @@
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
-    if (!is.element("Channel", colnames(annotation))) {
+    if (!is.element("Channel", colnames(input))) {
         counts = annotation[, list(n_rows = .N), by = "Run"]
         if (any(counts$n_rows > 1)) {
             msg = paste("** Please check annotation.",

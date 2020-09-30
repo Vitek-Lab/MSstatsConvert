@@ -439,7 +439,7 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
     }
     annotation = annotation[, !duplicated(colnames(annotation)), 
                             with = FALSE]
-    .checkAnnotation(annotation)
+    .checkAnnotation(input, annotation)
     if (is.element("Channel", colnames(annotation))) {
         annotation$Channel = .standardizeColnames(annotation$Channel)
         labels_msg = "Run and Channel"
