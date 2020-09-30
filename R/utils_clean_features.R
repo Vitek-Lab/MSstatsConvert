@@ -266,7 +266,7 @@
 #' @param input data.table
 #' @return data.table
 #' @keywords internal
-adjustIntensities = function(input) {
+.adjustIntensities = function(input) {
     Intensity = NULL
     
     if (is.element("isZero", colnames(input))) {
