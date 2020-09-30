@@ -192,7 +192,7 @@ This function accepts several parameters, and each corresponds to a preprocessin
   - `feature_cleaning` is a list, that currently consists of two named elements:
   `remove_features_with_few_measurements` should be equal to TRUE or FALSE. In the first case,
   feature that have less than three measurements across runs (or channels in a run for TMT data)
-  will be removed. "keep" means that only features with no non-missing measurements will be removed. The `summarize_multiple_psms` element should be a function that will be used to aggregate multiple feature measurements within a single MS run,
+  will be removed. FALSE means that only features with no non-missing measurements will be removed. The `summarize_multiple_psms` element should be a function that will be used to aggregate multiple feature measurements within a single MS run,
   - `aggregate_isotopic` is a logical parameter - `TRUE` means that isotopic peaks will be aggregated (currently only used for Skyline input),
   - `columns_to_fill` is an optional named list with names corresponding to columns 
   and values correponding to values that will be used for these columns. For example,

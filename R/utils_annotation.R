@@ -22,7 +22,7 @@
         input = merge(input[, !(colnames(input) %in% cols), with = FALSE], 
                       annotation, 
                       by = annotation_cols, all.x = TRUE, sort = FALSE)
-        msg = "** Run annotation merged with quantification data"
+        msg = "** Run annotation merged with quantification data."
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
     }
