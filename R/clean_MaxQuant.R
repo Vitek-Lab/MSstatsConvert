@@ -31,7 +31,9 @@
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     
-    mq_input[, ProteingroupIDs := as.integer(as.character(ProteingroupIDs))]
+    suppressWarnings({
+        mq_input[, ProteingroupIDs := as.integer(as.character(ProteingroupIDs))]
+    })
     
     if (getDataType(msstats_object) == "MSstats") {
         mq_input = mq_input[ProteingroupIDs %in% unique(mq_pg[["id"]]), ]
