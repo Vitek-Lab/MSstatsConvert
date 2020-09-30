@@ -57,7 +57,8 @@ tinytest::expect_identical(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annot
 ## Column names are updated
 tinytest::expect_true(
     is.element("Run",
-               colnames(MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_3,
+               colnames(MSstatsConvert:::MSstatsMakeAnnotation(dataset, 
+                                                               annotation_2,
                                                                Run = "Rawfile")))
 )
 # Merge annotation ----
@@ -74,7 +75,7 @@ tinytest::expect_identical(
     merge(dataset_chr, annotation_1, sort = FALSE)
 )
 ## MSstatsTMT: all is OK
-tmt_annotation = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_3, Run = "Rawfile")
+tmt_annotation = MSstatsConvert:::MSstatsMakeAnnotation(dataset_tmt, annotation_3, Run = "Rawfile")
 tinytest::expect_identical(
     MSstatsConvert:::.mergeAnnotation(dataset_tmt, tmt_annotation),
     merge(dataset_tmt, tmt_annotation, sort = FALSE)
@@ -83,6 +84,6 @@ tinytest::expect_identical(
 missing_condition = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_2, Run = "Rawfile")
 tinytest::expect_message(MSstatsConvert:::.mergeAnnotation(dataset, missing_condition))
 ## MSstatsTMT: missing channel
-missing_channel = MSstatsConvert:::MSstatsMakeAnnotation(dataset, annotation_4, Run = "Rawfile")
+missing_channel = MSstatsConvert:::MSstatsMakeAnnotation(dataset_tmt, annotation_4, Run = "Rawfile")
 tinytest::expect_error(MSstatsConvert:::.mergeAnnotation(dataset_tmt, missing_channel))
 
