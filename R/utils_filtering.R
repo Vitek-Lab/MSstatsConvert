@@ -102,26 +102,27 @@
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)
-    }
-    
-    if (filter) {
-        msg = paste("** Sequences containing", 
-                    paste(patterns, sep = ", ", collapse = ", "), "are removed.")
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
-        pattern_filter = rep(TRUE, nrow(input))
-        for (pattern in patterns) {
-            pattern_filter = pattern_filter & !grepl(pattern, input[[col_name]])
+    } else {
+        if (filter) {
+            msg = paste("** Sequences containing", 
+                        paste(patterns, sep = ", ", collapse = ", "), "are removed.")
+            getOption("MSstatsLog")("INFO", msg)
+            getOption("MSstatsMsg")("INFO", msg)
+            pattern_filter = rep(TRUE, nrow(input))
+            for (pattern in patterns) {
+                pattern_filter = pattern_filter & !grepl(pattern, input[[col_name]])
+            }
+        } else {
+            pattern_filter = rep(TRUE, nrow(input))
         }
-    } else {
-        pattern_filter = rep(TRUE, nrow(input))
+        
+        if (drop) {
+            input[pattern_filter, !(colnames(input) == col_name), with = FALSE]
+        } else {
+            input[pattern_filter, ]
+        }
     }
     
-    if (drop) {
-        input[pattern_filter, !(colnames(input) == col_name), with = FALSE]
-    } else {
-        input[pattern_filter, ]
-    }
 }
 
 
@@ -145,30 +146,27 @@
         getOption("MSstatsLog")("WARN", msg)
         getOption("MSstatsMsg")("WARN", msg)
         return(input)
-    }
-    
-    find_col = colnames(input) == col_name
-    if (filter) {
-        exact_filter = !(input[[col_name]] %in% filter_symbols)
-        msg = .makeExactFilterMessage(col_name, filter_symbols, 
-                                      behavior, fill_value)
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
     } else {
-        exact_filter = rep(TRUE, nrow(input))
+        find_col = colnames(input) == col_name
+        if (filter) {
+            exact_filter = !(input[[col_name]] %in% filter_symbols)
+            msg = .makeExactFilterMessage(col_name, filter_symbols, 
+                                          behavior, fill_value)
+            getOption("MSstatsLog")("INFO", msg)
+            getOption("MSstatsMsg")("INFO", msg)
+        } else {
+            exact_filter = rep(TRUE, nrow(input))
+        }
+        if (behavior == "remove") {
+            input = input[exact_filter]
+        } else {
+            input$Intensity = ifelse(exact_filter, input$Intensity, fill_value)
+        }
+        if (drop) {
+            input = input[, !find_col, with = FALSE]    
+        }
+        input
     }
-    
-    if (behavior == "remove") {
-        input = input[exact_filter]
-    } else {
-        input$Intensity = ifelse(exact_filter, input$Intensity, fill_value)
-    }
-    
-    
-    if (drop) {
-        input = input[, !find_col, with = FALSE]    
-    }
-    input
 }
 
 
