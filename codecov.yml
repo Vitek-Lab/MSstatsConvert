@@ -1,0 +1,18 @@
+comment: false
+
+ignore:
+  - "R/utils_logging.R"
+  - "R/MSstats_exports.R"
+  - "R/utils_checks.R"
+  - "R/utils_MSstatsConvert.R"
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%

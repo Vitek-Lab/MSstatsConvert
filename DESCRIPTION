@@ -1,29 +1,52 @@
-Package: MSstats
-Title: Protein Significance Analysis in DDA, SRM and DIA for Label-free
-        or Label-based Proteomics Experiments
-Version: 3.19.4
-Date: 2019-12-17
-Description: A set of tools for statistical relative protein significance analysis in DDA, SRM and DIA experiments.
+Package: MSstatsConvert
+Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
+Version: 0.99.0
 Authors@R: c(
-  person("Meena","Choi", , "mnchoi67@gmail.com", c("aut", "cre")),
-  person("Tsung-Heng","Tsai", , "tsai.tsungheng@gmail.com", role="aut"), 
-  person("Cyril","Galitzine", , "cyrildgg@gmail.com", role="aut"), 
-  person("Ting","Huang", , "thuang0703@gmail.com", role="aut"), 
-  person("Olga","Vitek", , "o.vitek@northeastern.edu", role="aut")) 
+  person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = c("aut","cre")),
+  person("Meena", "Choi", email = "mnchoi67@gmail.com", role = "aut"),
+  person("Ting", "Huang", email = "thuang0703@gmail.com", role = "aut"),
+  person("Olga", "Vitek", , email = "o.vitek@northeastern.edu", role = "aut")) 
+Description: MSstatsConvert provides tools for importing reports of Mass Spectrometry data processing tools
+    into R format suitable for statistical analysis using the MSstats and MSstatsTMT packages.
 License: Artistic-2.0
-Depends: R (>= 3.6)
-Imports: lme4, marray, limma, gplots, ggplot2, methods, grid,
-        ggrepel, preprocessCore, reshape2, survival, statmod,
-        minpack.lm, utils, grDevices, graphics, stats, doSNOW, snow,
-        foreach, data.table, MASS, dplyr, tidyr, broom, purrr, stringr, randomForest
-Suggests: BiocStyle, knitr, rmarkdown, MSstatsBioData
-VignetteBuilder: knitr
-biocViews: ImmunoOncology, MassSpectrometry, Proteomics, Software, Normalization,
-        QualityControl, TimeCourse
-LazyData: true
-URL: http://msstats.org
-BugReports: https://groups.google.com/forum/#!forum/msstats
-RoxygenNote: 6.1.1
 Encoding: UTF-8
-NeedsCompilation: no
-Packaged: 2017-10-20 02:13:12 UTC; meenachoi
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+biocViews: MassSpectrometry, Proteomics, Software, DataImport, QualityControl
+Depends:
+    R (>= 3.6)
+Imports: 
+    data.table,
+    log4r,
+    methods,
+    checkmate,
+    utils
+Suggests: 
+    tinytest,
+    covr,
+    knitr,
+    rmarkdown
+Collate: 
+    'clean_Spectronaut.R'
+    'clean_SpectroMine.R'
+    'clean_Skyline.R'
+    'clean_ProteomeDiscoverer.R'
+    'clean_Progenesis.R'
+    'clean_OpenSWATH.R'
+    'clean_OpenMS.R'
+    'clean_MaxQuant.R'
+    'clean_DIAUmpire.R'
+    'MSstatsConvert_core_functions.R'
+    'utils_MSstatsConvert.R'
+    'utils_annotation.R'
+    'utils_balanced_design.R'
+    'utils_checks.R'
+    'utils_classes.R'
+    'utils_clean_features.R'
+    'utils_dt_operations.R'
+    'utils_filtering.R'
+    'utils_fractions.R'
+    'utils_logging.R'
+    'utils_shared_peptides.R'
+VignetteBuilder: knitr

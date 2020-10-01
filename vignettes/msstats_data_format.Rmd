@@ -1,0 +1,331 @@
+---
+title: "Working with MSstatsConvert"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteIndexEntry{Working with MSstatsConvert}
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteEncoding{UTF-8}
+---
+  
+```{r, include = FALSE}
+  knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+  )
+```
+  
+  
+# Purpose of MSstatsConvert
+  
+The `MSstatsConvert` package is a member of the `MSstatst` family of packages, MSstats and MSstatsTMT.
+It creates an abstraction for the steps in mass spectrometry (MS) data analysis 
+that are required before a dataset can be used for statistical modeling. 
+In short, the package is responsible for converting output from signal processing
+tools such as `OpenMS` or `MaxQuant` into a format suitable for statistical analysis. 
+This includes:
+  
+  - PSM- and protein-level filtering,
+  - managing shared peptides,
+  - removing decoy, iRT, and other irrelavant sequences,
+  - removing features or proteins with a low number of measurements,
+  - aggregating duplicated measurements,
+  - handling fractionation by removing overlapped features,
+  - creating balanced statistical design in the presence of missing data.
+  
+`MSstatsConvert` allows for transforming any MS quantification result into a format
+required by `MSstats` and `MSstatsTMT` packages.
+Additionally, it provides built-in cleaning functions for outputs of `DIAUmpire`, `MaxQuant`,
+`OpenMS`, `OpenSWATH`, `Progenesis`, `ProteomeDiscoverer`, `Skyline`, `Spectromine`, and `Spectronaut`.
+These functions serve as a base for converter functions (called `*toMSstatsFormat` or 
+`*toMSstatsTMTFormat`) provided  by the `MSstats` and `MSstatsTMT` packages.
+  
+# MSstats data format
+  
+MSstats family packages works with label-free, SRM and TMT datasets. 
+The following column are required.
+
+  - `ProteinName`: column that indicates a protein ID. If the analysis is to be made 
+  at the peptide-level, the column should store peptide IDs. Summarization performed 
+  by `MSstats` and `MSstatsTMT` packages is done separately for each ID in this column,
+  - `PeptideSequence`, `PrecursorCharge`, `FragmentIon` and `ProductCharge`: these 
+  four columns define a spectral feature (transition in SRM case). If information 
+  for any of the columns is not available, it should be set to a constant value
+  (for example `NA`),
+  - `IsotopeLabelType`: column that indicates whether the measurement is based on an
+  endogenous peptide (indicated by value "L" or "light") or reference peptide (indicated by value "H" or "heavy"),
+  - `Run`: column that stores IDs of mass spectrometry runs. If annotation describing
+  biological conditions and replicates is provided via a separate table, the run IDs
+  should match `Run` IDs in the annotation,
+  - `Condition`: column that stores labels for biological conditions (groups of interest).
+  For time-course experiments, this column will represent time points. If the design
+  experiment includes both time points and distinct biological subjects, these labels
+  should be a combination of subject and time point,
+  - `BioReplicate`: this column should contain a unique identifier for each biological replicate in the experiment. 
+  For example, in a clinical proteomic investigation this should be a unique  patient ID. 
+  Patients from distinct groups (indicated by the `Condition` column) should have distinct IDs,
+  - `Intensity`: column that stores untransformed (in particular, no log transformation) measurements of feature abundance 
+  in a given Run (and Channel in TMT case). 
+  They can be peak heights, peak areas under the curve, or other quantitative representations
+  of feature abundance,
+  - for TMT datasets, a `Channel` column is required. Similarly to the `Run` column,
+  values in this column must correspond to values in the annotation file, if provided separately.
+  
+Additionally, if the experiment involves fractionation, `Fraction` column can be added
+to store fraction labels.
+
+# Logging
+  
+`MSstatsConvert` allows for flexible logging based on the `log4r` package.
+Information about preprocessing steps can be written to a file, to a console,
+to both or to neither.
+The `MSstatsLogsSettings` function helps manage log settings.
+The user can pass a path to an existing file to the `log_file_path` parameter.
+Combined with setting `append = TRUE`, this allows writing all information related to 
+a specific data analysis to a single file.
+If a user does not specify a file, a new file will be created automatically with a name
+starting with "MSstats_log", followed by a timestamp.
+  
+```{r logs}
+library(MSstatsConvert)
+# default - creates a new file
+MSstatsLogsSettings(use_log_file = TRUE, append = FALSE) 
+
+# default - creates a new file
+MSstatsLogsSettings(use_log_file = TRUE, append = TRUE, 
+                    log_file_path = "log_file.log") 
+
+# switches logging off
+MSstatsLogsSettings(use_log_file = FALSE, append = FALSE) 
+
+# switches off logs and messages
+MSstatsLogsSettings(use_log_file = FALSE, verbose = FALSE) 
+```
+  
+Additionally, session info generated by the `utils::sessionInfo()` function
+can be saved to file with the `MSstatsSaveSessionInfo` function.
+
+```{r }
+MSstatsSaveSessionInfo()
+```
+  
+By default, the output file name will start with "MSstats_session_info" and end with 
+a current timestamp.
+  
+# Importing and cleaning data
+  
+MS data processing by `MSstatsConvert` starts with importing and cleaning data.
+The `MSstatsImport` function produces a wrapper for possibly multiple files that
+may describe a single dataset.
+For example, `MaxQuant` output consists of two files, while `OpenMS` outputs just
+a single file.
+  
+```{r }
+maxquant_evidence = read.csv(system.file("tinytest/raw_data/MaxQuant/mq_ev.csv",
+                                         package = "MSstatsConvert"))
+maxquant_proteins = read.csv(system.file("tinytest/raw_data/MaxQuant/mq_pg.csv",
+                                         package = "MSstatsConvert"))
+maxquant_imported = MSstatsImport(list(evidence = maxquant_evidence,
+                                       protein_groups = maxquant_proteins),
+                                  type = "MSstats", tool = "MaxQuant")
+is(maxquant_imported)
+
+openms_input = read.csv(system.file(
+  "tinytest/raw_data/OpenMSTMT/openmstmt_input.csv",
+  package = "MSstatsConvert"
+))
+openms_imported = MSstatsImport(list(input = openms_input),
+                                "MSstatsTMT", "OpenMS")
+is(openms_imported)
+```
+  
+The `getInputFile` method allows user to retrieve the files:
+
+```{r }
+getInputFile(maxquant_imported, "evidence")[1:5, 1:5]
+```
+  
+As a next step of the analysis, input files are combined into a single `data.table`
+with standardized column names by the `MSstatsClean` function.
+It is a generic function with built-in support for outputs of tools listed in 
+the "Purpose of the MSstatsConvert package" section.
+The `type` parameter is equal to either `MSstats` or `MSstatsTMT` and indicates 
+if the data comes from a labelled TMT experiment.
+
+For some datasets, `MSstatsClean` may require additional parameters described in the respective help files.
+For our example datasets, the following calls merge input files into a single table.
+
+```{r }
+maxquant_cleaned = MSstatsClean(maxquant_imported, protein_id_col = "Proteins")
+head(maxquant_cleaned)
+
+openms_cleaned = MSstatsClean(openms_imported)
+head(openms_cleaned)
+```
+
+If a user wants to use `MSstatsConvert` package with data in a format that is not
+currently supported, it is enough to first re-format the data into a `data.table`
+with column ProteinName, PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge (with the latter two possibly equal to NA), Run and IsotopeLabelType (in case of non-TMT data) or 
+Channel (in case of TMT data). Moreover, the dataset may include any column that will be used for filtering the dataset (for example a column that stores q-values).
+In our example, such additional columns are "Modifications" and "Score" from MaxQuant files.
+
+Annotation columns should be called Condition and BioReplicate. For TMT data,
+Mixture, TechRepMixture columns may be added.
+Fractionation should be indicated by a Fraction column.
+
+# Preprocessing
+  
+The goal of `MSstatsPreprocess` function is to transform cleaned MS data into a format
+ready for statistical analysis with `MSstats` or `MSstatsTMT` packages.
+This function accepts several parameters, and each corresponds to a preprocessing step.
+
+  - `input` parameter is the dataset for preprocessing,
+  - `annotation` is a description of biological conditions and replicates associated with
+  MS runs (and channels in TMT case). If annotation is already included in the `input`,
+  it should be equal to `NULL`. The annotation should be created by the
+  `MSstatsMakeAnnotation` function,
+  - `feature_columns` is a vector of column names that will denote features,
+  - `remove_shared_peptides` is a logical parameter - if `TRUE`, shared peptides 
+  will be removed from the analysis. Currently, `MSstats` assumes that only unique peptides
+  are used, and presence of shared peptides may cause issues,
+  - `remove_single_feature_proteins` is a logical parameter that indicates if proteins
+  that only have a single feature should be removed from the analysis (`TRUE`),
+  - `feature_cleaning` is a list, that currently consists of two named elements:
+  `remove_features_with_few_measurements` should be equal to TRUE or FALSE. In the first case,
+  feature that have less than three measurements across runs (or channels in a run for TMT data)
+  will be removed. FALSE means that only features with no non-missing measurements will be removed. The `summarize_multiple_psms` element should be a function that will be used to aggregate multiple feature measurements within a single MS run,
+  - `aggregate_isotopic` is a logical parameter - `TRUE` means that isotopic peaks will be aggregated (currently only used for Skyline input),
+  - `columns_to_fill` is an optional named list with names corresponding to columns 
+  and values correponding to values that will be used for these columns. For example,
+  if the dataset is missing information about `ProductCharge`, such a column can be 
+  added by passing `list(ProductCharge = NA)` to this parameter,
+  - `score_filtering`, `exact_filtering` and `pattern_filtering` parameters are optional parameters that can be used to perform data filtering. An example is given below.
+  
+
+```{r }
+maxquant_annotation = read.csv(system.file(
+  "tinytest/raw_data/MaxQuant/annotation.csv",
+  package = "MSstatsConvert"
+))
+maxquant_annotation = MSstatsMakeAnnotation(maxquant_cleaned,
+                                            maxquant_annotation,
+                                            Run = "Rawfile")
+m_filter = list(col_name = "PeptideSequence", 
+                pattern = "M", 
+                filter = TRUE, 
+                drop_column = FALSE)
+
+oxidation_filter = list(col_name = "Modifications", 
+                        pattern = "Oxidation", 
+                        filter = TRUE, 
+                        drop_column = TRUE)
+
+feature_columns = c("PeptideSequence", "PrecursorCharge")
+maxquant_processed = MSstatsPreprocess(
+  maxquant_cleaned, 
+  maxquant_annotation,
+  feature_columns,
+  remove_shared_peptides = TRUE, 
+  remove_single_feature_proteins = FALSE,
+  pattern_filtering = list(oxidation = oxidation_filter,
+                           m = m_filter),
+  feature_cleaning = list(remove_features_with_few_measurements = TRUE,
+                          summarize_multiple_psms = max),
+  columns_to_fill = list("FragmentIon" = NA,
+                         "ProductCharge" = NA,
+                         "IsotopeLabelType" = "L"))
+head(maxquant_processed)
+
+# OpenMS - TMT data
+feature_columns_tmt = c("PeptideSequence", "PrecursorCharge")
+openms_processed = MSstatsPreprocess(
+  openms_cleaned, 
+  NULL, 
+  feature_columns_tmt,
+  remove_shared_peptides = TRUE,
+  remove_single_feature_proteins = TRUE,
+  feature_cleaning = list(remove_features_with_few_measurements = TRUE,
+                          summarize_multiple_psms = max)
+)
+head(openms_processed)
+```
+  
+Annotation is created via the `MSstatsMakeAnnotation` function. It takes the cleaned dataset
+and annotation file as input. Additionally, key-value pairs can be passed to this function
+to change column names (not including dots and other symbols) in the annotation from names given by values to names given by keys.
+
+For programmatic applications and consistency of the interface, filtering is done
+with the help of lists.
+
+For filtering based on numerical scores (for example q-value filtering), the list should 
+consist of elements named 
+  
+  - `score_column`: name of a column that stores the score,
+  - `score_threshold`: value above or below which measurements should be kept,
+  - `direction`: if "greater", values greater than `score_threshold` will be kept; 
+  if "smaller", values smaller than `score_threshold` will be kept;
+  - `behavior`: if "remove", rows not below/above the threshold will be removed;
+  if "replace", intensity in rows not below/above the threshold will be replaced by a given value,
+  - `handle_na`: if "keep", `NA` in the score column will not be removed,
+  - `fill_value`: value that will be used if `behavior = "replace"`,
+  - `filter`: if `TRUE`, filtering will be performed (can be used for conditional filtering),
+  - `drop_column`: if `TRUE`, column that stored the score will be removed.
+
+For example, to remove intensities smaller than 1, we could pass the following list to
+the `score_filtering` parameters:
+
+```{r , eval = FALSE}
+list(
+  list(score_column = "Intensity", score_threshold = 1,
+       direction = "greater", behavior = "remove", 
+       handle_na = "remove", fill_value = NA, filter = TRUE, drop = FALSE
+       )
+)
+```
+
+For filtering based on patterns (for example, removing oxidation peptides), the list
+should consist of elements named
+
+  - `col_name`: name of a column that values that may be removed,
+  - `filter_symbols`: vector of values - rows with these values in `col_name` will be removed
+  or corresponding intensities will be replaced,
+  - `behavior`: if "remove", rows that contain `filter_symbols` in `col_name` will be removed;
+  if "replace", intensity in rows that contain `filter_symbols` in `col_name` will be replaced by a given value,
+  - `fill_value`: value that will be used if `behavior = "replace"`,
+  - `filter`: if `TRUE`, filtering will be performed (can be used for conditional filtering),
+  - `drop_column`: if `TRUE`, column that stored the score will be removed.
+
+For filtering based on exact values (for example, removing iRT proteins), the list
+should consists of elements named
+
+  - `col_name`: name of a column that stores strings that will be searched for given patterns,
+  - `pattern`: vector of regular expressions - rows with matching values in `col_name` will be removed,
+  - `filter`: if `TRUE`, filtering will be performed (can be used for conditional filtering),
+  - `drop_column`: if `TRUE`, column that stored the values for filtering will be removed.
+
+# Fractions and balanced design
+
+Finally, after preprocessing, `MSstatsBalancedDesign` function can be applied to 
+handle fractions and create balanced design.
+For label-free and SRM data, it means that fractionation or technical replicates will be detected if these information is not provided. Features measured in multiple fractions (overlapped) will be assigned to a unique fraction. Then, the data will be adjusted so that within each fraction, every feature has a row for certain run. If the intensity value is missing, it will be denoted by `NA`.
+
+For TMT data, a unique fraction will be selected for each overlapped feature and the 
+data will adjusted so that within each run, every feature has a row for each channel.
+If the intensity is missing for a channel, it will be denoted by `NA`.
+
+```{r }
+maxquant_balanced = MSstatsBalancedDesign(maxquant_processed, feature_columns)
+head(maxquant_balanced)
+dim(maxquant_balanced)
+dim(maxquant_processed)
+
+openms_balanced = MSstatsBalancedDesign(openms_processed, feature_columns_tmt)
+head(openms_balanced)
+dim(openms_balanced)
+dim(openms_processed)
+```
+
+`MSstatsBalancedDesign` output is a `data.frame` of class `MSstatsValidated`.
+Such a `data.frame` will be recognized by statistical processing functions from
+`MSstats` and `MSstatsTMT` packages as a valid input, which will allow them to skip
+checks and transformation necessary to fit data into this format.
+

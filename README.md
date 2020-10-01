@@ -1,44 +1,27 @@
 # MSstats development version
 
 <!-- badges: start -->
-[![BioC status](http://www.bioconductor.org/shields/build/release/bioc/MSstats.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/MSstats)
+[![Travis build status](https://travis-ci.org/Vitek-Lab/MSstatsConvert.svg?branch=master)](https://travis-ci.org/Vitek-Lab/MSstatsConvert)
+[![Codecov test coverage](https://codecov.io/gh/Vitek-Lab/MSstatsConvert/branch/master/graph/badge.svg)](https://codecov.io/gh/Vitek-Lab/MSstatsConvert?branch=master)
 <!-- badges: end -->
 
 [MSstats](https://msstats.org) is an R-based/Bioconductor package for statistical relative quantification of peptides and proteins in mass spectrometry-based proteomic experiments. 
-It is applicable to multiple types of sample preparation, including label-free workflows, workflows that use stable isotope labeled reference proteins and peptides, and work-flows that use fractionation. 
+It is applicable to multiple types of sample preparation, including label-free workflows, workflows that use stable isotope labeled reference proteins and peptides, and workflows that use fractionation. 
 It is applicable to targeted Selected Reactin Monitoring(SRM), Data-Dependent Acquisiton(DDA or shotgun), and Data-Independent Acquisition(DIA or SWATH-MS). 
+This package implements converter functions that are used by MSstats to import data from various signal processing tools.
 
 ## Installation 
-
-A stable version of the package can be downloaded from Biocondutor:
-
-```
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("MSstats")
-```
-
-or from the official Github repository:
-
-```
-source("https://install-github.me/MeenaChoi/MSstats")
-```
 
 This development version is only available on Github:
 
 ```
-source("https://install-github.me/Vitek-Lab/MSstats-dev")
+devtools::install_github("Vitek-Lab/MSstatsConvert", ref = "minimum_working_version", build_vignettes = TRUE)
 ```
 
 ## Documentation and examples
 
 An extensive documentation can be found on the [official website of the package](https://msstats.org).
-A vignette explaining the functionalities of the package and examples can be accessed from within R:
 
-```
-vignette(package = "MSstats")
-example(package = "MSstats", topic = "dataProcess") # or any other function from the package
-```
 
 ## Contributing
 
