@@ -39,3 +39,56 @@ tinytest::expect_equal(
                                        MSstatsConvert:::.getOverlappingFeatures(data_with_additional_cols)),
     data_with_additional_cols[-(c(3:4, 19:20)), ]
 )
+## Overlap check
+### Fails, when overlapped
+tinytest::expect_error(
+    MSstatsConvert:::.checkOverlappedFeatures(
+        data.table::data.table(
+            feature = "A",
+            Fraction = c(1, 2, 3),
+            Intensity = c(NA, 1, 2)
+        )
+    )
+)
+### OK, when not overlapped
+fractions_ok = data.table::data.table(
+    feature = "A",
+    Fraction = c(1, 2, 2),
+    Intensity = c(NA, 1, 2)
+)
+tinytest::expect_identical(
+    MSstatsConvert:::.checkOverlappedFeatures(fractions_ok),
+    fractions_ok
+)
+## 
+fractionated = data.table::data.table(
+    feature = rep(c("A", "B"), each = 6),
+    Fraction = rep(rep(c(1, 2), each = 3), times = 2),
+    Run = 1:12,
+    Intensity = c(NA, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2)
+)
+picked_A = MSstatsConvert:::.getCorrectFraction(fractionated[feature == "A"])
+picked_B = MSstatsConvert:::.getCorrectFraction(fractionated[feature == "B"])
+### More observations win
+tinytest::expect_equal(picked_A, 2)
+### Higher average intensity wins
+tinytest::expect_equal(picked_B, 2)
+### For full data
+tinytest::expect_identical(
+    MSstatsConvert:::.removeOverlappingFeatures(data.table::copy(fractionated)),
+    fractionated[Fraction == 2]
+)
+fractionated_tmt = fractionated = data.table::data.table(
+    feature = rep(c("A", "B"), each = 6),
+    Fraction = rep(rep(c(1, 2), each = 3), times = 2),
+    Run = rep(rep(c(1, 2), each = 3), times = 2),
+    Intensity = c(NA, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2),
+    Channel = rep(1:3, times = 4),
+    Mixture = rep(c(1, 2), each = 6),
+    TechRepMixture = 1
+)
+tmt_unoverlapped = MSstatsConvert:::.handleFractionsTMT(data.table::copy(fractionated_tmt))
+tinytest::expect_identical(
+    tmt_unoverlapped[, colnames(tmt_unoverlapped) != "Run", with = FALSE],
+    fractionated_tmt[Fraction == 2, !(colnames(fractionated_tmt) %in% c("techrun", "id", "Run")), with = FALSE]
+)
