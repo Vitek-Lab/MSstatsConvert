@@ -86,4 +86,13 @@ tinytest::expect_message(MSstatsConvert:::.mergeAnnotation(dataset, missing_cond
 ## MSstatsTMT: missing channel
 missing_channel = MSstatsConvert:::MSstatsMakeAnnotation(dataset_tmt, annotation_4, Run = "Rawfile")
 tinytest::expect_error(MSstatsConvert:::.mergeAnnotation(dataset_tmt, missing_channel))
-
+## Missing column: error
+tinytest::expect_error(MSstatsConvert::MSstatsMakeAnnotation(
+    dataset, 
+    annotation2[, .(Rawfile, BioReplicate)],
+    Run = "Rawfile"))
+## Multiple conditions in a Run
+tinytest::expect_error(MSstatsConvert::MSstatsMakeAnnotation(
+    dataset, 
+    rbind(annotation_2, data.table::data.table(Rawfile = 1, Condition = 2, BioReplicate = 2)),
+    Run = "Rawfile"))
