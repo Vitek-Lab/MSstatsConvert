@@ -20,7 +20,8 @@ Imports:
     data.table,
     log4r,
     methods,
-    checkmate
+    checkmate,
+    utils
 Suggests: 
     tinytest,
     covr,
