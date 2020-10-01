@@ -7,18 +7,18 @@
 #' @keywords internal
 .handleFiltering = function(input, score_filtering, exact_filtering,
                             pattern_filtering) {
+    for (filtering in exact_filtering) {
+        input = .filterExact(input, filtering[["col_name"]], 
+                             filtering[["filter_symbols"]],
+                             filtering[["behavior"]], filtering[["fill_value"]],
+                             filtering[["filter"]], filtering[["drop_column"]])
+    }
     for (filtering in score_filtering) {
         input = .filterByScore(input, filtering[["score_column"]], 
                                filtering[["score_threshold"]], 
                                filtering[["direction"]], filtering[["behavior"]], 
                                filtering[["handle_na"]], filtering[["fill_value"]],
                                filtering[["filter"]], filtering[["drop_column"]])
-    }
-    for (filtering in exact_filtering) {
-        input = .filterExact(input, filtering[["col_name"]], 
-                             filtering[["filter_symbols"]],
-                             filtering[["behavior"]], filtering[["fill_value"]],
-                             filtering[["filter"]], filtering[["drop_column"]])
     }
     for (filtering in pattern_filtering) {
         input = .filterByPattern(input, filtering[["col_name"]], 
