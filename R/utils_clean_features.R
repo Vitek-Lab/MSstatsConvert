@@ -267,7 +267,7 @@
 #' @return data.table
 #' @keywords internal
 .adjustIntensities = function(input) {
-    Intensity = NULL
+    Intensity = isZero = NULL
     
     if (is.element("isZero", colnames(input))) {
         input[, isZero := ifelse(Intensity > 0 & Intensity <= 1, TRUE, isZero)]

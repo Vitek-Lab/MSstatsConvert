@@ -27,5 +27,6 @@ Save session information
 }
 \examples{
 MSstatsSaveSessionInfo("session_info.txt")
+MSstatsSaveSessionInfo("session_info.txt", base = "MSstatsTMT_session_info_")
 
 }

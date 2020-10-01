@@ -209,6 +209,7 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
 #' @importFrom utils sessionInfo
 #' @examples 
 #' MSstatsSaveSessionInfo("session_info.txt")
+#' MSstatsSaveSessionInfo("session_info.txt", base = "MSstatsTMT_session_info_")
 #' 
 MSstatsSaveSessionInfo = function(path = NULL, append = TRUE, 
                                   base = "MSstats_session_info_") {
