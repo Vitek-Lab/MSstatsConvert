@@ -1,6 +1,6 @@
-# Contributing to MSstats
+# Contributing to MSstatsConvert
 
-Thank you for considering contributing to the MSstas package.
+Thank you for considering contributing to the MSstatsConvert package.
 This document aims to help you take the right steps to file a bug report (report an issue), 
 request a new feature, fix a typo or propose code changes.
 
@@ -24,7 +24,7 @@ Bug reports can be filed in two ways:
 
 - via the official [Google group](https://groups.google.com/forum/#!forum/msstats),
 
-- or via [GitHub issues](https://github.com/MeenaChoi/MSstats/issues) (the preferred way). 
+- or via [GitHub issues](https://github.com/Vitek-Lab/MSstatsConvert/issues) (the preferred way). 
 
 Before filing a bug report please make sure that:
 
