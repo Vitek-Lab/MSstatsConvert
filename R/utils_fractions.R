@@ -313,7 +313,7 @@
                             list(n_fractions = data.table::uniqueN(Fraction)),
                             by = "feature"]
     count_fractions = count_fractions[n_fractions > 1, ]
-    if (nrow(count_fractions) > 1) {
+    if (nrow(count_fractions) > 0) {
         overlapped_features = unique(as.character(count_fractions$feature))
         msg = paste("** These features are measured across all fractionations.",
                     "Please keep only one intensity of listed features", 
