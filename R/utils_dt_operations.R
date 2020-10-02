@@ -1,13 +1,13 @@
 #' Read file from a provided path or convert given data.frame to data.table
 #' @param input report from a signal processing tool or a path to it
 #' @param ... additional parameters for data.table::fread
-#' @importFrom data.table as.data.table fread setDT
+#' @importFrom data.table as.data.table fread
 #' @return data.table
 #' @keywords internal
 .getDataTable = function(input, ...) {
     checkmate::checkTRUE(is.character(input) | inherits(input, "data.frame"))
     if (inherits(input, "data.frame")) {
-        input = data.table::setDT(input)
+        input = data.table::as.data.table(input)
     } else {
         input = data.table::fread(input, showProgress = FALSE, ...)
     }
