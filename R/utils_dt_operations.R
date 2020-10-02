@@ -84,3 +84,28 @@
     }
     col_names[channel_filter]
 }
+
+
+#' Select columns for MSstats format
+#' @param input data.table
+#' @return data.table
+#' @keywords internal
+.selectMSstatsColumns = function(input) {
+    standard_columns = c("ProteinName", "PeptideSequence", 
+                         "PeptideModifiedSequence", "PrecursorCharge", 
+                         "FragmentIon", "ProductCharge", "IsotopeLabelType",
+                         "Condition", "BioReplicate", "Run", "StandardType", 
+                         "Fraction", "DetectionQValue", "Intensity")
+    
+    standard_columns_tmt = c("ProteinName", "PeptideSequence", "Charge", "PSM", 
+                             "Mixture", "TechRepMixture", "Run", "Channel", 
+                             "BioReplicate", "Condition", "Intensity" )
+    
+    if (is.element("Channel", colnames(input))) {
+        cols = standard_columns_tmt
+    } else {
+        cols = standard_columns
+    }
+    input[, intersect(cols, colnames(input)), with = FALSE]
+}
+

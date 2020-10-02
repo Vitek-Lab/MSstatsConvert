@@ -8,5 +8,6 @@ setOldClass("MSstatsValidated", S4Class = "MSstatsValidated")
 #' @return object of class MSstatsValidated that inherits from data.frame
 #' @keywords internal
 .MSstatsFormat = function(input) {
+    input = .selectMSstatsColumns(input)
     new("MSstatsValidated", as.data.frame(input))
 }
