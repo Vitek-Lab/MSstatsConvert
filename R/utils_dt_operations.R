@@ -97,9 +97,9 @@
                          "Condition", "BioReplicate", "Run", "StandardType", 
                          "Fraction", "DetectionQValue", "Intensity")
     
-    standard_columns_tmt = c("ProteinName", "PeptideSequence", "Charge", "PSM", 
-                             "Mixture", "TechRepMixture", "Run", "Channel", 
-                             "BioReplicate", "Condition", "Intensity" )
+    standard_columns_tmt = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
+                             "PSM", "Mixture", "TechRepMixture", "Run", 
+                             "Channel", "BioReplicate", "Condition", "Intensity")
     
     if (is.element("Channel", colnames(input))) {
         cols = standard_columns_tmt
