@@ -72,7 +72,6 @@
 ) {
     if (is_tmt) {
         labels = "L"
-        
         groups = unique(input[[group_col]])
         by_group = vector("list", length(groups))
         measurements = unique(input[[measurement_col]])
@@ -88,16 +87,12 @@
         result = data.table::rbindlist(by_group)
         colnames(result) = c("IsotopeLabelType", feature_col, 
                              measurement_col, group_col)
-        
         result[, 2:4, with = FALSE]
-        
     } else {
         labels = unique(input[["IsotopeLabelType"]])
-        
         groups = unique(input[[group_col]])
         by_group = vector("list", length(groups))
         measurements = unique(input[[measurement_col]])
-        
         for (group_id in seq_along(groups)) {
             group = groups[group_id]
             group_filter = input[[group_col]] == group
@@ -112,7 +107,6 @@
         result = data.table::rbindlist(by_group)
         colnames(result) = c("IsotopeLabelType", feature_col, 
                              measurement_col, group_col)
-        
         result
     }
 }
