@@ -377,13 +377,6 @@ MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
     input = input[, !(colnames(input) %in% c("feature", "isZero")), 
                   with = FALSE]
     
-    target_function = ifelse(is.element("Channel", colnames(input)),
-                             "MSstatsTMT::proteinSummarization", 
-                             "MSstats::dataProcess")
-    msg_final = paste("** Finished preprocessing. The dataset is ready",
-                      "to be processed by the", target_function, "function.")
-    getOption("MSstatsLog")("INFO", msg_final)
-    getOption("MSstatsMsg")("INFO", msg_final)
     getOption("MSstatsLog")("INFO", "\n")
     .MSstatsFormat(input)
 }
