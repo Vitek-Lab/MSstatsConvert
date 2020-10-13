@@ -32,7 +32,7 @@
         all_possibilities = merge(
             all_possibilities, 
             unique(input[, c(cols, group_col), with = FALSE]), 
-            all.x = TRUE, by = c("feature", group_col))
+            all.x = TRUE, by = c("feature", group_col), allow.cartesian = TRUE)
         all_possibilities = merge(
             all_possibilities, 
             unique(input[, annotation_cols, with = FALSE]),
