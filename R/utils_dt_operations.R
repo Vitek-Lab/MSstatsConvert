@@ -91,6 +91,8 @@
 #' @return data.table
 #' @keywords internal
 .selectMSstatsColumns = function(input) {
+    Condition = NULL
+    
     standard_columns = c("ProteinName", "PeptideSequence", 
                          "PeptideModifiedSequence", "PrecursorCharge", 
                          "FragmentIon", "ProductCharge", "IsotopeLabelType",
@@ -103,6 +105,14 @@
     
     if (is.element("Channel", colnames(input))) {
         cols = standard_columns_tmt
+        character_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge",
+                           "PSM", "Mixture", "TechRepMixture", "Run",
+                           "Channel", "BioReplicate")
+        input[, c("ProteinName", "PeptideSequence", "PrecursorCharge",
+                  "PSM", "Mixture", "TechRepMixture", "Run",
+                  "Channel", "BioReplicate") := lapply(.SD, as.character),
+              .SDcols = character_cols]
+        input[, Condition := factor(as.character(Condition))]
     } else {
         cols = standard_columns
     }
