@@ -22,22 +22,22 @@ test1_na[, Intensity := ifelse(feature == "a" & Run %in% c(1, 3, 4) &
                                    IsotopeLabelType == "L", 
                                NA, Intensity)]
 test1_nona = filter_NA(test1_na)
-tinytest::expect_equal(
+expect_equal(
     MSstatsConvert:::.makeBalancedDesign(test1_nona, TRUE)[order(ProteinName, feature, 
                                                                  IsotopeLabelType, Run, Fraction), Intensity],
     test1_na$Intensity
 )
 ### List of missing values is returned when fill_missing = FALSE
-tinytest::expect_message(MSstatsConvert:::.makeBalancedDesign(test1_nona, FALSE))
-tinytest::expect_equal(MSstatsConvert:::.getMissingRunsPerFeature(test1_nona)$feature,
-                       "a")
+expect_stdout(MSstatsConvert:::.makeBalancedDesign(test1_nona, FALSE))
+expect_equal(MSstatsConvert:::.getMissingRunsPerFeature(test1_nona)$feature,
+             "a")
 ### All rows in one label are missing
 test2_na = data.table::copy(test_data_1)[order(ProteinName, feature, 
                                                IsotopeLabelType, Run, Fraction)]
 test2_na[, Intensity := ifelse(feature == "a" & IsotopeLabelType == "L", 
                                NA, Intensity)]
 test2_nona = filter_NA(test2_na)
-tinytest::expect_equal(
+expect_equal(
     MSstatsConvert:::.makeBalancedDesign(test2_nona, TRUE)[order(ProteinName, feature, 
                                                                  IsotopeLabelType, Run, Fraction), Intensity],
     test2_na$Intensity
@@ -56,7 +56,7 @@ test_data_tmt_na = data.table::copy(test_data_tmt)[order(ProteinName, feature,
 set.seed(100)
 test_data_tmt_na$Intensity[sample(1:nrow(test_data_tmt), 15)] = NA
 test_data_tmt_nona = filter_NA(test_data_tmt_na)
-tinytest::expect_equal(
+expect_equal(
     MSstatsConvert:::.makeBalancedDesign(test_data_tmt_nona, TRUE)[order(ProteinName, feature, 
                                                                          Run, Channel), Intensity],
     test_data_tmt_na$Intensity
@@ -71,8 +71,8 @@ no_duplicates = data.table::data.table(
     Run = 1:6,
     Intensity = 1:6
 )
-tinytest::expect_silent(MSstatsConvert:::.checkDuplicatedMeasurements(no_duplicates))
-tinytest::expect_error(MSstatsConvert:::.checkDuplicatedMeasurements(
+expect_silent(MSstatsConvert:::.checkDuplicatedMeasurements(no_duplicates))
+expect_error(MSstatsConvert:::.checkDuplicatedMeasurements(
     rbind(no_duplicates,
           no_duplicates[6, ])
 ))
@@ -85,14 +85,15 @@ no_duplicates4 = data.table::copy(no_duplicates)
 no_duplicates4$Intensity[c(1, 6)] = 0
 no_duplicates4$isZero = c(TRUE, rep(FALSE, 5))
 ## Zeros are converted to NA
-tinytest::expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates2), "zero_to_na"),
-                       no_duplicates3)
+expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates2), "zero_to_na"),
+             no_duplicates3)
 ## NAs are converted to 0
-tinytest::expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates3), "na_to_zero"),
-                       no_duplicates2)
+expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates3), "na_to_zero"),
+             no_duplicates2)
 ## For Skyline, 0 that are a result of sum(NA, na.rm = T) are replaced by NA
-tinytest::expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates4))$Intensity,
-                       c(0, 2:5, NA))
+expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates4))$Intensity,
+             c(0, 2:5, NA))
 ## Do nothing if no isZero column and fix_missing = NULL
-tinytest::expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates3), NULL)$Intensity,
-                       no_duplicates3$Intensity)
+expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates3), NULL)$Intensity,
+             no_duplicates3$Intensity)
+

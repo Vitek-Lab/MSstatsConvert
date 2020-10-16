@@ -4,27 +4,27 @@ openms = read.csv(openms)
 
 imported = MSstatsConvert::MSstatsImport(list(input = openms),
                                          "MSstats", "OpenMS")
-tinytest::expect_identical(is(imported), 
+expect_identical(is(imported), 
                            c("MSstatsOpenMSFiles", "MSstatsInputFiles"))
 cleaned = MSstatsConvert::MSstatsClean(imported)
-tinytest::expect_identical(class(cleaned), 
+expect_identical(class(cleaned), 
                            c("data.table", "data.frame"))
 annotation = MSstatsConvert::MSstatsMakeAnnotation(cleaned, NULL)
-tinytest::expect_identical(class(annotation), 
+expect_identical(class(annotation), 
                            c("data.table", "data.frame"))
 processed = MSstatsConvert::MSstatsPreprocess(
     cleaned, annotation, 
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
 )
-tinytest::expect_identical(class(processed), 
+expect_identical(class(processed), 
                            c("data.table", "data.frame"))
-tinytest::expect_true(nrow(processed) > 0)
-tinytest::expect_true(ncol(processed) == 10)
+expect_true(nrow(processed) > 0)
+expect_true(ncol(processed) == 10)
 balanced = MSstatsConvert::MSstatsBalancedDesign(
     processed, 
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
 )
-tinytest::expect_true(nrow(balanced) > 0)
-tinytest::expect_true(ncol(balanced) == 11)
+expect_true(nrow(balanced) > 0)
+expect_true(ncol(balanced) == 11)

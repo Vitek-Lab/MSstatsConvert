@@ -14,7 +14,7 @@ data_for_fractions = data.table::data.table(
 )
 # Tests ----
 ## No fractions - do nothing
-tinytest::expect_identical(
+expect_identical(
     MSstatsConvert:::.handleFractions(data_for_fractions[1:2, ]),
     data_for_fractions[1:2, ]
 )
@@ -29,19 +29,19 @@ data_with_additional_cols$feature = do.call(".combine", list(data_with_additiona
                                                              data_with_additional_cols$PrecursorCharge))
 data_with_additional_cols$id = paste(data_with_additional_cols$feature, 
                                      data_with_additional_cols$Run, sep = "_")
-tinytest::expect_equal(
+expect_equal(
     MSstatsConvert:::.getOverlappingFeatures(data_with_additional_cols),
     c("A_B_3", "A_C_3", "A_D_3")
 )
 ## Non-overlapped feature is not considered
-tinytest::expect_equal(
+expect_equal(
     MSstatsConvert:::.filterOverlapped(data_with_additional_cols, summary_function = mean,
                                        MSstatsConvert:::.getOverlappingFeatures(data_with_additional_cols)),
     data_with_additional_cols[-(c(3:4, 19:20)), ]
 )
 ## Overlap check
 ### Fails, when overlapped
-tinytest::expect_error(
+expect_error(
     MSstatsConvert:::.checkOverlappedFeatures(
         data.table::data.table(
             feature = "A",
@@ -56,7 +56,7 @@ fractions_ok = data.table::data.table(
     Fraction = c(1, 2, 2),
     Intensity = c(NA, 1, 2)
 )
-tinytest::expect_identical(
+expect_identical(
     MSstatsConvert:::.checkOverlappedFeatures(fractions_ok),
     fractions_ok
 )
@@ -70,11 +70,11 @@ fractionated = data.table::data.table(
 picked_A = MSstatsConvert:::.getCorrectFraction(fractionated[feature == "A"])
 picked_B = MSstatsConvert:::.getCorrectFraction(fractionated[feature == "B"])
 ### More observations win
-tinytest::expect_equal(picked_A, 2)
+expect_equal(picked_A, 2)
 ### Higher average intensity wins
-tinytest::expect_equal(picked_B, 2)
+expect_equal(picked_B, 2)
 ### For full data
-tinytest::expect_identical(
+expect_identical(
     MSstatsConvert:::.removeOverlappingFeatures(data.table::copy(fractionated)),
     fractionated[Fraction == 2]
 )
@@ -88,7 +88,7 @@ fractionated_tmt = fractionated = data.table::data.table(
     TechRepMixture = 1
 )
 tmt_unoverlapped = MSstatsConvert:::.handleFractionsTMT(data.table::copy(fractionated_tmt))
-tinytest::expect_identical(
+expect_identical(
     tmt_unoverlapped[, colnames(tmt_unoverlapped) != "Run", with = FALSE],
     fractionated_tmt[Fraction == 2, !(colnames(fractionated_tmt) %in% c("techrun", "id", "Run")), with = FALSE]
 )

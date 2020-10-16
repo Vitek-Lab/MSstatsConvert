@@ -28,15 +28,15 @@ dia_import4 = MSstatsConvert::MSstatsImport(
 dia_cleaned = MSstatsConvert::MSstatsClean(dia_import, TRUE, TRUE)
 dia_cleaned2 = MSstatsConvert::MSstatsClean(dia_import4, TRUE, TRUE)
 dia_cleaned3 = MSstatsConvert::MSstatsClean(dia_import, TRUE, FALSE)
-tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import, FALSE, TRUE))
-tinytest::expect_equal(ncol(dia_cleaned), 5)
-tinytest::expect_equal(ncol(dia_cleaned3), 5)
-tinytest::expect_true(nrow(dia_cleaned) > 0)
-tinytest::expect_true(nrow(dia_cleaned3) > 0)
-tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import, FALSE, FALSE))
-tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import2, TRUE, TRUE))
-tinytest::expect_error(MSstatsConvert::MSstatsClean(dia_import3, TRUE, TRUE))
-tinytest::expect_equal(dia_cleaned, dia_cleaned2)
+expect_error(MSstatsConvert::MSstatsClean(dia_import, FALSE, TRUE))
+expect_equal(ncol(dia_cleaned), 5)
+expect_equal(ncol(dia_cleaned3), 5)
+expect_true(nrow(dia_cleaned) > 0)
+expect_true(nrow(dia_cleaned3) > 0)
+expect_error(MSstatsConvert::MSstatsClean(dia_import, FALSE, FALSE))
+expect_error(MSstatsConvert::MSstatsClean(dia_import2, TRUE, TRUE))
+expect_error(MSstatsConvert::MSstatsClean(dia_import3, TRUE, TRUE))
+expect_equal(dia_cleaned, dia_cleaned2)
 # MaxQuant
 mq_ev = data.table::fread("./raw_data/MaxQuant/mq_ev.csv")
 mq_pg = data.table::fread("./raw_data/MaxQuant/mq_pg.csv")
@@ -47,13 +47,13 @@ mq_cleaned = MSstatsConvert::MSstatsClean(mq_import, protein_id_col = "Proteins"
 mq_cleaned_site = MSstatsConvert::MSstatsClean(mq_import, 
                                                protein_id_col = "Proteins",
                                                remove_by_site = TRUE)
-tinytest::expect_true(nrow(mq_cleaned_site) < nrow(mq_cleaned))
-tinytest::expect_true(nrow(mq_cleaned_site) > 0)
-tinytest::expect_equal(
+expect_true(nrow(mq_cleaned_site) < nrow(mq_cleaned))
+expect_true(nrow(mq_cleaned_site) > 0)
+expect_equal(
     ncol(MSstatsConvert::MSstatsClean(mq_import, protein_id_col = "Proteins")),
-    8
+    7
 )
-tinytest::expect_true(nrow(mq_cleaned) > 0)
+expect_true(nrow(mq_cleaned) > 0)
 # MaxQuantTMT
 mqtmt_ev = data.table::fread("./raw_data/MaxQuantTMT/mq_ev.csv")
 mqtmt_pg = data.table::fread("./raw_data/MaxQuantTMT/mq_pg.csv")
@@ -62,11 +62,11 @@ mqtmt_import = MSstatsConvert::MSstatsImport(list(evidence = mqtmt_ev,
                                              "MSstatsTMT", "MaxQuant")
 mqtmt_cleaned = MSstatsConvert::MSstatsClean(mqtmt_import, 
                                              protein_id_col = "Proteins")
-tinytest::expect_equal(
+expect_equal(
     ncol(mqtmt_cleaned),
     8
 )
-tinytest::expect_true(nrow(mq_cleaned) > 0)
+expect_true(nrow(mq_cleaned) > 0)
 # OpenMS
 openms_input = data.table::fread("./raw_data/OpenMS/openms_input.csv")
 openms_import = MSstatsConvert::MSstatsImport(list(input = openms_input), 
@@ -74,23 +74,23 @@ openms_import = MSstatsConvert::MSstatsImport(list(input = openms_input),
 openms_import2 = MSstatsConvert::MSstatsImport(list(input = openms_input[, -6]), 
                                                "MSstats", "OpenMS")
 om_cleaned = MSstatsConvert::MSstatsClean(openms_import)
-tinytest::expect_equal(ncol(om_cleaned), 10)
-tinytest::expect_equal(ncol(MSstatsConvert::MSstatsClean(openms_import2)), 10)
-tinytest::expect_true(nrow(om_cleaned) > 0)
+expect_equal(ncol(om_cleaned), 10)
+expect_equal(ncol(MSstatsConvert::MSstatsClean(openms_import2)), 10)
+expect_true(nrow(om_cleaned) > 0)
 # OpenMSTMT
 openmstmt_input = data.table::fread("./raw_data/OpenMSTMT/openmstmt_input.csv")
 openmstmt_import = MSstatsConvert::MSstatsImport(list(input = openmstmt_input), 
                                                  "MSstatsTMT", "OpenMS")
 omtmt_cleaned = MSstatsConvert::MSstatsClean(openmstmt_import)
-tinytest::expect_equal(ncol(omtmt_cleaned), 12)
-tinytest::expect_true(nrow(omtmt_cleaned) > 0)
+expect_equal(ncol(omtmt_cleaned), 12)
+expect_true(nrow(omtmt_cleaned) > 0)
 # OpenSWATH
 openswath_input = data.table::fread("./raw_data/OpenSWATH/openswath_input.csv")
 openswath_import = MSstatsConvert::MSstatsImport(list(input = openswath_input), 
                                                  "MSstats", "OpenSWATH")
 os_cleaned = MSstatsConvert::MSstatsClean(openswath_import)
-tinytest::expect_equal(ncol(os_cleaned), 8)
-tinytest::expect_true(nrow(os_cleaned) > 0)
+expect_equal(ncol(os_cleaned), 8)
+expect_true(nrow(os_cleaned) > 0)
 # PD
 pd_input = data.table::fread("./raw_data/PD/pd_input.csv")
 pd_input_frac = data.table::copy(pd_input)
@@ -107,12 +107,12 @@ pd_cleaned_frac = MSstatsConvert::MSstatsClean(
     pd_import_frac, protein_id_column = "ProteinGroupAccessions",
     sequence_column = "Sequence", quantification_column = "Intensity",
     remove_shared = TRUE)
-tinytest::expect_equal(ncol(pd_cleaned), 5)
-tinytest::expect_true(nrow(pd_cleaned) > 0)
-tinytest::expect_equal(pd_cleaned, 
-                       pd_cleaned_frac[, 
-                                       colnames(pd_cleaned_frac) != "Fraction", 
-                                       with = FALSE])
+expect_equal(ncol(pd_cleaned), 5)
+expect_true(nrow(pd_cleaned) > 0)
+expect_equal(pd_cleaned, 
+             pd_cleaned_frac[, 
+                             colnames(pd_cleaned_frac) != "Fraction", 
+                             with = FALSE])
 # PD-TMT
 pdtmt_input = data.table::fread("./raw_data/PDTMT/pdtmt_input.csv")
 pdtmt_input2 = data.table::copy(pdtmt_input)
@@ -131,24 +131,24 @@ pdtmt_cleaned = MSstatsConvert::MSstatsClean(pdtmt_import,
                                              protein_id_column = "ProteinAccessions",
                                              remove_shared = TRUE)
 pdtmt_cleaned2 = MSstatsConvert::MSstatsClean(pdtmt_import2, 
-                                             protein_id_column = "ProteinMasterAccessions",
-                                             remove_shared = TRUE)
+                                              protein_id_column = "ProteinMasterAccessions",
+                                              remove_shared = TRUE)
 pdtmt_cleaned3 = MSstatsConvert::MSstatsClean(pdtmt_import3, 
                                               protein_id_column = "ProteinMasterAccessions",
                                               remove_shared = TRUE)
-tinytest::expect_equal(pdtmt_cleaned, pdtmt_cleaned2)
-tinytest::expect_equal(pdtmt_cleaned[, colnames(pdtmt_cleaned) != "QuanInfo", 
-                                     with = FALSE], 
-                       pdtmt_cleaned3[, colnames(pdtmt_cleaned) != "QuanInfo", 
-                                      with = FALSE])
-tinytest::expect_error(MSstatsConvert::MSstatsClean(pdtmt_import, 
-                                                    protein_id_column = "ProteinAccessions",
-                                                    remove_shared = TRUE,
-                                                    intensity_columns_regexp = "Nothing"))
-tinytest::expect_equal(
+expect_equal(pdtmt_cleaned, pdtmt_cleaned2)
+expect_equal(pdtmt_cleaned[, colnames(pdtmt_cleaned) != "QuanInfo", 
+                           with = FALSE], 
+             pdtmt_cleaned3[, colnames(pdtmt_cleaned) != "QuanInfo", 
+                            with = FALSE])
+expect_error(MSstatsConvert::MSstatsClean(pdtmt_import, 
+                                          protein_id_column = "ProteinAccessions",
+                                          remove_shared = TRUE,
+                                          intensity_columns_regexp = "Nothing"))
+expect_equal(
     ncol(pdtmt_cleaned), 11
 )
-tinytest::expect_true(nrow(pdtmt_cleaned) > 0)
+expect_true(nrow(pdtmt_cleaned) > 0)
 # Progenesis
 progenesis_input = data.table::fread("./raw_data/Progenesis/progenesis_input.csv")
 progenesis_import = MSstatsConvert::MSstatsImport(list(input = progenesis_input),
@@ -159,9 +159,9 @@ progenesis_import2 = MSstatsConvert::MSstatsImport(
 runs = unique(data.table::fread("./raw_data/Progenesis/progenesis_annot.csv")$Run)
 pg_cleaned = MSstatsConvert::MSstatsClean(progenesis_import, runs)
 pg_cleaned2 = MSstatsConvert::MSstatsClean(progenesis_import2, runs) 
-tinytest::expect_equal(ncol(pg_cleaned), 5)
-tinytest::expect_true(nrow(pg_cleaned) > 0)
-tinytest::expect_equal(pg_cleaned, pg_cleaned2)
+expect_equal(ncol(pg_cleaned), 5)
+expect_true(nrow(pg_cleaned) > 0)
+expect_equal(pg_cleaned, pg_cleaned2)
 # Skyline
 skyline_input = data.table::fread("./raw_data/Skyline/skyline_input.csv")
 skyline_input2 = data.table::copy(skyline_input)
@@ -177,10 +177,10 @@ skyline_import3 = MSstatsConvert::MSstatsImport(list(input = skyline_input3),
                                                 "MSstats", "Skyline")
 sl_cleaned = MSstatsConvert::MSstatsClean(skyline_import)
 sl_cleaned2 = MSstatsConvert::MSstatsClean(skyline_import2)
-tinytest::expect_equal(ncol(sl_cleaned), 13)
-tinytest::expect_true(nrow(sl_cleaned) > 0)
-tinytest::expect_equal(sl_cleaned, sl_cleaned2[, colnames(sl_cleaned), with = FALSE])
-tinytest::expect_error(MSstatsConvert:::.checkDDA(MSstatsConvert::MSstatsClean(skyline_import3)))
+expect_equal(ncol(sl_cleaned), 13)
+expect_true(nrow(sl_cleaned) > 0)
+expect_equal(sl_cleaned, sl_cleaned2[, colnames(sl_cleaned), with = FALSE])
+expect_error(MSstatsConvert:::.checkDDA(MSstatsConvert::MSstatsClean(skyline_import3)))
 # SpectroMine
 spectromine_input = data.table::fread("./raw_data/SpectroMine/spectromine_input.csv")
 spectromine_import = MSstatsConvert::MSstatsImport(list(input = spectromine_input), 
@@ -188,9 +188,9 @@ spectromine_import = MSstatsConvert::MSstatsImport(list(input = spectromine_inpu
 spectromine_import_error = MSstatsConvert::MSstatsImport(list(input = spectromine_input[, 1:19]),
                                                          "MSstatsTMT", "SpectroMine")
 sm_cleaned = MSstatsConvert::MSstatsClean(spectromine_import)
-tinytest::expect_equal(ncol(sm_cleaned), 9)
-tinytest::expect_true(nrow(sm_cleaned) > 0)
-tinytest::expect_error(MSstatsConvert::MSstatsClean(spectromine_import_error))
+expect_equal(ncol(sm_cleaned), 9)
+expect_true(nrow(sm_cleaned) > 0)
+expect_error(MSstatsConvert::MSstatsClean(spectromine_import_error))
 # Spectronaut
 spectronaut_input = data.table::fread("./raw_data/Spectronaut/spectronaut_input.csv")
 spectronaut_input2 = data.table::copy(spectronaut_input)
@@ -206,6 +206,7 @@ sn_cleaned = MSstatsConvert::MSstatsClean(spectronaut_import,
                                           intensity = "PeakArea")
 sn_cleaned2 = MSstatsConvert::MSstatsClean(spectronaut_import2,
                                            intensity = "PeakArea")
-tinytest::expect_equal(ncol(sn_cleaned), 9)
-tinytest::expect_true(nrow(sn_cleaned) > 0)
-tinytest::expect_equal(sn_cleaned, sn_cleaned2)
+expect_equal(ncol(sn_cleaned), 9)
+expect_true(nrow(sn_cleaned) > 0)
+expect_equal(sn_cleaned, sn_cleaned2)
+
