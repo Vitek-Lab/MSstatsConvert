@@ -26,7 +26,7 @@ An extensive documentation can be found on the [official website of the package]
 ## Contributing
 
 We welcome contributions from the community. For details on how to contribute to the
-development of MSsstas, please refer to the [CONTRIBUTING](https://github.com/Vitek-Lab/MSstatsConvert/.github/CONTRIBUTING.md) file.
+development of MSsstas, please refer to the [CONTRIBUTING](https://github.com/Vitek-Lab/MSstatsConvert/blob/master/.github/CONTRIBUTING.md) file.
 
 ## License
 
