@@ -47,6 +47,8 @@
 #' If not provided, such a file will be created automatically.
 #' If `append = TRUE`, has to be a valid path to a file.
 #' @param base start of the file name.
+#' @param pkg_name currently "MSstats", "MSstatsPTM" or "MSstatsTMT". 
+#' Each package can use its own separate log settings.
 #' 
 #' @return TRUE invisibly in case of successful logging setup.
 #' @export
@@ -64,7 +66,7 @@
 #' 
 MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
                                verbose = TRUE, log_file_path = NULL,
-                               base = "MSstats_log_") {
+                               base = "MSstats_log_", pkg_name = "MSstats") {
     checkmate::assertLogical(use_log_file)
     checkmate::assertLogical(append)
     checkmate::assertLogical(verbose)
@@ -76,28 +78,27 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     }
     
     if (use_log_file) {
-        if (append) {
-            options("MSstatsLog" = log4r::file_appender(log_file_path))
+        if (!is.null(log_file_path)) {
+            file_appender = log4r::file_appender(log_file_path,
+                                                 append = append)            
         } else {
-            if (!is.null(log_file_path)) {
-                options("MSstatsLog" = log4r::file_appender(log_file_path),
-                        append = append)
-            } else {
-                time_now = Sys.time()
-                path = paste0(base, gsub("[ :\\-]", "_", time_now), 
-                              ".log")
-                options("MSstatsLog" = log4r::file_appender(path))
-            }
+            time_now = Sys.time()
+            path = paste0(base, gsub("[ :\\-]", "_", time_now), 
+                          ".log")
+            file_appender = log4r::file_appender(log_file_path)   
         }
     } else {
-        options("MSstatsLog" = .nullAppender)
+        file_appender = .nullAppender
     }
     
     if (verbose) {
-        options("MSstatsMsg" = console_appender())
+        console_appender = console_appender()
     } else {
-        options("MSstatsMsg" = .nullAppender)
+        console_appender = .nullAppender
     }
+    loggers = list(file_appender, console_appender)
+    names(loggers) = paste0(pkg_name, c("Log", "Msg"))
+    do.call(options, loggers)
     invisible(TRUE)
 }
 
