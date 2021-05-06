@@ -9,7 +9,8 @@ MSstatsLogsSettings(
   append = FALSE,
   verbose = TRUE,
   log_file_path = NULL,
-  base = "MSstats_log_"
+  base = "MSstats_log_",
+  pkg_name = "MSstats"
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ If not provided, such a file will be created automatically.
 If \code{append = TRUE}, has to be a valid path to a file.}
 
 \item{base}{start of the file name.}
+
+\item{pkg_name}{currently "MSstats", "MSstatsPTM" or "MSstatsTMT".
+Each package can use its own separate log settings.}
 }
 \value{
 TRUE invisibly in case of successful logging setup.
