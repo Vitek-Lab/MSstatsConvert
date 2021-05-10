@@ -40,6 +40,7 @@
                                              "Useinquantitation"))
     cols = c(cols, raw_abundances_col_ids)
     prog_input = prog_input[, cols, with = FALSE]
+    data.table::setnames(prog_input, "Ions", "Charge", skip_absent = TRUE)
     data.table::setnames(prog_input, 
                          c(protein_col, "Charge"), 
                          c("ProteinName", "PrecursorCharge"),
