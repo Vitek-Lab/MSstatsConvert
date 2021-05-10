@@ -1,4 +1,4 @@
-# MSstatsConvert 1.1.0
+# MSstatsConvert 1.1.1
 
 * Minor bug fixes
 * Updated MSstatsLogsSettings function to allow differents settings for different packages

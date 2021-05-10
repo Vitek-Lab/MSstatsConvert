@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSstatsConvert</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -171,9 +171,9 @@ If "na_to_zero", missing values will be replaced by zeros.</p></td>
 <span class='no'>unbalanced_data</span> <span class='kw'>=</span> <span class='kw pkg'>data.table</span><span class='kw ns'>::</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span>(<span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>unbalanced_data</span>))
 <span class='no'>balanced</span> <span class='kw'>=</span> <span class='fu'>MSstatsBalancedDesign</span>(<span class='no'>unbalanced_data</span>,
                                  <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"PeptideSequence"</span>, <span class='st'>"PrecursorCharge"</span>,
-                                   <span class='st'>"FragmentIon"</span>, <span class='st'>"ProductCharge"</span>))</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:39] ** Features with one or two measurements across runs are removed.
-#&gt; INFO  [2021-05-05 12:54:39] ** Fractionation handled.
-#&gt; INFO  [2021-05-05 12:54:39] ** Updated quantification data to make balanced design. Missing values are marked by NA</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>balanced</span>) <span class='co'># Now balanced has additional rows (with Intensity = NA)</span></div><div class='output co'>#&gt; [1] 721  11</div><div class='input'># for runs that were not included in the unbalanced_data table
+                                   <span class='st'>"FragmentIon"</span>, <span class='st'>"ProductCharge"</span>))</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:38] ** Features with one or two measurements across runs are removed.
+#&gt; INFO  [2021-05-10 23:03:38] ** Fractionation handled.
+#&gt; INFO  [2021-05-10 23:03:38] ** Updated quantification data to make balanced design. Missing values are marked by NA</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>balanced</span>) <span class='co'># Now balanced has additional rows (with Intensity = NA)</span></div><div class='output co'>#&gt; [1] 721  11</div><div class='input'># for runs that were not included in the unbalanced_data table
 
 </div></pre>
   </div>

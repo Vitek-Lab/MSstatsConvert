@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSstatsConvert</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -165,7 +165,7 @@ handling different versions of each signal processing tools.</p></td>
 <span class='no'>evidence</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>evidence_path</span>)
 <span class='no'>pg</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>pg_path</span>)
 <span class='no'>imported</span> <span class='kw'>=</span> <span class='fu'>MSstatsImport</span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>evidence</span> <span class='kw'>=</span> <span class='no'>evidence</span>, <span class='kw'>protein_groups</span> <span class='kw'>=</span> <span class='no'>pg</span>),
-                         <span class='st'>"MSstats"</span>, <span class='st'>"MaxQuant"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:41] ** Raw data from MaxQuant imported successfully.</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/class.html'>class</a></span>(<span class='no'>imported</span>)</div><div class='output co'>#&gt; [1] "MSstatsMaxQuantFiles"
+                         <span class='st'>"MSstats"</span>, <span class='st'>"MaxQuant"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:41] ** Raw data from MaxQuant imported successfully.</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/class.html'>class</a></span>(<span class='no'>imported</span>)</div><div class='output co'>#&gt; [1] "MSstatsMaxQuantFiles"
 #&gt; attr(,"package")
 #&gt; [1] "MSstatsConvert"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='fu'><a href='getInputFile.html'>getInputFile</a></span>(<span class='no'>imported</span>, <span class='st'>"evidence"</span>))</div><div class='output co'>#&gt;       Sequence Length Modifications Modifiedsequence OxidationMProbabilities
 #&gt; 1: AEAPAAAPAAK     11    Unmodified    _AEAPAAAPAAK_                        

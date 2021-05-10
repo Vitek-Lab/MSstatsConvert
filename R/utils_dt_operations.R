@@ -60,12 +60,12 @@
 #' @return character vector
 #' @keywords internal
 .standardizeColnames = function(col_names) {
-    col_names = gsub(" ", ".", col_names, fixed = TRUE)
-    col_names = gsub("\\[|\\]|\\%", ".", col_names, fixed = FALSE)
-    col_names = gsub("/", "", col_names, fixed = TRUE)
-    col_names = gsub("+", "", col_names, fixed = TRUE)
-    col_names = gsub("#", "X.", col_names, fixed = TRUE)
-    gsub("[\\.]+", "", col_names)
+    col_names = stringi::stri_replace_all(col_names, fixed = " ", replacement = ".")
+    col_names = stringi::stri_replace_all(col_names, regex = "\\[|\\]|\\%", replacement = ".")
+    col_names = stringi::stri_replace_all(col_names, fixed = "/", replacement = "")
+    col_names = stringi::stri_replace_all(col_names, fixed = "+", replacement = "")
+    col_names = stringi::stri_replace_all(col_names, fixed = "#", replacement = "X.")
+    stringi::stri_replace_all(col_names, regex = "[\\.]+", replacement = "")
 }
 
 
