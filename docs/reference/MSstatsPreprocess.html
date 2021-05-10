@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSstatsConvert</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -219,16 +219,16 @@ will be added to the output <code>data.frame</code>.</p></td>
 <span class='no'>evidence</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>evidence_path</span>)
 <span class='no'>pg</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>pg_path</span>)
 <span class='no'>imported</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsImport.html'>MSstatsImport</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>evidence</span> <span class='kw'>=</span> <span class='no'>evidence</span>, <span class='kw'>protein_groups</span> <span class='kw'>=</span> <span class='no'>pg</span>),
-                         <span class='st'>"MSstats"</span>, <span class='st'>"MaxQuant"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** Raw data from MaxQuant imported successfully.</div><div class='input'><span class='no'>cleaned_data</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsClean.html'>MSstatsClean</a></span>(<span class='no'>imported</span>, <span class='kw'>protein_id_col</span> <span class='kw'>=</span> <span class='st'>"Proteins"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Potentialcontaminant equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Reverse equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Potentialcontaminant equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Reverse equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** + Contaminant, + Reverse, + Potential.contaminant proteins are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Raw data from MaxQuant cleaned successfully.</div><div class='input'><span class='no'>annot_path</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"tinytest/raw_data/MaxQuant/annotation.csv"</span>,
+                         <span class='st'>"MSstats"</span>, <span class='st'>"MaxQuant"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:42] ** Raw data from MaxQuant imported successfully.</div><div class='input'><span class='no'>cleaned_data</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsClean.html'>MSstatsClean</a></span>(<span class='no'>imported</span>, <span class='kw'>protein_id_col</span> <span class='kw'>=</span> <span class='st'>"Proteins"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:42] ** Rows with values of Potentialcontaminant equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:42] ** Rows with values of Reverse equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:42] ** Rows with values of Potentialcontaminant equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:42] ** Rows with values of Reverse equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:42] ** + Contaminant, + Reverse, + Potential.contaminant proteins are removed.
+#&gt; INFO  [2021-05-10 23:03:42] ** Raw data from MaxQuant cleaned successfully.</div><div class='input'><span class='no'>annot_path</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"tinytest/raw_data/MaxQuant/annotation.csv"</span>,
                          <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"MSstatsConvert"</span>)
 <span class='no'>mq_annot</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsMakeAnnotation.html'>MSstatsMakeAnnotation</a></span>(<span class='no'>cleaned_data</span>, <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>annot_path</span>),
-                                 <span class='kw'>Run</span> <span class='kw'>=</span> <span class='st'>"Rawfile"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** Using provided annotation.
-#&gt; INFO  [2021-05-05 12:54:42] ** Run labels were standardized to remove symbols such as '.' or '%'.</div><div class='input'>
+                                 <span class='kw'>Run</span> <span class='kw'>=</span> <span class='st'>"Rawfile"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:42] ** Using provided annotation.
+#&gt; INFO  [2021-05-10 23:03:42] ** Run labels were standardized to remove symbols such as '.' or '%'.</div><div class='input'>
 <span class='co'># To filter M-peptides and oxidatin peptides </span>
 <span class='no'>m_filter</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>col_name</span> <span class='kw'>=</span> <span class='st'>"PeptideSequence"</span>, <span class='kw'>pattern</span> <span class='kw'>=</span> <span class='st'>"M"</span>,
                 <span class='kw'>filter</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>drop_column</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
@@ -239,19 +239,19 @@ will be added to the output <code>data.frame</code>.</p></td>
 <span class='kw'>feature_columns</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"PeptideSequence"</span>, <span class='st'>"PrecursorCharge"</span>),
 <span class='kw'>columns_to_fill</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>FragmentIon</span> <span class='kw'>=</span> <span class='fl'>NA</span>, <span class='kw'>ProductCharge</span> <span class='kw'>=</span> <span class='fl'>NA</span>),
 <span class='kw'>pattern_filtering</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>oxidation</span> <span class='kw'>=</span> <span class='no'>oxidation_filter</span>, <span class='kw'>m</span> <span class='kw'>=</span> <span class='no'>m_filter</span>)
-)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** The following options are used:
+)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:42] ** The following options are used:
 #&gt;   - Features will be defined by the columns: PeptideSequence, PrecursorCharge
 #&gt;   - Shared peptides will be removed.
 #&gt;   - Proteins with a single feature will be removed.
 #&gt;   - Features with less than 3 measurements across runs will be removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Sequences containing Oxidation are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Sequences containing M are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Features with all missing measurements across runs are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Shared peptides are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Multiple measurements in a feature and a run are summarized by summaryforMultipleRows: max
-#&gt; INFO  [2021-05-05 12:54:42] ** Features with one or two measurements across runs are removed.
-#&gt; INFO  [2021-05-05 12:54:42] Proteins with a single feature are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Run annotation merged with quantification data.</div><div class='input'><span class='co'># Output in the standard MSstats format</span>
+#&gt; INFO  [2021-05-10 23:03:42] ** Sequences containing Oxidation are removed.
+#&gt; INFO  [2021-05-10 23:03:42] ** Sequences containing M are removed.
+#&gt; INFO  [2021-05-10 23:03:42] ** Features with all missing measurements across runs are removed.
+#&gt; INFO  [2021-05-10 23:03:42] ** Shared peptides are removed.
+#&gt; INFO  [2021-05-10 23:03:42] ** Multiple measurements in a feature and a run are summarized by summaryforMultipleRows: max
+#&gt; INFO  [2021-05-10 23:03:42] ** Features with one or two measurements across runs are removed.
+#&gt; INFO  [2021-05-10 23:03:42] Proteins with a single feature are removed.
+#&gt; INFO  [2021-05-10 23:03:42] ** Run annotation merged with quantification data.</div><div class='input'><span class='co'># Output in the standard MSstats format</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>msstats_format</span>)</div><div class='output co'>#&gt;                                            Run PeptideSequence PrecursorCharge
 #&gt; 1: 121219_S_CCES_01_01_LysC_Try_1to10_Mixt_1_1     AEAPAAAPAAK               2
 #&gt; 2: 121219_S_CCES_01_02_LysC_Try_1to10_Mixt_1_2     AEAPAAAPAAK               2

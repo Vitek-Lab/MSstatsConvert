@@ -1,3 +1,8 @@
+# MSstatsConvert 1.1.1
+
+* Minor bug fixes
+* Updated MSstatsLogsSettings function to allow differents settings for different packages
+
 # MSstatsConvert 0.99.0
 
 * Added logging utitilies: `MSstatsLogsSettings`, `MSstatsSaveSesionInfo`.

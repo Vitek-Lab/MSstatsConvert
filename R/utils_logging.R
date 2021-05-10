@@ -83,8 +83,8 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
                                                  append = append)            
         } else {
             time_now = Sys.time()
-            path = paste0(base, gsub("[ :\\-]", "_", time_now), 
-                          ".log")
+            log_file_path = paste0(base, gsub("[ :\\-]", "_", time_now), 
+                                   ".log")
             file_appender = log4r::file_appender(log_file_path)   
         }
     } else {

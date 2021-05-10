@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MSstatsConvert</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.1</span>
       </span>
     </div>
 
@@ -155,16 +155,16 @@
 <span class='no'>evidence</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>evidence_path</span>)
 <span class='no'>pg</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>pg_path</span>)
 <span class='no'>imported</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsImport.html'>MSstatsImport</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>evidence</span> <span class='kw'>=</span> <span class='no'>evidence</span>, <span class='kw'>protein_groups</span> <span class='kw'>=</span> <span class='no'>pg</span>),
-                         <span class='st'>"MSstats"</span>, <span class='st'>"MaxQuant"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** Raw data from MaxQuant imported successfully.</div><div class='input'><span class='no'>cleaned_data</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsClean.html'>MSstatsClean</a></span>(<span class='no'>imported</span>, <span class='kw'>protein_id_col</span> <span class='kw'>=</span> <span class='st'>"Proteins"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Potentialcontaminant equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Reverse equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Potentialcontaminant equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** Rows with values of Reverse equal to + are removed 
-#&gt; INFO  [2021-05-05 12:54:42] ** + Contaminant, + Reverse, + Potential.contaminant proteins are removed.
-#&gt; INFO  [2021-05-05 12:54:42] ** Raw data from MaxQuant cleaned successfully.</div><div class='input'><span class='no'>annot_path</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"tinytest/raw_data/MaxQuant/annotation.csv"</span>,
+                         <span class='st'>"MSstats"</span>, <span class='st'>"MaxQuant"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:41] ** Raw data from MaxQuant imported successfully.</div><div class='input'><span class='no'>cleaned_data</span> <span class='kw'>=</span> <span class='fu'><a href='MSstatsClean.html'>MSstatsClean</a></span>(<span class='no'>imported</span>, <span class='kw'>protein_id_col</span> <span class='kw'>=</span> <span class='st'>"Proteins"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:41] ** Rows with values of Potentialcontaminant equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:41] ** Rows with values of Reverse equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:41] ** Rows with values of Potentialcontaminant equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:41] ** Rows with values of Reverse equal to + are removed 
+#&gt; INFO  [2021-05-10 23:03:41] ** + Contaminant, + Reverse, + Potential.contaminant proteins are removed.
+#&gt; INFO  [2021-05-10 23:03:41] ** Raw data from MaxQuant cleaned successfully.</div><div class='input'><span class='no'>annot_path</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"tinytest/raw_data/MaxQuant/annotation.csv"</span>,
                          <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"MSstatsConvert"</span>)
 <span class='no'>mq_annot</span> <span class='kw'>=</span> <span class='fu'>MSstatsMakeAnnotation</span>(<span class='no'>cleaned_data</span>, <span class='fu'><a href='https://rdrr.io/r/utils/read.table.html'>read.csv</a></span>(<span class='no'>annot_path</span>),
-                                 <span class='kw'>Run</span> <span class='kw'>=</span> <span class='st'>"Rawfile"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-05 12:54:42] ** Using provided annotation.
-#&gt; INFO  [2021-05-05 12:54:42] ** Run labels were standardized to remove symbols such as '.' or '%'.</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>mq_annot</span>)</div><div class='output co'>#&gt;                                            Run Condition BioReplicate
+                                 <span class='kw'>Run</span> <span class='kw'>=</span> <span class='st'>"Rawfile"</span>)</div><div class='output co'>#&gt; INFO  [2021-05-10 23:03:41] ** Using provided annotation.
+#&gt; INFO  [2021-05-10 23:03:41] ** Run labels were standardized to remove symbols such as '.' or '%'.</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>mq_annot</span>)</div><div class='output co'>#&gt;                                            Run Condition BioReplicate
 #&gt; 1: 121219_S_CCES_01_01_LysC_Try_1to10_Mixt_1_1         1            1
 #&gt; 2: 121219_S_CCES_01_02_LysC_Try_1to10_Mixt_1_2         1            1
 #&gt; 3: 121219_S_CCES_01_03_LysC_Try_1to10_Mixt_1_3         1            1
