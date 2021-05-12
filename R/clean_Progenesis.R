@@ -36,7 +36,7 @@
     protein_col = .findAvailable(c("Protein", "Accession"), 
                                  colnames(prog_input))
     cols = which(colnames(prog_input) %in% c(protein_col, "Modifications", 
-                                             "Sequence", "Charge",
+                                             "Sequence", "Charge", "Ions",
                                              "Useinquantitation"))
     cols = c(cols, raw_abundances_col_ids)
     prog_input = prog_input[, cols, with = FALSE]
