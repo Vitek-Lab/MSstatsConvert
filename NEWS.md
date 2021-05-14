@@ -1,3 +1,8 @@
+# MSstatsConvert 1.1.2
+
+* Updated Spectronaut converter to allow annotation in input file.
+
+
 # MSstatsConvert 1.1.1
 
 * Minor bug fixes
