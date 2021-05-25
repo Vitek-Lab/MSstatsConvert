@@ -53,7 +53,8 @@
             feature_columns = c("PSM", "Run")
         } else {
             feature_columns = intersect(colnames(input),
-                                        c("PeptideModifiedSequence", "Charge",
+                                        c("IsotopeLabelType",
+                                          "PeptideModifiedSequence", "Charge",
                                           "PeptideSequence", "PrecursorCharge",
                                           "FragmentIon", "ProductCharge"))
         }
