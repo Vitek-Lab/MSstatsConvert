@@ -53,12 +53,12 @@
             feature_columns = c("PSM", "Run")
         } else {
             feature_columns = intersect(colnames(input),
-                                        c("IsotopeLabelType",
-                                          "PeptideModifiedSequence", "Charge",
+                                        c("PeptideModifiedSequence", "Charge",
                                           "PeptideSequence", "PrecursorCharge",
                                           "FragmentIon", "ProductCharge"))
         }
     }
+    feature_columns = setdiff(feature_columns, "IsotopeLabelType")
     
     input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
           by = feature_columns]
