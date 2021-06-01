@@ -1,3 +1,7 @@
+# MSstatsConvert 1.2.1
+
+* Fixed a bug related to SRM inputs.
+
 # MSstatsConvert 1.1.2
 
 * Updated Spectronaut converter to allow annotation in input file.
