@@ -58,6 +58,7 @@
                                           "FragmentIon", "ProductCharge"))
         }
     }
+    feature_columns = setdiff(feature_columns, "IsotopeLabelType")
     
     input[, n_obs := sum(Intensity > min_intensity, na.rm = TRUE),
           by = feature_columns]
