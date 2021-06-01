@@ -206,7 +206,7 @@ sn_cleaned = MSstatsConvert::MSstatsClean(spectronaut_import,
                                           intensity = "PeakArea")
 sn_cleaned2 = MSstatsConvert::MSstatsClean(spectronaut_import2,
                                            intensity = "PeakArea")
-expect_equal(ncol(sn_cleaned), 9)
+expect_equal(ncol(sn_cleaned), 11)
 expect_true(nrow(sn_cleaned) > 0)
 expect_equal(sn_cleaned, sn_cleaned2)
 

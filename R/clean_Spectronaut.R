@@ -18,15 +18,17 @@
   f_charge_col = .findAvailable(c("FCharge", "FFrgZ"), colnames(spec_input))
   pg_qval_col = .findAvailable(c("PGQvalue"), colnames(spec_input))
   cols = c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon", 
-           f_charge_col, "RFileName", "EGQvalue", pg_qval_col, 
-           paste0("F", intensity))
+           f_charge_col, "RFileName", "RCondition", "RReplicate", 
+           "EGQvalue", pg_qval_col, paste0("F", intensity))
+  cols = intersect(cols, colnames(spec_input))
   spec_input = spec_input[, cols, with = FALSE]
   data.table::setnames(
     spec_input, 
     c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon",
-      f_charge_col, "RFileName", paste0("F", intensity)),
+      f_charge_col, "RFileName", paste0("F", intensity), "RCondition", "RReplicate"),
     c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
-      "ProductCharge", "Run", "Intensity"), skip_absent = TRUE)
+      "ProductCharge", "Run", "Intensity", "Condition", "BioReplicate"), 
+    skip_absent = TRUE)
   .logSuccess("Spectronaut", "clean")
   spec_input
 }
