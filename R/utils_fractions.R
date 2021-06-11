@@ -74,7 +74,10 @@
                 }
             }
         }
-        output_cols = !(colnames(single_run) %in% c("run", "techrun", "id"))
+          output_cols = !(colnames(single_run) %in% c("run", "techrun", "id",
+                                                      "Run", "Fraction",
+                                                      "QuanInfo", "IonsScore",
+                                                      "IsolationInterference"))
         unoverlapped_list[[technical_run]] = single_run[, output_cols,
                                                         with = FALSE]
     }
