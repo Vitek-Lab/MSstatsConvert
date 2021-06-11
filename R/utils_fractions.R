@@ -64,11 +64,8 @@
                     if (data.table::uniqueN(single_run$Run) > 1) {
                         single_run = single_run[
                             , list(Intensity = mean(Intensity, na.rm = TRUE)),
-                            by = setdiff(colnames(single_run), 
-                                         c("Run", "Intensity",
-                                           "Fraction", "id", "n_psms",
-                                           "QuanInfo", "IonsScore",
-                                           "IsolationInterference"))
+                            by = .(ProteinName, PeptideSequence, Charge, PSM, Mixture, 
+                                   TechRepMixture, Channel, Condition, BioReplicate)
                             ]
                     }
                 }
