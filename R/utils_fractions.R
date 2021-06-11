@@ -81,7 +81,7 @@
         unoverlapped_list[[technical_run]] = single_run[, output_cols,
                                                         with = FALSE]
     }
-    input = rbindlist(unoverlapped_list)
+    input = rbindlist(unoverlapped_list, names=TRUE)
     input[, Run := paste(Mixture, TechRepMixture, sep = "_")]
     input
 }
