@@ -61,7 +61,8 @@
                                 "use the fraction with maximal abundance.")
                     getOption("MSstatsLog")("INFO", msg)
                     getOption("MSstatsMsg")("INFO", msg)
-                    if (data.table::uniqueN(single_run$Run) > 1) {
+                    features_to_remove = .getOverlappingFeatures(single_run)
+                    if (length(features_to_remove) > 0) {
                         single_run = single_run[
                             , list(Intensity = mean(Intensity, na.rm = TRUE)),
                             by = .(ProteinName, PeptideSequence, Charge, PSM, Mixture, 
