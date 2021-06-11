@@ -74,12 +74,9 @@
                 }
             }
         }
-          output_cols = !(colnames(single_run) %in% c("run", "techrun", "id",
-                                                      "Run", "Fraction",
-                                                      "QuanInfo", "IonsScore",
-                                                      "IsolationInterference"))
-        unoverlapped_list[[technical_run]] = single_run[, output_cols,
-                                                        with = FALSE]
+        unoverlapped_list[[technical_run]] = single_run[, .(ProteinName, PeptideSequence, Charge, PSM,
+                                                            Mixture, TechRepMixture, Channel, Condition,
+                                                            BioReplicate, Intensity)]
     }
     input = rbindlist(unoverlapped_list, use.names = TRUE)
     input[, Run := paste(Mixture, TechRepMixture, sep = "_")]
