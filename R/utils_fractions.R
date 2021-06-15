@@ -26,9 +26,13 @@
 #' @keywords internal
 .handleFractionsTMT = function(input) {
     techrun = feature = id = Mixture = TechRepMixture = Run = Intensity = NULL
-    
+
     input[, techrun := paste(Mixture, TechRepMixture, sep = "_")]
     input[, id := paste(feature, Run, sep = "_")]
+    tmt_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge",
+                 "Charge", "PSM", "feature", "Mixture",
+                 "TechRepMixture", "Channel", "Condition", "BioReplicate")
+    tmt_cols = intersect(tmt_cols, colnames(input))
     
     unoverlapped_list = vector("list", length(unique(input$techrun)))
     names(unoverlapped_list) = unique(input$techrun)
@@ -65,16 +69,15 @@
                     if (length(features_to_remove) > 0) {
                         single_run = single_run[
                             , list(Intensity = mean(Intensity, na.rm = TRUE)),
-                            by = .(ProteinName, PeptideSequence, Charge, PSM, Mixture, 
-                                   TechRepMixture, Channel, Condition, BioReplicate)
-                            ]
+                            by = tmt_cols
+                        ]
                     }
                 }
             }
         }
-        unoverlapped_list[[technical_run]] = single_run[, .(ProteinName, PeptideSequence, Charge, PSM,
-                                                            Mixture, TechRepMixture, Channel, Condition,
-                                                            BioReplicate, Intensity)]
+        unoverlapped_list[[technical_run]] = single_run[, 
+                                                        c(tmt_cols, "Intensity"), 
+                                                        with = FALSE]
     }
     input = rbindlist(unoverlapped_list, use.names = TRUE)
     input[, Run := paste(Mixture, TechRepMixture, sep = "_")]
