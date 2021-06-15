@@ -89,6 +89,6 @@ fractionated_tmt = fractionated = data.table::data.table(
 )
 tmt_unoverlapped = MSstatsConvert:::.handleFractionsTMT(data.table::copy(fractionated_tmt))
 expect_identical(
-    tmt_unoverlapped[, colnames(tmt_unoverlapped) != "Run", with = FALSE],
-    fractionated_tmt[Fraction == 2, !(colnames(fractionated_tmt) %in% c("techrun", "id", "Run")), with = FALSE]
+    tmt_unoverlapped[, .(Mixture, TechRepMixture, Channel, feature, Intensity)],
+    fractionated_tmt[Fraction == 2, .(Mixture, TechRepMixture, Channel, feature, Intensity)]
 )
