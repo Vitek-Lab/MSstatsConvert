@@ -61,24 +61,22 @@
                                 "use the fraction with maximal abundance.")
                     getOption("MSstatsLog")("INFO", msg)
                     getOption("MSstatsMsg")("INFO", msg)
-                    if (data.table::uniqueN(input$Run) > 1) {
+                    features_to_remove = .getOverlappingFeatures(single_run)
+                    if (length(features_to_remove) > 0) {
                         single_run = single_run[
                             , list(Intensity = mean(Intensity, na.rm = TRUE)),
-                            by = setdiff(colnames(single_run), 
-                                         c("Run", "Intensity",
-                                           "Fraction", "id", "n_psms",
-                                           "QuanInfo", "IonsScore",
-                                           "IsolationInterference"))
+                            by = .(ProteinName, PeptideSequence, Charge, PSM, Mixture, 
+                                   TechRepMixture, Channel, Condition, BioReplicate)
                             ]
                     }
                 }
             }
         }
-        output_cols = !(colnames(single_run) %in% c("run", "techrun", "id"))
-        unoverlapped_list[[technical_run]] = single_run[, output_cols,
-                                                        with = FALSE]
+        unoverlapped_list[[technical_run]] = single_run[, .(ProteinName, PeptideSequence, Charge, PSM,
+                                                            Mixture, TechRepMixture, Channel, Condition,
+                                                            BioReplicate, Intensity)]
     }
-    input = rbindlist(unoverlapped_list)
+    input = rbindlist(unoverlapped_list, use.names = TRUE)
     input[, Run := paste(Mixture, TechRepMixture, sep = "_")]
     input
 }
