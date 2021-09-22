@@ -317,6 +317,8 @@ MSstatsPreprocess = function(
         feature_columns, remove_shared_peptides, remove_single_feature_proteins,
         feature_cleaning, is.element("Channel", colnames(input))
     )
+    
+    input$Intensity = as.numeric(input$Intensity)
     input = .handleFiltering(input, score_filtering, 
                              exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
