@@ -45,9 +45,9 @@
                      by = "ProteingroupIDs", sort = FALSE)
     
     if (getDataType(msstats_object) == "MSstatsTMT") {
-        protein_id = .findAvailable(c("Proteins", "Leadingproteins", 
-                                      "Leadingrazorprotein", "Genenames"),
-                                    colnames(mq_input), "Proteins")
+        protein_id = MSstatsConvert:::.findAvailable(c("Proteins", "Leadingproteins", 
+                                                       "Leadingrazorprotein", "Genenames"),
+                                                     protein_id, "Proteins")
         channels = .getChannelColumns(colnames(mq_input), channel_columns)
     } else {
         protein_id = ifelse(protein_id_col == "Proteins", 
