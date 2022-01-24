@@ -133,10 +133,6 @@ setMethod("getDataType", "MSstatsInputFiles",
 #' head(getInputFile(imported, "evidence"))
 #' 
 MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
-    checkmate::assertChoice(tool, 
-                            c("DIAUmpire", "MaxQuant", "OpenMS", "OpenSWATH",
-                              "Progenesis", "ProteomeDiscoverer", "Skyline",
-                              "SpectroMine", "Spectronaut"))
     checkmate::assertChoice(type, c("MSstats", "MSstatsTMT"))
     checkmate::assertTRUE(!is.null(names(input_files)))
     
