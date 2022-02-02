@@ -12,6 +12,7 @@
 \alias{MSstatsSkylineFiles-class}
 \alias{MSstatsSpectroMineFiles-class}
 \alias{MSstatsSpectronautFiles-class}
+\alias{MSstatsPhilosopherFiles-class}
 \title{Class to model files that describe a single MS dataset.}
 \description{
 Class to model files that describe a single MS dataset.
@@ -33,6 +34,8 @@ MSstatsSkylineFiles: class for Skyline files.
 MSstatsSkylineFiles: class for SpectroMine files.
 
 MSstatsSpectronautFiles: class for Spectronaut files.
+
+MSstatsPhilosopherFiles: class for Philosopher files.
 }
 \section{Slots}{
 

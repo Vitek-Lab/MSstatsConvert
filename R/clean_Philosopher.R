@@ -1,3 +1,12 @@
+#' Clean raw Philosopher files
+#' @param msstats_object object of class MSstatsPhilosopherFiles
+#' @param protein_id_col character name of a column that identifies proteins
+#' @param peptide_id_col character name of a column that identifies peptides
+#' @param channel character vector of channel labels
+#' @param remove_shared_peptides logical, if TRUE, shared peptides will be 
+#' removed based on the IsUnique column from Philosopher output
+#' @keywords internal
+#' @return data.table
 .cleanRawPhilosopher = function(msstats_object, protein_id_col,
                                 peptide_id_col, channels,
                                 remove_shared_peptides) {
