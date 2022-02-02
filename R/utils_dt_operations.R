@@ -93,7 +93,7 @@
 .selectMSstatsColumns = function(input) {
     Condition = NULL
     
-    standard_columns = c("ProteinName", "PeptideSequence", 
+    standard_columns = c("ProteinName", "PeptideSequence", "TechReplicate",
                          "PeptideModifiedSequence", "PrecursorCharge", 
                          "FragmentIon", "ProductCharge", "IsotopeLabelType",
                          "Condition", "BioReplicate", "Run", "StandardType", 
