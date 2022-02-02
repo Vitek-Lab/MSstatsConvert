@@ -33,6 +33,7 @@
                            variable.name = "Channel", value.name = "Intensity",
                            variable.factor = FALSE)
   input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
+  input[, PSM := paste(PeptideSequence, PrecursorCharge, sep = "_")]
   input = input[!is.na(ProteinName) & ProteinName != ""]
   input
 }
