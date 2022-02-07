@@ -18,6 +18,8 @@
   input[, ModifiedPeptideSequence := ifelse(is.na(ModifiedPeptideSequence),
                                             PeptideSequence, 
                                             ModifiedPeptideSequence)]
+  data.table::setnames(input, stringi::stri_replace_all(colnames(input), 
+                                                        fixed = "Channel", replacement = ""))
   cols = c(protein_col, peptide_col, "Charge", "SpectrumName", 
            "PeptideProphetProbability", "Purity", "Modifications",
            "IsUnique", channels)
