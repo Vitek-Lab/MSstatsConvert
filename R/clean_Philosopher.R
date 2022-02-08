@@ -32,7 +32,7 @@
     input[, IsUnique := NULL]
   }
   input[, PSM := paste(PeptideSequence, PrecursorCharge, 
-                       1:nrow(sm_input), sep = "_")]
+                       1:nrow(input), sep = "_")]
   input = data.table::melt(input, measure.vars = channels,
                            variable.name = "Channel", value.name = "Intensity",
                            variable.factor = FALSE)
