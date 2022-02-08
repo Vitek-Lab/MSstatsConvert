@@ -29,11 +29,12 @@
     input = input[(IsUnique)]
     input[, IsUnique := NULL]
   }
+  input[, PSM := paste(PeptideSequence, PrecursorCharge, 
+                       1:nrow(sm_input), sep = "_")]
   input = data.table::melt(input, measure.vars = channels,
                            variable.name = "Channel", value.name = "Intensity",
                            variable.factor = FALSE)
   input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
-  input[, PSM := paste(PeptideSequence, PrecursorCharge, sep = "_")]
   input[, Run := stringi::stri_split(Run, regex = "\\.", simplify = TRUE)[, 1]]
   input = input[!is.na(ProteinName) & ProteinName != ""]
   input
