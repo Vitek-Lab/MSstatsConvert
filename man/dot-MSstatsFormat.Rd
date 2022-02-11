@@ -6,6 +6,9 @@
 \usage{
 .MSstatsFormat(input)
 }
+\arguments{
+\item{input}{data.table}
+}
 \value{
 object of class MSstatsValidated that inherits from data.frame
 }
