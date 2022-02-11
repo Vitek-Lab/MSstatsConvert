@@ -8,20 +8,6 @@
     Useinquantitation = Intensity = NULL
     
     prog_input = getInputFile(msstats_object, "input")
-    
-    if (fix_colnames) {
-        if (all(unique(prog_input[[1]][1:2]) == "")) {
-            skip = 1:2
-        } else {
-            skip = 1
-        }
-        prog_input = prog_input[-skip, ]
-        colnames(prog_input) = as.character(unlist(prog_input[1, ]))
-        prog_input = prog_input[-1, ]
-    }
-    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
-
-    
     raw_abundance_col_id = which(colnames(prog_input) == "Rawabundance")
     if (is.element("Rawabundance", colnames(prog_input)) &
         is.element("Normalizedabundance", colnames(prog_input))) {
@@ -36,6 +22,17 @@
     raw_abundances_col_ids = seq(raw_abundance_col_id,
                                  raw_abundance_col_id + length(runs) - 1)
     
+    if (fix_colnames) {
+        if (all(unique(prog_input[[1]][1:2]) == "")) {
+            skip = 1:2
+        } else {
+            skip = 1
+        }
+        prog_input = prog_input[-skip, ]
+        colnames(prog_input) = as.character(unlist(prog_input[1, ]))
+        prog_input = prog_input[-1, ]
+    }
+    colnames(prog_input) = .standardizeColnames(colnames(prog_input))
     protein_col = .findAvailable(c("Protein", "Accession"), 
                                  colnames(prog_input))
     cols = which(colnames(prog_input) %in% c(protein_col, "Modifications", 
