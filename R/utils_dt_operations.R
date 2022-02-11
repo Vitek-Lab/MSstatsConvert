@@ -92,13 +92,13 @@
 #' @keywords internal
 .selectMSstatsColumns = function(input) {
     Condition = NULL
-    
+
     standard_columns = c(
         "ProteinName", "PeptideSequence", "PeptideModifiedSequence", 
         "PrecursorCharge", "FragmentIon", "ProductCharge", "IsotopeLabelType",
         "Condition", "BioReplicate", "Run", "TechReplicate", "StandardType", 
         "Fraction", "DetectionQValue", "Intensity"
-    )
+      )
     
     standard_columns_tmt = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                              "PSM", "Mixture", "TechRepMixture", "Run", 
