@@ -324,8 +324,6 @@ MSstatsPreprocess = function(
     pattern_filtering = list(), columns_to_fill = list(), 
     aggregate_isotopic = FALSE, ...
 ) {
-    Intensity = NULL
-    
     .checkMSstatsParams(input, annotation, feature_columns,
                         remove_shared_peptides,
                         remove_single_feature_proteins,
@@ -335,7 +333,7 @@ MSstatsPreprocess = function(
         feature_cleaning, is.element("Channel", colnames(input))
     )
     
-    input$Intensity = as.numeric(input$Intensity)
+    input = .fixBasicColumns(input)
     input = .handleFiltering(input, score_filtering, 
                              exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
