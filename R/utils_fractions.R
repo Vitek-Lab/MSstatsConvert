@@ -26,9 +26,13 @@
 #' @keywords internal
 .handleFractionsTMT = function(input) {
     techrun = feature = id = Mixture = TechRepMixture = Run = Intensity = NULL
-    
+
     input[, techrun := paste(Mixture, TechRepMixture, sep = "_")]
     input[, id := paste(feature, Run, sep = "_")]
+    tmt_cols = c("ProteinName", "PeptideSequence", "PrecursorCharge",
+                 "Charge", "PSM", "feature", "Mixture",
+                 "TechRepMixture", "Channel", "Condition", "BioReplicate")
+    tmt_cols = intersect(tmt_cols, colnames(input))
     
     unoverlapped_list = vector("list", length(unique(input$techrun)))
     names(unoverlapped_list) = unique(input$techrun)
@@ -61,24 +65,21 @@
                                 "use the fraction with maximal abundance.")
                     getOption("MSstatsLog")("INFO", msg)
                     getOption("MSstatsMsg")("INFO", msg)
-                    if (data.table::uniqueN(input$Run) > 1) {
+                    features_to_remove = .getOverlappingFeatures(single_run)
+                    if (length(features_to_remove) > 0) {
                         single_run = single_run[
                             , list(Intensity = mean(Intensity, na.rm = TRUE)),
-                            by = setdiff(colnames(single_run), 
-                                         c("Run", "Intensity",
-                                           "Fraction", "id", "n_psms",
-                                           "QuanInfo", "IonsScore",
-                                           "IsolationInterference"))
-                            ]
+                            by = tmt_cols
+                        ]
                     }
                 }
             }
         }
-        output_cols = !(colnames(single_run) %in% c("run", "techrun", "id"))
-        unoverlapped_list[[technical_run]] = single_run[, output_cols,
+        unoverlapped_list[[technical_run]] = single_run[, 
+                                                        c(tmt_cols, "Intensity"), 
                                                         with = FALSE]
     }
-    input = rbindlist(unoverlapped_list)
+    input = rbindlist(unoverlapped_list, use.names = TRUE)
     input[, Run := paste(Mixture, TechRepMixture, sep = "_")]
     input
 }
