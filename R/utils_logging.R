@@ -140,7 +140,7 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
         event = "are replaced with"
         what = fill_value
     } 
-    msg = paste("**", subject, "with values", direction, "than", score_threshold,
+    msg = paste("**", subject, "with values not", direction, "than", score_threshold,
                 "in", score_column, event, what)
     msg
 }

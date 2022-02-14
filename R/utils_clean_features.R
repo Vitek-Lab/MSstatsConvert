@@ -163,7 +163,8 @@
         if (nrow(input_duplicates) > 0) {
             cols = intersect(colnames(input_duplicates),
                              c("PSM", "Channel", "Intensity", "Run", "Score",
-                               "IsolationInterference", "IonsScore", "n_psms"))
+                               "IsolationInterference", "IonsScore", "n_psms",
+                               "Purity", "PeptideProphetProbability"))
             input_duplicates[, keep := .summarizeMultiplePSMs(.SD, 
                                                               summary_function),
                              by = feature_columns, .SDcols = cols]
@@ -171,7 +172,8 @@
         input = rbind(input, input_duplicates, fill = TRUE)
         cols = intersect(colnames(input),
                          c("PSM", "Channel", "Intensity", "Run", "Score",
-                           "IsolationInterference", "IonsScore", "n_psms"))
+                           "IsolationInterference", "IonsScore", "n_psms",
+                           "Purity", "PeptideProphetProbability"))
         input[, keep := .summarizeMultiplePSMs(.SD, summary_function), 
               by = feature_columns, .SDcols = cols]
         input = input[(PSM == keep) | is.na(keep), 
@@ -183,7 +185,8 @@
                           by = setdiff(colnames(input), 
                                        c("PSM", "Intensity", "n_psms",
                                          "IsolationInterference", "Score",
-                                         "IonsScore"))]
+                                         "IonsScore", "Purity",
+                                         "Purity", "PeptideProphetProbability"))]
         }
     }
     input[, PSM := do.call(".combine", .SD), 
@@ -249,6 +252,30 @@
                 input = input[PSM %in% unique(by_score$PSM[is_max])]
             }
         }
+        
+        if ("Purity" %in% colnames(input) & !any(is.na(input$Purity))) {
+            by_score = input[, list(score = unique(Purity)),
+                             by = c("PSM")]
+            is_max = by_score$score == max(by_score$score, na.rm = TRUE)
+            if (sum(is_max, na.rm = TRUE) == 1) {
+                return(by_score$PSM[which.max(by_score$score)])
+            } else {
+                input = input[PSM %in% unique(by_score$PSM[is_max])]
+            }
+        }
+        
+        if ("PeptideProphet.Probability" %in% colnames(input) &
+            !any(is.na(input$PeptideProphet.Probability))) {
+            by_score = input[, list(score = unique(PeptideProphet.Probability)),
+                             by = c("PSM")]
+            is_max = by_score$score == max(by_score$score, na.rm = TRUE)
+            if (sum(is_max, na.rm = TRUE) == 1) {
+                return(by_score$PSM[which.max(by_score$score)])
+            } else {
+                input = input[PSM %in% unique(by_score$PSM[is_max])]
+            }
+        }
+        
         
         by_max = input[, list(Intensity = summary_function(Intensity, 
                                                            na.rm = TRUE)),

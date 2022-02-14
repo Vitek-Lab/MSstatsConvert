@@ -16,6 +16,22 @@
 }
 
 
+#' Remove underscores from sequences and change intensity type to numeric
+#' @param input data.table
+#' @return data.table
+#' @keywords internal
+.fixBasicColumns = function(input) {
+  Intensity = PeptideSequence = FragmentIon = NULL
+  
+  input[, Intensity := as.numeric(Intensity)]
+  input[, PeptideSequence := stringi::stri_replace_all(PeptideSequence, 
+                                                       "", fixed = "_")]
+  input[, FragmentIon := stringi::stri_replace_all(FragmentIon, "",
+                                                   fixed = "_")]
+  input
+}
+
+
 #' Change classes of multiple columns
 #' @param input data.table preprocessed by one of the `cleanRaw*` functions.
 #' @param numeric_columns chr, vector of names of columns that will be 
@@ -92,12 +108,13 @@
 #' @keywords internal
 .selectMSstatsColumns = function(input) {
     Condition = NULL
-    
-    standard_columns = c("ProteinName", "PeptideSequence", 
-                         "PeptideModifiedSequence", "PrecursorCharge", 
-                         "FragmentIon", "ProductCharge", "IsotopeLabelType",
-                         "Condition", "BioReplicate", "Run", "StandardType", 
-                         "Fraction", "DetectionQValue", "Intensity")
+
+    standard_columns = c(
+        "ProteinName", "PeptideSequence", "PeptideModifiedSequence", 
+        "PrecursorCharge", "FragmentIon", "ProductCharge", "IsotopeLabelType",
+        "Condition", "BioReplicate", "Run", "TechReplicate", "StandardType", 
+        "Fraction", "DetectionQValue", "Intensity"
+      )
     
     standard_columns_tmt = c("ProteinName", "PeptideSequence", "PrecursorCharge", 
                              "PSM", "Mixture", "TechRepMixture", "Run", 
