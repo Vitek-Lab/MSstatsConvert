@@ -51,6 +51,10 @@ setClass("MSstatsSpectroMineFiles", contains = "MSstatsInputFiles")
 #' @rdname MSstatsInputFiles
 #' @keywords internal
 setClass("MSstatsSpectronautFiles", contains = "MSstatsInputFiles")
+#' MSstatsPhilosopherFiles: class for Philosopher files.
+#' @rdname MSstatsInputFiles
+#' @keywords internal
+setClass("MSstatsPhilosopherFiles", contains = "MSstatsInputFiles")
 
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
@@ -79,6 +83,16 @@ setGeneric("getInputFile",
 setMethod("getInputFile", "MSstatsInputFiles", 
           function(msstats_object, file_type = "input") 
               msstats_object@files[[file_type]])
+setMethod("getInputFile", "MSstatsPhilosopherFiles",
+          function(msstats_object, file_type = "input") {
+              if (file_type == "annotation") {
+                  msstats_object@files[["annotation"]]
+              } else {
+                  list_names = names(msstats_object@files)
+                  data.table::rbindlist(msstats_object@files[list_names != "annotation"])
+              }
+          })
+
 
 #' Get type of dataset from an MSstatsInputFiles object.
 #' @rdname getDataType
@@ -133,10 +147,6 @@ setMethod("getDataType", "MSstatsInputFiles",
 #' head(getInputFile(imported, "evidence"))
 #' 
 MSstatsImport = function(input_files, type, tool, tool_version = NULL, ...) {
-    checkmate::assertChoice(tool, 
-                            c("DIAUmpire", "MaxQuant", "OpenMS", "OpenSWATH",
-                              "Progenesis", "ProteomeDiscoverer", "Skyline",
-                              "SpectroMine", "Spectronaut"))
     checkmate::assertChoice(type, c("MSstats", "MSstatsTMT"))
     checkmate::assertTRUE(!is.null(names(input_files)))
     
@@ -235,6 +245,13 @@ setMethod("MSstatsClean", signature = "MSstatsSpectroMineFiles",
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles", 
           .cleanRawSpectronaut)
+#' Clean Philosopher files
+#' @include clean_Philosopher.R
+#' @rdname MSstatsClean
+#' @inheritParams .cleanRawPhilosopher
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsPhilosopherFiles", 
+          .cleanRawPhilosopher)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats
@@ -307,8 +324,6 @@ MSstatsPreprocess = function(
     pattern_filtering = list(), columns_to_fill = list(), 
     aggregate_isotopic = FALSE, ...
 ) {
-    Intensity = NULL
-    
     .checkMSstatsParams(input, annotation, feature_columns,
                         remove_shared_peptides,
                         remove_single_feature_proteins,
@@ -317,6 +332,8 @@ MSstatsPreprocess = function(
         feature_columns, remove_shared_peptides, remove_single_feature_proteins,
         feature_cleaning, is.element("Channel", colnames(input))
     )
+    
+    input = .fixBasicColumns(input)
     input = .handleFiltering(input, score_filtering, 
                              exact_filtering, pattern_filtering)
     input = .handleIsotopicPeaks(input, aggregate_isotopic)
