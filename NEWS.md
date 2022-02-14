@@ -1,3 +1,10 @@
+# MSstatsConvert 1.5.1
+
+* Fixed bugs related to data types.
+* Fixed bug that resulted in missing TechReplicate column in output.
+* Added Philosopher converter.
+* Added methods for MSstatsValidated objects.
+
 # MSstatsConvert 1.2.1
 
 * Fixed a bug related to SRM inputs.
