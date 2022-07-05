@@ -55,6 +55,10 @@ setClass("MSstatsSpectronautFiles", contains = "MSstatsInputFiles")
 #' @rdname MSstatsInputFiles
 #' @keywords internal
 setClass("MSstatsPhilosopherFiles", contains = "MSstatsInputFiles")
+#' MSstatsDIANNFiles: class for DIA-NN files.
+#' @rdname MSstatsInputFiles
+#' @keywords internal
+setClass("MSstatsDIANNFiles", contains = "MSstatsInputFiles")
 
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
@@ -252,6 +256,13 @@ setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles",
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsPhilosopherFiles", 
           .cleanRawPhilosopher)
+#' Clean DIA-NN files
+#' @include clean_DIANN.R
+#' @rdname MSstatsClean
+#' @inheritParams .cleanRawDIANN
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsDIANNFiles", 
+          .cleanRawDIANN)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats
