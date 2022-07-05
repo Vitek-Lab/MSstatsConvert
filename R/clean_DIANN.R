@@ -9,8 +9,8 @@
                           fragment_column) {
   diann_input = getInputFile(msstats_object, "input")
   diann_input = diann_input[, c("Run", protein_column, 
-                                "Modified.Sequence", "Precursor.Charge",
-                                "Q.Value", "Protein.Q.Value", 
+                                "ModifiedSequence", "PrecursorCharge",
+                                "QValue", "ProteinQValue", 
                                 fragment_column), with = FALSE]
   setnames(diann_input, c("Run", "ProteinName", "PeptideSequence",
                           "PrecursorCharge", "Qvalue", "ProteinQValue",
