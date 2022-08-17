@@ -45,14 +45,13 @@
                      by = "ProteingroupIDs", sort = FALSE)
     
     if (getDataType(msstats_object) == "MSstatsTMT") {
-        protein_id = MSstatsConvert:::.findAvailable(c("Proteins", "Leadingproteins", 
-                                                       "Leadingrazorprotein", "Genenames"),
-                                                     protein_id_col, "Proteins")
         channels = .getChannelColumns(colnames(mq_input), channel_columns)
     } else {
-        protein_id = ifelse(protein_id_col == "Proteins", 
-                            "uniquefromProteinGroups",
-                            "Leadingrazorprotein")
+        if (protein_id_col == "Proteins") {
+          protein_id = "uniquefromProteinGroups"
+        } else {
+          protein_id = protein_id_col
+        }
         channels = character(0)
     }
     data.table::setnames(
