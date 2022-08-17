@@ -37,17 +37,6 @@
     sequence_column = .standardizeColnames(sequence_column)
     quantification_column = .standardizeColnames(quantification_column)
     
-    quantification_column = .findAvailable(c("Intensity", "Area", "PrecursorArea"),
-                                           colnames(pd_input),
-                                           quantification_column)
-    protein_id_column = .findAvailable(c("ProteinAccessions", 
-                                         "MasterProteinAccessions",
-                                         "ProteinGroupAccessions"),
-                                       colnames(pd_input),
-                                       protein_id_column)
-    sequence_column = .findAvailable(c("Sequence", "AnnotatedSequence"), 
-                                     colnames(pd_input), 
-                                     sequence_column)
     if (remove_shared) {
         pd_input = pd_input[XProteins == "1", ]
     }
@@ -88,12 +77,6 @@
     
     pd_input = getInputFile(msstats_object, "input")
     protein_id_column = .standardizeColnames(protein_id_column)
-    if (!is.element(protein_id_column, colnames(pd_input))) {
-        protein_id_column = .findAvailable(c("ProteinAccessions", 
-                                             "MasterProteinAccessions"),
-                                           colnames(pd_input), 
-                                           "ProteinAccessions")
-    }
     if (protein_id_column == "ProteinAccessions") {
         num_proteins = "XProteins"
     } else {
