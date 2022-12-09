@@ -56,7 +56,7 @@ MSstatsClean(msstats_object, ...)
   remove_shared_peptides
 )
 
-\S4method{MSstatsClean}{MSstatsDIANNFiles}(msstats_object, protein_column, fragment_column)
+\S4method{MSstatsClean}{MSstatsDIANNFiles}(msstats_object, MBR = TRUE)
 }
 \arguments{
 \item{msstats_object}{object that inherits from \code{MSstatsInputFiles} class.}
@@ -102,10 +102,7 @@ will be treated as corresponding to intensities for different channels.}
 \item{remove_shared_peptides}{logical, if TRUE, shared peptides will be
 removed based on the IsUnique column from Philosopher output}
 
-\item{protein_column}{chr, name of a column that will be used as protein ID.}
-
-\item{fragment_column}{chr, name of a column that will be used as a source
-of fragment intensities.}
+\item{MBR}{True if analysis was done with match between runs}
 }
 \value{
 data.table
