@@ -1,3 +1,6 @@
+# MSstatsConvert 1.9.1
+* Added DIA-NN converter.
+
 # MSstatsConvert 1.5.1
 
 * Fixed bugs related to data types.
