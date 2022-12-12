@@ -10,10 +10,13 @@
 .cleanRawPhilosopher = function(msstats_object, protein_id_col,
                                 peptide_id_col, channels,
                                 remove_shared_peptides) {
-  channels = MSstatsConvert:::.standardizeColnames(channels)
+  ProteinName = ModifiedPeptideSequence = PeptideSequence = NULL
+  PrecursorCharge = Intensity = IsUnique = PSM = NULL
+  
+  channels = .standardizeColnames(channels)
   input = getInputFile(msstats_object, "psm_data")  
-  protein_col = MSstatsConvert:::.standardizeColnames(protein_id_col)
-  peptide_col = MSstatsConvert:::.standardizeColnames(peptide_id_col)
+  protein_col = .standardizeColnames(protein_id_col)
+  peptide_col = .standardizeColnames(peptide_id_col)
   
   input[, ModifiedPeptideSequence := ifelse(is.na(ModifiedPeptideSequence),
                                             PeptideSequence, 

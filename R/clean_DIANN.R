@@ -2,6 +2,7 @@
 #' @param msstats_object an object of class `MSstatsDIANNFiles`.
 #' @param MBR True if analysis was done with match between runs
 #' @return data.table
+#' @importFrom stats na.omit
 #' @keywords internal
 .cleanRawDIANN = function(msstats_object, MBR = TRUE) {
   # read input and set data type

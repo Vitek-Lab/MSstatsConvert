@@ -257,7 +257,7 @@ setMethod("MSstatsClean", signature = "MSstatsSpectronautFiles",
 setMethod("MSstatsClean", signature = "MSstatsPhilosopherFiles", 
           .cleanRawPhilosopher)
 #' Clean DIA-NN files
-#' @include clean_Diann.R
+#' @include clean_DIANN.R
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawDIANN
 #' @return data.table
