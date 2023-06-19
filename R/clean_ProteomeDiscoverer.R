@@ -37,18 +37,7 @@
     sequence_column = .standardizeColnames(sequence_column)
     quantification_column = .standardizeColnames(quantification_column)
     
-    quantification_column = .findAvailable(c("Intensity", "Area", "PrecursorArea"),
-                                           colnames(pd_input),
-                                           quantification_column)
-    protein_id_column = .findAvailable(c("ProteinAccessions", 
-                                         "MasterProteinAccessions",
-                                         "ProteinGroupAccessions"),
-                                       colnames(pd_input),
-                                       protein_id_column)
-    sequence_column = .findAvailable(c("Sequence", "AnnotatedSequence"), 
-                                     colnames(pd_input), 
-                                     sequence_column)
-    if (remove_shared) {
+    if (remove_shared & is.element("XProteins", colnames(pd_input))) {
         pd_input = pd_input[XProteins == "1", ]
     }
     pd_cols = c(protein_id_column, sequence_column, 

@@ -34,7 +34,7 @@
   dn_input[, ProductCharge := strtoi(sub('.*\\^','',ProductCharge))]
   dn_input = dn_input[!grepl("NH3", FragmentIon), ]
   dn_input = dn_input[!grepl("H2O", FragmentIon), ]
-  dn_input = na.omit(dn_input, cols = c("FragmentInfo", "FragmentQuantCorrected"))
+  dn_input = na.omit(dn_input, cols = "FragmentQuantCorrected")
   data.table::setnames(dn_input, old = c('ProteinNames', 'StrippedSequence', 
                                          'ModifiedSequence','PrecursorCharge',
                                          'FragmentQuantCorrected', 'QValue', 
