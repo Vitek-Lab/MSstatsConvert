@@ -14,6 +14,7 @@
 \alias{MSstatsSpectronautFiles-class}
 \alias{MSstatsPhilosopherFiles-class}
 \alias{MSstatsDIANNFiles-class}
+\alias{MSstatsFragPipeFiles-class}
 \title{Class to model files that describe a single MS dataset.}
 \description{
 Class to model files that describe a single MS dataset.
@@ -39,6 +40,8 @@ MSstatsSpectronautFiles: class for Spectronaut files.
 MSstatsPhilosopherFiles: class for Philosopher files.
 
 MSstatsDIANNFiles: class for DIA-NN files.
+
+MSstatsFragPipeFiles: class for FragPipe files.
 }
 \section{Slots}{
 
