@@ -15,9 +15,9 @@
     dn_input[, FragmentInfo := NA]
   }
   req_cols = c('ProteinNames', 'StrippedSequence', 
-                'ModifiedSequence', 'PrecursorCharge',
-                'FragmentQuantCorrected', 'QValue', 
-                'PrecursorMz', 'FragmentInfo', 'Run')
+               'ModifiedSequence', 'PrecursorCharge',
+               'FragmentQuantCorrected', 'QValue', 
+               'PrecursorMz', 'FragmentInfo', 'Run')
   if (MBR) {
     req_cols = c(req_cols, c('LibQValue', 'LibPGQValue'))
   } else{
@@ -40,13 +40,14 @@
                                          'FragmentQuantCorrected', 'QValue', 
                                          'PrecursorMz', 'FragmentIon','Run', 
                                          'ProductCharge'),
-                                 new = c('ProteinName', 'PeptideSequence', 
-                                         'PeptideModifiedSequence','PrecursorCharge',
-                                         'Intensity', 'DetectionQValue', 
-                                         'PrecursorMz', 'FragmentIon','Run',
-                                         'ProductCharge'),
-                                 skip_absent = TRUE)
-  protein.id = unique(dn_input$ProteinName)
+                       new = c('ProteinName', 'PeptideSequence', 
+                               'PeptideModifiedSequence','PrecursorCharge',
+                               'Intensity', 'DetectionQValue', 
+                               'PrecursorMz', 'FragmentIon','Run',
+                               'ProductCharge'),
+                       skip_absent = TRUE)
+  dn_input[, PeptideSequence := NULL]
+  setnames(dn_input, "PeptideModifiedSequence", "PeptideSequence")
   .logSuccess("DIANN", "clean")
   dn_input
 }
