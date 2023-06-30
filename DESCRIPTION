@@ -1,6 +1,6 @@
 Package: MSstatsConvert
 Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
-Version: 1.11.1
+Version: 1.11.2
 Authors@R: c(
   person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = c("aut","cre")),
   person("Meena", "Choi", email = "mnchoi67@gmail.com", role = "aut"),
@@ -12,7 +12,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 biocViews: MassSpectrometry, Proteomics, Software, DataImport, QualityControl
 Depends:
     R (>= 4.0)
