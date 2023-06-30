@@ -27,11 +27,18 @@
   dn_input = dn_input[, lapply(.SD, function(x) unlist(tstrsplit(x, ";"))),
                       .SDcols = c("FragmentQuantCorrected", "FragmentInfo"), 
                       by = setdiff(colnames(dn_input), c("FragmentInfo", "FragmentQuantCorrected"))]
+  if (all(is.na(dn_input[["FragmentInfo"]]))) {
+    dn_input[, FragmentInfo := paste0("Frag", 1:.N),
+             by = c("ProteinNames", "ModifiedSequence", "PrecursorCharge", "Run")]
+  }
   dn_input[, FragmentQuantCorrected := as.numeric(FragmentQuantCorrected)]
-  dn_input[, FragmentIon := sub('\\^.*','',FragmentInfo)]
-  dn_input[, ProductCharge := unlist(strsplit(FragmentInfo, split = '/'))[[1]], 
-           by = FragmentInfo]
-  dn_input[, ProductCharge := strtoi(sub('.*\\^','',ProductCharge))]
+  dn_input[, FragmentIon := sub('\\^\\.\\*', '', FragmentInfo)]
+  if (any(grepl("/", dn_input$FragmentInfo))) {
+    dn_input[, ProductCharge := unlist(strsplit(FragmentInfo, split = "/"))[[1]], by = FragmentInfo]
+    dn_input[, ProductCharge := strtoi(sub("\\.\\*\\^", "", ProductCharge))]
+  } else {
+    dn_input[, ProductCharge := 1]
+  }
   dn_input = dn_input[!grepl("NH3", FragmentIon), ]
   dn_input = dn_input[!grepl("H2O", FragmentIon), ]
   dn_input = na.omit(dn_input, cols = "FragmentQuantCorrected")
