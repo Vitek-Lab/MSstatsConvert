@@ -9,7 +9,8 @@ MSstatsBalancedDesign(
   feature_columns,
   fill_incomplete = TRUE,
   handle_fractions = TRUE,
-  fix_missing = NULL
+  fix_missing = NULL,
+  remove_few = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ will be added as NA}
 If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".
 If "zero_to_na", Intensity values equal exactly to 0 will be converted to NA.
 If "na_to_zero", missing values will be replaced by zeros.}
+
+\item{remove_few}{lgl, if TRUE, features with one or two measurements
+across runs will be removed.}
 }
 \value{
 data.frame of class \code{MSstatsValidated}
