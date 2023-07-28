@@ -374,6 +374,8 @@ MSstatsPreprocess = function(
 #' If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".
 #' If "zero_to_na", Intensity values equal exactly to 0 will be converted to NA.
 #' If "na_to_zero", missing values will be replaced by zeros.
+#' @param remove_few lgl, if TRUE, features with one or two measurements 
+#' across runs will be removed.
 #' 
 #' @export
 #' @return data.frame of class `MSstatsValidated`
@@ -389,13 +391,16 @@ MSstatsPreprocess = function(
 #' # for runs that were not included in the unbalanced_data table
 #' 
 MSstatsBalancedDesign = function(input, feature_columns, fill_incomplete = TRUE,
-                                 handle_fractions = TRUE, fix_missing = NULL) {
+                                 handle_fractions = TRUE, fix_missing = NULL,
+                                 remove_few = TRUE) {
     feature = NULL
     
     input[, feature := do.call(".combine", .SD), .SDcols = feature_columns]
     if (handle_fractions) {
         input = .handleFractions(input)
-        input = .filterFewMeasurements(input, 1, TRUE, feature_columns)
+        input = .filterFewMeasurements(input, 1, 
+                                       remove_few, 
+                                       feature_columns)
         msg_fractions = "** Fractionation handled."
         getOption("MSstatsLog")("INFO", msg_fractions)
         getOption("MSstatsMsg")("INFO", msg_fractions)
