@@ -63,6 +63,10 @@ setClass("MSstatsDIANNFiles", contains = "MSstatsInputFiles")
 #' @rdname MSstatsInputFiles
 #' @keywords internal
 setClass("MSstatsFragPipeFiles", contains = "MSstatsInputFiles")
+#' MSstatsMetamorpheusFiles: class for Metamorpheus files.
+#' @rdname MSstatsInputFiles
+#' @keywords internal
+setClass("MSstatsMetamorpheusFiles", contains = "MSstatsInputFiles")
 
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
