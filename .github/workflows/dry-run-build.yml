@@ -1,0 +1,15 @@
+name: Dry runs for PRs
+on: 
+  pull_request:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup R and Bioconductor
+        uses: grimbough/bioc-actions/setup-bioc@v1
+        with:
+          bioc-version: devel
+      - name: Build, Install, Check
+        uses: grimbough/bioc-actions/build-install-check@v1
+
