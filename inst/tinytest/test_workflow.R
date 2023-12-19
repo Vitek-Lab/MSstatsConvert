@@ -28,3 +28,5 @@ balanced = MSstatsConvert::MSstatsBalancedDesign(
 )
 expect_true(nrow(balanced) > 0)
 expect_true(ncol(balanced) == 11)
+# Placeholder with simple test
+expect_equal(1 + 1, 3)
