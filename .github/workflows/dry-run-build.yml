@@ -12,6 +12,8 @@ jobs:
         uses: grimbough/bioc-actions/setup-bioc@v1
         with:
           bioc-version: release
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
       - name: Build, Install, Check
         uses: grimbough/bioc-actions/build-install-check@v1
 
