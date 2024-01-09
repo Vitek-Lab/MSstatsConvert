@@ -210,3 +210,7 @@ expect_equal(ncol(sn_cleaned), 11)
 expect_true(nrow(sn_cleaned) > 0)
 expect_equal(sn_cleaned, sn_cleaned2)
 
+# Metamorpheus
+metamorpheus_table = data.table::fread("./raw_data/Metamorpheus/AllQuantifiedPeaks.tsv")
+input = MSstatsConvert::MSstatsImport(list(input = metamorpheus_table), "MSstats", "Metamorpheus")
+expect_identical(is(input), c("MSstatsMetamorpheusFiles", "MSstatsInputFiles"))
