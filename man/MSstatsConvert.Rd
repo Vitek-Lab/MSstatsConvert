@@ -13,7 +13,7 @@ signal processing tools to a format suitable for statistical analysis with the M
 \code{\link{MSstatsLogsSettings}} for logs management,
 \code{\link{MSstatsImport}} for importing files created by signal processing tools,
 \code{\link{MSstatsClean}} for re-formatting imported files into a consistent format,
-\code{\link{MSstatsImport}} for preprocessing cleaned files,
+\code{\link{MSstatsPreprocess}} for preprocessing cleaned files,
 \code{\link{MSstatsBalancedDesign}} for handling fractions and creating balanced data.
 }
 
