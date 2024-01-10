@@ -1,0 +1,5 @@
+Run	Condition	BioReplicate	Fraction
+NEG1-calib	neg	1	1
+NEG2-calib	neg	2	1
+POS1-calib	pos	3	1
+POS2-calib	pos	4	1
