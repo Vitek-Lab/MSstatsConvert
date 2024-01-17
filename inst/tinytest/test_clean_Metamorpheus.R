@@ -1,6 +1,6 @@
 # Test Metamorpheus .cleanRawMetamorpheus ---------------------------
 
-file_path = system.file("tinytest/raw_data/Metamorpheus/MSstatsMetamorpheusFilesObject.rds", package="MSstatsConvert")
+file_path = system.file("tinytest/processed_data/Metamorpheus/MSstatsMetamorpheusFilesObject.rds", package="MSstatsConvert")
 input = readRDS(file_path)
 output = MSstatsConvert:::.cleanRawMetamorpheus(input)
 expect_equal(ncol(output), 5)
