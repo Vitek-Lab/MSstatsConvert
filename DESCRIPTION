@@ -29,6 +29,7 @@ Suggests:
     knitr,
     rmarkdown
 Collate: 
+    'clean_Metamorpheus.R'
     'clean_DIANN.R'
     'clean_Philosopher.R'
     'clean_Spectronaut.R'
