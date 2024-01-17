@@ -271,6 +271,13 @@ setMethod("MSstatsClean", signature = "MSstatsPhilosopherFiles",
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsDIANNFiles", 
           .cleanRawDIANN)
+#' Clean Metamorpheus files
+#' @include clean_Metamorpheus.R
+#' @rdname MSstatsClean
+#' @inheritParams .cleanRawMetamorpheus
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsMetamorpheusFiles", 
+          .cleanRawMetamorpheus)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats
