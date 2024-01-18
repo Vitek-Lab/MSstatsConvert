@@ -95,6 +95,10 @@ setGeneric("getInputFile",
 setMethod("getInputFile", "MSstatsInputFiles", 
           function(msstats_object, file_type = "input") 
               msstats_object@files[[file_type]])
+#' @param msstats_object object that inherits from `MSstatsPhilosopherFiles` class.
+#' @param file_type character name of a type file. Usually equal to "input".
+#' @return data.table
+#' @rdname getInputFile
 setMethod("getInputFile", "MSstatsPhilosopherFiles",
           function(msstats_object, file_type = "input") {
               if (file_type == "annotation") {

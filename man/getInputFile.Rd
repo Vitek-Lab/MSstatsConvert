@@ -3,18 +3,23 @@
 \name{getInputFile}
 \alias{getInputFile}
 \alias{getInputFile,MSstatsInputFiles-method}
+\alias{getInputFile,MSstatsPhilosopherFiles-method}
 \title{Get one of files contained in an instance of \code{MSstatsInputFiles} class.}
 \usage{
 getInputFile(msstats_object, file_type)
 
 \S4method{getInputFile}{MSstatsInputFiles}(msstats_object, file_type = "input")
+
+\S4method{getInputFile}{MSstatsPhilosopherFiles}(msstats_object, file_type = "input")
 }
 \arguments{
-\item{msstats_object}{object that inherits from \code{MSstatsInputFiles} class.}
+\item{msstats_object}{object that inherits from \code{MSstatsPhilosopherFiles} class.}
 
 \item{file_type}{character name of a type file. Usually equal to "input".}
 }
 \value{
+data.table
+
 data.table
 
 data.table

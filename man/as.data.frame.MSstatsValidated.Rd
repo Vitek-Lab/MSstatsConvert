@@ -4,10 +4,12 @@
 \alias{as.data.frame.MSstatsValidated}
 \title{Convert output of converters to data.frame}
 \usage{
-\method{as.data.frame}{MSstatsValidated}(x)
+\method{as.data.frame}{MSstatsValidated}(x, ...)
 }
 \arguments{
 \item{x}{object of class MSstatsValidated}
+
+\item{...}{Additional arguments to be passed to or from other methods.}
 }
 \value{
 data.frame
