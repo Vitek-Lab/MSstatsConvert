@@ -16,16 +16,18 @@ setOldClass("MSstatsValidated", S4Class = "MSstatsValidated")
 
 #' Convert output of converters to data.frame
 #' @param x object of class MSstatsValidated
+#' @param ... Additional arguments to be passed to or from other methods.
 #' @return data.frame
 #' @export
-as.data.frame.MSstatsValidated = function(x) {
+as.data.frame.MSstatsValidated = function(x, ...) {
   as.data.frame(unclass(x))
 }
 
 #' Convert output of converters to data.table
 #' @param x object of class MSstatsValidated
+#' @param ... Additional arguments to be passed to or from other methods.
 #' @return data.tables
 #' @export
-as.data.table.MSstatsValidated = function(x) {
+as.data.table.MSstatsValidated = function(x, ...) {
   data.table::as.data.table(unclass(x))
 }

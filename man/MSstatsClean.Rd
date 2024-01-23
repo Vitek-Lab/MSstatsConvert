@@ -102,6 +102,8 @@ will be treated as corresponding to intensities for different channels.}
 
 \item{peptide_id_col}{character name of a column that identifies peptides}
 
+\item{channels}{character vector of channel labels}
+
 \item{remove_shared_peptides}{logical, if TRUE, shared peptides will be
 removed based on the IsUnique column from Philosopher output}
 
