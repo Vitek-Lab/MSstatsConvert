@@ -4,10 +4,12 @@
 \alias{as.data.table.MSstatsValidated}
 \title{Convert output of converters to data.table}
 \usage{
-\method{as.data.table}{MSstatsValidated}(x)
+\method{as.data.table}{MSstatsValidated}(x, ...)
 }
 \arguments{
 \item{x}{object of class MSstatsValidated}
+
+\item{...}{Additional arguments to be passed to or from other methods.}
 }
 \value{
 data.tables
