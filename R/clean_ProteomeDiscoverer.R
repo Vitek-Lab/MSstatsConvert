@@ -84,9 +84,15 @@
                                        "ProteinAccessions")
   }
   if (protein_id_column == "ProteinAccessions") {
-    num_proteins = "XProteins"
+    num_proteins = .findAvailable(c("XProteins", 
+                                    "NumberofProteins"),
+                                  colnames(pd_input), 
+                                  "XProteins")
   } else {
-    num_proteins = "XProteinGroups"
+    num_proteins = .findAvailable(c("XProteinGroups", 
+                                    "NumberofProteinGroups"),
+                                  colnames(pd_input), 
+                                  "XProteinGroups")
   }
   
   channels = .getChannelColumns(colnames(pd_input), intensity_columns_regexp)
