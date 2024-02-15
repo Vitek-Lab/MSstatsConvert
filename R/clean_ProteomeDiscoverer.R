@@ -84,19 +84,19 @@
                                        "ProteinAccessions")
   }
   if (protein_id_column == "ProteinAccessions") {
-    num_proteins = "XProteins"
+    num_proteins = .findAvailable(c("XProteins", 
+                                    "NumberofProteins"),
+                                  colnames(pd_input), 
+                                  "XProteins")
   } else {
-    num_proteins = "XProteinGroups"
+    num_proteins = .findAvailable(c("XProteinGroups", 
+                                    "NumberofProteinGroups"),
+                                  colnames(pd_input), 
+                                  "XProteinGroups")
   }
   
   channels = .getChannelColumns(colnames(pd_input), intensity_columns_regexp)
-  if (length(channels) == 0L) {
-    msg = paste("There is no channel intensity column in the input data,",
-                "which should start with the string provided in the",
-                "intensity_columns_regexp parameter (default: 'Abundance')")
-    getOption("MSstatsLog")("ERROR", msg)
-    stop(msg)
-  }
+  .validatePDTMTInputColumns(pd_input, protein_id_column, num_proteins, channels)
   
   pd_cols = intersect(c(protein_id_column, num_proteins, "AnnotatedSequence", 
                         "Charge", "PrecursorCharge", "IonsScore", 
@@ -130,4 +130,33 @@
     }
   }
   pd_input
+}
+
+
+#' Helper method to validate input has necessary columns
+#' @param pd_input data.frame input
+#' @param protein_id_column column name for protein passed from user
+#' @param num_proteins_column column name for number of protein groups passed from user
+#' @param channels list of column names for channels
+.validatePDTMTInputColumns = function(pd_input, 
+                                protein_id_column, 
+                                num_proteins_column, 
+                                channels
+) {
+    required_columns = c(protein_id_column, num_proteins_column, "AnnotatedSequence", 
+      "SpectrumFile")
+    missing_columns = setdiff(required_columns, colnames(pd_input))
+    if (length(missing_columns) > 0) {
+        msg = paste("The following columns are missing from the input data:", 
+                    paste(missing_columns, sep = ", ", collapse = ", "))
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
+    if (length(channels) == 0L) {
+        msg = paste("There is no channel intensity column in the input data,",
+                    "which should start with the string provided in the",
+                    "intensity_columns_regexp parameter (default: 'Abundance')")
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
 }
