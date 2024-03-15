@@ -76,9 +76,10 @@
     precursors = intersect(fragment_ions, 
                            c("precursor", "precursor [M+1]", "precursor [M+2]"))
     if (length(frags) > 0 & length(precursors) > 0) {
-        msg = paste("** Please check precursors information.",
-                    "If your experiment is DIA, please remove the precursors.",
-                    "If your experiments is DDA, please check the precursor information.")
+        msg = paste("** Please check precursors information in the FragmentIon column.",
+                    "If your experiment is DIA or SRM, please remove the precursors.",
+                    "If your experiments is DDA, please check the precursor information.",
+                    "MSstats only performs analysis on either MS1 or MS2, but not both simultaneously.")
         getOption("MSstatsLog")("ERROR", msg)
         stop(msg)
     }
