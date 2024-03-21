@@ -11,6 +11,7 @@
 #' @param removeFewMeasurements should proteins with few measurements be removed
 #' @param removeOxidationMpeptides should peptides with oxidation be removed
 #' @param removeProtein_with1Feature should proteins with a single feature be removed
+#' @param quantificationColumn Use 'FragmentQuantCorrected'(default) column for quantified intensities. 'FragmentQuantRaw' can be used instead.
 #' @param ... additional parameters to `data.table::fread`.
 #'  
 #' @return data.frame in the MSstats required format.
@@ -39,13 +40,16 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
                                 removeProtein_with1Feature = TRUE,
                                 use_log_file = TRUE, append = FALSE, 
                                 verbose = TRUE, log_file_path = NULL,
-                                MBR = TRUE,...) {
+                                MBR = TRUE, 
+                                quantificationColumn = "FragmentQuantCorrected",
+                                ...) {
     MSstatsConvert::MSstatsLogsSettings(use_log_file, append, verbose, 
                                         log_file_path)
     
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "DIANN")
-    input = MSstatsConvert::MSstatsClean(input, MBR = MBR)
+    input = MSstatsConvert::MSstatsClean(input, MBR = MBR, 
+                                         quantificationColumn = quantificationColumn)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
     
     decoy_filter = list(col_name = "ProteinName",
