@@ -17,8 +17,8 @@
 #' @examples 
 #' os_raw = system.file("tinytest/raw_data/OpenSWATH/openswath_input.csv", 
 #'                              package = "MSstatsConvert")
-#' annot = system.file("tinytest/annotations/annot_os.csv", 
-#'                     package = "MSstats")
+#' annot = system.file("tinytest/raw_data/OpenSWATH/annot_os.csv", 
+#'                     package = "MSstatsConvert")
 #' os_raw = data.table::fread(os_raw) 
 #' annot = data.table::fread(annot)
 #' 

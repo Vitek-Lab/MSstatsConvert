@@ -20,7 +20,8 @@
 #' 
 #' pd_raw = system.file("tinytest/raw_data/PD/pd_input.csv", 
 #'                      package = "MSstatsConvert")
-#' annot = system.file("tinytest/annotations/annot_pd.csv", package = "MSstats")
+#' annot = system.file("tinytest/raw_data/PD/annot_pd.csv", 
+#'                     package = "MSstatsConvert")
 #' pd_raw = data.table::fread(pd_raw)
 #' annot = data.table::fread(annot)
 #' 
