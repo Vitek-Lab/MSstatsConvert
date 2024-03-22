@@ -1,0 +1,18 @@
+# Test SkylinetoMSstatsFormat ---------------------------
+skyline_raw = system.file("tinytest/raw_data/Skyline/skyline_input.csv",
+                          package = "MSstatsConvert")
+skyline_raw = data.table::fread(skyline_raw)
+output = SkylinetoMSstatsFormat(skyline_raw)
+expect_equal(ncol(output), 11)
+expect_true(nrow(output) > 0)
+expect_true("Run" %in% colnames(output))
+expect_true("ProteinName" %in% colnames(output))
+expect_true("PeptideSequence" %in% colnames(output))
+expect_true("PrecursorCharge" %in% colnames(output))
+expect_true("Intensity" %in% colnames(output))
+expect_true("FragmentIon" %in% colnames(output))
+expect_true("ProductCharge" %in% colnames(output))
+expect_true("IsotopeLabelType" %in% colnames(output))
+expect_true("Condition" %in% colnames(output))
+expect_true("BioReplicate" %in% colnames(output))
+expect_true("Fraction" %in% colnames(output))

@@ -1,0 +1,7 @@
+Run,Condition,BioReplicate
+Run1,0.1fmol,1
+Run2,0.1fmol,2
+Run3,0.1fmol,3
+Run4,0.25fmol,4
+Run5,0.25fmol,5
+Run6,0.25fmol,6
