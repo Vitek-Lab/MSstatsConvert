@@ -57,7 +57,11 @@ MSstatsClean(msstats_object, ...)
   remove_shared_peptides
 )
 
-\S4method{MSstatsClean}{MSstatsDIANNFiles}(msstats_object, MBR = TRUE)
+\S4method{MSstatsClean}{MSstatsDIANNFiles}(
+  msstats_object,
+  MBR = TRUE,
+  quantificationColumn = "FragmentQuantCorrected"
+)
 
 \S4method{MSstatsClean}{MSstatsMetamorpheusFiles}(msstats_object)
 }
@@ -108,6 +112,8 @@ will be treated as corresponding to intensities for different channels.}
 removed based on the IsUnique column from Philosopher output}
 
 \item{MBR}{True if analysis was done with match between runs}
+
+\item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities. 'FragmentQuantRaw' can be used instead.}
 }
 \value{
 data.table

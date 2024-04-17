@@ -19,6 +19,7 @@ DIANNtoMSstatsFormat(
   verbose = TRUE,
   log_file_path = NULL,
   MBR = TRUE,
+  quantificationColumn = "FragmentQuantCorrected",
   ...
 )
 }
@@ -56,6 +57,8 @@ If not provided, such a file will be created automatically.
 If \code{append = TRUE}, has to be a valid path to a file.}
 
 \item{MBR}{True if analysis was done with match between runs}
+
+\item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities. 'FragmentQuantRaw' can be used instead.}
 
 \item{...}{additional parameters to \code{data.table::fread}.}
 }
