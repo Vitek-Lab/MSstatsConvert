@@ -4,12 +4,18 @@
 \alias{.cleanRawDIANN}
 \title{Clean raw Diann files}
 \usage{
-.cleanRawDIANN(msstats_object, MBR = TRUE)
+.cleanRawDIANN(
+  msstats_object,
+  MBR = TRUE,
+  quantificationColumn = "FragmentQuantCorrected"
+)
 }
 \arguments{
 \item{msstats_object}{an object of class \code{MSstatsDIANNFiles}.}
 
 \item{MBR}{True if analysis was done with match between runs}
+
+\item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities. 'FragmentQuantRaw' can be used instead.}
 }
 \value{
 data.table

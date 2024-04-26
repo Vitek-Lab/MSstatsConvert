@@ -13,6 +13,10 @@ Please provide a detailed bullet point list of your changes.
 Please describe any unit tests you added or modified to verify your changes.
 
 ## Checklist Before Requesting a Review
+<<<<<<< HEAD
 - [ ] I have read this repository's [contributing guidelines](https://github.com/Vitek-Lab/MSstatsConvert/blob/master/.github/CONTRIBUTING.md)
+=======
+- [ ] I have read the MSstats [contributing guidelines](https://github.com/Vitek-Lab/MSstatsConvert/blob/master/.github/CONTRIBUTING.md)
+>>>>>>> aca951e22891075019e3d8ebf64b3f5833eef6a1
 - [ ] My changes generate no new warnings
 - [ ] Any dependent changes have been merged and published in downstream modules

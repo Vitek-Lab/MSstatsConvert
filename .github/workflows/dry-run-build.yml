@@ -1,7 +1,11 @@
 name: Dry runs for PRs
 on: 
   pull_request:
+<<<<<<< HEAD
     branches: [master]
+=======
+    branches: [devel]
+>>>>>>> aca951e22891075019e3d8ebf64b3f5833eef6a1
 jobs:
   build:
     runs-on: ubuntu-latest
