@@ -42,9 +42,7 @@ Collate:
     'clean_MaxQuant.R'
     'clean_DIAUmpire.R'
     'MSstatsConvert_core_functions.R'
-<<<<<<< HEAD
     'converters_MetamorpheusToMSstatsFormat.R'
-=======
     'converters_DIANNtoMSstatsFormat.R'
     'converters_DIAUmpiretoMSstatsFormat.R'
     'converters_FragPipetoMSstatsFormat.R'
@@ -56,7 +54,6 @@ Collate:
     'converters_ProgenesistoMSstatsFormat.R'
     'converters_SkylinetoMSstatsFormat.R'
     'converters_SpectronauttoMSstatsFormat.R'
->>>>>>> aca951e22891075019e3d8ebf64b3f5833eef6a1
     'utils_MSstatsConvert.R'
     'utils_annotation.R'
     'utils_balanced_design.R'
