@@ -21,7 +21,6 @@ export(PDtoMSstatsFormat)
 export(ProgenesistoMSstatsFormat)
 export(SkylinetoMSstatsFormat)
 export(SpectronauttoMSstatsFormat)
->>>>>>> aca951e22891075019e3d8ebf64b3f5833eef6a1
 export(getDataType)
 export(getInputFile)
 exportMethods(getDataType)
