@@ -2,7 +2,6 @@
 % Please edit documentation in R/utils_MSstatsConvert.R
 \docType{package}
 \name{MSstatsConvert}
-\alias{MSstatsConvert-package}
 \alias{MSstatsConvert}
 \title{MSstatsConvert: An R Package to Convert Data from Mass Spectrometry Signal Processing Tools to MSstats Format}
 \description{
@@ -18,14 +17,3 @@ signal processing tools to a format suitable for statistical analysis with the M
 \code{\link{MSstatsBalancedDesign}} for handling fractions and creating balanced data.
 }
 
-\author{
-\strong{Maintainer}: Mateusz Staniak \email{mtst@mstaniak.pl}
-
-Authors:
-\itemize{
-  \item Meena Choi \email{mnchoi67@gmail.com}
-  \item Ting Huang \email{thuang0703@gmail.com}
-  \item Olga Vitek \email{o.vitek@northeastern.edu}
-}
-
-}
