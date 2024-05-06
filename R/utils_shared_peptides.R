@@ -10,7 +10,7 @@
         input = .removeSharedPeptides(input, protein_column, peptide_column)
         getOption("MSstatsLog")("INFO", "** Shared peptides are removed.")
         getOption("MSstatsMsg")("INFO", "** Shared peptides are removed.")
-    } 
+    }
     input
 }
 
@@ -23,11 +23,11 @@
 #' @keywords internal
 .removeSharedPeptides = function(input, protein_column, peptide_column) {
     count = NULL
-    
-    unique_pairs = unique(input[, c(protein_column, peptide_column), 
+
+    unique_pairs = unique(input[, c(protein_column, peptide_column),
                                 with = FALSE])
     protein_counts = unique_pairs[, list(count = .N), by = peptide_column]
-    protein_counts = unique(protein_counts[count == 1L, peptide_column, 
+    protein_counts = unique(protein_counts[count == 1L, peptide_column,
                                            with = FALSE])
-    merge(input, protein_counts, sort = FALSE)[, colnames(input), with = FALSE]
+    merge(input, protein_counts, sort = FALSE, by = peptide_column)[, colnames(input), with = FALSE]
 }
