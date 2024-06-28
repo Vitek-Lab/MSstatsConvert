@@ -3,6 +3,8 @@ Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSs
 Version: 1.15.1
 Authors@R: c(
   person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = c("aut","cre")),
+  person("Devon", "Kohler", email = "kohler.d@northeastern.edu", role = "aut"),
+  person("Anthony", "Wu", email = "wu.anthon@northeastern.edu", role = "aut"),
   person("Meena", "Choi", email = "mnchoi67@gmail.com", role = "aut"),
   person("Ting", "Huang", email = "thuang0703@gmail.com", role = "aut"),
   person("Olga", "Vitek", , email = "o.vitek@northeastern.edu", role = "aut")) 
@@ -12,7 +14,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.1
 biocViews: MassSpectrometry, Proteomics, Software, DataImport, QualityControl
 Depends:
     R (>= 4.0)

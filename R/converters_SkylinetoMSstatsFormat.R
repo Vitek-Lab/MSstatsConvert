@@ -66,7 +66,7 @@ SkylinetoMSstatsFormat = function(
                        score_threshold = qvalue_cutoff, 
                        direction = "smaller",
                        behavior = "fill", 
-                       fill_value = 0, 
+                       fill_value = NA_real_, 
                        handle_na = "keep",
                        filter = filter_with_Qvalue, 
                        drop_column = TRUE)
@@ -88,6 +88,8 @@ SkylinetoMSstatsFormat = function(
         feature_cleaning = list(
             remove_features_with_few_measurements = removeFewMeasurements,
             summarize_multiple_psms = sum))
+    input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
+    
     input = MSstatsBalancedDesign(input, c("PeptideSequence", "PrecursorCharge", 
                                            "FragmentIon", "ProductCharge"),
                                   remove_few = removeFewMeasurements)

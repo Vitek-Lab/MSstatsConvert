@@ -65,6 +65,8 @@ SpectronauttoMSstatsFormat = function(
         score_filtering = list(pgq = pq_filter, 
                                psm_q = qval_filter),
         columns_to_fill = list("IsotopeLabelType" = "L"))
+    input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
+    
     input = MSstatsConvert::MSstatsBalancedDesign(input, feature_columns,
                                                   remove_few = removeFewMeasurements)
     
