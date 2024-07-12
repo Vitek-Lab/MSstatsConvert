@@ -3,7 +3,7 @@ openms_raw = data.table::fread(system.file("tinytest/raw_data/OpenMS/openms_inpu
                                            package = "MSstatsConvert"))
 output = OpenMStoMSstatsFormat(openms_raw, use_log_file = FALSE)
 expect_equal(ncol(output), 11)
-expect_true(nrow(output) > 0)
+expect_equal(nrow(output), 372)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))

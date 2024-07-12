@@ -7,7 +7,7 @@ annot = data.table::fread(system.file("tinytest/raw_data/MaxQuant/annotation.csv
                                       package = "MSstatsConvert"))
 output = MaxQtoMSstatsFormat(mq_ev, annot, mq_pg, use_log_file = FALSE)
 expect_equal(ncol(output), 11)
-expect_true(nrow(output) > 0)
+expect_equal(nrow(output), 1590)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))
