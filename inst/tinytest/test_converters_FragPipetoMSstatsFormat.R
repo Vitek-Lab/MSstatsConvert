@@ -4,7 +4,7 @@ fragpipe_raw = system.file("tinytest/raw_data/FragPipe/fragpipe_input.csv",
 fragpipe_raw = data.table::fread(fragpipe_raw)
 output = FragPipetoMSstatsFormat(fragpipe_raw, use_log_file = FALSE)
 expect_equal(ncol(output), 11)
-expect_true(nrow(output) > 0)
+expect_equal(nrow(output), 66)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))

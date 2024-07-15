@@ -11,6 +11,7 @@ expect_error(MSstatsConvert:::.getDataTable(numeric(10)))
 ## Remove unnecessary symbols from column names
 expect_equal(MSstatsConvert:::.standardizeColnames("Col.name"), "Colname")
 expect_equal(MSstatsConvert:::.standardizeColnames("[Col%name]"), "Colname")
+expect_equal(MSstatsConvert:::.standardizeColnames(c("Col+/name", "#Col.name", "#Col.name")), c("Colname", "XColname", "XColname"))
 ### Does not cover ":" - is it bad?
 expect_equal(MSstatsConvert:::.getChannelColumns(c("Ab:1", "Ab:2"), "Ab"), c("Ab:1", "Ab:2"))
 # Additional columns
