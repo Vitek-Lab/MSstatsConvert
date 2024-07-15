@@ -41,7 +41,7 @@ SpectronauttoMSstatsFormat = function(
                      direction = "smaller", 
                      behavior = "fill", 
                      handle_na = "keep", 
-                     fill_value = NA,
+                     fill_value = NA_real_,
                      filter = filter_with_Qvalue, 
                      drop_column = TRUE)
     qval_filter = list(score_column = "EGQvalue", 
@@ -49,7 +49,7 @@ SpectronauttoMSstatsFormat = function(
                        direction = "smaller", 
                        behavior = "fill", 
                        handle_na = "keep", 
-                       fill_value = NA, 
+                       fill_value = NA_real_, 
                        filter = filter_with_Qvalue, 
                        drop_column = TRUE)
     
