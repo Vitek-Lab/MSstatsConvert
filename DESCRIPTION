@@ -31,6 +31,7 @@ Suggests:
     knitr,
     rmarkdown
 Collate: 
+    'clean_ProteinProspector.R'
     'clean_Metamorpheus.R'
     'clean_DIANN.R'
     'clean_Philosopher.R'
@@ -53,6 +54,7 @@ Collate:
     'converters_OpenSWATHtoMSstatsFormat.R'
     'converters_PDtoMSstatsFormat.R'
     'converters_ProgenesistoMSstatsFormat.R'
+    'converters_ProteinProspectortoMSstatsTMTFormat.R'
     'converters_SkylinetoMSstatsFormat.R'
     'converters_SpectronauttoMSstatsFormat.R'
     'utils_MSstatsConvert.R'
