@@ -1,8 +1,8 @@
 #' Generate MSstatsTMT required input format from Protein Prospector output
 #' 
 #' @inheritParams .sharedParametersAmongConverters
-#' @param input txt report file from Protein Prospector with 
-#' `Keep Replicates` option selected.
+#' @param input Input txt peptide report file from Protein Prospector with 
+#' "Keep Replicates", "Mods in Peptide", and "Protein Mods" options selected.
 #' @param annotation data frame which contains column Run, Fraction, 
 #' TechRepMixture, Mixture, Channel, BioReplicate, Condition. 
 #' 
