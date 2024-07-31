@@ -36,7 +36,7 @@
   protein_id_column = .standardizeColnames(protein_id_column)
   sequence_column = .standardizeColnames(sequence_column)
   quantification_column = .standardizeColnames(quantification_column)
-  run_column = ifelse(grepl("FileID", colnames(pd_input)), "FileID", "SpectrumFile")
+  run_column = ifelse(any(grepl("FileID", colnames(pd_input))), "FileID", "SpectrumFile")
   
   if (remove_shared & is.element("XProteins", colnames(pd_input))) {
     pd_input = pd_input[XProteins == "1", ]
@@ -97,7 +97,7 @@
   }
   
   channels = .getChannelColumns(colnames(pd_input), intensity_columns_regexp)
-  run_column = ifelse(grepl("FileID", colnames(pd_input)), "FileID", "SpectrumFile")
+  run_column = ifelse(any(grepl("FileID", colnames(pd_input))), "FileID", "SpectrumFile")
   .validatePDTMTInputColumns(pd_input, protein_id_column, num_proteins, run_column, channels)
   
   pd_cols = intersect(c(protein_id_column, num_proteins, "AnnotatedSequence", 
