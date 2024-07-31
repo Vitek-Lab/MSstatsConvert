@@ -36,19 +36,20 @@
   protein_id_column = .standardizeColnames(protein_id_column)
   sequence_column = .standardizeColnames(sequence_column)
   quantification_column = .standardizeColnames(quantification_column)
+  run_column = ifelse(grepl("FileID", colnames(pd_input)), "FileID", "SpectrumFile")
   
   if (remove_shared & is.element("XProteins", colnames(pd_input))) {
     pd_input = pd_input[XProteins == "1", ]
   }
   pd_cols = c(protein_id_column, sequence_column, 
-              "Modifications", "Charge", "SpectrumFile", quantification_column)
+              "Modifications", "Charge", run_column, quantification_column)
   if (any(is.element(colnames(pd_input), "Fraction"))) {
     pd_cols = c(pd_cols, "Fraction")
   }
   pd_input = pd_input[, pd_cols, with = FALSE]
   data.table::setnames(
     pd_input,
-    c(protein_id_column, sequence_column, "SpectrumFile", 
+    c(protein_id_column, sequence_column, run_column, 
       quantification_column, "Charge"),
     c("ProteinName", "PeptideSequence", "Run", 
       "Intensity", "PrecursorCharge"),
@@ -96,17 +97,18 @@
   }
   
   channels = .getChannelColumns(colnames(pd_input), intensity_columns_regexp)
+  run_column = ifelse(grepl("FileID", colnames(pd_input)), "FileID", "SpectrumFile")
   .validatePDTMTInputColumns(pd_input, protein_id_column, num_proteins, channels)
   
   pd_cols = intersect(c(protein_id_column, num_proteins, "AnnotatedSequence", 
                         "Charge", "PrecursorCharge", "IonsScore", 
-                        "SpectrumFile", "QuanInfo", 
+                        run_column, "QuanInfo", 
                         "IsolationInterference", channels),
                       colnames(pd_input))
   pd_input = pd_input[, pd_cols, with = FALSE]
   data.table::setnames(pd_input,
                        c(protein_id_column, num_proteins, "AnnotatedSequence", 
-                         "SpectrumFile", "Charge"),
+                         run_column, "Charge"),
                        c("ProteinName", "numProtein", "PeptideSequence", 
                          "Run", "PrecursorCharge"),
                        skip_absent = TRUE)
