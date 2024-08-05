@@ -34,11 +34,6 @@
     protein_prospector_input$Channel = .standardizeColnames(
         protein_prospector_input$Channel
     )
-    protein_prospector_input$Intensity = ifelse(
-        protein_prospector_input$Intensity == 0, 
-        NA, 
-        protein_prospector_input$Intensity
-    )
     
     .logSuccess("ProteinProspector", "clean")
     protein_prospector_input
