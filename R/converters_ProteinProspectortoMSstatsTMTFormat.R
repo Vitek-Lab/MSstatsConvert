@@ -48,6 +48,7 @@ ProteinProspectortoMSstatsTMTFormat = function(
         )
     input = MSstatsConvert::MSstatsBalancedDesign(input, feature_columns,
                                                   fix_missing = "zero_to_na")
+    data.table::setnames(input, "PrecursorCharge", "Charge", skip_absent = TRUE)
     
     msg_final = paste("** Finished preprocessing. The dataset is ready",
                       "to be processed by the proteinSummarization function.")
