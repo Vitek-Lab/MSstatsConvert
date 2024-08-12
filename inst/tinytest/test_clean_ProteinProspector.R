@@ -17,7 +17,7 @@
 
 # Test PD .cleanRawPDTMT ---------------------------
 
-file_path = system.file("tinytest/processed_data/ProteinProspector/MSstatsProteinProspectorFilesObjectTMT.rds", package="MSstatsConvert")
+file_path = system.file("tinytest/processed_data/ProtProspector/MSstatsProtProspectorFilesObjectTMT.rds", package="MSstatsConvert")
 input = readRDS(file_path)
 .testHappyPath(input)
 

@@ -19,3 +19,9 @@ expect_true("Mixture" %in% colnames(output))
 expect_true("Condition" %in% colnames(output))
 expect_true("BioReplicate" %in% colnames(output))
 expect_true("Channel" %in% colnames(output))
+
+# Test ProteinProspectortoMSstatsTMTFormat with missing value ------------
+zero_value_entry = 
+    output[output$PeptideSequence == "DINKVAEDLESEGLMAEEVQAVQQQEVYGAMPR" 
+       & output$BioReplicate == "S1",]$Intensity
+expect_true(is.na(zero_value_entry))
