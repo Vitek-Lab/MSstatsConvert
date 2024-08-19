@@ -4,6 +4,7 @@
 #' @keywords internal
 #' @noRd
 .cleanRawProteinProspector = function(msstats_object) {
+    PSM = PeptideSequence = PrecursorCharge = NULL
     protein_prospector_input = getInputFile(msstats_object, "input")
     protein_prospector_input = 
         data.table::as.data.table(protein_prospector_input)
@@ -16,11 +17,8 @@
         c("AccX", "DBPeptide", "z", "Fraction"),
         c("ProteinName", "PeptideSequence", "PrecursorCharge", "Run"), 
         skip_absent = TRUE)
-    protein_prospector_input$PSM = paste(
-        protein_prospector_input$PeptideSequence, 
-        protein_prospector_input$PrecursorCharge,
-        1:nrow(protein_prospector_input), sep = "_"
-    )
+    protein_prospector_input[, PSM := paste(PeptideSequence, PrecursorCharge, 
+                            1:nrow(protein_prospector_input), sep = "_")]
     
     protein_prospector_input = melt(protein_prospector_input, 
                                     measure.vars = channels, 
