@@ -67,6 +67,10 @@ setClass("MSstatsFragPipeFiles", contains = "MSstatsInputFiles")
 #' @rdname MSstatsInputFiles
 #' @keywords internal
 setClass("MSstatsMetamorpheusFiles", contains = "MSstatsInputFiles")
+#' MSstatsProteinProspectorFiles: class for ProteinProspector files.
+#' @rdname MSstatsInputFiles
+#' @keywords internal
+setClass("MSstatsProteinProspectorFiles", contains = "MSstatsInputFiles")
 
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
@@ -282,6 +286,13 @@ setMethod("MSstatsClean", signature = "MSstatsDIANNFiles",
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsMetamorpheusFiles", 
           .cleanRawMetamorpheus)
+#' Clean Protein Prospector files
+#' @include clean_ProteinProspector.R
+#' @rdname MSstatsClean
+#' @inheritParams .cleanRawProteinProspector
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsProteinProspectorFiles", 
+          .cleanRawProteinProspector)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats
