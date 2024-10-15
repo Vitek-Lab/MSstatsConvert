@@ -1,3 +1,10 @@
+# MSstatsConvert 1.16.0
+
+* Improved memory management for efficiency.
+* Added support for ProteinProspector data conversion to MSstatsTMT format.
+* Updated NA handling for Skyline and Spectronaut converters
+* Added MetaMorpheus converter functionality.
+
 # MSstatsConvert 1.9.1
 
 * Added DIA-NN converter.
