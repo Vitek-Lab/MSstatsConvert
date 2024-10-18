@@ -1,6 +1,6 @@
 #' Clean raw SpectroMine TMT data
 #' @param msstats_object an object of class `MSstatsSpectroMineFiles`.
-#' @importFrom data.table melt
+#' @importFrom data.table melt setnames
 #' @return `data.table`
 #' @keywords internal
 .cleanRawSpectroMineTMT = function(msstats_object) {
@@ -14,6 +14,8 @@
     getOption("MSstatsMsg")("ERROR", msg)
     stop(msg)
   }
+  pg_qval_column = grep("pgqvalue", colnames(sm_input), ignore.case = TRUE, value = TRUE)
+  data.table::setnames(sm_input, pg_qval_column, "PGQValue")
   sm_input = sm_input[, c("PGProteinAccessions", "PMoleculeID", "PPCharge",
                           "PGQValue", "PSMQvalue", "RFileName", channels),
                       with = FALSE]

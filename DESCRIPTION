@@ -1,8 +1,10 @@
 Package: MSstatsConvert
 Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
-Version: 1.15.1
+Version: 1.15.5
 Authors@R: c(
   person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = c("aut","cre")),
+  person("Devon", "Kohler", email = "kohler.d@northeastern.edu", role = "aut"),
+  person("Anthony", "Wu", email = "wu.anthon@northeastern.edu", role = "aut"),
   person("Meena", "Choi", email = "mnchoi67@gmail.com", role = "aut"),
   person("Ting", "Huang", email = "thuang0703@gmail.com", role = "aut"),
   person("Olga", "Vitek", , email = "o.vitek@northeastern.edu", role = "aut")) 
@@ -29,6 +31,7 @@ Suggests:
     knitr,
     rmarkdown
 Collate: 
+    'clean_ProteinProspector.R'
     'clean_Metamorpheus.R'
     'clean_DIANN.R'
     'clean_Philosopher.R'
@@ -51,6 +54,7 @@ Collate:
     'converters_OpenSWATHtoMSstatsFormat.R'
     'converters_PDtoMSstatsFormat.R'
     'converters_ProgenesistoMSstatsFormat.R'
+    'converters_ProteinProspectortoMSstatsTMTFormat.R'
     'converters_SkylinetoMSstatsFormat.R'
     'converters_SpectronauttoMSstatsFormat.R'
     'utils_MSstatsConvert.R'

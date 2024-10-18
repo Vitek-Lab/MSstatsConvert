@@ -8,7 +8,7 @@ SpectronauttoMSstatsFormat(
   input,
   annotation = NULL,
   intensity = "PeakArea",
-  filter_with_Qvalue = TRUE,
+  filter_with_Qvalue = FALSE,
   qvalue_cutoff = 0.01,
   useUniquePeptide = TRUE,
   removeFewMeasurements = TRUE,
@@ -28,7 +28,7 @@ SpectronauttoMSstatsFormat(
 
 \item{intensity}{'PeakArea'(default) uses not normalized peak area. 'NormalizedPeakArea' uses peak area normalized by Spectronaut.}
 
-\item{filter_with_Qvalue}{TRUE(default) will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.}
+\item{filter_with_Qvalue}{FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.}
 
 \item{qvalue_cutoff}{Cutoff for EG.Qvalue. default is 0.01.}
 

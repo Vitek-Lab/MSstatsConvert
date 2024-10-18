@@ -36,19 +36,20 @@
   protein_id_column = .standardizeColnames(protein_id_column)
   sequence_column = .standardizeColnames(sequence_column)
   quantification_column = .standardizeColnames(quantification_column)
+  run_column = ifelse(any(grepl("FileID", colnames(pd_input))), "FileID", "SpectrumFile")
   
   if (remove_shared & is.element("XProteins", colnames(pd_input))) {
     pd_input = pd_input[XProteins == "1", ]
   }
   pd_cols = c(protein_id_column, sequence_column, 
-              "Modifications", "Charge", "SpectrumFile", quantification_column)
+              "Modifications", "Charge", run_column, quantification_column)
   if (any(is.element(colnames(pd_input), "Fraction"))) {
     pd_cols = c(pd_cols, "Fraction")
   }
   pd_input = pd_input[, pd_cols, with = FALSE]
   data.table::setnames(
     pd_input,
-    c(protein_id_column, sequence_column, "SpectrumFile", 
+    c(protein_id_column, sequence_column, run_column, 
       quantification_column, "Charge"),
     c("ProteinName", "PeptideSequence", "Run", 
       "Intensity", "PrecursorCharge"),
@@ -96,17 +97,18 @@
   }
   
   channels = .getChannelColumns(colnames(pd_input), intensity_columns_regexp)
-  .validatePDTMTInputColumns(pd_input, protein_id_column, num_proteins, channels)
+  run_column = ifelse(any(grepl("FileID", colnames(pd_input))), "FileID", "SpectrumFile")
+  .validatePDTMTInputColumns(pd_input, protein_id_column, num_proteins, run_column, channels)
   
   pd_cols = intersect(c(protein_id_column, num_proteins, "AnnotatedSequence", 
                         "Charge", "PrecursorCharge", "IonsScore", 
-                        "SpectrumFile", "QuanInfo", 
+                        run_column, "QuanInfo", 
                         "IsolationInterference", channels),
                       colnames(pd_input))
   pd_input = pd_input[, pd_cols, with = FALSE]
   data.table::setnames(pd_input,
                        c(protein_id_column, num_proteins, "AnnotatedSequence", 
-                         "SpectrumFile", "Charge"),
+                         run_column, "Charge"),
                        c("ProteinName", "numProtein", "PeptideSequence", 
                          "Run", "PrecursorCharge"),
                        skip_absent = TRUE)
@@ -137,14 +139,16 @@
 #' @param pd_input data.frame input
 #' @param protein_id_column column name for protein passed from user
 #' @param num_proteins_column column name for number of protein groups passed from user
+#' @param run_column column name for Run ID, depends on PD version
 #' @param channels list of column names for channels
 .validatePDTMTInputColumns = function(pd_input, 
                                 protein_id_column, 
                                 num_proteins_column, 
+                                run_column,
                                 channels
 ) {
     required_columns = c(protein_id_column, num_proteins_column, "AnnotatedSequence", 
-      "SpectrumFile")
+      run_column)
     missing_columns = setdiff(required_columns, colnames(pd_input))
     if (length(missing_columns) > 0) {
         msg = paste("The following columns are missing from the input data:", 

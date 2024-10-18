@@ -4,7 +4,7 @@ skyline_raw = system.file("tinytest/raw_data/Skyline/skyline_input.csv",
 skyline_raw = data.table::fread(skyline_raw)
 output = SkylinetoMSstatsFormat(skyline_raw)
 expect_equal(ncol(output), 11)
-expect_true(nrow(output) > 0)
+expect_equal(nrow(output), 705)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))

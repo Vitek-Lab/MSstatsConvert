@@ -76,12 +76,17 @@
 #' @return character vector
 #' @keywords internal
 .standardizeColnames = function(col_names) {
-    col_names = stringi::stri_replace_all(col_names, fixed = " ", replacement = ".")
-    col_names = stringi::stri_replace_all(col_names, regex = "\\[|\\]|\\%", replacement = ".")
-    col_names = stringi::stri_replace_all(col_names, fixed = "/", replacement = "")
-    col_names = stringi::stri_replace_all(col_names, fixed = "+", replacement = "")
-    col_names = stringi::stri_replace_all(col_names, fixed = "#", replacement = "X.")
-    stringi::stri_replace_all(col_names, regex = "[\\.]+", replacement = "")
+    col_names_unique = unique(col_names)
+    col_names_transformed = stringi::stri_replace_all(col_names_unique, fixed = " ", replacement = ".")
+    col_names_transformed = stringi::stri_replace_all(col_names_transformed, regex = "\\[|\\]|\\%", replacement = ".")
+    col_names_transformed = stringi::stri_replace_all(col_names_transformed, fixed = "/", replacement = "")
+    col_names_transformed = stringi::stri_replace_all(col_names_transformed, fixed = "+", replacement = "")
+    col_names_transformed = stringi::stri_replace_all(col_names_transformed, fixed = "#", replacement = "X.")
+    col_names_transformed = stringi::stri_replace_all(col_names_transformed, regex = "[\\.]+", replacement = "")
+    lookup_table = c()
+    lookup_table[col_names_unique] = col_names_transformed
+    col_names = lookup_table[col_names]
+    return(unname(col_names))
 }
 
 

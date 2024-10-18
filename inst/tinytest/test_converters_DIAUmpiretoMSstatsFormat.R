@@ -17,7 +17,7 @@ diau_frag = diau_frag[, lapply(.SD, function(x) if (is.integer(x)) as.numeric(x)
 output = MSstatsConvert:::DIAUmpiretoMSstatsFormat(diau_frag, diau_pept, diau_prot,
                                          annot, use_log_file = FALSE)
 expect_equal(ncol(output), 11)
-expect_true(nrow(output) > 0)
+expect_equal(nrow(output), 480)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))
