@@ -141,6 +141,7 @@
 #' @param num_proteins_column column name for number of protein groups passed from user
 #' @param run_column column name for Run ID, depends on PD version
 #' @param channels list of column names for channels
+#' @noRd
 .validatePDTMTInputColumns = function(pd_input, 
                                 protein_id_column, 
                                 num_proteins_column, 
