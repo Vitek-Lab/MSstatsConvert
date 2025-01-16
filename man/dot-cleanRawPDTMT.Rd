@@ -9,7 +9,8 @@
   remove_shared = TRUE,
   remove_protein_groups = TRUE,
   protein_id_column = "ProteinAccessions",
-  intensity_columns_regexp = "Abundance"
+  intensity_columns_regexp = "Abundance",
+  run_column = "SpectrumFile"
 )
 }
 \arguments{

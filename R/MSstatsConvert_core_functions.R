@@ -393,8 +393,12 @@ MSstatsPreprocess = function(
 #' 
 #' @param input `data.table` processed by the `MSstatsPreprocess` function
 #' @param feature_columns str, names of columns that define spectral features
-#' @param fill_incomplete if TRUE (default), Intensity values for missing runs
-#' will be added as NA
+#' @param fill_incomplete if TRUE (default), ensures that rows with missing data 
+#' for specific features are added as NA. For example, if the y10 ion of 
+#' peptideA is measured in the "disease" samples but entirely missing for the 
+#' "healthy" samples, rows with NA values will be created for the y10 ion of 
+#' peptideA in the "healthy" group. This process increases the number of 
+#' rows to account for all possible feature-sample combinations.
 #' @param handle_fractions if TRUE (default), overlapping fractions will be resolved
 #' @param fix_missing str, optional. Defaults to NULL, which means no action.
 #' If not NULL, must be one of the options: "zero_to_na" or "na_to_zero".

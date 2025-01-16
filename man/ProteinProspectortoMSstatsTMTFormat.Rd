@@ -19,8 +19,8 @@ ProteinProspectortoMSstatsTMTFormat(
 )
 }
 \arguments{
-\item{input}{txt report file from Protein Prospector with
-\verb{Keep Replicates} option selected.}
+\item{input}{Input txt peptide report file from Protein Prospector with
+"Keep Replicates", "Mods in Peptide", and "Protein Mods" options selected.}
 
 \item{annotation}{data frame which contains column Run, Fraction,
 TechRepMixture, Mixture, Channel, BioReplicate, Condition.}

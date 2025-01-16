@@ -18,8 +18,12 @@ MSstatsBalancedDesign(
 
 \item{feature_columns}{str, names of columns that define spectral features}
 
-\item{fill_incomplete}{if TRUE (default), Intensity values for missing runs
-will be added as NA}
+\item{fill_incomplete}{if TRUE (default), ensures that rows with missing data
+for specific features are added as NA. For example, if the y10 ion of
+peptideA is measured in the "disease" samples but entirely missing for the
+"healthy" samples, rows with NA values will be created for the y10 ion of
+peptideA in the "healthy" group. This process increases the number of
+rows to account for all possible feature-sample combinations.}
 
 \item{handle_fractions}{if TRUE (default), overlapping fractions will be resolved}
 

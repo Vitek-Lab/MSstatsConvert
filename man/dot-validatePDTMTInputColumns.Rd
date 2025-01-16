@@ -8,6 +8,7 @@
   pd_input,
   protein_id_column,
   num_proteins_column,
+  run_column,
   channels
 )
 }
@@ -17,6 +18,8 @@
 \item{protein_id_column}{column name for protein passed from user}
 
 \item{num_proteins_column}{column name for number of protein groups passed from user}
+
+\item{run_column}{column name for Run ID, depends on PD version}
 
 \item{channels}{list of column names for channels}
 }

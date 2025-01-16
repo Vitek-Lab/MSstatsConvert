@@ -9,7 +9,8 @@
   quantification_column,
   protein_id_column,
   sequence_column,
-  remove_shared
+  remove_shared,
+  run_column = "SpectrumFile"
 )
 }
 \arguments{
