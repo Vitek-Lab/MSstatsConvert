@@ -4,9 +4,17 @@
 #' @param input name of MSstats input report from Diann, which includes feature-level data.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. 
 #' @param MBR True if analysis was done with match between runs
-#' @param global_qvalue_cutoff The global qvalue cutoff
-#' @param qvalue_cutoff local qvalue cutoff for library
-#' @param pg_qvalue_cutoff local qvalue cutoff for protein groups Run should be the same as filename.
+#' @param global_qvalue_cutoff The qvalue cutoff for the Q.Value column, i.e. 
+#' the run-specific precursor q-value. Default is 0.01.
+#' @param qvalue_cutoff If MBR is false, the qvalue cutoff for the Global.Q.Value 
+#' column, i.e. global precursor q-value.  If MBR is true, the qvalue cutoff for the 
+#' Lib.Q.Value column, i.e. the q-value for the library created after the first MBR pass.
+#' Default is 0.01.
+#' @param pg_qvalue_cutoff If MBR is false, the qvalue cutoff for the Global.PG.Q.Value 
+#' column, i.e. the global q-value for the protein group.  If MBR is true, the
+#' qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for 
+#' the library created after the first MBR pass. Run should be the same as filename.
+#' Default is 0.01.
 #' @param useUniquePeptide should unique pepties be removed
 #' @param removeFewMeasurements should proteins with few measurements be removed
 #' @param removeOxidationMpeptides should peptides with oxidation be removed

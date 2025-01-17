@@ -28,11 +28,19 @@ DIANNtoMSstatsFormat(
 
 \item{annotation}{name of 'annotation.txt' data which includes Condition, BioReplicate, Run.}
 
-\item{global_qvalue_cutoff}{The global qvalue cutoff}
+\item{global_qvalue_cutoff}{The qvalue cutoff for the Q.Value column, i.e.
+the run-specific precursor q-value. Default is 0.01.}
 
-\item{qvalue_cutoff}{local qvalue cutoff for library}
+\item{qvalue_cutoff}{If MBR is false, the qvalue cutoff for the Global.Q.Value
+column, i.e. global precursor q-value.  If MBR is true, the qvalue cutoff for the
+Lib.Q.Value column, i.e. the q-value for the library created after the first MBR pass.
+Default is 0.01.}
 
-\item{pg_qvalue_cutoff}{local qvalue cutoff for protein groups Run should be the same as filename.}
+\item{pg_qvalue_cutoff}{If MBR is false, the qvalue cutoff for the Global.PG.Q.Value
+column, i.e. the global q-value for the protein group.  If MBR is true, the
+qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for
+the library created after the first MBR pass. Run should be the same as filename.
+Default is 0.01.}
 
 \item{useUniquePeptide}{should unique pepties be removed}
 
