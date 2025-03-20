@@ -7,6 +7,7 @@
   FFrgLossType = FExcludedFromQuantification = NULL
   
   spec_input = getInputFile(msstats_object, "input")
+  .validateSpectronautInput(spec_input)
   spec_input = spec_input[FFrgLossType == "noloss", ]
   
   if (is.character(spec_input$FExcludedFromQuantification)) {
@@ -31,4 +32,20 @@
     skip_absent = TRUE)
   .logSuccess("Spectronaut", "clean")
   spec_input
+}
+
+#' Helper method to validate input has necessary columns
+#' @param spec_input dataframe input
+#' @noRd
+.validateSpectronautInput = function(spec_input) {
+    required_columns = c(
+        "FFrgLossType", "FExcludedFromQuantification", "PGProteinGroups",
+        "FGCharge")
+    missing_columns = setdiff(required_columns, colnames(spec_input))
+    if (length(missing_columns) > 0) {
+        msg = paste("The following columns are missing from the input data:", 
+                    paste(missing_columns, sep = ", ", collapse = ", "))
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
 }
