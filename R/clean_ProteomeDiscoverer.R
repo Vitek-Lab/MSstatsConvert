@@ -131,7 +131,7 @@
       pd_input = pd_input[toupper(QuanInfo) == 'UNIQUE', ]
     }
   }
-  pd_input = pd_input[, !(colnames(pd_input) %in% "QuanInfo")]
+  pd_input = pd_input[, !(colnames(pd_input) %in% "QuanInfo"), with = FALSE]
   pd_input
 }
 
