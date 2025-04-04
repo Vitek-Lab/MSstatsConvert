@@ -131,6 +131,7 @@
       pd_input = pd_input[toupper(QuanInfo) == 'UNIQUE', ]
     }
   }
+  pd_input = pd_input[, setdiff(colnames(pd_input), c("QuanInfo")), with = FALSE]
   pd_input
 }
 

@@ -1,6 +1,6 @@
 .testHappyPath = function(input) {
     output = MSstatsConvert:::.cleanRawPDTMT(input)
-    expect_equal(ncol(output), 11)
+    expect_equal(ncol(output), 10)
     expect_true(nrow(output) > 0)
     expected_column_names = c(
         "ProteinName",
@@ -9,7 +9,6 @@
         "PrecursorCharge",
         "IonsScore",
         "Run",
-        "QuanInfo",
         "IsolationInterference",
         "PSM",
         "Channel",

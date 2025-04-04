@@ -146,7 +146,7 @@ expect_error(MSstatsConvert::MSstatsClean(pdtmt_import,
                                           remove_shared = TRUE,
                                           intensity_columns_regexp = "Nothing"))
 expect_equal(
-    ncol(pdtmt_cleaned), 11
+    ncol(pdtmt_cleaned), 10
 )
 expect_true(nrow(pdtmt_cleaned) > 0)
 # Progenesis
