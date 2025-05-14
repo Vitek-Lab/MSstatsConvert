@@ -1,7 +1,8 @@
 #' Import Diann files
 #' 
 #' @inheritParams .sharedParametersAmongConverters
-#' @param input name of MSstats input report from Diann, which includes feature-level data.
+#' @param input name of MSstats input report from Diann, which includes fragment-level data.  
+#' Output fragment data with --export-quant flag in DIA-NN 2.0
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. 
 #' @param MBR True if analysis was done with match between runs
 #' @param global_qvalue_cutoff The qvalue cutoff for the Q.Value column, i.e. 
@@ -29,6 +30,7 @@
 #' @export
 #' 
 #' @examples 
+#' # See https://github.com/vdemichev/DiaNN/discussions/1525 for workaround for DIANN 2.0
 #' input_file_path = system.file("tinytest/raw_data/DIANN/diann_input.tsv", 
 #'                                 package="MSstatsConvert")
 #' annotation_file_path = system.file("tinytest/raw_data/DIANN/annotation.csv", 
