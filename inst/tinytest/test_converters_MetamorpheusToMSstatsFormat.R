@@ -1,12 +1,12 @@
 # Test MetamorpheusToMSstatsFormat ---------------------------
 
-input_file_path = system.file("tinytest/raw_data/Metamorpheus/AllQuantifiedPeaks.tsv", package="MSstatsConvert")
-annotation_file_path = system.file("tinytest/raw_data/Metamorpheus/Annotation.tsv", package = "MSstatsConvert")
+input_file_path = system.file("tinytest/raw_data/Metamorpheus/QuantifiedPeaks.tsv", package="MSstatsConvert")
+annotation_file_path = system.file("tinytest/raw_data/Metamorpheus/annotation.csv", package = "MSstatsConvert")
 input = data.table::fread(input_file_path)
 annotation = data.table::fread(annotation_file_path)
 output = MSstatsConvert:::MetamorpheusToMSstatsFormat(input, annotation = annotation)
 expect_equal(ncol(output), 11)
-expect_equal(nrow(output), 236)
+expect_equal(nrow(output), 20)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))

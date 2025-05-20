@@ -1,7 +1,9 @@
 #' Import Metamorpheus files
 #' 
 #' @param input name of Metamorpheus output file, which is tabular format. Use the AllQuantifiedPeaks.tsv file from the Metamorpheus output.
-#' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate. 
+#' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate.
+#' @param MBR If TRUE, the function will include peaks detected by MBR
+#' @param qvalue_cutoff The q-value cutoff for filtering peaks detected by MBR 
 #' @inheritParams .sharedParametersAmongConverters
 #' 
 #' @return data.frame in the MSstats required format.
@@ -11,17 +13,18 @@
 #' @export
 #' 
 #' @examples 
-#' input = system.file("tinytest/raw_data/Metamorpheus/AllQuantifiedPeaks.tsv", 
+#' input = system.file("tinytest/raw_data/Metamorpheus/QuantifiedPeaks.tsv", 
 #'                                 package = "MSstatsConvert")
 #' input = data.table::fread(input)
-#' annot = system.file("tinytest/raw_data/Metamorpheus/Annotation.tsv", 
+#' annot = system.file("tinytest/raw_data/Metamorpheus/annotation.csv", 
 #'                                 package = "MSstatsConvert")
 #' annot = data.table::fread(annot)
 #' metamorpheus_imported = MSstatsConvert:::MetamorpheusToMSstatsFormat(input, annotation = annot)
 #' head(metamorpheus_imported)
 #' 
 MetamorpheusToMSstatsFormat = function(
-        input, annotation = NULL, useUniquePeptide = TRUE, removeFewMeasurements = TRUE,
+        input, annotation = NULL, MBR = TRUE, qvalue_cutoff = 0.05, 
+        useUniquePeptide = TRUE, removeFewMeasurements = TRUE,
         removeProtein_with1Feature = FALSE, summaryforMultipleRows = max,
         use_log_file = TRUE, append = FALSE, verbose = TRUE, log_file_path = NULL,
         ...
@@ -31,7 +34,7 @@ MetamorpheusToMSstatsFormat = function(
     
     input = MSstatsConvert::MSstatsImport(list(input = input), 
                                           "MSstats", "Metamorpheus", ...)
-    input = MSstatsConvert::MSstatsClean(input)
+    input = MSstatsConvert::MSstatsClean(input, MBR, qvalue_cutoff)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
     
     feature_columns = c("PeptideSequence", "PrecursorCharge")

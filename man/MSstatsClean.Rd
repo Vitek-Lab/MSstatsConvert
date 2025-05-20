@@ -64,7 +64,7 @@ MSstatsClean(msstats_object, ...)
   quantificationColumn = "FragmentQuantCorrected"
 )
 
-\S4method{MSstatsClean}{MSstatsMetamorpheusFiles}(msstats_object)
+\S4method{MSstatsClean}{MSstatsMetamorpheusFiles}(msstats_object, MBR = TRUE, qvalue_cutoff = 0.05)
 
 \S4method{MSstatsClean}{MSstatsProteinProspectorFiles}(msstats_object)
 }
@@ -117,6 +117,8 @@ removed based on the IsUnique column from Philosopher output}
 \item{MBR}{True if analysis was done with match between runs}
 
 \item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities. 'FragmentQuantRaw' can be used instead.}
+
+\item{qvalue_cutoff}{The q-value cutoff for filtering peaks detected by MBR}
 }
 \value{
 data.table

@@ -4,10 +4,14 @@
 \alias{.cleanRawMetamorpheus}
 \title{Clean raw Metamorpheus files}
 \usage{
-.cleanRawMetamorpheus(msstats_object)
+.cleanRawMetamorpheus(msstats_object, MBR = TRUE, qvalue_cutoff = 0.05)
 }
 \arguments{
 \item{msstats_object}{an object of class \code{MSstatsMetamorpheusFiles}.}
+
+\item{MBR}{If TRUE, the function will include peaks detected by MBR}
+
+\item{qvalue_cutoff}{The q-value cutoff for filtering peaks detected by MBR}
 }
 \value{
 data.table

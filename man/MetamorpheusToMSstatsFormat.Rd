@@ -7,6 +7,8 @@
 MetamorpheusToMSstatsFormat(
   input,
   annotation = NULL,
+  MBR = TRUE,
+  qvalue_cutoff = 0.05,
   useUniquePeptide = TRUE,
   removeFewMeasurements = TRUE,
   removeProtein_with1Feature = FALSE,
@@ -22,6 +24,10 @@ MetamorpheusToMSstatsFormat(
 \item{input}{name of Metamorpheus output file, which is tabular format. Use the AllQuantifiedPeaks.tsv file from the Metamorpheus output.}
 
 \item{annotation}{name of 'annotation.txt' data which includes Condition, BioReplicate.}
+
+\item{MBR}{If TRUE, the function will include peaks detected by MBR}
+
+\item{qvalue_cutoff}{The q-value cutoff for filtering peaks detected by MBR}
 
 \item{useUniquePeptide}{TRUE (default) removes peptides that are assigned for more than one proteins.
 We assume to use unique peptide for each protein.}
@@ -55,10 +61,10 @@ data.frame in the MSstats required format.
 Import Metamorpheus files
 }
 \examples{
-input = system.file("tinytest/raw_data/Metamorpheus/AllQuantifiedPeaks.tsv", 
+input = system.file("tinytest/raw_data/Metamorpheus/QuantifiedPeaks.tsv", 
                                 package = "MSstatsConvert")
 input = data.table::fread(input)
-annot = system.file("tinytest/raw_data/Metamorpheus/Annotation.tsv", 
+annot = system.file("tinytest/raw_data/Metamorpheus/annotation.csv", 
                                 package = "MSstatsConvert")
 annot = data.table::fread(annot)
 metamorpheus_imported = MSstatsConvert:::MetamorpheusToMSstatsFormat(input, annotation = annot)
