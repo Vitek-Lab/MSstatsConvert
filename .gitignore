@@ -6,3 +6,6 @@ inst/doc
 *.Rproj
 *.DS_Store
 *.log
+*.o
+*.so
+*.dll
