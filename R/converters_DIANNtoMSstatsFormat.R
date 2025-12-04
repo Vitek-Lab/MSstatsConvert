@@ -133,6 +133,7 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
             summarize_multiple_psms = max),
         columns_to_fill = list(Fraction = 1,
                                IsotopeLabelType = "Light"))
+    input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
     
     input = MSstatsConvert::MSstatsBalancedDesign(input, feature_columns, 
                                                   fill_incomplete = FALSE,
