@@ -149,12 +149,9 @@
 #' @return cleaned data.table
 #' @noRd
 .cleanDIANNCleanAndFilterData <- function(dn_input, quantificationColumn) {
-    # Remove NH3 and H2O loss fragments
-    dn_input <- dn_input[!grepl("NH3", FragmentIon)]
-    dn_input <- dn_input[!grepl("H2O", FragmentIon)]
-    
-    # Remove rows with NA in quantification column
-    dn_input <- na.omit(dn_input, cols = quantificationColumn)
+    # Remove NH3 and H2O loss fragments & remove rows with NA in quant column
+    dn_input <- dn_input[!grepl("NH3|H2O", FragmentIon) & 
+                             !is.na(get(quantificationColumn))]
     
     return(dn_input)
 }
