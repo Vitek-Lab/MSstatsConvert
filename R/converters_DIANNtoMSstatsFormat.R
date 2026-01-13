@@ -23,6 +23,15 @@
 #' @param quantificationColumn Use 'FragmentQuantCorrected'(default) column for quantified intensities for DIANN 1.8.x.
 #' Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x. 
 #' Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.
+#' @param calculateAnomalyScores Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.
+#' @param anomalyModelFeatures character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.
+#' @param anomalyModelFeatureTemporal character vector of temporal direction corresponding to columns passed to anomalyModelFeatures. Values must be one of: `mean_decrease`, `mean_increase`, `dispersion_increase`, or NULL (to perform no temporal feature engineering). Default is empty vector. If calculateAnomalyScores=TRUE, vector must have as many values as anomalyModelFeatures (even if all NULL).
+#' @param removeMissingFeatures Remove features with missing values in more than this fraction of runs. Default is 0.5. Only used if calculateAnomalyScores=TRUE.
+#' @param anomalyModelFeatureCount Feature selection for anomaly model. Anomaly detection works on the precursor-level and can be much slower if all features used. We will by default filter to the top-100 highest intensity features. This can be adjusted as necessary. To turn feature-selection off, set this value to a high number (e.g. 10000). Only used if calculateAnomalyScores=TRUE.
+#' @param runOrder Temporal order of MS runs. Should be a two column data.table with columns `Run` and `Order`, where `Run` matches the run name output by Spectronaut and `Order` is an integer. Used to engineer the temporal features defined in anomalyModelFeatureTemporal.
+#' @param n_trees Number of trees to use in isolation forest when calculateAnomalyScores=TRUE. Default is 100.
+#' @param max_depth Max tree depth to use in isolation forest when calculateAnomalyScores=TRUE. Default is "auto" which calculates depth as log2(N) where N is the number of runs. Otherwise must be an integer.
+#' @param numberOfCores Number of cores for parallel processing anomaly detection model. When > 1, a logfile named 'MSstats_anomaly_model_progress.log' is created to track progress. Only works for Linux & Mac OS. Default is 1.
 #' @param ... additional parameters to `data.table::fread`.
 #'  
 #' @return data.frame in the MSstats required format.
@@ -52,26 +61,36 @@
 #' output_2_0 = DIANNtoMSstatsFormat(input_2_0, annotation = annot_2_0, MBR = FALSE, 
 #'                                 use_log_file = FALSE, quantificationColumn = 'auto')
 #' head(output_2_0)
-DIANNtoMSstatsFormat = function(input, annotation = NULL,
-                                global_qvalue_cutoff = 0.01,
-                                qvalue_cutoff = 0.01, 
-                                pg_qvalue_cutoff = 0.01,
-                                useUniquePeptide = TRUE, 
-                                removeFewMeasurements = TRUE,
-                                removeOxidationMpeptides = TRUE, 
-                                removeProtein_with1Feature = TRUE,
-                                use_log_file = TRUE, append = FALSE, 
-                                verbose = TRUE, log_file_path = NULL,
-                                MBR = TRUE, 
-                                quantificationColumn = "FragmentQuantCorrected",
-                                ...) {
+DIANNtoMSstatsFormat = function(
+    input, annotation = NULL,
+    global_qvalue_cutoff = 0.01,
+    qvalue_cutoff = 0.01, 
+    pg_qvalue_cutoff = 0.01,
+    useUniquePeptide = TRUE, 
+    removeFewMeasurements = TRUE,
+    removeOxidationMpeptides = TRUE, 
+    removeProtein_with1Feature = TRUE,
+    MBR = TRUE, 
+    quantificationColumn = "FragmentQuantCorrected",
+    calculateAnomalyScores=FALSE, anomalyModelFeatures=c(),
+    anomalyModelFeatureTemporal=c(), removeMissingFeatures=.5,
+    anomalyModelFeatureCount=100,
+    runOrder=NULL, n_trees=100, max_depth="auto", numberOfCores=1, 
+    use_log_file = TRUE, append = FALSE, 
+    verbose = TRUE, log_file_path = NULL,
+    ...) {
     MSstatsConvert::MSstatsLogsSettings(use_log_file, append, verbose, 
                                         log_file_path)
     
+    anomalyModelFeatures = .standardizeColnames(anomalyModelFeatures)
+
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "DIANN")
-    input = MSstatsConvert::MSstatsClean(input, MBR = MBR, 
-                                         quantificationColumn = quantificationColumn)
+    # browser()
+    input = MSstatsConvert::MSstatsClean(
+        input, MBR = MBR, quantificationColumn = quantificationColumn,
+        calculateAnomalyScores = calculateAnomalyScores, 
+        anomalyModelFeatures = anomalyModelFeatures)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
     
     decoy_filter = list(col_name = "ProteinName",
@@ -86,14 +105,15 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
     msg = paste0('** Filtering on Global Q Value < ', global_qvalue_cutoff)
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
-    
-    input = input[DetectionQValue < global_qvalue_cutoff, ]
+    # browser()
+    input[DetectionQValue >= global_qvalue_cutoff, Intensity := 0]
+
     if (MBR) {
         msg = '** MBR was used to analyze the data. Now setting names and filtering'
         msg_1_mbr = paste0('-- LibPGQValue < ', pg_qvalue_cutoff)
         msg_2_mbr = paste0('-- LibQValue < ', qvalue_cutoff)
-        input = input[LibPGQValue < pg_qvalue_cutoff, ]
-        input = input[LibQValue < qvalue_cutoff, ]
+        input = input[LibPGQValue >= pg_qvalue_cutoff, Intensity := 0]
+        input = input[LibQValue >= qvalue_cutoff, Intensity := 0]
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
         getOption("MSstatsLog")("INFO", msg_1_mbr)
@@ -105,8 +125,8 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
         msg = '** MBR was not used to analyze the data. Now setting names and filtering'
         msg_1 = paste0('-- Filtering on GlobalPGQValue < ', pg_qvalue_cutoff)
         msg_2 = paste0('-- Filtering on GlobalQValue < ', qvalue_cutoff)
-        input = input[GlobalPGQValue < pg_qvalue_cutoff, ]
-        input = input[GlobalQValue < qvalue_cutoff, ]
+        input = input[GlobalPGQValue >= pg_qvalue_cutoff, Intensity := 0]
+        input = input[GlobalQValue >= qvalue_cutoff, Intensity := 0]
         getOption("MSstatsLog")("INFO", msg)
         getOption("MSstatsMsg")("INFO", msg)
         getOption("MSstatsLog")("INFO", msg_1)
@@ -118,6 +138,7 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
     
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
+    # browser()
     input = MSstatsConvert::MSstatsPreprocess(
         input, 
         annotation, 
@@ -132,15 +153,24 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
             remove_features_with_few_measurements = removeFewMeasurements,
             summarize_multiple_psms = max),
         columns_to_fill = list(Fraction = 1,
-                               IsotopeLabelType = "Light"))
+                               IsotopeLabelType = "Light"),
+        anomaly_metrics = anomalyModelFeatures)
     input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
-    
+    # browser()
     input = MSstatsConvert::MSstatsBalancedDesign(input, feature_columns, 
-                                                  fill_incomplete = FALSE,
+                                                  fill_incomplete = TRUE,
                                                   handle_fractions = FALSE,
-                                                  remove_few = removeFewMeasurements
+                                                  remove_few = removeFewMeasurements,
+                                                  anomaly_metrics = anomalyModelFeatures
     )
-    
+    # browser()
+    if (calculateAnomalyScores){
+        input = MSstatsConvert::MSstatsAnomalyScores(
+            input, anomalyModelFeatures, anomalyModelFeatureTemporal,
+            removeMissingFeatures, anomalyModelFeatureCount, runOrder, n_trees, 
+            max_depth, numberOfCores)
+    }
+    # browser()
     msg_final = paste("** Finished preprocessing. The dataset is ready",
                       "to be processed by the dataProcess function.")
     getOption("MSstatsLog")("INFO", msg_final)

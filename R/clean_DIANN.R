@@ -8,7 +8,9 @@
 #' @importFrom stats na.omit
 #' @keywords internal
 .cleanRawDIANN <- function(msstats_object, MBR = TRUE, 
-                           quantificationColumn = "FragmentQuantCorrected") {
+                           quantificationColumn = "FragmentQuantCorrected",
+                           calculateAnomalyScores = FALSE, 
+                           anomalyModelFeatures = c()) {
     dn_input <- getInputFile(msstats_object, "input")
     dn_input <- data.table::as.data.table(dn_input)
     
@@ -19,7 +21,9 @@
     dn_input <- .cleanDIANNAddMissingColumns(dn_input)
     
     # Select required columns
-    dn_input <- .cleanDIANNSelectRequiredColumns(dn_input, quantificationColumn, MBR)
+    dn_input <- .cleanDIANNSelectRequiredColumns(dn_input, quantificationColumn, MBR,
+                                                 calculateAnomalyScores,
+                                                 anomalyModelFeatures)
     
     # Split concatenated values
     dn_input <- .cleanDIANNSplitConcatenatedValues(dn_input, quantificationColumn)
@@ -75,7 +79,9 @@
 #' @param MBR logical indicating if match between runs was used
 #' @return data.table with selected columns
 #' @noRd
-.cleanDIANNSelectRequiredColumns <- function(dn_input, quantificationColumn, MBR) {
+.cleanDIANNSelectRequiredColumns <- function(dn_input, quantificationColumn, MBR,
+                                             calculateAnomalyScores,
+                                             anomalyModelFeatures) {
     base_cols <- c('ProteinNames', 'StrippedSequence', 'ModifiedSequence', 
                    'PrecursorCharge', quantificationColumn, 'QValue', 
                    'PrecursorMz', 'FragmentInfo', 'Run')
@@ -86,7 +92,13 @@
         c('GlobalQValue', 'GlobalPGQValue')
     }
     
-    req_cols <- c(base_cols, mbr_cols)
+    qual_cols <- if (calculateAnomalyScores) {
+        anomalyModelFeatures
+    } else {
+        c()
+    }
+
+    req_cols <- c(base_cols, mbr_cols, qual_cols)
     return(dn_input[, req_cols, with = FALSE])
 }
 
