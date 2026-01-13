@@ -79,68 +79,174 @@
 
 #' Calculate mean increase
 #' @noRd
-.add_mean_increase = function(quality_vector){
-    
-    mean_increase = numeric(length(quality_vector))
-    mean_increase[1] = 0
+.add_mean_increase = function(quality_vector) {
+
+    n = length(quality_vector)
+    mean_increase = rep(NA_real_, n)
+
     d = 0.5
-    
-    for(k in 2:length(quality_vector)) {
-        # 5 is reference (3 sigma)
-        if (mean_increase[k] > 5){
-            mean_increase[k] = max(0,(quality_vector[k] - d), na.rm = TRUE)
-        } else {
-            mean_increase[k] = max(0,
-                                   (quality_vector[k] - d + mean_increase[k-1]),
-                                   na.rm = TRUE) # positive CuSum
+    h = 5
+
+    state = 0
+    mean_increase[1] = if (is.na(quality_vector[1])) NA_real_ else 0
+
+    if (n >= 2) {
+        for (k in 2:n) {
+
+            if (is.na(quality_vector[k])) {
+                mean_increase[k] = NA_real_   # output NA at missing
+                next                          # state unchanged (carry forward)
+            }
+
+            if (state > h) {
+                state = max(0, quality_vector[k] - d)
+            } else {
+                state = max(0, quality_vector[k] - d + state)
+            }
+
+            mean_increase[k] = state
         }
     }
-    return(mean_increase)
+
+    mean_increase
 }
+# .add_mean_increase = function(quality_vector){
+    
+#     mean_increase = numeric(length(quality_vector))
+#     mean_increase[1] = 0
+#     d = 0.5
+    
+#     for(k in 2:length(quality_vector)) {
+#         # 5 is reference (3 sigma)
+#         if (mean_increase[k - 1] > 5){
+#             mean_increase[k] = max(0,(quality_vector[k] - d), na.rm = TRUE)
+#         } else {
+#             mean_increase[k] = max(0,
+#                                    (quality_vector[k] - d + mean_increase[k-1]),
+#                                    na.rm = TRUE) # positive CuSum
+#         }
+#     }
+#     return(mean_increase)
+# }
 
 #' Calculate mean decrease
 #' @noRd
-.add_mean_decrease = function(quality_vector){
-    
-    mean_decrease = numeric(length(quality_vector))
-    mean_decrease[1] = 0
+.add_mean_decrease = function(quality_vector) {
+
+    n = length(quality_vector)
+    mean_decrease = rep(NA_real_, n)
+
     d = -0.5
-    
-    for(k in 2:length(quality_vector)) {
-        # 5 is reference (3 sigma)
-        if (mean_decrease[k]>5){
-            mean_decrease[k] <- max(0,(d - quality_vector[k] + 0), na.rm = TRUE)
-        } else {
-            mean_decrease[k] <- max(0,
-                                    (d - quality_vector[k] + mean_decrease[k-1]),
-                                    na.rm = TRUE) # negative CuSum
+    h = 5
+
+    state = 0
+    mean_decrease[1] =
+        if (is.na(quality_vector[1])) NA_real_ else 0
+
+    if (n >= 2) {
+        for (k in 2:n) {
+
+            if (is.na(quality_vector[k])) {
+                mean_decrease[k] = NA_real_   # mark missing
+                next                          # carry state forward
+            }
+
+            if (state > h) {
+                state = max(0, d - quality_vector[k])
+            } else {
+                state = max(0, d - quality_vector[k] + state)
+            }
+
+            mean_decrease[k] = state
         }
     }
-    return(mean_decrease)
+
+    mean_decrease
 }
+# .add_mean_decrease = function(quality_vector){
+    
+#     mean_decrease = numeric(length(quality_vector))
+#     mean_decrease[1] = 0
+#     d = -0.5
+    
+#     for(k in 2:length(quality_vector)) {
+#         # 5 is reference (3 sigma)
+#         if (mean_decrease[k - 1] > 5){
+#             mean_decrease[k] <- max(0,(d - quality_vector[k] + 0), na.rm = TRUE)
+#         } else {
+#             mean_decrease[k] <- max(0,
+#                                     (d - quality_vector[k] + mean_decrease[k-1]),
+#                                     na.rm = TRUE) # negative CuSum
+#         }
+#     }
+#     return(mean_decrease)
+# }
 
 #' Calculate dispersion increase
 #' @noRd
-.add_dispersion_increase = function(quality_vector){
-    dispersion_increase = numeric(length(quality_vector))
-    v = numeric(length(quality_vector))
-    v[1] = (sqrt(abs(quality_vector[1]))-0.822)/0.349
+.add_dispersion_increase = function(quality_vector) {
+
+    n = length(quality_vector)
+    dispersion_increase = rep(NA_real_, n)
+    v = rep(NA_real_, n)
+
     d = 0.5
-    for(k in 2:length(quality_vector)) {
-        
-        v[k] = (sqrt(abs(quality_vector[k]))-0.822)/0.349 
-        
-        if (dispersion_increase[k] > 5){
-            dispersion_increase[k] = max(0,(v[k] - d),
-                                         na.rm = TRUE)
-        } else {
-            dispersion_increase[k] = max(0, 
-                                         (v[k] - d + dispersion_increase[k-1]),
-                                         na.rm = TRUE) # CuSum variance
+    h = 5
+
+    # initialize state
+    state = 0
+
+    if (!is.na(quality_vector[1])) {
+        v[1] = (sqrt(abs(quality_vector[1])) - 0.822) / 0.349
+        dispersion_increase[1] = 0
+    } else {
+        v[1] = NA_real_
+        dispersion_increase[1] = NA_real_
+    }
+
+    if (n >= 2) {
+        for (k in 2:n) {
+
+            if (is.na(quality_vector[k])) {
+                v[k] = NA_real_
+                dispersion_increase[k] = NA_real_  # mark missing
+                next                               # carry state forward
+            }
+
+            v[k] = (sqrt(abs(quality_vector[k])) - 0.822) / 0.349
+
+            if (state > h) {
+                state = max(0, v[k] - d)
+            } else {
+                state = max(0, v[k] - d + state)
+            }
+
+            dispersion_increase[k] = state
         }
     }
+
     return(dispersion_increase)
 }
+# .add_dispersion_increase = function(quality_vector){
+#     dispersion_increase = numeric(length(quality_vector))
+#     v = numeric(length(quality_vector))
+#     v[1] = (sqrt(abs(quality_vector[1]))-0.822)/0.349
+#     d = 0.5
+#     for(k in 2:length(quality_vector)) {
+        
+#         v[k] = (sqrt(abs(quality_vector[k]))-0.822)/0.349 
+        
+#         if (dispersion_increase[k - 1] > 5){
+#             dispersion_increase[k] = max(0,(v[k] - d),
+#                                          na.rm = TRUE)
+#         } else {
+#             dispersion_increase[k] = max(0, 
+#                                          (v[k] - d + dispersion_increase[k-1]),
+#                                          na.rm = TRUE) # CuSum variance
+#         }
+#     }
+#     return(dispersion_increase)
+# }
 
 #' Train isolation forest model in parallel
 #' @import parallel
