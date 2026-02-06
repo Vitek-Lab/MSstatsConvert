@@ -71,7 +71,10 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "DIANN")
     input = MSstatsConvert::MSstatsClean(input, MBR = MBR, 
-                                         quantificationColumn = quantificationColumn)
+                                         quantificationColumn = quantificationColumn,
+                                         global_qvalue_cutoff,
+                                         qvalue_cutoff, 
+                                         pg_qvalue_cutoff)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
     
     decoy_filter = list(col_name = "ProteinName",
