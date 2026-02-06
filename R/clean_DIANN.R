@@ -159,7 +159,7 @@
     dn_input <- dn_input[!grepl("NH3|H2O", FragmentIon) & 
                              !is.na(get(quantificationColumn))]
     
-    msg = paste0('** Filtering on Global Q Value < ', global_qvalue_cutoff)
+    msg = paste0('** Filtering on Q.Value < ', global_qvalue_cutoff)
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     
