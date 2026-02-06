@@ -14,8 +14,7 @@
 #' @param pg_qvalue_cutoff If MBR is false, the qvalue cutoff for the Global.PG.Q.Value 
 #' column, i.e. the global q-value for the protein group.  If MBR is true, the
 #' qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for 
-#' the library created after the first MBR pass. Run should be the same as filename.
-#' Default is 0.01.
+#' the library created after the first MBR pass. Default is 0.01.
 #' @param useUniquePeptide should unique pepties be removed
 #' @param removeFewMeasurements should proteins with few measurements be removed
 #' @param removeOxidationMpeptides should peptides with oxidation be removed
@@ -72,9 +71,9 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
                                           "MSstats", "DIANN")
     input = MSstatsConvert::MSstatsClean(input, MBR = MBR, 
                                          quantificationColumn = quantificationColumn,
-                                         global_qvalue_cutoff,
-                                         qvalue_cutoff, 
-                                         pg_qvalue_cutoff)
+                                         global_qvalue_cutoff = global_qvalue_cutoff,
+                                         qvalue_cutoff = qvalue_cutoff, 
+                                         pg_qvalue_cutoff = pg_qvalue_cutoff)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
     
     decoy_filter = list(col_name = "ProteinName",
