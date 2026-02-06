@@ -14,7 +14,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 biocViews: MassSpectrometry, Proteomics, Software, DataImport, QualityControl
 Depends:
     R (>= 4.0)

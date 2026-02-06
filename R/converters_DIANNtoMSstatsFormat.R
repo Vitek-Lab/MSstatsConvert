@@ -83,39 +83,6 @@ DIANNtoMSstatsFormat = function(input, annotation = NULL,
                             filter = removeOxidationMpeptides,
                             drop_column = FALSE)
     
-    msg = paste0('** Filtering on Global Q Value < ', global_qvalue_cutoff)
-    getOption("MSstatsLog")("INFO", msg)
-    getOption("MSstatsMsg")("INFO", msg)
-    
-    input = input[DetectionQValue < global_qvalue_cutoff, ]
-    if (MBR) {
-        msg = '** MBR was used to analyze the data. Now setting names and filtering'
-        msg_1_mbr = paste0('-- LibPGQValue < ', pg_qvalue_cutoff)
-        msg_2_mbr = paste0('-- LibQValue < ', qvalue_cutoff)
-        input = input[LibPGQValue < pg_qvalue_cutoff, ]
-        input = input[LibQValue < qvalue_cutoff, ]
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
-        getOption("MSstatsLog")("INFO", msg_1_mbr)
-        getOption("MSstatsMsg")("INFO", msg_1_mbr)
-        getOption("MSstatsLog")("INFO", msg_2_mbr)
-        getOption("MSstatsMsg")("INFO", msg_2_mbr)
-        # getOption("MSstatsLog")("INFO", "\n")
-    } else{
-        msg = '** MBR was not used to analyze the data. Now setting names and filtering'
-        msg_1 = paste0('-- Filtering on GlobalPGQValue < ', pg_qvalue_cutoff)
-        msg_2 = paste0('-- Filtering on GlobalQValue < ', qvalue_cutoff)
-        input = input[GlobalPGQValue < pg_qvalue_cutoff, ]
-        input = input[GlobalQValue < qvalue_cutoff, ]
-        getOption("MSstatsLog")("INFO", msg)
-        getOption("MSstatsMsg")("INFO", msg)
-        getOption("MSstatsLog")("INFO", msg_1)
-        getOption("MSstatsMsg")("INFO", msg_1)
-        getOption("MSstatsLog")("INFO", msg_2)
-        getOption("MSstatsMsg")("INFO", msg_2)
-        # getOption("MSstatsLog")("INFO", "\n")
-    }
-    
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
     input = MSstatsConvert::MSstatsPreprocess(
