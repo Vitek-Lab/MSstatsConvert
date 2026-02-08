@@ -36,7 +36,8 @@ SpectronauttoMSstatsFormat(
 
 \item{annotation}{name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.}
 
-\item{intensity}{'PeakArea'(default) uses not normalized peak area. 'NormalizedPeakArea' uses peak area normalized by Spectronaut.}
+\item{intensity}{'PeakArea'(default) uses not normalized MS2 peak area. 'NormalizedPeakArea' uses MS2 peak area normalized by Spectronaut.
+'MS1Quantity' uses MS1 level quantification, which should be used if MS2 is unreliable.}
 
 \item{excludedFromQuantificationFilter}{Remove rows with F.ExcludedFromQuantification=TRUE Default is TRUE.}
 

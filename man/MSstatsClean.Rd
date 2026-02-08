@@ -113,11 +113,12 @@ in TMT data.}
 Defaults to "Abundance", which means that columns that contain the word "Abundance"
 will be treated as corresponding to intensities for different channels.}
 
-\item{intensity}{chr, specifies which column will be used for Intensity.}
+\item{intensity}{'PeakArea'(default) uses not normalized MS2 peak area. 'NormalizedPeakArea' uses MS2 peak area normalized by Spectronaut.
+'MS1Quantity' uses MS1 level quantification, which should be used if MS2 is unreliable.}
 
-\item{calculateAnomalyScores}{logical, whether to calculate anomaly scores}
+\item{calculateAnomalyScores}{Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.}
 
-\item{anomalyModelFeatures}{character vector, specifies which columns will be used for anomaly detection model. Can be NULL if calculateAnomalyScores=FALSE.}
+\item{anomalyModelFeatures}{character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.}
 
 \item{peptide_id_col}{character name of a column that identifies peptides}
 
