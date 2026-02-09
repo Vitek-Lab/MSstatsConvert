@@ -548,14 +548,34 @@ MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
                                        temporal_direction[i]))
         }
     }
-    
-    input = .runAnomalyModel(input, 
+
+
+    idx_all_missing = input[, 
+        rowSums(is.na(as.matrix(.SD))) == length(quality_metrics),
+        .SDcols = quality_metrics]
+
+    input_missing_quality = input[idx_all_missing]
+    input_measured_quality = input[!idx_all_missing]
+
+
+    input_measured_quality = .runAnomalyModel(input_measured_quality, 
                              n_trees=n_trees, 
                              max_depth=max_depth, 
                              cores=cores,
                              split_column="PSM",
                              quality_metrics=quality_metrics)
     
+    # Calculate median anomaly score for each PSM
+    median_scores = input_measured_quality[, 
+        .(MedianAnomalyScore = median(AnomalyScores, na.rm = TRUE)), by = PSM]
+    input_missing_quality = merge(
+        input_missing_quality, median_scores, by = "PSM", all.x = TRUE)
+    input_missing_quality$AnomalyScores = input_missing_quality$MedianAnomalyScore
+    input_missing_quality$MedianAnomalyScore = NULL
+
+    # Combine measured and missing quality data
+    input = rbind(input_measured_quality, input_missing_quality, fill = TRUE)
+
     subset_cols = c("Run", "ProteinName", "PeptideSequence", 
                     "PrecursorCharge", "FragmentIon", 
                     "ProductCharge", "IsotopeLabelType", 

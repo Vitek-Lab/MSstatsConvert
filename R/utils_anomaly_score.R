@@ -278,6 +278,7 @@
     cat(paste0("Number of PSMs to process: ", num_psm), 
         sep = "\n", file = "MSstats_anomaly_model_progress.log")
     
+    # input_data = na.omit(input_data)
     model_results = parallel::parLapply(
         cl, seq_len(num_psm), 
         function(i){
