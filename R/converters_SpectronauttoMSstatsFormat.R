@@ -33,7 +33,8 @@
 #' head(spectronaut_imported)
 #' 
 SpectronauttoMSstatsFormat = function(
-        input, annotation = NULL, intensity = 'PeakArea', 
+        input, annotation = NULL, 
+        intensity = c('PeakArea', 'NormalizedPeakArea', 'MS1Quantity'),
         excludedFromQuantificationFilter = TRUE,
         filter_with_Qvalue = FALSE, qvalue_cutoff = 0.01, 
         useUniquePeptide = TRUE, removeFewMeasurements=TRUE,
