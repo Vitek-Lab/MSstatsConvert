@@ -23,6 +23,7 @@
       "NormalizedPeakArea" = "FNormalizedPeakArea",
       "MS1Quantity" = "FGMS1Quantity"
   )
+  intensity = match.arg(intensity, names(intensity_column_mapping))
   intensity_column = intensity_column_mapping[[intensity]]
   cols = c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon", 
            f_charge_col, "RFileName", "RCondition", "RReplicate", 
