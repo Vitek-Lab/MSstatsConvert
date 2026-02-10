@@ -13,4 +13,4 @@ expect_true(all(output$Intensity == 100000))
 expect_error(MSstatsConvert:::.cleanRawSpectronaut(msstats_input, intensity = 'invalid', 
                                                    calculateAnomalyScores = FALSE, 
                                                    anomalyModelFeatures = c()), 
-             pattern = "'arg' should be one of “PeakArea”")
+             pattern = "'arg' should be one of .*PeakArea")
