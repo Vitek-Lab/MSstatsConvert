@@ -278,6 +278,9 @@
     cat(paste0("Number of PSMs to process: ", num_psm), 
         sep = "\n", file = "MSstats_anomaly_model_progress.log")
     
+    # browser()
+    model_input = unique(input_data[, c(split_column, quality_metrics), with = FALSE])
+
     # input_data = na.omit(input_data)
     model_results = parallel::parLapply(
         cl, seq_len(num_psm), 
@@ -286,7 +289,7 @@
                 cat("Finished processing an additional 100 PSMs", 
                     sep = "\n", file = "MSstats_anomaly_model_progress.log", append = TRUE)
             }
-            single_psm = input_data[get(split_column) == psm_list[[i]], 
+            single_psm = model_input[model_input[[split_column]] == psm_list[[i]], 
                                     ..quality_metrics]
             
             if (max_depth == "auto"){
@@ -301,7 +304,9 @@
     
     model_results = unlist(model_results)
     # Clip anomaly scores to stop them from exploding
-    input_data$AnomalyScores = pmax(model_results, .001)
+    model_input$AnomalyScores = pmax(model_results, .001)
     
+    # browser()
+    input_data = merge(input_data, model_input, by = c(split_column, quality_metrics), all.x = TRUE)
     return(input_data)
 }

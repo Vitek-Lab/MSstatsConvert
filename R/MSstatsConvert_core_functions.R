@@ -535,7 +535,7 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
 MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
                                 missing_run_count, n_feat, run_order, n_trees, 
                                 max_depth, cores){
-    
+
     input = .prepareSpectronautAnomalyInput(input, quality_metrics, 
                                             run_order, n_feat, 
                                             missing_run_count)
@@ -549,7 +549,7 @@ MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
         }
     }
 
-
+    # browser() #AASDAIPPASPK
     idx_all_missing = input[, 
         rowSums(is.na(as.matrix(.SD))) == length(quality_metrics),
         .SDcols = quality_metrics]
@@ -567,7 +567,7 @@ MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
     
     # Calculate median anomaly score for each PSM
     median_scores = input_measured_quality[, 
-        .(MedianAnomalyScore = median(AnomalyScores, na.rm = TRUE)), by = PSM]
+        .(MedianAnomalyScore = mean(AnomalyScores, na.rm = TRUE)), by = PSM]
     input_missing_quality = merge(
         input_missing_quality, median_scores, by = "PSM", all.x = TRUE)
     input_missing_quality$AnomalyScores = input_missing_quality$MedianAnomalyScore
