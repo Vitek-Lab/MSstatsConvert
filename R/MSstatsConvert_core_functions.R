@@ -518,6 +518,12 @@ MSstatsMakeAnnotation = function(input, annotation, ...) {
 }
 
 #' Run Anomaly Model
+#'
+#' Detects anomalous measurements in mass spectrometry data using an isolation forest algorithm.
+#' This function identifies unusual precursor measurements based on quality metrics and their 
+#' temporal patterns. For features with insufficient quality metric data, it assigns anomaly 
+#' scores based on the median score of similar features (same peptide and charge combination).
+#' The model supports parallel processing for improved performance on large datasets.
 #' 
 #' @param input data.table preprocessed by the MSstatsBalancedDesign function
 #' @param quality_metrics character vector of quality metrics to use in the model
@@ -549,14 +555,12 @@ MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
         }
     }
 
-    # browser() #AASDAIPPASPK
     idx_all_missing = input[, 
         rowSums(is.na(as.matrix(.SD))) == length(quality_metrics),
         .SDcols = quality_metrics]
 
     input_missing_quality = input[idx_all_missing]
     input_measured_quality = input[!idx_all_missing]
-
 
     input_measured_quality = .runAnomalyModel(input_measured_quality, 
                              n_trees=n_trees, 
@@ -567,7 +571,7 @@ MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
     
     # Calculate median anomaly score for each PSM
     median_scores = input_measured_quality[, 
-        .(MedianAnomalyScore = mean(AnomalyScores, na.rm = TRUE)), by = PSM]
+        .(MedianAnomalyScore = median(AnomalyScores, na.rm = TRUE)), by = PSM]
     input_missing_quality = merge(
         input_missing_quality, median_scores, by = "PSM", all.x = TRUE)
     input_missing_quality$AnomalyScores = input_missing_quality$MedianAnomalyScore
