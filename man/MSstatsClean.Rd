@@ -66,7 +66,9 @@ MSstatsClean(msstats_object, ...)
 \S4method{MSstatsClean}{MSstatsDIANNFiles}(
   msstats_object,
   MBR = TRUE,
-  quantificationColumn = "FragmentQuantCorrected"
+  quantificationColumn = "FragmentQuantCorrected",
+  calculateAnomalyScores = FALSE,
+  anomalyModelFeatures = c()
 )
 
 \S4method{MSstatsClean}{MSstatsMetamorpheusFiles}(msstats_object, MBR = TRUE, qvalue_cutoff = 0.05)

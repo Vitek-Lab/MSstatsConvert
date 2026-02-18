@@ -14,12 +14,21 @@ DIANNtoMSstatsFormat(
   removeFewMeasurements = TRUE,
   removeOxidationMpeptides = TRUE,
   removeProtein_with1Feature = TRUE,
+  MBR = TRUE,
+  quantificationColumn = "FragmentQuantCorrected",
+  calculateAnomalyScores = FALSE,
+  anomalyModelFeatures = c(),
+  anomalyModelFeatureTemporal = c(),
+  removeMissingFeatures = 0.5,
+  anomalyModelFeatureCount = 100,
+  runOrder = NULL,
+  n_trees = 100,
+  max_depth = "auto",
+  numberOfCores = 1,
   use_log_file = TRUE,
   append = FALSE,
   verbose = TRUE,
   log_file_path = NULL,
-  MBR = TRUE,
-  quantificationColumn = "FragmentQuantCorrected",
   ...
 )
 }
@@ -51,6 +60,30 @@ Default is 0.01.}
 
 \item{removeProtein_with1Feature}{should proteins with a single feature be removed}
 
+\item{MBR}{True if analysis was done with match between runs}
+
+\item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities for DIANN 1.8.x.
+Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x.
+Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.}
+
+\item{calculateAnomalyScores}{Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.}
+
+\item{anomalyModelFeatures}{character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.}
+
+\item{anomalyModelFeatureTemporal}{character vector of temporal direction corresponding to columns passed to anomalyModelFeatures. Values must be one of: \code{mean_decrease}, \code{mean_increase}, \code{dispersion_increase}, or NULL (to perform no temporal feature engineering). Default is empty vector. If calculateAnomalyScores=TRUE, vector must have as many values as anomalyModelFeatures (even if all NULL).}
+
+\item{removeMissingFeatures}{Remove features with missing values in more than this fraction of runs. Default is 0.5. Only used if calculateAnomalyScores=TRUE.}
+
+\item{anomalyModelFeatureCount}{Feature selection for anomaly model. Anomaly detection works on the precursor-level and can be much slower if all features used. We will by default filter to the top-100 highest intensity features. This can be adjusted as necessary. To turn feature-selection off, set this value to a high number (e.g. 10000). Only used if calculateAnomalyScores=TRUE.}
+
+\item{runOrder}{Temporal order of MS runs. Should be a two column data.table with columns \code{Run} and \code{Order}, where \code{Run} matches the run name output by Spectronaut and \code{Order} is an integer. Used to engineer the temporal features defined in anomalyModelFeatureTemporal.}
+
+\item{n_trees}{Number of trees to use in isolation forest when calculateAnomalyScores=TRUE. Default is 100.}
+
+\item{max_depth}{Max tree depth to use in isolation forest when calculateAnomalyScores=TRUE. Default is "auto" which calculates depth as log2(N) where N is the number of runs. Otherwise must be an integer.}
+
+\item{numberOfCores}{Number of cores for parallel processing anomaly detection model. When > 1, a logfile named 'MSstats_anomaly_model_progress.log' is created to track progress. Only works for Linux & Mac OS. Default is 1.}
+
 \item{use_log_file}{logical. If TRUE, information about data processing
 will be saved to a file.}
 
@@ -64,12 +97,6 @@ to the console.}
 data processing will be saved.
 If not provided, such a file will be created automatically.
 If \code{append = TRUE}, has to be a valid path to a file.}
-
-\item{MBR}{True if analysis was done with match between runs}
-
-\item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities for DIANN 1.8.x.
-Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x.
-Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.}
 
 \item{...}{additional parameters to \code{data.table::fread}.}
 }

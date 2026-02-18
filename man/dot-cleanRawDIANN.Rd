@@ -7,7 +7,9 @@
 .cleanRawDIANN(
   msstats_object,
   MBR = TRUE,
-  quantificationColumn = "FragmentQuantCorrected"
+  quantificationColumn = "FragmentQuantCorrected",
+  calculateAnomalyScores = FALSE,
+  anomalyModelFeatures = c()
 )
 }
 \arguments{

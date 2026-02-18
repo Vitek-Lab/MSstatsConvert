@@ -39,5 +39,9 @@ MSstatsAnomalyScores(
 data.table
 }
 \description{
-Run Anomaly Model
+Detects anomalous measurements in mass spectrometry data using an isolation forest algorithm.
+This function identifies unusual precursor measurements based on quality metrics and their
+temporal patterns. For features with insufficient quality metric data, it assigns anomaly
+scores based on the median score of similar features (same peptide and charge combination).
+The model supports parallel processing for improved performance on large datasets.
 }
