@@ -244,11 +244,9 @@
         }
     )
     
-    model_results = unlist(model_results)
-    # Clip anomaly scores to stop them from exploding
-    model_input$AnomalyScores = pmax(model_results, .001)
-    
-    # browser()
+    model_input$AnomalyScores = unlist(model_results)
+
     input_data = merge(input_data, model_input, by = c(split_column, quality_metrics), all.x = TRUE)
+      
     return(input_data)
 }
