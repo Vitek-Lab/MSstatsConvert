@@ -7,7 +7,7 @@
 SpectronauttoMSstatsFormat(
   input,
   annotation = NULL,
-  intensity = "PeakArea",
+  intensity = c("PeakArea", "NormalizedPeakArea", "MS1Quantity"),
   excludedFromQuantificationFilter = TRUE,
   filter_with_Qvalue = FALSE,
   qvalue_cutoff = 0.01,

@@ -15,7 +15,7 @@
 #' column, i.e. the global q-value for the protein group.  If MBR is true, the
 #' qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for 
 #' the library created after the first MBR pass. Default is 0.01.
-#' @param useUniquePeptide should unique pepties be removed
+#' @param useUniquePeptide should unique peptides be removed
 #' @param removeFewMeasurements should proteins with few measurements be removed
 #' @param removeOxidationMpeptides should peptides with oxidation be removed
 #' @param removeProtein_with1Feature should proteins with a single feature be removed
