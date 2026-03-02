@@ -152,11 +152,6 @@
         }
     }
     
-    # Intensity validation (if provided)
-    if (!is.null(config$intensity)) {
-        checkmate::assertString(config$intensity)
-    }
-    
     # Q-value filtering parameters
     checkmate::assertLogical(config$filter_with_Qvalue, len = 1)
     checkmate::assertNumber(config$qvalue_cutoff, lower = 0, upper = 1)

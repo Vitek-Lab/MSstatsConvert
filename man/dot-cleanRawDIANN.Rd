@@ -8,6 +8,9 @@
   msstats_object,
   MBR = TRUE,
   quantificationColumn = "FragmentQuantCorrected",
+  global_qvalue_cutoff = 0.01,
+  qvalue_cutoff = 0.01,
+  pg_qvalue_cutoff = 0.01,
   calculateAnomalyScores = FALSE,
   anomalyModelFeatures = c()
 )
@@ -20,6 +23,19 @@
 \item{quantificationColumn}{Use 'FragmentQuantCorrected'(default) column for quantified intensities for DIANN 1.8.x.
 Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x.
 Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.}
+
+\item{global_qvalue_cutoff}{The qvalue cutoff for the Q.Value column, i.e.
+the run-specific precursor q-value. Default is 0.01.}
+
+\item{qvalue_cutoff}{If MBR is false, the qvalue cutoff for the Global.Q.Value
+column, i.e. global precursor q-value.  If MBR is true, the qvalue cutoff for the
+Lib.Q.Value column, i.e. the q-value for the library created after the first MBR pass.
+Default is 0.01.}
+
+\item{pg_qvalue_cutoff}{If MBR is false, the qvalue cutoff for the Global.PG.Q.Value
+column, i.e. the global q-value for the protein group.  If MBR is true, the
+qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for
+the library created after the first MBR pass. Default is 0.01.}
 }
 \value{
 data.table

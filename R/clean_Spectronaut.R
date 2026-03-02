@@ -1,8 +1,6 @@
 #' Clean raw Spectronaut output.
 #' @param msstats_object an object of class `MSstatsSpectronautFiles`.
-#' @param intensity chr, specifies which column will be used for Intensity.
-#' @param calculateAnomalyScores logical, whether to calculate anomaly scores
-#' @param anomalyModelFeatures character vector, specifies which columns will be used for anomaly detection model. Can be NULL if calculateAnomalyScores=FALSE.
+#' @inheritParams SpectronauttoMSstatsFormat
 #' @return `data.table`
 #' @keywords internal
 .cleanRawSpectronaut = function(msstats_object, intensity,
@@ -20,10 +18,17 @@
                                     colnames(spec_input))
   exclude_col = .findAvailable(c("FExcludedFromQuantification"), 
                                colnames(spec_input))
+  intensity_column_mapping = c(
+      "PeakArea" = "FPeakArea",
+      "NormalizedPeakArea" = "FNormalizedPeakArea",
+      "MS1Quantity" = "FGMS1Quantity"
+  )
+  intensity = match.arg(intensity, names(intensity_column_mapping))
+  intensity_column = intensity_column_mapping[[intensity]]
   cols = c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon", 
            f_charge_col, "RFileName", "RCondition", "RReplicate", 
            "EGQvalue", pg_qval_col, interference_col, exclude_col,
-           paste0("F", intensity))
+           intensity_column)
   if (calculateAnomalyScores){
     cols = c(cols, anomalyModelFeatures)
   }
@@ -32,7 +37,7 @@
   data.table::setnames(
     spec_input, 
     c("PGProteinGroups", "EGModifiedSequence", "FGCharge", "FFrgIon",
-      f_charge_col, "RFileName", paste0("F", intensity), 
+      f_charge_col, "RFileName", intensity_column, 
       "RCondition", "RReplicate"),
     c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
       "ProductCharge", "Run", "Intensity", "Condition", "BioReplicate"), 

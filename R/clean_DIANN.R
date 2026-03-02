@@ -1,14 +1,14 @@
 #' Clean raw Diann files
 #' @param msstats_object an object of class `MSstatsDIANNFiles`.
-#' @param MBR True if analysis was done with match between runs
-#' @param quantificationColumn Use 'FragmentQuantCorrected'(default) column for quantified intensities for DIANN 1.8.x.
-#' Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x. 
-#' Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.
+#' @inheritParams DIANNtoMSstatsFormat
 #' @return data.table
 #' @importFrom stats na.omit
 #' @keywords internal
 .cleanRawDIANN <- function(msstats_object, MBR = TRUE, 
                            quantificationColumn = "FragmentQuantCorrected",
+                           global_qvalue_cutoff = 0.01,
+                           qvalue_cutoff = 0.01, 
+                           pg_qvalue_cutoff = 0.01,
                            calculateAnomalyScores = FALSE, 
                            anomalyModelFeatures = c()) {
     dn_input <- getInputFile(msstats_object, "input")
@@ -32,7 +32,10 @@
     dn_input <- .cleanDIANNProcessFragmentInfo(dn_input, quantificationColumn)
     
     # Clean and filter data
-    dn_input <- .cleanDIANNCleanAndFilterData(dn_input, quantificationColumn)
+    dn_input <- .cleanDIANNCleanAndFilterData(dn_input, MBR, quantificationColumn, 
+                                              global_qvalue_cutoff,
+                                              qvalue_cutoff, 
+                                              pg_qvalue_cutoff)
     
     # Rename columns
     dn_input <- .cleanDIANNRenameColumns(dn_input, quantificationColumn)
@@ -157,13 +160,49 @@
 
 #' Clean and filter data by removing unwanted fragments and NA values
 #' @param dn_input data.table input
-#' @param quantificationColumn quantification column name
+#' @inheritParams DIANNtoMSstatsFormat
 #' @return cleaned data.table
 #' @noRd
-.cleanDIANNCleanAndFilterData <- function(dn_input, quantificationColumn) {
+.cleanDIANNCleanAndFilterData <- function(dn_input, MBR, quantificationColumn,
+                                         global_qvalue_cutoff,
+                                         qvalue_cutoff, 
+                                         pg_qvalue_cutoff) {
     # Remove NH3 and H2O loss fragments & remove rows with NA in quant column
     dn_input <- dn_input[!grepl("NH3|H2O", FragmentIon) & 
                              !is.na(get(quantificationColumn))]
+    
+    msg = paste0('** Filtering on Q.Value < ', global_qvalue_cutoff)
+    getOption("MSstatsLog")("INFO", msg)
+    getOption("MSstatsMsg")("INFO", msg)
+    
+    dn_input = dn_input[QValue >= global_qvalue_cutoff, quantificationColumn := 0]
+    if (MBR) {
+        msg = '** MBR was used to analyze the data. Now setting names and filtering'
+        msg_1_mbr = paste0('-- LibPGQValue < ', pg_qvalue_cutoff)
+        msg_2_mbr = paste0('-- LibQValue < ', qvalue_cutoff)
+        dn_input = dn_input[LibPGQValue >= pg_qvalue_cutoff, , quantificationColumn := 0]
+        dn_input = dn_input[LibQValue >= qvalue_cutoff, , quantificationColumn := 0]
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
+        getOption("MSstatsLog")("INFO", msg_1_mbr)
+        getOption("MSstatsMsg")("INFO", msg_1_mbr)
+        getOption("MSstatsLog")("INFO", msg_2_mbr)
+        getOption("MSstatsMsg")("INFO", msg_2_mbr)
+        # getOption("MSstatsLog")("INFO", "\n")
+    } else{
+        msg = '** MBR was not used to analyze the data. Now setting names and filtering'
+        msg_1 = paste0('-- Filtering on GlobalPGQValue < ', pg_qvalue_cutoff)
+        msg_2 = paste0('-- Filtering on GlobalQValue < ', qvalue_cutoff)
+        dn_input = dn_input[GlobalPGQValue >= pg_qvalue_cutoff, quantificationColumn := 0]
+        dn_input = dn_input[GlobalQValue >= qvalue_cutoff, quantificationColumn := 0]
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
+        getOption("MSstatsLog")("INFO", msg_1)
+        getOption("MSstatsMsg")("INFO", msg_1)
+        getOption("MSstatsLog")("INFO", msg_2)
+        getOption("MSstatsMsg")("INFO", msg_2)
+        # getOption("MSstatsLog")("INFO", "\n")
+    }
     
     return(dn_input)
 }

@@ -67,6 +67,9 @@ MSstatsClean(msstats_object, ...)
   msstats_object,
   MBR = TRUE,
   quantificationColumn = "FragmentQuantCorrected",
+  global_qvalue_cutoff = 0.01,
+  qvalue_cutoff = 0.01,
+  pg_qvalue_cutoff = 0.01,
   calculateAnomalyScores = FALSE,
   anomalyModelFeatures = c()
 )
@@ -112,11 +115,12 @@ in TMT data.}
 Defaults to "Abundance", which means that columns that contain the word "Abundance"
 will be treated as corresponding to intensities for different channels.}
 
-\item{intensity}{chr, specifies which column will be used for Intensity.}
+\item{intensity}{'PeakArea'(default) uses not normalized MS2 peak area. 'NormalizedPeakArea' uses MS2 peak area normalized by Spectronaut.
+'MS1Quantity' uses MS1 level quantification, which should be used if MS2 is unreliable.}
 
-\item{calculateAnomalyScores}{logical, whether to calculate anomaly scores}
+\item{calculateAnomalyScores}{Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.}
 
-\item{anomalyModelFeatures}{character vector, specifies which columns will be used for anomaly detection model. Can be NULL if calculateAnomalyScores=FALSE.}
+\item{anomalyModelFeatures}{character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.}
 
 \item{peptide_id_col}{character name of a column that identifies peptides}
 
@@ -131,7 +135,18 @@ removed based on the IsUnique column from Philosopher output}
 Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x.
 Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.}
 
-\item{qvalue_cutoff}{The q-value cutoff for filtering peaks detected by MBR}
+\item{global_qvalue_cutoff}{The qvalue cutoff for the Q.Value column, i.e.
+the run-specific precursor q-value. Default is 0.01.}
+
+\item{qvalue_cutoff}{If MBR is false, the qvalue cutoff for the Global.Q.Value
+column, i.e. global precursor q-value.  If MBR is true, the qvalue cutoff for the
+Lib.Q.Value column, i.e. the q-value for the library created after the first MBR pass.
+Default is 0.01.}
+
+\item{pg_qvalue_cutoff}{If MBR is false, the qvalue cutoff for the Global.PG.Q.Value
+column, i.e. the global q-value for the protein group.  If MBR is true, the
+qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for
+the library created after the first MBR pass. Default is 0.01.}
 }
 \value{
 data.table

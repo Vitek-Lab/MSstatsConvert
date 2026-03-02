@@ -2,7 +2,8 @@
 #' 
 #' @param input name of Spectronaut output, which is long-format. ProteinName, PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, IsotopeLabelType, Condition, BioReplicate, Run, Intensity, F.ExcludedFromQuantification are required. Rows with F.ExcludedFromQuantification=True will be removed.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.
-#' @param intensity 'PeakArea'(default) uses not normalized peak area. 'NormalizedPeakArea' uses peak area normalized by Spectronaut.
+#' @param intensity 'PeakArea'(default) uses not normalized MS2 peak area. 'NormalizedPeakArea' uses MS2 peak area normalized by Spectronaut.
+#' 'MS1Quantity' uses MS1 level quantification, which should be used if MS2 is unreliable.
 #' @param excludedFromQuantificationFilter Remove rows with F.ExcludedFromQuantification=TRUE Default is TRUE.
 #' @param filter_with_Qvalue FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
@@ -32,7 +33,8 @@
 #' head(spectronaut_imported)
 #' 
 SpectronauttoMSstatsFormat = function(
-        input, annotation = NULL, intensity = 'PeakArea', 
+        input, annotation = NULL, 
+        intensity = c('PeakArea', 'NormalizedPeakArea', 'MS1Quantity'),
         excludedFromQuantificationFilter = TRUE,
         filter_with_Qvalue = FALSE, qvalue_cutoff = 0.01, 
         useUniquePeptide = TRUE, removeFewMeasurements=TRUE,
