@@ -86,7 +86,6 @@ DIANNtoMSstatsFormat = function(
 
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "DIANN")
-    # browser()
     input = MSstatsConvert::MSstatsClean(
         input, MBR = MBR, quantificationColumn = quantificationColumn,
         calculateAnomalyScores = calculateAnomalyScores, 
@@ -105,7 +104,6 @@ DIANNtoMSstatsFormat = function(
     msg = paste0('** Filtering on Global Q Value < ', global_qvalue_cutoff)
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
-    # browser()
     input[DetectionQValue >= global_qvalue_cutoff, Intensity := 0]
 
     if (MBR) {
@@ -138,7 +136,6 @@ DIANNtoMSstatsFormat = function(
     
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
-    # browser()
     input = MSstatsConvert::MSstatsPreprocess(
         input, 
         annotation, 
@@ -156,21 +153,18 @@ DIANNtoMSstatsFormat = function(
                                IsotopeLabelType = "Light"),
         anomaly_metrics = anomalyModelFeatures)
     input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
-    # browser()
     input = MSstatsConvert::MSstatsBalancedDesign(input, feature_columns, 
                                                   fill_incomplete = TRUE,
                                                   handle_fractions = FALSE,
                                                   remove_few = removeFewMeasurements,
                                                   anomaly_metrics = anomalyModelFeatures
     )
-    # browser()
     if (calculateAnomalyScores){
         input = MSstatsConvert::MSstatsAnomalyScores(
             input, anomalyModelFeatures, anomalyModelFeatureTemporal,
             removeMissingFeatures, anomalyModelFeatureCount, runOrder, n_trees, 
             max_depth, numberOfCores)
     }
-    # browser()
     msg_final = paste("** Finished preprocessing. The dataset is ready",
                       "to be processed by the dataProcess function.")
     getOption("MSstatsLog")("INFO", msg_final)
