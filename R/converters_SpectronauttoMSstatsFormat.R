@@ -1,9 +1,29 @@
 #' Import Spectronaut files
-#' 
+#'
 #' @param input name of Spectronaut output, which is long-format. ProteinName, PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, IsotopeLabelType, Condition, BioReplicate, Run, Intensity, F.ExcludedFromQuantification are required. Rows with F.ExcludedFromQuantification=True will be removed.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.
-#' @param intensity 'PeakArea'(default) uses not normalized MS2 peak area. 'NormalizedPeakArea' uses MS2 peak area normalized by Spectronaut.
-#' 'MS1Quantity' uses MS1 level quantification, which should be used if MS2 is unreliable.
+#' @param intensity Intensity column to use. Accepts legacy enum values
+#'   \code{'PeakArea'} (default, uses F.PeakArea), \code{'NormalizedPeakArea'}
+#'   (uses F.NormalizedPeakArea), \code{'MS1Quantity'} (uses FG.MS1Quantity),
+#'   or \code{'MS2Quantity'} (uses FG.MS2Quantity).  Can also be any raw
+#'   Spectronaut column name passed as a string (e.g.
+#'   \code{"FG.MS1Quantity"}); the column name is standardized internally.
+#'   For protein turnover workflows the recommended default is
+#'   \code{'MS1Quantity'} (FG.MS1Quantity).
+#' @param heavyLabel Character string identifying the heavy isotope label as it
+#'   appears inside square brackets in the labeled sequence column, e.g.
+#'   \code{"Lys6"} matches peptides containing \code{[Lys6]}.  Supports any
+#'   novel label name reported by Spectronaut (e.g. \code{"Leu6"},
+#'   \code{"Phe10"}, \code{"Lys8"}).  When provided, each peptide is
+#'   classified as heavy (\code{IsotopeLabelType = "H"}), light
+#'   (\code{IsotopeLabelType = "L"}), or unlabeled
+#'   (\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
+#'   \code{NULL} (default) all peptides receive \code{IsotopeLabelType = "L"}
+#'   as in previous versions.
+#' @param labelColumn Name of the Spectronaut column that contains the labeled
+#'   peptide sequence used for heavy/light classification.  Defaults to
+#'   \code{"FG.LabeledSequence"}.  The value is standardized internally
+#'   (dots and spaces removed) before column lookup.
 #' @param excludedFromQuantificationFilter Remove rows with F.ExcludedFromQuantification=TRUE Default is TRUE.
 #' @param filter_with_Qvalue FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
@@ -33,8 +53,10 @@
 #' head(spectronaut_imported)
 #' 
 SpectronauttoMSstatsFormat = function(
-        input, annotation = NULL, 
-        intensity = c('PeakArea', 'NormalizedPeakArea', 'MS1Quantity'),
+        input, annotation = NULL,
+        intensity = c('PeakArea', 'NormalizedPeakArea', 'MS1Quantity', 'MS2Quantity'),
+        heavyLabel = NULL,
+        labelColumn = "FG.LabeledSequence",
         excludedFromQuantificationFilter = TRUE,
         filter_with_Qvalue = FALSE, qvalue_cutoff = 0.01, 
         useUniquePeptide = TRUE, removeFewMeasurements=TRUE,
@@ -47,10 +69,22 @@ SpectronauttoMSstatsFormat = function(
         use_log_file = TRUE, append = FALSE, verbose = TRUE, 
         log_file_path = NULL, ...
 ) {
+    # Standardize the intensity value when it is a raw column name so that the
+    # legacy match.arg() inside .cleanRawSpectronaut sees it correctly.
+    known_aliases = c('PeakArea', 'NormalizedPeakArea', 'MS1Quantity', 'MS2Quantity')
+    if (length(intensity) > 1) {
+        # No value supplied: use first (default)
+        intensity = intensity[1]
+    }
+    if (!(intensity %in% known_aliases)) {
+        # Treat as a raw column name and standardize it
+        intensity = .standardizeColnames(intensity)
+    }
+
     validation_config = list(
-        input = input, 
-        annotation = annotation, 
-        intensity = intensity, 
+        input = input,
+        annotation = annotation,
+        intensity = intensity,
         excludedFromQuantificationFilter = excludedFromQuantificationFilter,
         filter_with_Qvalue = filter_with_Qvalue, 
         qvalue_cutoff = qvalue_cutoff, 
@@ -84,8 +118,10 @@ SpectronauttoMSstatsFormat = function(
                                           "MSstats", "Spectronaut", ...)
 
     input = MSstatsConvert::MSstatsClean(input, intensity = intensity,
-                                         calculateAnomalyScores, 
-                                         anomalyModelFeatures)
+                                         calculateAnomalyScores,
+                                         anomalyModelFeatures,
+                                         heavyLabel = heavyLabel,
+                                         labelColumn = labelColumn)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
     
     pq_filter = list(score_column = "PGQvalue", 
@@ -113,20 +149,25 @@ SpectronauttoMSstatsFormat = function(
         drop_column = TRUE
     )
     
-    feature_columns = c("PeptideSequence", "PrecursorCharge", 
+    feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
+    # When heavyLabel is provided IsotopeLabelType is already assigned per-row
+    # by .cleanRawSpectronaut.  We must not overwrite those values with "L".
+    # When heavyLabel is NULL we preserve the original behaviour: fill any
+    # missing IsotopeLabelType with "L".
+    fill_isotope = if (is.null(heavyLabel)) list("IsotopeLabelType" = "L") else list()
     input = MSstatsConvert::MSstatsPreprocess(
-        input, 
-        annotation, 
+        input,
+        annotation,
         feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(remove_features_with_few_measurements = removeFewMeasurements,
                                 summarize_multiple_psms = summaryforMultipleRows),
-        score_filtering = list(pgq = pq_filter, 
+        score_filtering = list(pgq = pq_filter,
                                psm_q = qval_filter),
         exact_filtering = list(excluded_quant = excluded_quant_filter),
-        columns_to_fill = list("IsotopeLabelType" = "L"),
+        columns_to_fill = fill_isotope,
         anomaly_metrics = anomalyModelFeatures)
     input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
     
