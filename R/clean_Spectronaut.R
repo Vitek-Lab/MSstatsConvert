@@ -47,7 +47,7 @@
     skip_absent = TRUE)
 
   spec_input = .assignSpectronautIsotopeLabelType(
-    spec_input, heavyLabels, peptideSequenceColumn)
+    spec_input, heavyLabels)
 
   .logSuccess("Spectronaut", "clean")
   spec_input
@@ -179,13 +179,10 @@
 #' @param spec_input `data.table` after column renaming.
 #' @param heavyLabels Character scalar heavy label name (e.g. \code{"Lys6"}),
 #'   or \code{NULL}.
-#' @param peptideSequenceColumn Raw (dot-separated) column name that holds the labeled
-#'   sequence (e.g. \code{"FG.LabeledSequence"}).
 #' @return `data.table` with \code{IsotopeLabelType} column added or updated.
 #' @keywords internal
 #' @noRd
-.assignSpectronautIsotopeLabelType = function(spec_input, heavyLabels,
-                                              peptideSequenceColumn) {
+.assignSpectronautIsotopeLabelType = function(spec_input, heavyLabels) {
     IsotopeLabelType = PeptideSequence = NULL
     if (is.null(heavyLabels)) {
         return(spec_input)
@@ -195,7 +192,7 @@
     bare_amino_acids_pattern = paste0(bare_amino_acids, collapse = "|")
     heavy_pattern = paste0(heavyLabels, collapse = "|")
     heavy_brackets_escaped_pattern = paste(
-        gsub("([\\[\\]])", "\\\\\\1", heavy_pattern),
+        gsub("([\\[\\]])", "\\\\\\1", heavy_pattern, perl = TRUE),
         collapse = "|"
     )
     
