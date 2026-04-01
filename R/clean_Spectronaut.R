@@ -202,7 +202,10 @@
         default = NA_character_
     )]
     
-    spec_input[, PeptideSequence := gsub(heavy_brackets_escaped_pattern, "", PeptideSequence, perl = TRUE)]
+    for (i in seq_along(heavyLabels)) {
+        escaped = gsub("([\\[\\]])", "\\\\\\1", heavyLabels[i], perl = TRUE)
+        spec_input[, PeptideSequence := gsub(escaped, bare_amino_acids[i], PeptideSequence, perl = TRUE)]
+    }
 
     spec_input
 }
