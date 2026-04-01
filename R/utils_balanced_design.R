@@ -107,6 +107,15 @@
                     features = unique(input[[feature_col]][group_filter]),
                     measurements = unique(input[[measurement_col]][group_filter])
                 ))
+            na_label_features = unique(input[[feature_col]][group_filter & is.na(input[["IsotopeLabelType"]])])
+            if (length(na_label_features) > 0) {
+                na_rows = data.table::as.data.table(expand.grid(
+                    labels = NA,
+                    features = na_label_features,
+                    measurements = unique(input[[measurement_col]][group_filter])
+                ))
+                by_group[[group_id]] = data.table::rbindlist(list(by_group[[group_id]], na_rows))
+            }
             by_group[[group_id]]$group = group
         }
         result = data.table::rbindlist(by_group)
