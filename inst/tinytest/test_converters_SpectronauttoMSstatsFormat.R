@@ -19,8 +19,6 @@ expect_true("Fraction" %in% colnames(output))
 
 
 # Test SpectronauttoMSstatsFormat Missing Columns ---------------------------
-# F.ExcludedFromQuantification is now synthesized as FALSE when absent, so
-# removing it should NOT cause an error.
 spectronaut_raw = system.file("tinytest/raw_data/Spectronaut/spectronaut_input.csv",
                               package = "MSstatsConvert")
 spectronaut_raw = data.table::fread(spectronaut_raw)
@@ -29,8 +27,6 @@ expect_silent(
     SpectronauttoMSstatsFormat(spectronaut_raw, use_log_file = FALSE)
 )
 
-# F.FrgLossType is now synthesized as "noloss" when absent, so removing it
-# should NOT cause an error.
 spectronaut_raw = system.file("tinytest/raw_data/Spectronaut/spectronaut_input.csv",
                               package = "MSstatsConvert")
 spectronaut_raw = data.table::fread(spectronaut_raw)
@@ -39,9 +35,6 @@ expect_silent(
     SpectronauttoMSstatsFormat(spectronaut_raw, use_log_file = FALSE)
 )
 
-# PG.ProteinGroups is now optional when PG.ProteinAccessions is present.
-# The standard test file has both columns, so removing PG.ProteinGroups should
-# fall back to PG.ProteinAccessions without error.
 spectronaut_raw = system.file("tinytest/raw_data/Spectronaut/spectronaut_input.csv",
                               package = "MSstatsConvert")
 spectronaut_raw = data.table::fread(spectronaut_raw)
@@ -50,7 +43,6 @@ expect_silent(
     SpectronauttoMSstatsFormat(spectronaut_raw, use_log_file = FALSE)
 )
 
-# When BOTH protein name columns are absent the converter must still error.
 spectronaut_raw = system.file("tinytest/raw_data/Spectronaut/spectronaut_input.csv",
                               package = "MSstatsConvert")
 spectronaut_raw = data.table::fread(spectronaut_raw)
@@ -61,7 +53,6 @@ expect_error(
     "The following columns are missing from the input data: PGProteinGroups"
 )
 
-# FG.Charge remains required.
 spectronaut_raw = system.file("tinytest/raw_data/Spectronaut/spectronaut_input.csv",
                               package = "MSstatsConvert")
 spectronaut_raw = data.table::fread(spectronaut_raw)
