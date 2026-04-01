@@ -75,7 +75,7 @@ Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensit
 
 \item{anomalyModelFeatureCount}{Feature selection for anomaly model. Anomaly detection works on the precursor-level and can be much slower if all features used. We will by default filter to the top-100 highest intensity features. This can be adjusted as necessary. To turn feature-selection off, set this value to a high number (e.g. 10000). Only used if calculateAnomalyScores=TRUE.}
 
-\item{runOrder}{Temporal order of MS runs. Should be a two column data.table with columns \code{Run} and \code{Order}, where \code{Run} matches the run name output by Spectronaut and \code{Order} is an integer. Used to engineer the temporal features defined in anomalyModelFeatureTemporal.}
+\item{runOrder}{Temporal order of MS runs. Should be a two column data.table with columns \code{Run} and \code{Order}, where \code{Run} matches the run name output by DIA-NN and \code{Order} is an integer. Used to engineer the temporal features defined in anomalyModelFeatureTemporal.}
 
 \item{n_trees}{Number of trees to use in isolation forest when calculateAnomalyScores=TRUE. Default is 100.}
 

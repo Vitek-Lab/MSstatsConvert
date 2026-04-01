@@ -52,7 +52,9 @@ MSstatsClean(msstats_object, ...)
   msstats_object,
   intensity,
   calculateAnomalyScores,
-  anomalyModelFeatures
+  anomalyModelFeatures,
+  peptideSequenceColumn = "EG.ModifiedSequence",
+  heavyLabels = NULL
 )
 
 \S4method{MSstatsClean}{MSstatsPhilosopherFiles}(
@@ -115,12 +117,33 @@ in TMT data.}
 Defaults to "Abundance", which means that columns that contain the word "Abundance"
 will be treated as corresponding to intensities for different channels.}
 
-\item{intensity}{'PeakArea'(default) uses not normalized MS2 peak area. 'NormalizedPeakArea' uses MS2 peak area normalized by Spectronaut.
-'MS1Quantity' uses MS1 level quantification, which should be used if MS2 is unreliable.}
+\item{intensity}{Intensity column to use. Accepts legacy enum values
+\code{'PeakArea'} (default, uses F.PeakArea), \code{'NormalizedPeakArea'}
+(uses F.NormalizedPeakArea).  Can also be any raw
+Spectronaut column name passed as a string (e.g.
+\code{"FG.MS1Quantity"}); the column name is standardized internally.
+For protein turnover workflows the recommended default is
+\code{"FG.MS1Quantity"}.}
 
 \item{calculateAnomalyScores}{Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.}
 
 \item{anomalyModelFeatures}{character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.}
+
+\item{peptideSequenceColumn}{Name of the Spectronaut column that contains the
+peptide sequence.  Defaults to \code{"EG.ModifiedSequence"}. The value is
+standardized internally (dots and spaces removed) before column lookup.}
+
+\item{heavyLabels}{Character list identifying the heavy isotope labels as it
+appears inside square brackets in the peptide sequence column, e.g.
+\code{c("Lys6")} matches peptides containing \code{[Lys6]}.
+\code{c("Lys6", "Arg10")} matches peptides containing either \code{[Lys6]} or \code{[Arg10]}.
+Supports any novel label name reported by Spectronaut (e.g. \code{"Leu6"},
+\code{"Phe10"}).  When provided, peptides are
+classified as heavy (\code{IsotopeLabelType = "H"}), light
+(\code{IsotopeLabelType = "L"}), or unlabeled
+(\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
+\code{NULL} (default) all peptides receive \code{IsotopeLabelType = "L"}.
+Useful for protein turnover experiments.}
 
 \item{peptide_id_col}{character name of a column that identifies peptides}
 

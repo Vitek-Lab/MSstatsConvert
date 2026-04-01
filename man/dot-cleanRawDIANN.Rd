@@ -36,6 +36,10 @@ Default is 0.01.}
 column, i.e. the global q-value for the protein group.  If MBR is true, the
 qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for
 the library created after the first MBR pass. Default is 0.01.}
+
+\item{calculateAnomalyScores}{Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.}
+
+\item{anomalyModelFeatures}{character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.}
 }
 \value{
 data.table

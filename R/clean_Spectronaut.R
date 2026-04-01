@@ -6,47 +6,31 @@
 .cleanRawSpectronaut = function(msstats_object, intensity,
                                 calculateAnomalyScores,
                                 anomalyModelFeatures,
-                                heavyLabel = NULL,
-                                labelColumn = "FG.LabeledSequence") {
+                                peptideSequenceColumn = "EG.ModifiedSequence",
+                                heavyLabels = NULL) {
   FFrgLossType = FExcludedFromQuantification = NULL
 
   spec_input = getInputFile(msstats_object, "input")
-  .validateSpectronautInput(spec_input)
-
-  # --- Normalize missing columns that vary across Spectronaut report formats ---
-  spec_input = .addMissingSpectronautColumns(spec_input)
-
+  .validateSpectronautInput(spec_input, peptideSequenceColumn)
+  spec_input = .addSpectronautColumnsIfMissing(spec_input)
   spec_input = spec_input[FFrgLossType == "noloss", ]
-
+  
   f_charge_col = .findAvailable(c("FCharge", "FFrgZ"), colnames(spec_input))
   pg_qval_col = .findAvailable(c("PGQvalue"), colnames(spec_input))
   interference_col = .findAvailable(c("FPossibleInterference"),
                                     colnames(spec_input))
   exclude_col = .findAvailable(c("FExcludedFromQuantification"),
                                colnames(spec_input))
-
-  # Resolve intensity column: accepts enum alias OR raw standardized column name
-  intensity_column = .resolveSpectronautIntensityColumn(intensity, colnames(spec_input))
-
-  # Resolve peptide sequence column: prefer EGModifiedSequence, fall back to
-  # FGLabeledSequence (protein turnover format uses FG.LabeledSequence)
-  peptide_col = .findAvailable(c("EGModifiedSequence", "FGLabeledSequence"),
+  intensity_col = .resolveSpectronautIntensityColumn(intensity, colnames(spec_input))
+  peptide_col = .findAvailable(.standardizeColnames(peptideSequenceColumn),
                                colnames(spec_input))
-
-  # Resolve protein name column: prefer PGProteinGroups, fall back to
-  # PGProteinAccessions (protein turnover format omits PG.ProteinGroups)
   protein_col = .findAvailable(c("PGProteinGroups", "PGProteinAccessions"),
                                colnames(spec_input))
 
-  # Resolve BioReplicate column: prefer RReplicate, fall back to RCondition
-  # (protein turnover format does not include R.Replicate)
-  replicate_col = .findAvailable(c("RReplicate", "RCondition"),
-                                 colnames(spec_input))
-
   cols = c(protein_col, peptide_col, "FGCharge", "FFrgIon",
-           f_charge_col, "RFileName", "RCondition", replicate_col,
+           f_charge_col, "RFileName", "RCondition", "RReplicate",
            "EGQvalue", pg_qval_col, interference_col, exclude_col,
-           intensity_column)
+           intensity_col)
   if (calculateAnomalyScores){
     cols = c(cols, anomalyModelFeatures)
   }
@@ -56,20 +40,49 @@
   data.table::setnames(
     spec_input,
     c(protein_col, peptide_col, "FGCharge", "FFrgIon",
-      f_charge_col, "RFileName", intensity_column,
-      "RCondition", replicate_col),
+      f_charge_col, "RFileName", intensity_col,
+      "RCondition", "RReplicate"),
     c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
       "ProductCharge", "Run", "Intensity", "Condition", "BioReplicate"),
     skip_absent = TRUE)
 
-  # Assign IsotopeLabelType based on heavy label detection when requested
   spec_input = .assignSpectronautIsotopeLabelType(
-    spec_input, heavyLabel, labelColumn, msstats_object)
+    spec_input, heavyLabels, peptideSequenceColumn, msstats_object)
 
   .logSuccess("Spectronaut", "clean")
   spec_input
 }
 
+#' Helper method to validate input has necessary columns
+#' @param spec_input dataframe input
+#' @param peptideSequenceColumn character, name of the column containing peptide 
+#' sequences, passed from user
+#' @noRd
+.validateSpectronautInput = function(spec_input, peptideSequenceColumn) {
+    # Only FGCharge is truly required
+    required_columns = c("FGCharge")
+    missing_columns = setdiff(required_columns, colnames(spec_input))
+    if (length(missing_columns) > 0) {
+        msg = paste("The following columns are missing from the input data:",
+                    paste(missing_columns, sep = ", ", collapse = ", "))
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
+    # Ensure at least one protein name column is present
+    if (!any(c("PGProteinGroups", "PGProteinAccessions") %in% colnames(spec_input))) {
+        msg = paste("The following columns are missing from the input data:",
+                    "PGProteinGroups")
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
+    # Ensure at least one protein name column is present
+    if (.standardizeColnames(peptideSequenceColumn) %in% colnames(spec_input)) {
+        msg = paste("The following column are missing from the input data:",
+                    peptideSequenceColumn)
+        getOption("MSstatsLog")("ERROR", msg)
+        stop(msg)
+    }
+}
 
 #' Add synthetic columns that are absent in protein turnover Spectronaut reports.
 #'
@@ -93,7 +106,8 @@
 #' @param spec_input `data.table` with standardized column names.
 #' @return `data.table` with missing columns added.
 #' @keywords internal
-.addMissingSpectronautColumns = function(spec_input) {
+#' @noRd
+.addSpectronautColumnsIfMissing = function(spec_input) {
   if (!("FFrgLossType" %in% colnames(spec_input))) {
     spec_input[, FFrgLossType := "noloss"]
   }
@@ -122,27 +136,23 @@
 #' @param available_cols Character vector of available standardized column names.
 #' @return The resolved standardized column name.
 #' @keywords internal
+#' @noRd
 .resolveSpectronautIntensityColumn = function(intensity, available_cols) {
   legacy_mapping = c(
     "PeakArea"           = "FPeakArea",
     "NormalizedPeakArea" = "FNormalizedPeakArea",
-    "MS1Quantity"        = "FGMS1Quantity",
-    "MS2Quantity"        = "FGMS2Quantity"
   )
 
   if (intensity %in% names(legacy_mapping)) {
     resolved = legacy_mapping[[intensity]]
   } else {
-    # Treat as a raw standardized column name
-    resolved = intensity
+    resolved = .standardizeColnames(intensity)
   }
 
   if (!(resolved %in% available_cols)) {
     stop(paste0(
-      "Intensity column '", resolved, "' not found in input data. ",
-      "Available columns include: ",
-      paste(grep("Quantity|PeakArea", available_cols, value = TRUE), collapse = ", ")
-    ))
+      "Intensity column '", intensity, "' not found in input data. ", collapse = ", ")
+    )
   }
   resolved
 }
@@ -167,91 +177,35 @@
 #' preserving backwards compatibility.
 #'
 #' @param spec_input `data.table` after column renaming.
-#' @param heavyLabel Character scalar heavy label name (e.g. \code{"Lys6"}),
+#' @param heavyLabels Character scalar heavy label name (e.g. \code{"Lys6"}),
 #'   or \code{NULL}.
-#' @param labelColumn Raw (dot-separated) column name that holds the labeled
+#' @param peptideSequenceColumn Raw (dot-separated) column name that holds the labeled
 #'   sequence (e.g. \code{"FG.LabeledSequence"}).
 #' @param msstats_object The original MSstats object (used to access the
 #'   standardized label column after import).
 #' @return `data.table` with \code{IsotopeLabelType} column added or updated.
 #' @keywords internal
-.assignSpectronautIsotopeLabelType = function(spec_input, heavyLabel,
-                                              labelColumn, msstats_object) {
-  IsotopeLabelType = PeptideSequence = NULL
-
-  if (is.null(heavyLabel)) {
-    return(spec_input)
-  }
-
-  # The label column may have already been renamed to PeptideSequence if it was
-  # the chosen peptide column.  We need the original labeled sequence values.
-  # Retrieve them from the cleaned input (PeptideSequence column).
-  if (!("PeptideSequence" %in% colnames(spec_input))) {
-    msg = paste0("Cannot assign IsotopeLabelType: 'PeptideSequence' column ",
-                 "not found after cleaning. Skipping label assignment.")
-    getOption("MSstatsLog")("WARN", msg)
-    getOption("MSstatsMsg")("WARN", msg)
-    return(spec_input)
-  }
-
-  heavy_pattern = paste0("[", heavyLabel, "]")
-
-  spec_input[, IsotopeLabelType := data.table::fifelse(
-    grepl(heavy_pattern, PeptideSequence, fixed = TRUE),
-    "H",
-    "L"
-  )]
-
-  # Identify stripped sequences that appear ONLY as light (no heavy counterpart
-  # exists anywhere in the dataset).  These peptides cannot be labelled and
-  # should receive NA rather than "L" to distinguish them from the light
-  # channel of a quantified heavy/light pair.
-  stripped_col = .findAvailable(
-    c("PEPStrippedSequence", "PeptideSequence"), colnames(spec_input))
-
-  if (!is.null(stripped_col) && stripped_col != "PeptideSequence") {
-    heavy_sequences = spec_input[IsotopeLabelType == "H",
-                                 unique(get(stripped_col))]
-    spec_input[IsotopeLabelType == "L" &
-                 !(get(stripped_col) %in% heavy_sequences),
-               IsotopeLabelType := NA_character_]
-  }
-
-  msg = paste0("** IsotopeLabelType assigned using heavy label: '", heavyLabel,
-               "'. Heavy (H): ",
-               sum(spec_input$IsotopeLabelType == "H", na.rm = TRUE),
-               ", Light (L): ",
-               sum(spec_input$IsotopeLabelType == "L", na.rm = TRUE),
-               ", Unlabeled (NA): ",
-               sum(is.na(spec_input$IsotopeLabelType)))
-  getOption("MSstatsLog")("INFO", msg)
-  getOption("MSstatsMsg")("INFO", msg)
-
-  spec_input
-}
-
-
-#' Helper method to validate input has necessary columns
-#' @param spec_input dataframe input
 #' @noRd
-.validateSpectronautInput = function(spec_input) {
-    # Only FGCharge is truly required; all other formerly-required columns are
-    # either synthesized by .addMissingSpectronautColumns or detected via
-    # .findAvailable fallbacks so that protein turnover reports (which omit
-    # several standard columns) are handled without pre-processing by the caller.
-    required_columns = c("FGCharge")
-    missing_columns = setdiff(required_columns, colnames(spec_input))
-    if (length(missing_columns) > 0) {
-        msg = paste("The following columns are missing from the input data:",
-                    paste(missing_columns, sep = ", ", collapse = ", "))
-        getOption("MSstatsLog")("ERROR", msg)
-        stop(msg)
+.assignSpectronautIsotopeLabelType = function(spec_input, heavyLabels,
+                                              peptideSequenceColumn) {
+    IsotopeLabelType = PeptideSequence = NULL
+    if (is.null(heavyLabels)) {
+        return(spec_input)
     }
-    # Ensure at least one protein name column is present
-    if (!any(c("PGProteinGroups", "PGProteinAccessions") %in% colnames(spec_input))) {
-        msg = paste("The following columns are missing from the input data:",
-                    "PGProteinGroups")
-        getOption("MSstatsLog")("ERROR", msg)
-        stop(msg)
-    }
+    
+    bare_amino_acids = sub("\\[.*\\]", "", heavyLabels)
+    bare_amino_acids_pattern = paste(bare_amino_acids, collapse = "|")
+    heavy_pattern = paste(heavyLabels, collapse = "|")
+    heavy_brackets_escaped_pattern = paste(
+        gsub("([\\[\\]])", "\\\\\\1", heavyLabels),
+        collapse = "|"
+    )
+    
+    spec_input[, IsotopeLabelType := data.table::fcase(
+        grepl(heavy_pattern_escaped, PeptideSequence, perl = TRUE), "H",
+        grepl(bare_pattern, PeptideSequence, perl = TRUE), "L",
+        default = NA_character_
+    )]
+
+    spec_input
 }
