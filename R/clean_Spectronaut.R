@@ -15,7 +15,7 @@
   spec_input = .addSpectronautColumnsIfMissing(spec_input)
   spec_input = spec_input[FFrgLossType == "noloss", ]
   
-  f_charge_col = .findAvailable(c("FCharge", "FFrgZ"), colnames(spec_input))
+  f_charge_col = .findAvailable(c("FCharge", "FFrgZ"), colnames(spec_input), fall_back = "FCharge")
   pg_qval_col = .findAvailable(c("PGQvalue"), colnames(spec_input))
   interference_col = .findAvailable(c("FPossibleInterference"),
                                     colnames(spec_input))
@@ -25,7 +25,7 @@
   peptide_col = .findAvailable(.standardizeColnames(peptideSequenceColumn),
                                colnames(spec_input))
   protein_col = .findAvailable(c("PGProteinGroups", "PGProteinAccessions"),
-                               colnames(spec_input))
+                               colnames(spec_input), fall_back = "PGProteinGroups")
 
   cols = c(protein_col, peptide_col, "FGCharge", "FFrgIon",
            f_charge_col, "RFileName", "RCondition", "RReplicate",
@@ -47,7 +47,7 @@
     skip_absent = TRUE)
 
   spec_input = .assignSpectronautIsotopeLabelType(
-    spec_input, heavyLabels, peptideSequenceColumn, msstats_object)
+    spec_input, heavyLabels, peptideSequenceColumn)
 
   .logSuccess("Spectronaut", "clean")
   spec_input
@@ -140,7 +140,7 @@
 .resolveSpectronautIntensityColumn = function(intensity, available_cols) {
   legacy_mapping = c(
     "PeakArea"           = "FPeakArea",
-    "NormalizedPeakArea" = "FNormalizedPeakArea",
+    "NormalizedPeakArea" = "FNormalizedPeakArea"
   )
 
   if (intensity %in% names(legacy_mapping)) {
@@ -181,8 +181,6 @@
 #'   or \code{NULL}.
 #' @param peptideSequenceColumn Raw (dot-separated) column name that holds the labeled
 #'   sequence (e.g. \code{"FG.LabeledSequence"}).
-#' @param msstats_object The original MSstats object (used to access the
-#'   standardized label column after import).
 #' @return `data.table` with \code{IsotopeLabelType} column added or updated.
 #' @keywords internal
 #' @noRd

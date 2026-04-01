@@ -53,7 +53,7 @@
 #' 
 SpectronauttoMSstatsFormat = function(
         input, annotation = NULL,
-        intensity = c('PeakArea', 'NormalizedPeakArea'),
+        intensity = 'PeakArea',
         peptideSequenceColumn = "EG.ModifiedSequence",
         heavyLabels = NULL,
         excludedFromQuantificationFilter = TRUE,
@@ -68,17 +68,6 @@ SpectronauttoMSstatsFormat = function(
         use_log_file = TRUE, append = FALSE, verbose = TRUE, 
         log_file_path = NULL, ...
 ) {
-    # # Standardize the intensity value when it is a raw column name so that the
-    # # legacy match.arg() inside .cleanRawSpectronaut sees it correctly.
-    # known_aliases = c('PeakArea', 'NormalizedPeakArea')
-    # if (length(intensity) > 1) {
-    #     # No value supplied: use first (default)
-    #     intensity = intensity[1]
-    # }
-    # if (!(intensity %in% known_aliases)) {
-    #     # Treat as a raw column name and standardize it
-    #     intensity = .standardizeColnames(intensity)
-    # }
 
     validation_config = list(
         input = input,

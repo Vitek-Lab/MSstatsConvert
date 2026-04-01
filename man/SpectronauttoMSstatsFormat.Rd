@@ -7,7 +7,7 @@
 SpectronauttoMSstatsFormat(
   input,
   annotation = NULL,
-  intensity = c("PeakArea", "NormalizedPeakArea"),
+  intensity = "PeakArea",
   peptideSequenceColumn = "EG.ModifiedSequence",
   heavyLabels = NULL,
   excludedFromQuantificationFilter = TRUE,

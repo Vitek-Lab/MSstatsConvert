@@ -382,14 +382,12 @@ expect_error(SpectronauttoMSstatsFormat(
 ))
 
 
+# --- Heavy Label Testing --------------------------------
 
 boxcar_path = system.file(
     "tinytest/raw_data/Spectronaut/boxcar_protein_turnover_input.csv",
     package = "MSstatsConvert")
 boxcar_raw = data.table::fread(boxcar_path)
-
-
-# --- Heavy Label Testing --------------------------------
 
 output_heavy = SpectronauttoMSstatsFormat(
     boxcar_raw,
@@ -423,7 +421,8 @@ na_rows = output_heavy[is.na(IsotopeLabelType)]
 expect_false(any(grepl("K", na_rows$PeptideSequence, fixed = TRUE)))
 output_leu = SpectronauttoMSstatsFormat(
     boxcar_raw,
-    intensity    = "MS1Quantity",
+    peptideSequenceColumn = "FG.LabeledSequence",
+    intensity    = "FG.MS1Quantity",
     heavyLabel   = c("L[Leu6]"),
     use_log_file = FALSE
 )
