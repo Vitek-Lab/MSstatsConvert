@@ -16,7 +16,7 @@ expect_true("IsotopeLabelType" %in% colnames(output))
 expect_true("Condition" %in% colnames(output))
 expect_true("BioReplicate" %in% colnames(output))
 expect_true("Fraction" %in% colnames(output))
-
+expect_true(all(spectronaut_raw$IsotopeLabelType == "L"))
 
 # Test SpectronauttoMSstatsFormat Missing Columns ---------------------------
 spectronaut_raw = system.file("tinytest/raw_data/Spectronaut/spectronaut_input.csv",
@@ -380,3 +380,51 @@ expect_error(SpectronauttoMSstatsFormat(
     n_trees = 100,
     max_depth = "auto"
 ))
+
+
+
+boxcar_path = system.file(
+    "tinytest/raw_data/Spectronaut/boxcar_protein_turnover_input.csv",
+    package = "MSstatsConvert")
+boxcar_raw = data.table::fread(boxcar_path)
+
+
+# --- Heavy Label Testing --------------------------------
+
+output_heavy = SpectronauttoMSstatsFormat(
+    boxcar_raw,
+    intensity    = "FG.MS1Quantity",
+    peptideSequenceColumn = "FG.LabeledSequence",
+    heavyLabel   = c("K[Lys6]"),
+    use_log_file = FALSE
+)
+
+expect_true("Run"              %in% colnames(output_heavy))
+expect_true("ProteinName"      %in% colnames(output_heavy))
+expect_true("PeptideSequence"  %in% colnames(output_heavy))
+expect_true("PrecursorCharge"  %in% colnames(output_heavy))
+expect_true("Intensity"        %in% colnames(output_heavy))
+expect_true("FragmentIon"      %in% colnames(output_heavy))
+expect_true("ProductCharge"    %in% colnames(output_heavy))
+expect_true("IsotopeLabelType" %in% colnames(output_heavy))
+expect_true("Condition"        %in% colnames(output_heavy))
+expect_true("BioReplicate"     %in% colnames(output_heavy))
+
+expect_true(all(c("0d", "8d", "32d") %in% unique(output_heavy$Condition)))
+expect_true(nrow(output_heavy) > 0)
+expect_false(any(is.na(output_heavy$ProteinName)))
+expect_true("H" %in% unique(output_heavy$IsotopeLabelType))
+expect_true("L" %in% unique(output_heavy$IsotopeLabelType))
+heavy_rows = output_heavy[IsotopeLabelType == "H"]
+expect_true(all(grepl("[Lys6]", heavy_rows$PeptideSequence, fixed = TRUE)))
+light_rows = output_heavy[IsotopeLabelType == "L"]
+expect_false(any(grepl("[Lys6]", light_rows$PeptideSequence, fixed = TRUE)))
+na_rows = output_heavy[is.na(IsotopeLabelType)]
+expect_false(any(grepl("K", na_rows$PeptideSequence, fixed = TRUE)))
+output_leu = SpectronauttoMSstatsFormat(
+    boxcar_raw,
+    intensity    = "MS1Quantity",
+    heavyLabel   = c("L[Leu6]"),
+    use_log_file = FALSE
+)
+expect_false("H" %in% unique(output_leu$IsotopeLabelType))
