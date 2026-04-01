@@ -94,7 +94,7 @@
                              measurement_col, group_col)
         result[, 2:4, with = FALSE]
     } else {
-        labels = unique(input[["IsotopeLabelType"]])
+        labels = na.omit(unique(input[["IsotopeLabelType"]]))
         groups = unique(input[[group_col]])
         by_group = vector("list", length(groups))
         measurements = unique(input[[measurement_col]])

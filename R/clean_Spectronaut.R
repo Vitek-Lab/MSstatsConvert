@@ -201,6 +201,8 @@
         grepl(bare_amino_acids_pattern, PeptideSequence, perl = TRUE), "L",
         default = NA_character_
     )]
+    
+    spec_input[, PeptideSequence := gsub(heavy_brackets_escaped_pattern, "", PeptideSequence, perl = TRUE)]
 
     spec_input
 }
