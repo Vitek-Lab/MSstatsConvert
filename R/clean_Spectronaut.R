@@ -76,7 +76,7 @@
         stop(msg)
     }
     # Ensure at least one protein name column is present
-    if (.standardizeColnames(peptideSequenceColumn) %in% colnames(spec_input)) {
+    if (!(.standardizeColnames(peptideSequenceColumn) %in% colnames(spec_input))) {
         msg = paste("The following column are missing from the input data:",
                     peptideSequenceColumn)
         getOption("MSstatsLog")("ERROR", msg)
@@ -168,10 +168,10 @@
 #' \code{FG.LabeledSequence} with a bracketed modification, e.g.
 #' \code{_PEPTIDEK[Lys6]_}.  Any sequence that contains
 #' \code{[<heavyLabel>]} is classified as heavy; all others are light.
-#' Sequences that belong to peptide families that cannot carry the label
-#' (i.e. the same stripped sequence never appears in a heavy form in the
-#' entire dataset) are classified as \code{NA}.
-#'
+#' Sequences that do not have amino acids that can carry the label
+#' are classified as \code{NA}.  For example, if \code{heavyLabels} is 
+#' \code{"Lys6"}, then \code{PEPTIDEZ} is classified as NA since it
+#' has no lysine residues that could be labeled.
 #' When \code{heavyLabel} is \code{NULL} the column is left untouched so
 #' that the downstream \code{columns_to_fill} default of \code{"L"} applies,
 #' preserving backwards compatibility.
@@ -194,16 +194,16 @@
     }
     
     bare_amino_acids = sub("\\[.*\\]", "", heavyLabels)
-    bare_amino_acids_pattern = paste(bare_amino_acids, collapse = "|")
-    heavy_pattern = paste(heavyLabels, collapse = "|")
+    bare_amino_acids_pattern = paste0(bare_amino_acids, collapse = "|")
+    heavy_pattern = paste0(heavyLabels, collapse = "|")
     heavy_brackets_escaped_pattern = paste(
-        gsub("([\\[\\]])", "\\\\\\1", heavyLabels),
+        gsub("([\\[\\]])", "\\\\\\1", heavy_pattern),
         collapse = "|"
     )
     
     spec_input[, IsotopeLabelType := data.table::fcase(
-        grepl(heavy_pattern_escaped, PeptideSequence, perl = TRUE), "H",
-        grepl(bare_pattern, PeptideSequence, perl = TRUE), "L",
+        grepl(heavy_brackets_escaped_pattern, PeptideSequence, perl = TRUE), "H",
+        grepl(bare_amino_acids_pattern, PeptideSequence, perl = TRUE), "L",
         default = NA_character_
     )]
 
