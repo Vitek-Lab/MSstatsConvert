@@ -101,21 +101,28 @@
         for (group_id in seq_along(groups)) {
             group = groups[group_id]
             group_filter = input[[group_col]] == group
-            by_group[[group_id]] = data.table::as.data.table(
-                expand.grid(
-                    labels = labels,
-                    features = unique(input[[feature_col]][group_filter]),
-                    measurements = unique(input[[measurement_col]][group_filter])
-                ))
-            na_label_features = unique(input[[feature_col]][group_filter & is.na(input[["IsotopeLabelType"]])])
-            if (length(na_label_features) > 0) {
-                na_rows = data.table::as.data.table(expand.grid(
-                    labels = NA,
-                    features = na_label_features,
-                    measurements = unique(input[[measurement_col]][group_filter])
-                ))
-                by_group[[group_id]] = data.table::rbindlist(list(by_group[[group_id]], na_rows))
+            non_na_filter = group_filter & !is.na(input[["IsotopeLabelType"]])
+            na_filter = group_filter & is.na(input[["IsotopeLabelType"]])
+            non_na_features = unique(input[[feature_col]][non_na_filter])
+            na_label_features = unique(input[[feature_col]][na_filter])
+            parts = list()
+            if (length(non_na_features) > 0) {
+                parts[[length(parts) + 1]] = data.table::as.data.table(
+                    expand.grid(
+                        labels = labels,
+                        features = non_na_features,
+                        measurements = unique(input[[measurement_col]][non_na_filter])
+                    ))
             }
+            if (length(na_label_features) > 0) {
+                parts[[length(parts) + 1]] = data.table::as.data.table(
+                    expand.grid(
+                        labels = NA,
+                        features = na_label_features,
+                        measurements = unique(input[[measurement_col]][na_filter])
+                    ))
+            }
+            by_group[[group_id]] = data.table::rbindlist(parts)
             by_group[[group_id]]$group = group
         }
         result = data.table::rbindlist(by_group)
