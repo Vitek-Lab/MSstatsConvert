@@ -175,7 +175,7 @@
     getOption("MSstatsLog")("INFO", msg)
     getOption("MSstatsMsg")("INFO", msg)
     
-    dn_input = dn_input[QValue >= global_qvalue_cutoff, quantificationColumn := 0]
+    dn_input = dn_input[QValue >= global_qvalue_cutoff, (quantificationColumn) := 0]
     if (MBR) {
         msg = '** MBR was used to analyze the data. Now setting names and filtering'
         msg_1_mbr = paste0('-- LibPGQValue < ', pg_qvalue_cutoff)
