@@ -37,23 +37,23 @@ baseline_scores = run_quality_metrics(
 # Data with progressively higher cumulative sums
 high_scores = run_quality_metrics(
     base_df_10,
-    c(rep(0.1, 5), seq(2.0, 5.0, length.out = 5)),  # mean_increase
-    c(rep(0.1, 5), seq(2.0, 5.0, length.out = 5)),  # mean_decrease
-    c(rep(0.1, 5), seq(2.0, 5.0, length.out = 5))   # dispersion_increase
+    c(seq(0, 0.1, length.out = 5), seq(2.0, 5.0, length.out = 5)),  # mean_increase
+    c(seq(0, 0.1, length.out = 5), seq(2.0, 5.0, length.out = 5)),  # mean_decrease
+    c(seq(0, 0.1, length.out = 5), seq(2.0, 5.0, length.out = 5))   # dispersion_increase
 )
 
 # The last 5 rows (with high values) should have higher mean anomaly scores
-# expect_true(mean(high_scores$AnomalyScores[6:10]) > mean(high_scores$AnomalyScores[1:5]),
-#             info = "Higher cumulative sum values should produce higher anomaly scores")
+expect_true(mean(high_scores$AnomalyScores[6:10]) > mean(high_scores$AnomalyScores[1:5]),
+            info = "Higher cumulative sum values should produce higher anomaly scores")
 
 # Test 2: Extreme Value Testing - Obvious Outliers
 base_df_20 = create_base_df(20)
 
 extreme_scores = run_quality_metrics(
     base_df_20,
-    c(rep(0.1, 19), 10.0),  # Last value is extreme
-    c(rep(0.1, 19), 8.0),   # Last value is extreme
-    c(rep(0.1, 19), 12.0)   # Last value is extreme
+    c(seq(0, 0.1, length.out = 19), 10.0),  # Last value is extreme
+    c(seq(0, 0.1, length.out = 19), 8.0),   # Last value is extreme
+    c(seq(0, 0.1, length.out = 19), 12.0)   # Last value is extreme
 )
 
 # The extreme outlier (last row) should have the highest anomaly score
@@ -61,8 +61,8 @@ expect_true(extreme_scores$AnomalyScores[20] == max(extreme_scores$AnomalyScores
             info = "Extreme outlier should have highest anomaly score")
 
 # The outlier should score significantly higher than the median
-# expect_true(extreme_scores$AnomalyScores[20] > median(extreme_scores$AnomalyScores[1:19]) * 2,
-#             info = "Outlier should score significantly higher than median")
+expect_true(extreme_scores$AnomalyScores[20] > median(extreme_scores$AnomalyScores[1:19]) * 2,
+            info = "Outlier should score significantly higher than median")
 
 # Test 3: Consistency/Reproducibility Testing
 base_df_20_orig = create_base_df(20)
@@ -267,9 +267,9 @@ base_df_6_rank = create_base_df(6)
 # Create data with obvious ranking: Row 6 > Row 5 > Row 4 > Rows 1,2,3
 ranking_scores = run_quality_metrics(
     base_df_6_rank,
-    c(0.1, 0.1, 0.1, 1.0, 2.0, 5.0),
-    c(0.1, 0.1, 0.1, 1.0, 2.0, 5.0),
-    c(0.1, 0.1, 0.1, 1.0, 2.0, 5.0)
+    c(0.1, 0.11, 0.12, 1.0, 2.0, 5.0),
+    c(0.1, 0.11, 0.12, 1.0, 2.0, 5.0),
+    c(0.1, 0.11, 0.12, 1.0, 2.0, 5.0)
 )
 
 # Row 5 should have highest score, Row 4 second highest, etc.
@@ -277,8 +277,8 @@ expect_true(ranking_scores$AnomalyScores[6] > ranking_scores$AnomalyScores[5],
             info = "Row 6 should score higher than Row 5")
 expect_true(ranking_scores$AnomalyScores[5] > ranking_scores$AnomalyScores[4],
             info = "Row 5 should score higher than Row 4")
-# expect_true(ranking_scores$AnomalyScores[4] > max(ranking_scores$AnomalyScores[1:3]),
-#             info = "Row 4 should score higher than Rows 1-3")
+expect_true(ranking_scores$AnomalyScores[4] > max(ranking_scores$AnomalyScores[1:3]),
+            info = "Row 4 should score higher than Rows 1-3")
 
 # Test 10: Original Quality Metrics Calculation Test (from the beginning of the file)
 # Test add_increase, add_decrease, add_dispersion
