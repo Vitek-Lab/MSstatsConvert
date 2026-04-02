@@ -183,7 +183,7 @@
 #' @keywords internal
 #' @noRd
 .assignSpectronautIsotopeLabelType = function(spec_input, heavyLabels) {
-    IsotopeLabelType = PeptideSequence = NULL
+    IsotopeLabelType = PeptideSequence = StrippedSequence = NULL
     if (is.null(heavyLabels)) {
         return(spec_input)
     }
@@ -196,16 +196,19 @@
         collapse = "|"
     )
     
+    spec_input[, StrippedSequence := gsub("\\[.*?\\]", "", PeptideSequence)]
+    
     spec_input[, IsotopeLabelType := data.table::fcase(
         grepl(heavy_brackets_escaped_pattern, PeptideSequence, perl = TRUE), "H",
-        grepl(bare_amino_acids_pattern, PeptideSequence, perl = TRUE), "L",
+        grepl(bare_amino_acids_pattern, StrippedSequence, perl = TRUE), "L",
         default = NA_character_
     )]
+    
+    spec_input[, StrippedSequence := NULL]
     
     for (i in seq_along(heavyLabels)) {
         escaped = gsub("([\\[\\]])", "\\\\\\1", heavyLabels[i], perl = TRUE)
         spec_input[, PeptideSequence := gsub(escaped, bare_amino_acids[i], PeptideSequence, perl = TRUE)]
     }
-
     spec_input
 }
