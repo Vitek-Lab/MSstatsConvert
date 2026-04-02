@@ -26,13 +26,13 @@ output = MSstatsConvert:::.cleanRawDIANN(input, quantificationColumn = "Fragment
 .validateOutput(output)
 
 # Q-value filtering
-expect_qvalue_cutoff <- function(output, col, cutoff, intensity_col = NULL) {
+expect_qvalue_cutoff <- function(output, col, cutoff) {
     expect_equal(
         sum(output[[col]] > cutoff),
-        sum(output[[intensity_col]] == 0 & output[[col]] > cutoff),
+        sum(output[["Intensity"]] == 0 & output[[col]] > cutoff),
         info = sprintf(
             "All rows with %s > %s should have %s == 0",
-            col, cutoff, intensity_col
+            col, cutoff, "Intensity"
         )
     )
     expect_equal(
@@ -45,12 +45,12 @@ expect_qvalue_cutoff <- function(output, col, cutoff, intensity_col = NULL) {
     )
 }
 output <- MSstatsConvert:::.cleanRawDIANN(input, global_qvalue_cutoff = 0.005)
-expect_qvalue_cutoff(output, "DetectionQValue", 0.005, "Intensity")
+expect_qvalue_cutoff(output, "DetectionQValue", 0.005)
 output <- MSstatsConvert:::.cleanRawDIANN(input, qvalue_cutoff = 0.00001)
-expect_qvalue_cutoff(output, "LibQValue", 0.00001, "Intensity")
+expect_qvalue_cutoff(output, "LibQValue", 0.00001)
 output <- MSstatsConvert:::.cleanRawDIANN(input, pg_qvalue_cutoff = 0.001)
-expect_qvalue_cutoff(output, "LibPGQValue", 0.001, "Intensity")
+expect_qvalue_cutoff(output, "LibPGQValue", 0.001)
 output <- MSstatsConvert:::.cleanRawDIANN(input, MBR = FALSE, qvalue_cutoff = 0.001)
-expect_qvalue_cutoff(output, "GlobalQValue", 0.001, "Intensity")
+expect_qvalue_cutoff(output, "GlobalQValue", 0.001)
 output <- MSstatsConvert:::.cleanRawDIANN(input, MBR = FALSE, pg_qvalue_cutoff = 0.0002)
-expect_qvalue_cutoff(output, "GlobalPGQValue", 0.0002, "Intensity")
+expect_qvalue_cutoff(output, "GlobalPGQValue", 0.0002)
