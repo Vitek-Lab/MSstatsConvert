@@ -111,7 +111,7 @@
                     expand.grid(
                         labels = labels,
                         features = non_na_features,
-                        measurements = unique(input[[measurement_col]][non_na_filter])
+                        measurements = unique(input[[measurement_col]][group_filter])
                     ))
             }
             if (length(na_label_features) > 0) {
@@ -119,7 +119,7 @@
                     expand.grid(
                         labels = NA,
                         features = na_label_features,
-                        measurements = unique(input[[measurement_col]][na_filter])
+                        measurements = unique(input[[measurement_col]][group_filter])
                     ))
             }
             by_group[[group_id]] = data.table::rbindlist(parts)

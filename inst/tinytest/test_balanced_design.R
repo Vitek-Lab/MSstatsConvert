@@ -97,3 +97,58 @@ expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates4)
 expect_equal(MSstatsConvert:::.fixMissingValues(data.table::copy(no_duplicates3), NULL)$Intensity,
              no_duplicates3$Intensity)
 
+# .getFullDesign tests
+
+# Test 1: H/L features expand over all runs in the group even if a label was only
+# observed in a subset of runs. NA-labeled features also expand to all group runs.
+# "b" has H only in run 1 and L only in run 2; "a" (NA) only in run 3.
+# All three should be filled out to all runs {1, 2, 3} in the group.
+gfd_mixed = data.table::data.table(
+    feature          = c("b", "b", "a"),
+    Run              = c(  1,   2,   3),
+    IsotopeLabelType = c("H", "L",  NA),
+    Fraction         = 1L
+)
+gfd_result = MSstatsConvert:::.getFullDesign(
+    gfd_mixed, group_col = "Fraction", feature_col = "feature",
+    measurement_col = "Run", is_tmt = FALSE)
+a_rows = gfd_result[gfd_result$feature == "a", ]
+expect_true(all(is.na(a_rows$IsotopeLabelType)))
+expect_equal(nrow(a_rows), 3L)
+b_rows = gfd_result[gfd_result$feature == "b", ]
+expect_equal(nrow(b_rows), 6L)
+expect_true(all(sort(unique(b_rows$IsotopeLabelType)) == c("H", "L")))
+
+# Test 2: All features have NA IsotopeLabelType — full design contains only NA labels,
+# not the empty H/L set that na.omit() would strip from the labels vector.
+gfd_all_na = data.table::data.table(
+    feature          = c("x", "x", "y", "y"),
+    Run              = c(  1,   2,   1,   2),
+    IsotopeLabelType = NA_character_,
+    Fraction         = 1L
+)
+gfd_na_result = MSstatsConvert:::.getFullDesign(
+    gfd_all_na, group_col = "Fraction", feature_col = "feature",
+    measurement_col = "Run", is_tmt = FALSE)
+expect_true(all(is.na(gfd_na_result$IsotopeLabelType)))
+expect_equal(nrow(gfd_na_result), 4L)
+
+# Test 3: NA-labeled features expand over ALL runs in the group, not just the runs
+# where they were observed. Feature "p" appears in runs 1 and 2 with H/L;
+# feature "q" appears only in run 3 with NA, but should be filled out to runs 1-3.
+gfd_separate_runs = data.table::data.table(
+    feature          = c("p", "p", "p", "p", "q"),
+    Run              = c(  1,   1,   2,   2,   3),
+    IsotopeLabelType = c("L", "H", "L", "H",  NA),
+    Fraction         = 1L
+)
+gfd_sep_result = MSstatsConvert:::.getFullDesign(
+    gfd_separate_runs, group_col = "Fraction", feature_col = "feature",
+    measurement_col = "Run", is_tmt = FALSE)
+p_rows = gfd_sep_result[gfd_sep_result$feature == "p", ]
+expect_equal(nrow(p_rows), 6)
+q_rows = gfd_sep_result[gfd_sep_result$feature == "q", ]
+expect_equal(nrow(q_rows), 3L)
+expect_true(all(is.na(q_rows$IsotopeLabelType)))
+expect_equal(sort(q_rows$Run), c(1L, 2L, 3L))
+
