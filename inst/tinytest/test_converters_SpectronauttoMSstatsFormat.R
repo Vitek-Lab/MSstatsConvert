@@ -427,3 +427,17 @@ output_leu = SpectronauttoMSstatsFormat(
     use_log_file = FALSE
 )
 expect_false("H" %in% unique(output_leu$IsotopeLabelType))
+
+# Verify intensity values for ANGYTTEYSASVK are preserved from FG.MS1Quantity
+output_heavy = data.table::as.data.table(output_heavy)
+angyt_input_intensities = sort(
+    boxcar_raw[PEP.StrippedSequence == "ANGYTTEYSASVK", FG.MS1Quantity])
+angyt_output_intensities = sort(
+    output_heavy[grepl("ANGYTTEYSASVK", PeptideSequence, fixed = TRUE), Intensity])
+expect_equivalent(angyt_input_intensities, angyt_output_intensities)
+
+# Verify row count for ANGYTTEYSASVK is 2 * number of bioreplicates
+# (one row per bioreplicate for heavy label, one for light label)
+n_bioreplicates = length(unique(boxcar_raw$R.Replicate))
+angyt_rows = subset(output_heavy, grepl("ANGYTTEYSASVK", PeptideSequence, fixed = TRUE))
+expect_equal(nrow(angyt_rows), 2L * n_bioreplicates)
