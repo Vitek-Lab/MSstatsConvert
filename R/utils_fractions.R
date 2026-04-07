@@ -268,6 +268,7 @@
     
     if (data.table::uniqueN(input$Fraction) > 1) {
         measurement_count = input[
+            (IsotopeLabelType == "L" | is.na(IsotopeLabelType)) & 
             !is.na(Intensity) & Intensity > 0,
             .(n_obs = uniqueN(Run)),
             by = .(feature, Fraction)
@@ -298,7 +299,8 @@
         tied_fractions = max_fractions[feature %in% tie_features, .(feature, Fraction)]
         avg_abundance = input[
             tied_fractions, on = .(feature, Fraction), nomatch = 0
-        ][!is.na(Intensity) & Intensity > 0,
+        ][(IsotopeLabelType == "L" | is.na(IsotopeLabelType)) & 
+              !is.na(Intensity) & Intensity > 0,
           .(mean_abundance = mean(Intensity)),
           by = .(feature, Fraction)]
         best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
