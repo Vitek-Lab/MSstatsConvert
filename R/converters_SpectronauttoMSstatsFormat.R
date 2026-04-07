@@ -139,14 +139,15 @@ SpectronauttoMSstatsFormat = function(
     
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
-    
-    fill_isotope_label_type = if (is.null(heavyLabels)) 
-        list("IsotopeLabelType" = "L") else list()
+    preprocess_feature_columns = if ("IsotopeLabelType" %in% colnames(input))
+        c(feature_columns, "IsotopeLabelType") else feature_columns
+    fill_isotope_label_type = if ("IsotopeLabelType" %in% colnames(input)) 
+        list() else list("IsotopeLabelType" = "L") 
     
     input = MSstatsConvert::MSstatsPreprocess(
         input,
         annotation,
-        feature_columns,
+        preprocess_feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         feature_cleaning = list(remove_features_with_few_measurements = removeFewMeasurements,
