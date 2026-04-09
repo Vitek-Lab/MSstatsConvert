@@ -287,21 +287,20 @@
                 .(mean_abundance = mean(Intensity)),
                 by = .(feature, Fraction)
             ]
-            # Pick the Fraction with highest mean per tied feature
             best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
-            
-            # For non-tied features, just take the max fraction
-            best_simple = max_fractions[!feature %in% tie_features, 
-                                        .(feature, Fraction = Fraction[1]), 
-                                        by = "feature"]
-            fraction_map = rbind(best_simple[, .(feature, Fraction)], 
+            best_simple = max_fractions[
+                !feature %in% tie_features,
+                .(Fraction = Fraction[1]),
+                by = "feature"
+            ]
+            fraction_map = rbind(best_simple[, .(feature, Fraction)],
                                  best_tied[, .(feature, Fraction)])
         } else {
-            fraction_map = max_fractions[, .(feature, Fraction = Fraction[1]), by = "feature"]
+            fraction_map = max_fractions[, .(Fraction = Fraction[1]), by = "feature"]
         }
         
-        # Step 4: single join back to original table
-        input[fraction_map, fraction_keep := i.Fraction, on = "feature"]
+        # Step 4: filter input to only rows matching the selected fraction per feature
+        input = input[fraction_map, on = .(feature, Fraction), nomatch = 0]
     }
     input
 }
