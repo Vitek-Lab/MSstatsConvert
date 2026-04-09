@@ -264,70 +264,52 @@
 #' @return data.table
 #' @keywords internal
 .removeOverlappingFeatures = function(input) {
-    fraction_keep = Fraction = NULL
+    Fraction = NULL
     
     if (data.table::uniqueN(input$Fraction) > 1) {
-        # Step 1: count unique Runs per feature+Fraction
         measurement_count = input[
             !is.na(Intensity) & Intensity > 0,
             .(n_obs = uniqueN(Run)),
             by = .(feature, Fraction)
         ]
-        
-        # Step 2: keep only the Fraction(s) with max n_obs per feature
         measurement_count[, is_max := n_obs == max(n_obs), by = "feature"]
         max_fractions = measurement_count[(is_max)]
         
-        # Step 3: if tie, resolve by mean intensity
-        tie_features = max_fractions[, .(n_ties = .N), by = "feature"][n_ties > 1, feature]
-        
-        if (length(tie_features) > 0) {
-            avg_abundance = input[
-                feature %in% tie_features & !is.na(Intensity) & Intensity > 0,
-                .(mean_abundance = mean(Intensity)),
-                by = .(feature, Fraction)
-            ]
-            best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
-            best_simple = max_fractions[
-                !feature %in% tie_features,
-                .(Fraction = Fraction[1]),
-                by = "feature"
-            ]
-            fraction_map = rbind(best_simple[, .(feature, Fraction)],
-                                 best_tied[, .(feature, Fraction)])
-        } else {
-            fraction_map = max_fractions[, .(Fraction = Fraction[1]), by = "feature"]
-        }
-        
-        # Step 4: filter input to only rows matching the selected fraction per feature
+        fraction_map = .resolveFractionTies(input, max_fractions)
         input = input[fraction_map, on = .(feature, Fraction), nomatch = 0]
     }
     input
 }
 
 
-#' Get a name of fraction with the largest number of measurements or the largest
-#' average intensity
+#' Resolve ties when multiple fractions share the maximum number of measurements
+#' for a given feature. In the case of a tie, the fraction with the highest
+#' mean intensity is selected.
 #' @param input output of `MSstatsPreprocess`
-#' @return character - label of the fraction that has most measurements or
-#' highest mean intensity for a given feature
+#' @param max_fractions data.table of fractions that share the maximum number
+#' of unique runs per feature, as produced by `.removeOverlappingFeatures`
+#' @return data.table with columns `feature` and `Fraction`, containing one
+#' selected fraction per feature
 #' @keywords internal
-.getCorrectFraction = function(input) {
-    Intensity = Run = Fraction = NULL
+.resolveFractionTies = function(input, max_fractions) {
+    tie_features = max_fractions[, .(n_ties = .N), by = "feature"][n_ties > 1, feature]
     
-    measurement_count = input[!is.na(Intensity) & Intensity > 0, 
-                              list(n_obs = data.table::uniqueN(Run)),
-                              by = "Fraction"]
-    which_max_measurements = which(measurement_count$n_obs == max(measurement_count$n_obs))
-    if (length(which_max_measurements) == 1L) {
-        return(unique(measurement_count$Fraction[which_max_measurements]))
+    if (length(tie_features) > 0) {
+        avg_abundance = input[
+            feature %in% tie_features & !is.na(Intensity) & Intensity > 0,
+            .(mean_abundance = mean(Intensity)),
+            by = .(feature, Fraction)
+        ]
+        best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
+        best_simple = max_fractions[
+            !feature %in% tie_features,
+            .(Fraction = Fraction[1]),
+            by = "feature"
+        ]
+        rbind(best_simple[, .(feature, Fraction)],
+              best_tied[, .(feature, Fraction)])
     } else {
-        input = input[Fraction %in% measurement_count$Fraction[which_max_measurements]]
-        average_abundance = input[!is.na(Intensity) & Intensity > 0, 
-                                  list(mean_abundance = mean(Intensity)),
-                                  by = "Fraction"]
-        which_max_abundance = which.max(average_abundance$mean_abundance)
-        unique(average_abundance$Fraction[which_max_abundance])
+        max_fractions[, .(Fraction = Fraction[1]), by = "feature"]
     }
 }
 
