@@ -267,11 +267,41 @@
     fraction_keep = Fraction = NULL
     
     if (data.table::uniqueN(input$Fraction) > 1) {
-        input[, fraction_keep := .getCorrectFraction(.SD), 
-              by = "feature", 
-              .SDcols = c("feature", "Fraction", "Run", "Intensity")]
-        input = input[Fraction == fraction_keep]
-        input = input[, !(colnames(input) == "fraction_keep"), with = FALSE]
+        # Step 1: count unique Runs per feature+Fraction
+        measurement_count = input[
+            !is.na(Intensity) & Intensity > 0,
+            .(n_obs = uniqueN(Run)),
+            by = .(feature, Fraction)
+        ]
+        
+        # Step 2: keep only the Fraction(s) with max n_obs per feature
+        measurement_count[, is_max := n_obs == max(n_obs), by = "feature"]
+        max_fractions = measurement_count[(is_max)]
+        
+        # Step 3: if tie, resolve by mean intensity
+        tie_features = max_fractions[, .(n_ties = .N), by = "feature"][n_ties > 1, feature]
+        
+        if (length(tie_features) > 0) {
+            avg_abundance = input[
+                feature %in% tie_features & !is.na(Intensity) & Intensity > 0,
+                .(mean_abundance = mean(Intensity)),
+                by = .(feature, Fraction)
+            ]
+            # Pick the Fraction with highest mean per tied feature
+            best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
+            
+            # For non-tied features, just take the max fraction
+            best_simple = max_fractions[!feature %in% tie_features, 
+                                        .(feature, Fraction = Fraction[1]), 
+                                        by = "feature"]
+            fraction_map = rbind(best_simple[, .(feature, Fraction)], 
+                                 best_tied[, .(feature, Fraction)])
+        } else {
+            fraction_map = max_fractions[, .(feature, Fraction = Fraction[1]), by = "feature"]
+        }
+        
+        # Step 4: single join back to original table
+        input[fraction_map, fraction_keep := i.Fraction, on = "feature"]
     }
     input
 }
