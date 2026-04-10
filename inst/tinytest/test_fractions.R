@@ -65,6 +65,7 @@ fractionated = data.table::data.table(
     feature = rep(c("A", "B"), each = 6),
     Fraction = rep(rep(c(1, 2), each = 3), times = 2),
     Run = 1:12,
+    IsotopeLabelType = "L",
     Intensity = c(NA, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2)
 )
 ### More observations win
@@ -87,6 +88,7 @@ fractionated_third = data.table::data.table(
     feature = rep("A", 9),
     Fraction = c(rep(1, 3), rep(2, 3), rep(3, 3)),
     Run = 1:9,
+    IsotopeLabelType = "L",
     Intensity = c(1, 1, 1,    # Fraction 1: 3 obs, mean = 1 (ties for max n_obs)
                   2, 2, 2,    # Fraction 2: 3 obs, mean = 2 (ties for max n_obs)
                   10, NA, NA) # Fraction 3: 1 obs, mean = 10 (loses on n_obs but mean would win w/o fix)
@@ -94,6 +96,47 @@ fractionated_third = data.table::data.table(
 expect_equal(
     unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated_third)$Fraction),
     2
+)
+### L/H isotope label types: fraction selection uses only L obs, output keeps both L and H;
+### NA-only features: fraction selection uses NA obs
+# Feature "A" (L+H): F1 has 1 L obs (run 1) + 4 H obs (runs 1-4) = 4 unique runs total
+#                    F2 has 3 L obs (runs 5-7) + 1 H obs (run 5)  = 3 unique runs total
+#   → If counting all unique runs: F1 wins (4 > 3)
+#   → If counting L unique runs only: F2 wins (3 > 1)
+#   → Expected: F2 selected, confirming H obs do not influence fraction selection
+#   → Both L and H rows from F2 are returned
+# Feature "B" (NA only): F1 has 2 NA obs (runs 8-9), F2 has 4 NA obs (runs 10-13)
+#   → NA obs: F1=2, F2=4 → F2 wins; all 4 F2 rows are kept
+fractionated_lh = data.table::data.table(
+    feature = c(rep("A", 9), rep("B", 6)),
+    Fraction = c(rep(1, 5), rep(2, 4),
+                 rep(1, 2), rep(2, 4)),
+    Run = c(1, 1, 2, 3, 4,    # A F1: run 1 paired L+H, runs 2-4 H only
+            5, 5, 6, 7,        # A F2: run 5 paired L+H, runs 6-7 L only
+            8, 9, 10, 11, 12, 13),
+    IsotopeLabelType = c("L", "H", "H", "H", "H",   # A F1: 1 L, 4 H
+                         "L", "H", "L", "L",          # A F2: 3 L, 1 H
+                         rep(NA_character_, 6)),
+    Intensity = rep(1, 15)
+)
+### Feature A: F1 has more total obs but fewer L obs — F2 must win to confirm L-only logic
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated_lh[feature == "A"])$Fraction),
+    2
+)
+### Both L and H rows are returned for the winning fraction
+expect_true(
+    all(c("L", "H") %in% MSstatsConvert:::.removeOverlappingFeatures(fractionated_lh[feature == "A"])$IsotopeLabelType)
+)
+### Feature B (NA only) selected via NA obs count
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated_lh[feature == "B"])$Fraction),
+    2
+)
+### Full dataset: A keeps F2 (L+H rows), B keeps F2 (NA rows)
+expect_identical(
+    MSstatsConvert:::.removeOverlappingFeatures(data.table::copy(fractionated_lh)),
+    fractionated_lh[(feature == "A" & Fraction == 2) | (feature == "B" & Fraction == 2)]
 )
 fractionated_tmt = fractionated = data.table::data.table(
     feature = rep(c("A", "B"), each = 6),
