@@ -8,6 +8,10 @@
 }
 \arguments{
 \item{input}{data.frame of \code{msstats.csv} file produced by Philosopher}
+
+\item{path}{character. Path to a file or directory containing msstats.csv output(s) from Philosopher. Used when \code{input} is NULL.}
+
+\item{folder}{logical. If TRUE, \code{path} is treated as a directory and all msstats files within it are read. If FALSE, \code{path} is treated as a single file path.}
 }
 \description{
 Convert Philosopher parameters to consistent format

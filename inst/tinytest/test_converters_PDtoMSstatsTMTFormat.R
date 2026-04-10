@@ -24,10 +24,11 @@ annotation.pd = data.table::fread(system.file("tinytest/raw_data/PDTMT/pd_annota
                                               package = "MSstatsConvert"))
 
 expect_error(PDtoMSstatsTMTFormat(input = pd_raw[, !colnames(pd_raw) == "Protein.Accessions"], # missing columns in input
-                                  annotation = annot))
+                                  annotation = annot, use_log_file = FALSE))
 
 expect_error(PDtoMSstatsTMTFormat(input = pd_raw,
-                                  annotation = annot[, !colnames(annot) == "Condition"])) # missing columns in annotation
+                                  annotation = annot[, !colnames(annot) == "Condition"], # missing columns in annotation
+                                  use_log_file = FALSE))
 
 # Verify output intensities are present in input
 intensity_cols = grep("^Abundance", colnames(pd_raw), value = TRUE)

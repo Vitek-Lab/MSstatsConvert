@@ -13,7 +13,7 @@
 #' The probability is confidence score determined by PeptideProphet and higher values indicate greater confidence.
 #' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
 #' @param rmPeptide_OxidationM TRUE (default) will remove the peptides including oxidation (M) sequence.
-#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
+#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Default is FALSE.
 #' @param ... additional parameters to `data.table::fread`.
 #' @inheritParams .sharedParametersAmongConverters
 #' 
@@ -102,7 +102,9 @@ PhilosophertoMSstatsTMTFormat = function(
 
 
 #' Convert Philosopher parameters to consistent format
-#' @inheritParams PhilosophertoMSstatsTMTFormat 
+#' @inheritParams PhilosophertoMSstatsTMTFormat
+#' @param path character. Path to a file or directory containing msstats.csv output(s) from Philosopher. Used when \code{input} is NULL.
+#' @param folder logical. If TRUE, \code{path} is treated as a directory and all msstats files within it are read. If FALSE, \code{path} is treated as a single file path.
 #' @keywords internal
 .getPhilosopherInput = function(input, path, folder) {
     if (!is.null(input)) {

@@ -27,7 +27,7 @@ ProgenesistoMSstatsFormat(
 \item{useUniquePeptide}{TRUE (default) removes peptides that are assigned for more than one proteins.
 We assume to use unique peptide for each protein.}
 
-\item{summaryforMultipleRows}{max(default) or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities.}
+\item{summaryforMultipleRows}{max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.}
 
 \item{removeFewMeasurements}{TRUE (default) will remove the features that have 1 or 2 measurements across runs.}
 
@@ -41,7 +41,7 @@ will be saved to a file.}
 \item{append}{logical. If TRUE, information about data processing will be added
 to an existing log file.}
 
-\item{verbose}{logical. If TRUE, information about data processing wil be printed
+\item{verbose}{logical. If TRUE, information about data processing will be printed
 to the console.}
 
 \item{log_file_path}{character. Path to a file to which information about

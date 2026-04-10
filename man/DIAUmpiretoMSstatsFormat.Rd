@@ -38,7 +38,7 @@ DIAUmpiretoMSstatsFormat(
 
 \item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 
-\item{summaryforMultipleRows}{max(default) or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities.}
+\item{summaryforMultipleRows}{max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.}
 
 \item{use_log_file}{logical. If TRUE, information about data processing
 will be saved to a file.}
@@ -46,7 +46,7 @@ will be saved to a file.}
 \item{append}{logical. If TRUE, information about data processing will be added
 to an existing log file.}
 
-\item{verbose}{logical. If TRUE, information about data processing wil be printed
+\item{verbose}{logical. If TRUE, information about data processing will be printed
 to the console.}
 
 \item{log_file_path}{character. Path to a file to which information about

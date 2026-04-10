@@ -1,7 +1,7 @@
 #' Generate MSstatsTMT required input format for OpenMS output
 #' @param input MSstatsTMT report from OpenMS
 #' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
-#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
+#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Default is FALSE.
 #' @param summaryforMultiplePSMs sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.
 #' @param ... additional parameters to `data.table::fread`.
 #' @inheritParams .sharedParametersAmongConverters

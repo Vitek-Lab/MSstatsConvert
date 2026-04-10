@@ -25,7 +25,7 @@ We assume to use unique peptide for each protein.}
 
 \item{rmPSM_withfewMea_withinRun}{TRUE (default) will remove the features that have 1 or 2 measurements within each Run.}
 
-\item{rmProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.}
+\item{rmProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. Default is FALSE.}
 
 \item{summaryforMultiplePSMs}{sum(default) or max - when there are multiple measurements for certain feature in certain run, select the feature with the largest summation or maximal value.}
 
@@ -35,7 +35,7 @@ will be saved to a file.}
 \item{append}{logical. If TRUE, information about data processing will be added
 to an existing log file.}
 
-\item{verbose}{logical. If TRUE, information about data processing wil be printed
+\item{verbose}{logical. If TRUE, information about data processing will be printed
 to the console.}
 
 \item{log_file_path}{character. Path to a file to which information about

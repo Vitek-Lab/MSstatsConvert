@@ -5,7 +5,7 @@
 #' @param removeFewMeasurements TRUE (default) will remove the features that have 1 or 2 measurements across runs.
 #' @param useUniquePeptide TRUE (default) removes peptides that are assigned for more than one proteins. 
 #' We assume to use unique peptide for each protein.
-#' @param summaryforMultipleRows max(default) or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities.
+#' @param summaryforMultipleRows max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.
 #' @param removeProtein_with1Feature TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.
 #' @param removeProtein_with1Peptide TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.
 #' @param removeOxidationMpeptides TRUE will remove the peptides including 'oxidation (M)' in modification. FALSE is default.
@@ -14,7 +14,7 @@
 #' will be saved to a file.
 #' @param append logical. If TRUE, information about data processing will be added
 #' to an existing log file.
-#' @param verbose logical. If TRUE, information about data processing wil be printed
+#' @param verbose logical. If TRUE, information about data processing will be printed
 #' to the console.
 #' @param log_file_path character. Path to a file to which information about 
 #' data processing will be saved. 
