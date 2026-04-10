@@ -28,14 +28,14 @@ BioReplicate, Condition columns or a path to file. Refer to the example 'annotat
 
 \item{which.proteinid}{Use 'Protein.Accessions'(default) column for protein name. 'Master.Protein.Accessions' can be used instead to get the protein name with single protein.}
 
-\item{useNumProteinsColumn}{logical, TURE(default) remove shared peptides by information of # Proteins column in PSM sheet.}
+\item{useNumProteinsColumn}{logical, TRUE (default) removes shared peptides by information of # Proteins column in PSM sheet.}
 
 \item{useUniquePeptide}{TRUE (default) removes peptides that are assigned for more than one proteins.
 We assume to use unique peptide for each protein.}
 
 \item{rmPSM_withfewMea_withinRun}{TRUE (default) will remove the features that have 1 or 2 measurements within each Run.}
 
-\item{rmProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.}
+\item{rmProtein_with1Feature}{TRUE will remove the proteins which have only 1 peptide and charge. Default is FALSE.}
 
 \item{summaryforMultipleRows}{max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.}
 

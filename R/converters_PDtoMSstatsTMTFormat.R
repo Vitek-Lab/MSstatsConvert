@@ -4,9 +4,9 @@
 #' @param annotation annotation with Run, Fraction, TechRepMixture, Mixture, Channel, 
 #' BioReplicate, Condition columns or a path to file. Refer to the example 'annotation' for the meaning of each column.
 #' @param which.proteinid Use 'Protein.Accessions'(default) column for protein name. 'Master.Protein.Accessions' can be used instead to get the protein name with single protein.
-#' @param useNumProteinsColumn logical, TURE(default) remove shared peptides by information of # Proteins column in PSM sheet.
+#' @param useNumProteinsColumn logical, TRUE (default) removes shared peptides by information of # Proteins column in PSM sheet.
 #' @param rmPSM_withfewMea_withinRun TRUE (default) will remove the features that have 1 or 2 measurements within each Run.
-#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Defaut is FALSE.
+#' @param rmProtein_with1Feature TRUE will remove the proteins which have only 1 peptide and charge. Default is FALSE.
 #' @param ... additional parameters to `data.table::fread`.
 #' @inheritParams .sharedParametersAmongConverters
 #' 
@@ -48,7 +48,7 @@ PDtoMSstatsTMTFormat <- function(
     input = MSstatsConvert::MSstatsPreprocess(
         input,
         annotation, 
-        feature_columns = c("PeptideSequence", "PrecursorCharge"),
+        feature_columns = feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = rmProtein_with1Feature,
         feature_cleaning = list(remove_features_with_few_measurements = rmPSM_withfewMea_withinRun,
