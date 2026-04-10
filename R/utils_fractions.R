@@ -265,17 +265,30 @@
 #' @keywords internal
 .removeOverlappingFeatures = function(input) {
     Fraction = NULL
-    
+
     if (data.table::uniqueN(input$Fraction) > 1) {
         measurement_count = input[
-            (IsotopeLabelType == "L" | is.na(IsotopeLabelType)) & 
+            (IsotopeLabelType == "L" | is.na(IsotopeLabelType)) &
             !is.na(Intensity) & Intensity > 0,
             .(n_obs = uniqueN(Run)),
             by = .(feature, Fraction)
         ]
+        # Features absent from measurement_count have no L or NA observations.
+        # Fall back to H observations so they are not silently dropped.
+        h_only_features = setdiff(unique(input$feature), unique(measurement_count$feature))
+        if (length(h_only_features) > 0) {
+            h_count = input[
+                feature %in% h_only_features &
+                    IsotopeLabelType == "H" &
+                    !is.na(Intensity) & Intensity > 0,
+                .(n_obs = uniqueN(Run)),
+                by = .(feature, Fraction)
+            ]
+            measurement_count = rbind(measurement_count, h_count)
+        }
         measurement_count[, is_max := n_obs == max(n_obs), by = "feature"]
         max_fractions = measurement_count[(is_max)]
-        
+
         fraction_map = .resolveFractionTies(input, max_fractions)
         input = input[fraction_map, on = .(feature, Fraction), nomatch = 0]
     }
@@ -294,15 +307,28 @@
 #' @keywords internal
 .resolveFractionTies = function(input, max_fractions) {
     tie_features = max_fractions[, .(n_ties = .N), by = "feature"][n_ties > 1, feature]
-    
+
     if (length(tie_features) > 0) {
         tied_fractions = max_fractions[feature %in% tie_features, .(feature, Fraction)]
-        avg_abundance = input[
-            tied_fractions, on = .(feature, Fraction), nomatch = 0
-        ][(IsotopeLabelType == "L" | is.na(IsotopeLabelType)) & 
-              !is.na(Intensity) & Intensity > 0,
-          .(mean_abundance = mean(Intensity)),
-          by = .(feature, Fraction)]
+        tied_input = input[tied_fractions, on = .(feature, Fraction), nomatch = 0]
+        avg_abundance = tied_input[
+            (IsotopeLabelType == "L" | is.na(IsotopeLabelType)) &
+                !is.na(Intensity) & Intensity > 0,
+            .(mean_abundance = mean(Intensity)),
+            by = .(feature, Fraction)
+        ]
+        # H-only tied features have no L or NA rows; fall back to H for tie-breaking.
+        h_only_tied = setdiff(tie_features, unique(avg_abundance$feature))
+        if (length(h_only_tied) > 0) {
+            h_avg = tied_input[
+                feature %in% h_only_tied &
+                    IsotopeLabelType == "H" &
+                    !is.na(Intensity) & Intensity > 0,
+                .(mean_abundance = mean(Intensity)),
+                by = .(feature, Fraction)
+            ]
+            avg_abundance = rbind(avg_abundance, h_avg)
+        }
         best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
         best_simple = max_fractions[
             !feature %in% tie_features,

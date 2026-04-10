@@ -138,6 +138,32 @@ expect_identical(
     MSstatsConvert:::.removeOverlappingFeatures(data.table::copy(fractionated_lh)),
     fractionated_lh[(feature == "A" & Fraction == 2) | (feature == "B" & Fraction == 2)]
 )
+### H-only feature: falls back to H obs for fraction selection (not silently dropped)
+# F1 has 1 H obs, F2 has 3 H obs → F2 wins
+fractionated_h_only = data.table::data.table(
+    feature = rep("A", 4),
+    Fraction = c(1, 2, 2, 2),
+    Run = 1:4,
+    IsotopeLabelType = "H",
+    Intensity = 1
+)
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated_h_only)$Fraction),
+    2
+)
+### H-only feature with tied obs count: higher mean H intensity breaks the tie
+# F1: 2 obs, mean intensity 1; F2: 2 obs, mean intensity 3 → F2 wins
+fractionated_h_tied = data.table::data.table(
+    feature = rep("A", 4),
+    Fraction = rep(c(1, 2), each = 2),
+    Run = 1:4,
+    IsotopeLabelType = "H",
+    Intensity = c(1, 1, 3, 3)
+)
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated_h_tied)$Fraction),
+    2
+)
 fractionated_tmt = fractionated = data.table::data.table(
     feature = rep(c("A", "B"), each = 6),
     Fraction = rep(rep(c(1, 2), each = 3), times = 2),
