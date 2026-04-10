@@ -82,6 +82,19 @@ expect_identical(
     MSstatsConvert:::.removeOverlappingFeatures(data.table::copy(fractionated)),
     fractionated[Fraction == 2]
 )
+### Non-tied fraction with high mean intensity should not be selected over tied fractions
+fractionated_third = data.table::data.table(
+    feature = rep("A", 9),
+    Fraction = c(rep(1, 3), rep(2, 3), rep(3, 3)),
+    Run = 1:9,
+    Intensity = c(1, 1, 1,    # Fraction 1: 3 obs, mean = 1 (ties for max n_obs)
+                  2, 2, 2,    # Fraction 2: 3 obs, mean = 2 (ties for max n_obs)
+                  10, NA, NA) # Fraction 3: 1 obs, mean = 10 (loses on n_obs but mean would win w/o fix)
+)
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated_third)$Fraction),
+    2
+)
 fractionated_tmt = fractionated = data.table::data.table(
     feature = rep(c("A", "B"), each = 6),
     Fraction = rep(rep(c(1, 2), each = 3), times = 2),

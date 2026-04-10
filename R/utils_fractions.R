@@ -295,11 +295,12 @@
     tie_features = max_fractions[, .(n_ties = .N), by = "feature"][n_ties > 1, feature]
     
     if (length(tie_features) > 0) {
+        tied_fractions = max_fractions[feature %in% tie_features, .(feature, Fraction)]
         avg_abundance = input[
-            feature %in% tie_features & !is.na(Intensity) & Intensity > 0,
-            .(mean_abundance = mean(Intensity)),
-            by = .(feature, Fraction)
-        ]
+            tied_fractions, on = .(feature, Fraction), nomatch = 0
+        ][!is.na(Intensity) & Intensity > 0,
+          .(mean_abundance = mean(Intensity)),
+          by = .(feature, Fraction)]
         best_tied = avg_abundance[, .SD[which.max(mean_abundance)], by = "feature"]
         best_simple = max_fractions[
             !feature %in% tie_features,
