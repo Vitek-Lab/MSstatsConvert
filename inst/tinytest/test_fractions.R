@@ -67,12 +67,16 @@ fractionated = data.table::data.table(
     Run = 1:12,
     Intensity = c(NA, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2)
 )
-picked_A = MSstatsConvert:::.getCorrectFraction(fractionated[feature == "A"])
-picked_B = MSstatsConvert:::.getCorrectFraction(fractionated[feature == "B"])
 ### More observations win
-expect_equal(picked_A, 2)
-### Higher average intensity wins
-expect_equal(picked_B, 2)
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated[feature == "A"])$Fraction),
+    2
+)
+### Higher average intensity wins on tie
+expect_equal(
+    unique(MSstatsConvert:::.removeOverlappingFeatures(fractionated[feature == "B"])$Fraction),
+    2
+)
 ### For full data
 expect_identical(
     MSstatsConvert:::.removeOverlappingFeatures(data.table::copy(fractionated)),
