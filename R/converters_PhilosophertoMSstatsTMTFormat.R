@@ -21,9 +21,9 @@
 #' 
 #' @examples
 #' input_file_path = system.file("tinytest/raw_data/Philosopher/msstats.csv", 
-#'                      package = "MSstatsTMT")
+#'                      package = "MSstatsConvert")
 #' annotation_file_path = system.file("tinytest/raw_data/Philosopher/MSstatsTMT_annotation.csv", 
-#'                     package = "MSstatsTMT")
+#'                     package = "MSstatsConvert")
 #' input = data.table::fread(input_file_path)
 #' annotation = data.table::fread(annotation_file_path)
 #' msstats_format = PhilosophertoMSstatsTMTFormat(input, annotation)

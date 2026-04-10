@@ -1,11 +1,11 @@
-# Test ProteinProspectortoMSstatsTMTFormat ---------------------------
-input = data.table::fread(system.file("tinytest/raw_data/ProteinProspector/Prospector_TotalTMT.txt",
+# Test PhilosophertoMSstatsTMTFormat ---------------------------
+input = data.table::fread(system.file("tinytest/raw_data/Philosopher/msstats.csv",
                                       package = "MSstatsConvert"))
-annot = data.table::fread(system.file("tinytest/raw_data/ProteinProspector/Annotation.csv",
+annot = data.table::fread(system.file("tinytest/raw_data/Philosopher/MSstatsTMT_annotation.csv",
                                       package = "MSstatsConvert"))
-output = ProteinProspectortoMSstatsTMTFormat(input, annot, use_log_file = FALSE)
+output = PhilosophertoMSstatsTMTFormat(input, annot, use_log_file = FALSE)
 expect_equal(ncol(output), 11)
-expect_equal(nrow(output), 528)
+expect_equal(nrow(output), 550)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))
@@ -18,14 +18,8 @@ expect_true("Condition" %in% colnames(output))
 expect_true("BioReplicate" %in% colnames(output))
 expect_true("Channel" %in% colnames(output))
 
-# Test ProteinProspectortoMSstatsTMTFormat with missing value ------------
-zero_value_entry = 
-    output[output$PeptideSequence == "DINKVAEDLESEGLMAEEVQAVQQQEVYGAMPR" 
-       & output$BioReplicate == "S1",]$Intensity
-expect_true(is.na(zero_value_entry))
-
 # Verify output intensities are present in input
-intensity_cols = grep("^Int ", colnames(input), value = TRUE)
+intensity_cols = grep("^Channel\\.", colnames(input), value = TRUE)
 input_intensities = as.character(unlist(input[, intensity_cols, with = FALSE]))
 output_intensities = as.character(output$Intensity[!is.na(output$Intensity)])
 expect_true(all(output_intensities %in% input_intensities))
