@@ -4,42 +4,49 @@
 #' @return data.table
 #' @importFrom stats na.omit
 #' @keywords internal
-.cleanRawDIANN <- function(msstats_object, MBR = TRUE, 
+.cleanRawDIANN <- function(msstats_object, MBR = TRUE,
                            quantificationColumn = "FragmentQuantCorrected",
                            global_qvalue_cutoff = 0.01,
-                           qvalue_cutoff = 0.01, 
+                           qvalue_cutoff = 0.01,
                            pg_qvalue_cutoff = 0.01,
-                           calculateAnomalyScores = FALSE, 
-                           anomalyModelFeatures = c()) {
+                           calculateAnomalyScores = FALSE,
+                           anomalyModelFeatures = c(),
+                           labeledAminoAcids = NULL) {
     dn_input <- getInputFile(msstats_object, "input")
     dn_input <- data.table::as.data.table(dn_input)
-    
+
     # Process quantification columns
     quantificationColumn <- .cleanDIANNProcessQuantificationColumns(dn_input, quantificationColumn)
-    
+
     # Add missing columns
     dn_input <- .cleanDIANNAddMissingColumns(dn_input)
-    
+
+    has_channel <- !is.null(labeledAminoAcids) && "Channel" %in% colnames(dn_input)
+
     # Select required columns
     dn_input <- .cleanDIANNSelectRequiredColumns(dn_input, quantificationColumn, MBR,
                                                  calculateAnomalyScores,
-                                                 anomalyModelFeatures)
-    
+                                                 anomalyModelFeatures,
+                                                 has_channel = has_channel)
+
     # Split concatenated values
     dn_input <- .cleanDIANNSplitConcatenatedValues(dn_input, quantificationColumn)
-    
+
     # Process fragment information
     dn_input <- .cleanDIANNProcessFragmentInfo(dn_input, quantificationColumn)
-    
+
     # Clean and filter data
-    dn_input <- .cleanDIANNCleanAndFilterData(dn_input, MBR, quantificationColumn, 
+    dn_input <- .cleanDIANNCleanAndFilterData(dn_input, MBR, quantificationColumn,
                                               global_qvalue_cutoff,
-                                              qvalue_cutoff, 
+                                              qvalue_cutoff,
                                               pg_qvalue_cutoff)
-    
+
     # Rename columns
     dn_input <- .cleanDIANNRenameColumns(dn_input, quantificationColumn)
-    
+
+    # Assign IsotopeLabelType for protein turnover
+    dn_input <- .assignDIANNIsotopeLabelType(dn_input, labeledAminoAcids, has_channel)
+
     .logSuccess("DIANN", "clean")
     dn_input
 }
@@ -84,17 +91,22 @@
 #' @noRd
 .cleanDIANNSelectRequiredColumns <- function(dn_input, quantificationColumn, MBR,
                                              calculateAnomalyScores,
-                                             anomalyModelFeatures) {
-    base_cols <- c('ProteinNames', 'StrippedSequence', 'ModifiedSequence', 
-                   'PrecursorCharge', quantificationColumn, 'QValue', 
+                                             anomalyModelFeatures,
+                                             has_channel = FALSE) {
+    base_cols <- c('ProteinNames', 'StrippedSequence', 'ModifiedSequence',
+                   'PrecursorCharge', quantificationColumn, 'QValue',
                    'PrecursorMz', 'FragmentInfo', 'Run')
-    
+
+    if (has_channel) {
+        base_cols <- c(base_cols, 'Channel')
+    }
+
     mbr_cols <- if (MBR) {
         c('LibQValue', 'LibPGQValue')
     } else {
         c('GlobalQValue', 'GlobalPGQValue')
     }
-    
+
     qual_cols <- if (calculateAnomalyScores) {
         anomalyModelFeatures
     } else {
@@ -206,6 +218,59 @@
     
     return(dn_input)
 }
+
+#' Assign IsotopeLabelType for DIANN protein turnover workflows.
+#'
+#' When \code{labeledAminoAcids} is provided, each row is classified as heavy
+#' (\code{"H"}), light (\code{"L"}), or unlabeled (\code{NA}).
+#'
+#' If the input contains a \code{Channel} column (present in some DIANN protein
+#' turnover exports), the column is mapped directly: \code{"H"} → \code{"H"},
+#' \code{"L"} → \code{"L"}, anything else → \code{NA}.
+#'
+#' Otherwise the \code{PeptideSequence} (i.e. the original ModifiedSequence) is
+#' inspected for SILAC suffixes of the form \code{(SILAC-<AA>-H)} or
+#' \code{(SILAC-<AA>-L)}, where \code{<AA>} is one of the supplied
+#' \code{labeledAminoAcids}.  Sequences carrying neither suffix are \code{NA}.
+#' The SILAC suffix is stripped from \code{PeptideSequence} after classification.
+#'
+#' @param dn_input \code{data.table} after column renaming.
+#' @param labeledAminoAcids Character vector of single-letter amino acid codes
+#'   that carry the SILAC label (e.g. \code{c("K")} or \code{c("K", "R")}), or
+#'   \code{NULL} to skip labeling (backwards-compatible default).
+#' @param has_channel Logical; \code{TRUE} when the raw input contained a
+#'   \code{Channel} column that was carried through to \code{dn_input}.
+#' @return \code{dn_input} with \code{IsotopeLabelType} column added (and
+#'   \code{Channel} removed when applicable).
+#' @keywords internal
+#' @noRd
+.assignDIANNIsotopeLabelType <- function(dn_input, labeledAminoAcids, has_channel) {
+    IsotopeLabelType = Channel = PeptideSequence = NULL
+
+    if (is.null(labeledAminoAcids)) {
+        return(dn_input)
+    }
+
+    if (has_channel) {
+        dn_input[, IsotopeLabelType := data.table::fcase(
+            Channel == "H", "H",
+            Channel == "L", "L",
+            default = NA_character_
+        )]
+        dn_input[, Channel := NULL]
+    } else {
+        aa_pattern <- paste0(labeledAminoAcids, collapse = "|")
+        heavy_regex <- paste0("\\(SILAC-(?:", aa_pattern, ")-H\\)")
+        light_regex <- paste0("\\(SILAC-(?:", aa_pattern, ")-L\\)")
+        strip_regex <- paste0("\\(SILAC-(?:", aa_pattern, ")-[HL]\\)")
+
+        dn_input <- .classifyIsotopeLabelType(dn_input, heavy_regex, light_regex)
+        dn_input[, PeptideSequence := gsub(strip_regex, "", PeptideSequence, perl = TRUE)]
+    }
+
+    dn_input
+}
+
 
 #' Rename columns to standardized names
 #' @param dn_input data.table input

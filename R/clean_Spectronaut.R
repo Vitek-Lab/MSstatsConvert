@@ -183,32 +183,25 @@
 #' @keywords internal
 #' @noRd
 .assignSpectronautIsotopeLabelType = function(spec_input, heavyLabels) {
-    IsotopeLabelType = PeptideSequence = StrippedSequence = NULL
+    PeptideSequence = NULL
     if (is.null(heavyLabels)) {
         return(spec_input)
     }
-    
+
     bare_amino_acids = sub("\\[.*\\]", "", heavyLabels)
-    bare_amino_acids_pattern = paste0(bare_amino_acids, collapse = "|")
-    heavy_pattern = paste0(heavyLabels, collapse = "|")
-    heavy_brackets_escaped_pattern = paste(
-        gsub("([\\[\\]])", "\\\\\\1", heavy_pattern, perl = TRUE),
+    labeled_aa_regex = paste0(bare_amino_acids, collapse = "|")
+    heavy_regex = paste(
+        gsub("([\\[\\]])", "\\\\\\1", heavyLabels, perl = TRUE),
         collapse = "|"
     )
-    
-    spec_input[, StrippedSequence := gsub("\\[.*?\\]", "", PeptideSequence)]
-    
-    spec_input[, IsotopeLabelType := data.table::fcase(
-        grepl(heavy_brackets_escaped_pattern, PeptideSequence, perl = TRUE), "H",
-        grepl(bare_amino_acids_pattern, StrippedSequence, perl = TRUE), "L",
-        default = NA_character_
-    )]
-    
-    spec_input[, StrippedSequence := NULL]
-    
+
+    spec_input = .classifyIsotopeLabelType(spec_input, heavy_regex,
+                                            labeled_aa_regex = labeled_aa_regex)
+
     for (i in seq_along(heavyLabels)) {
         escaped = gsub("([\\[\\]])", "\\\\\\1", heavyLabels[i], perl = TRUE)
-        spec_input[, PeptideSequence := gsub(escaped, bare_amino_acids[i], PeptideSequence, perl = TRUE)]
+        spec_input[, PeptideSequence := gsub(escaped, bare_amino_acids[i],
+                                             PeptideSequence, perl = TRUE)]
     }
     spec_input
 }

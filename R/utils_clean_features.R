@@ -309,6 +309,63 @@
 }
 
 
+#' Classify IsotopeLabelType from peptide sequence patterns.
+#'
+#' Shared core logic for protein turnover workflows in both Spectronaut and
+#' DIANN converters.  Each peptide is classified as heavy (\code{"H"}), light
+#' (\code{"L"}), or unlabeled (\code{NA}) by matching regex patterns against
+#' the \code{PeptideSequence} column.
+#'
+#' Two modes are supported:
+#' \describe{
+#'   \item{Spectronaut mode}{Pass \code{labeled_aa_regex}.  The sequence is
+#'     first stripped of all bracket modifications; light is inferred when the
+#'     bare labeled amino acid is present but the heavy bracket form is absent.}
+#'   \item{DIANN mode}{Pass \code{light_regex}.  Both heavy and light patterns
+#'     are matched directly against the modified sequence; absence of either
+#'     yields \code{NA}.}
+#' }
+#'
+#' @param dt \code{data.table} with a \code{PeptideSequence} column.
+#' @param heavy_regex Perl-compatible regex matching heavy-labeled sequences.
+#' @param light_regex Perl-compatible regex explicitly matching light-labeled
+#'   sequences, or \code{NULL} (DIANN mode).
+#' @param labeled_aa_regex Perl-compatible regex for bare labeled amino acids
+#'   applied to the bracket-stripped sequence to detect light peptides
+#'   (Spectronaut mode), or \code{NULL}.
+#' @return \code{dt} with \code{IsotopeLabelType} column added or updated.
+#' @keywords internal
+#' @noRd
+.classifyIsotopeLabelType = function(dt, heavy_regex,
+                                      light_regex = NULL,
+                                      labeled_aa_regex = NULL) {
+    IsotopeLabelType = PeptideSequence = StrippedSequence = NULL
+
+    if (!is.null(labeled_aa_regex)) {
+        dt[, StrippedSequence := gsub("\\[.*?\\]", "", PeptideSequence)]
+        dt[, IsotopeLabelType := data.table::fcase(
+            grepl(heavy_regex, PeptideSequence, perl = TRUE), "H",
+            grepl(labeled_aa_regex, StrippedSequence, perl = TRUE), "L",
+            default = NA_character_
+        )]
+        dt[, StrippedSequence := NULL]
+    } else if (!is.null(light_regex)) {
+        dt[, IsotopeLabelType := data.table::fcase(
+            grepl(heavy_regex, PeptideSequence, perl = TRUE), "H",
+            grepl(light_regex, PeptideSequence, perl = TRUE), "L",
+            default = NA_character_
+        )]
+    } else {
+        dt[, IsotopeLabelType := data.table::fcase(
+            grepl(heavy_regex, PeptideSequence, perl = TRUE), "H",
+            default = NA_character_
+        )]
+    }
+
+    dt
+}
+
+
 #' Fix invalid intensities: infinite to NA, between 0 and 1 to 0
 #' @param input data.table
 #' @return data.table

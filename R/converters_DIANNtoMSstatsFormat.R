@@ -19,8 +19,19 @@
 #' @param removeFewMeasurements should proteins with few measurements be removed
 #' @param removeOxidationMpeptides should peptides with oxidation be removed
 #' @param removeProtein_with1Feature should proteins with a single feature be removed
+#' @param labeledAminoAcids Character vector of single-letter amino acid codes
+#' that carry the SILAC label in protein turnover experiments, e.g.
+#' \code{c("K")} or \code{c("K", "R")}.  When provided, each peptide is
+#' classified as heavy (\code{IsotopeLabelType = "H"}), light
+#' (\code{IsotopeLabelType = "L"}), or unlabeled (\code{IsotopeLabelType = NA}).
+#' If the input contains a \code{Channel} column (some DIANN protein turnover
+#' exports), that column is mapped directly to \code{IsotopeLabelType} and the
+#' \code{labeledAminoAcids} are used for documentation / validation only.
+#' Otherwise the \code{ModifiedSequence} column is parsed for SILAC suffixes of
+#' the form \code{(SILAC-<AA>-H)} / \code{(SILAC-<AA>-L)}.  When \code{NULL}
+#' (default) all peptides receive \code{IsotopeLabelType = "Light"}.
 #' @param quantificationColumn Use 'FragmentQuantCorrected'(default) column for quantified intensities for DIANN 1.8.x.
-#' Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x. 
+#' Use 'FragmentQuantRaw' for quantified intensities for DIANN 1.9.x.
 #' Use 'auto' for quantified intensities for DIANN 2.x where each fragment intensity is a separate column, e.g. Fr0Quantity.
 #' @param calculateAnomalyScores Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.
 #' @param anomalyModelFeatures character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.
@@ -63,19 +74,20 @@
 DIANNtoMSstatsFormat = function(
     input, annotation = NULL,
     global_qvalue_cutoff = 0.01,
-    qvalue_cutoff = 0.01, 
+    qvalue_cutoff = 0.01,
     pg_qvalue_cutoff = 0.01,
-    useUniquePeptide = TRUE, 
+    useUniquePeptide = TRUE,
     removeFewMeasurements = TRUE,
-    removeOxidationMpeptides = TRUE, 
+    removeOxidationMpeptides = TRUE,
     removeProtein_with1Feature = TRUE,
-    MBR = TRUE, 
+    MBR = TRUE,
+    labeledAminoAcids = NULL,
     quantificationColumn = "FragmentQuantCorrected",
     calculateAnomalyScores=FALSE, anomalyModelFeatures=c(),
     anomalyModelFeatureTemporal=c(), removeMissingFeatures=.5,
     anomalyModelFeatureCount=100,
-    runOrder=NULL, n_trees=100, max_depth="auto", numberOfCores=1, 
-    use_log_file = TRUE, append = FALSE, 
+    runOrder=NULL, n_trees=100, max_depth="auto", numberOfCores=1,
+    use_log_file = TRUE, append = FALSE,
     verbose = TRUE, log_file_path = NULL,
     ...) {
     MSstatsConvert::MSstatsLogsSettings(use_log_file, append, verbose, 
@@ -86,42 +98,46 @@ DIANNtoMSstatsFormat = function(
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "DIANN")
    
-    input = MSstatsConvert::MSstatsClean(input, MBR = MBR, 
+    input = MSstatsConvert::MSstatsClean(input, MBR = MBR,
                                          quantificationColumn = quantificationColumn,
                                          global_qvalue_cutoff = global_qvalue_cutoff,
-                                         qvalue_cutoff = qvalue_cutoff, 
+                                         qvalue_cutoff = qvalue_cutoff,
                                          pg_qvalue_cutoff = pg_qvalue_cutoff,
-                                         calculateAnomalyScores = calculateAnomalyScores, 
-                                         anomalyModelFeatures = anomalyModelFeatures)
+                                         calculateAnomalyScores = calculateAnomalyScores,
+                                         anomalyModelFeatures = anomalyModelFeatures,
+                                         labeledAminoAcids = labeledAminoAcids)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
-    
+
     decoy_filter = list(col_name = "ProteinName",
                         pattern = c("DECOY", "Decoys"),
-                        filter = T, 
+                        filter = T,
                         drop_column = FALSE)
     oxidation_filter = list(col_name = "PeptideSequence",
                             pattern = "\\(UniMod\\:35\\)",
                             filter = removeOxidationMpeptides,
                             drop_column = FALSE)
-    
+
     feature_columns = c("PeptideSequence", "PrecursorCharge",
                         "FragmentIon", "ProductCharge")
-    # browser()
+    preprocess_feature_columns = if ("IsotopeLabelType" %in% colnames(input))
+        c(feature_columns, "IsotopeLabelType") else feature_columns
+    fill_isotope_label_type = if ("IsotopeLabelType" %in% colnames(input))
+        list() else list("IsotopeLabelType" = "Light")
+
     input = MSstatsConvert::MSstatsPreprocess(
-        input, 
-        annotation, 
-        feature_columns,
+        input,
+        annotation,
+        preprocess_feature_columns,
         remove_shared_peptides = useUniquePeptide,
         remove_single_feature_proteins = removeProtein_with1Feature,
         exact_filtering = NULL,
-        pattern_filtering = list(decoy = decoy_filter, 
+        pattern_filtering = list(decoy = decoy_filter,
                                  oxidation = oxidation_filter),
         aggregate_isotopic = FALSE,
         feature_cleaning = list(
             remove_features_with_few_measurements = removeFewMeasurements,
             summarize_multiple_psms = max),
-        columns_to_fill = list(Fraction = 1,
-                               IsotopeLabelType = "Light"),
+        columns_to_fill = c(list(Fraction = 1), fill_isotope_label_type),
         anomaly_metrics = anomalyModelFeatures)
     input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
     # browser()
