@@ -54,3 +54,66 @@ output <- MSstatsConvert:::.cleanRawDIANN(input, MBR = FALSE, qvalue_cutoff = 0.
 expect_qvalue_cutoff(output, "GlobalQValue", 0.001)
 output <- MSstatsConvert:::.cleanRawDIANN(input, MBR = FALSE, pg_qvalue_cutoff = 0.0002)
 expect_qvalue_cutoff(output, "GlobalPGQValue", 0.0002)
+
+# Test .classifyIsotopeLabelType ---------------------------
+# DIANN mode: explicit SILAC-H / SILAC-L suffix tags
+dt_diann = data.table::data.table(PeptideSequence = c(
+    "PEPTIDEK(SILAC-K-H)",  # heavy
+    "PEPTIDEK(SILAC-K-L)",  # light
+    "PEPTIDEAC"             # neither -> NA
+))
+result_diann = MSstatsConvert:::.classifyIsotopeLabelType(
+    dt_diann,
+    heavy_regex = "\\(SILAC-(?:K)-H\\)",
+    light_regex = "\\(SILAC-(?:K)-L\\)"
+)
+expect_equal(result_diann$IsotopeLabelType, c("H", "L", NA_character_))
+
+# DIANN mode with multiple labeled amino acids (K and R)
+dt_multi = data.table::data.table(PeptideSequence = c(
+    "PEPTIDEK(SILAC-K-H)",  # heavy K
+    "PEPTIDER(SILAC-R-H)",  # heavy R
+    "PEPTIDEK(SILAC-K-L)",  # light K
+    "PEPTIDER(SILAC-R-L)",  # light R
+    "PEPTIDEAC"             # NA
+))
+result_multi = MSstatsConvert:::.classifyIsotopeLabelType(
+    dt_multi,
+    heavy_regex = "\\(SILAC-(?:K|R)-H\\)",
+    light_regex = "\\(SILAC-(?:K|R)-L\\)"
+)
+expect_equal(result_multi$IsotopeLabelType, c("H", "H", "L", "L", NA_character_))
+
+# Heavy-only mode: no light_regex -- non-heavy sequences get NA, not "L"
+dt_heavy_only = data.table::data.table(PeptideSequence = c(
+    "PEPTIDEK(SILAC-K-H)",  # heavy
+    "PEPTIDEK(SILAC-K-L)",  # would be light, but no light_regex -> NA
+    "PEPTIDEAC"             # NA
+))
+result_heavy_only = MSstatsConvert:::.classifyIsotopeLabelType(
+    dt_heavy_only,
+    heavy_regex = "\\(SILAC-(?:K)-H\\)"
+)
+expect_equal(result_heavy_only$IsotopeLabelType, c("H", NA_character_, NA_character_))
+
+# Test .assignDIANNIsotopeLabelType ---------------------------
+# Channel path: Channel column is mapped to IsotopeLabelType, then dropped
+dt_channel = data.table::data.table(
+    PeptideSequence = c("PEPTIDEK", "PEPTIDEK", "PEPTIDEK"),
+    Channel = c("H", "L", "other")
+)
+result_channel = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_channel, labeledAminoAcids = c("K"), has_channel = TRUE
+)
+expect_equal(result_channel$IsotopeLabelType, c("H", "L", NA_character_))
+expect_false("Channel" %in% colnames(result_channel))
+
+# NULL path: labeledAminoAcids = NULL returns input unchanged (no IsotopeLabelType added)
+dt_null = data.table::data.table(
+    PeptideSequence = c("PEPTIDEK(SILAC-K-H)", "PEPTIDEK(SILAC-K-L)")
+)
+result_null = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_null, labeledAminoAcids = NULL, has_channel = FALSE
+)
+expect_false("IsotopeLabelType" %in% colnames(result_null))
+expect_equal(nrow(result_null), 2L)

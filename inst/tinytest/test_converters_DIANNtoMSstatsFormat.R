@@ -121,6 +121,8 @@ expect_true("IsotopeLabelType" %in% colnames(output))
 expect_true("Condition" %in% colnames(output))
 expect_true("BioReplicate" %in% colnames(output))
 expect_true("Fraction" %in% colnames(output))
+# When labeledAminoAcids = NULL (default), IsotopeLabelType is filled with "Light"
+expect_true(all(output$IsotopeLabelType == "Light"))
 
 # Test DIANNtoMSstatsFormat DIANN 2.0 ------------------------
 input_file_path = system.file("tinytest/raw_data/DIANN/diann_2.0.parquet", package="MSstatsConvert")
@@ -141,3 +143,5 @@ expect_true("IsotopeLabelType" %in% colnames(output))
 expect_true("Condition" %in% colnames(output))
 expect_true("BioReplicate" %in% colnames(output))
 expect_true("Fraction" %in% colnames(output))
+# When labeledAminoAcids = NULL (default), IsotopeLabelType is filled with "Light"
+expect_true(all(output$IsotopeLabelType == "Light"))
