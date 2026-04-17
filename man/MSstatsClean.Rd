@@ -73,7 +73,8 @@ MSstatsClean(msstats_object, ...)
   qvalue_cutoff = 0.01,
   pg_qvalue_cutoff = 0.01,
   calculateAnomalyScores = FALSE,
-  anomalyModelFeatures = c()
+  anomalyModelFeatures = c(),
+  labeledAminoAcids = NULL
 )
 
 \S4method{MSstatsClean}{MSstatsMetamorpheusFiles}(msstats_object, MBR = TRUE, qvalue_cutoff = 0.05)
@@ -170,6 +171,18 @@ Default is 0.01.}
 column, i.e. the global q-value for the protein group.  If MBR is true, the
 qvalue cutoff for the Lib.PG.Q.Value column, i.e. the protein group q-value for
 the library created after the first MBR pass. Default is 0.01.}
+
+\item{labeledAminoAcids}{Character vector of single-letter amino acid codes
+that carry the SILAC label in protein turnover experiments, e.g.
+\code{c("K")} or \code{c("K", "R")}.  When provided, each peptide is
+classified as heavy (\code{IsotopeLabelType = "H"}), light
+(\code{IsotopeLabelType = "L"}), or unlabeled (\code{IsotopeLabelType = NA}).
+If the input contains a \code{Channel} column (some DIANN protein turnover
+exports), that column is mapped directly to \code{IsotopeLabelType} and the
+\code{labeledAminoAcids} are used for documentation / validation only.
+Otherwise the \code{ModifiedSequence} column is parsed for SILAC suffixes of
+the form \code{(SILAC-<AA>-H)} / \code{(SILAC-<AA>-L)}.  When \code{NULL}
+(default) all peptides receive \code{IsotopeLabelType = "Light"}.}
 }
 \value{
 data.table

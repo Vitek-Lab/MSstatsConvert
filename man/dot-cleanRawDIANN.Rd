@@ -12,7 +12,8 @@
   qvalue_cutoff = 0.01,
   pg_qvalue_cutoff = 0.01,
   calculateAnomalyScores = FALSE,
-  anomalyModelFeatures = c()
+  anomalyModelFeatures = c(),
+  labeledAminoAcids = NULL
 )
 }
 \arguments{
@@ -40,6 +41,18 @@ the library created after the first MBR pass. Default is 0.01.}
 \item{calculateAnomalyScores}{Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.}
 
 \item{anomalyModelFeatures}{character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.}
+
+\item{labeledAminoAcids}{Character vector of single-letter amino acid codes
+that carry the SILAC label in protein turnover experiments, e.g.
+\code{c("K")} or \code{c("K", "R")}.  When provided, each peptide is
+classified as heavy (\code{IsotopeLabelType = "H"}), light
+(\code{IsotopeLabelType = "L"}), or unlabeled (\code{IsotopeLabelType = NA}).
+If the input contains a \code{Channel} column (some DIANN protein turnover
+exports), that column is mapped directly to \code{IsotopeLabelType} and the
+\code{labeledAminoAcids} are used for documentation / validation only.
+Otherwise the \code{ModifiedSequence} column is parsed for SILAC suffixes of
+the form \code{(SILAC-<AA>-H)} / \code{(SILAC-<AA>-L)}.  When \code{NULL}
+(default) all peptides receive \code{IsotopeLabelType = "Light"}.}
 }
 \value{
 data.table
