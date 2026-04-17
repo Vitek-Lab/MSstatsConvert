@@ -221,27 +221,32 @@
 
 #' Assign IsotopeLabelType for DIANN protein turnover workflows.
 #'
-#' When \code{labeledAminoAcids} is provided, each row is classified as heavy
-#' (\code{"H"}), light (\code{"L"}), or unlabeled (\code{NA}).
+#' Dispatches to one of two classification paths depending on \code{has_channel}:
 #'
-#' If the input contains a \code{Channel} column (present in some DIANN protein
-#' turnover exports), the column is mapped directly: \code{"H"} → \code{"H"},
-#' \code{"L"} → \code{"L"}, anything else → \code{NA}.
+#' \strong{Channel-based path} (\code{has_channel = TRUE}): \code{Channel}
+#' values are mapped directly to \code{IsotopeLabelType} (\code{"H"} →
+#' \code{"H"}, \code{"L"} → \code{"L"}, anything else → \code{NA}), and the
+#' \code{Channel} column is then dropped.  \code{labeledAminoAcids} acts solely
+#' as the opt-in flag that enables this path; the amino acid codes are
+#' \strong{not} used to validate or filter \code{ModifiedSequence}.
 #'
-#' Otherwise the \code{PeptideSequence} (i.e. the original ModifiedSequence) is
-#' inspected for SILAC suffixes of the form \code{(SILAC-<AA>-H)} or
-#' \code{(SILAC-<AA>-L)}, where \code{<AA>} is one of the supplied
-#' \code{labeledAminoAcids}.  Sequences carrying neither suffix are \code{NA}.
-#' The SILAC suffix is stripped from \code{PeptideSequence} after classification.
+#' \strong{ModifiedSequence-parsing path} (\code{has_channel = FALSE}):
+#' \code{PeptideSequence} (the retained \code{ModifiedSequence}) is matched
+#' against SILAC suffixes of the form \code{(SILAC-<AA>-H)} or
+#' \code{(SILAC-<AA>-L)}, where \code{<AA>} is any code in
+#' \code{labeledAminoAcids}.  Sequences carrying neither suffix receive
+#' \code{IsotopeLabelType = NA}.  The SILAC suffix is stripped from
+#' \code{PeptideSequence} after classification.
 #'
 #' @param dn_input \code{data.table} after column renaming.
 #' @param labeledAminoAcids Character vector of single-letter amino acid codes
-#'   that carry the SILAC label (e.g. \code{c("K")} or \code{c("K", "R")}), or
-#'   \code{NULL} to skip labeling (backwards-compatible default).
+#'   (e.g. \code{c("K")} or \code{c("K", "R")}), or \code{NULL} to skip
+#'   protein-turnover mode entirely (backwards-compatible default).
 #' @param has_channel Logical; \code{TRUE} when the raw input contained a
-#'   \code{Channel} column that was carried through to \code{dn_input}.
+#'   \code{Channel} column that was retained through
+#'   \code{.cleanDIANNSelectRequiredColumns}.
 #' @return \code{dn_input} with \code{IsotopeLabelType} column added (and
-#'   \code{Channel} removed when applicable).
+#'   \code{Channel} removed when \code{has_channel} is \code{TRUE}).
 #' @keywords internal
 #' @noRd
 .assignDIANNIsotopeLabelType <- function(dn_input, labeledAminoAcids, has_channel) {
