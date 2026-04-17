@@ -273,6 +273,12 @@
         dn_input[, PeptideSequence := gsub(strip_regex, "", PeptideSequence, perl = TRUE)]
     }
 
+    if (all(is.na(dn_input[["IsotopeLabelType"]]))) {
+        warning("labeledAminoAcids was provided but no rows were classified as H or L. ",
+                "Check that the input contains either a Channel column with H/L values ",
+                "or ModifiedSequence entries with (SILAC-<AA>-H)/(SILAC-<AA>-L) suffixes.")
+    }
+
     dn_input
 }
 
