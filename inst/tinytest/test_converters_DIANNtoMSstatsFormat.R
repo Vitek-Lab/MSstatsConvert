@@ -1,3 +1,107 @@
+# Test DIANNtoMSstatsFormat SILAC protein turnover ---------------------------
+# Verifies E2E behavior when labeledAminoAcids = c("K") is used for protein
+# turnover experiments with SILAC-labeled lysines.
+input_file_path_silac = system.file("tinytest/raw_data/DIANN/diann_input_silac.csv",
+                                    package = "MSstatsConvert")
+annotation_file_path_silac = system.file("tinytest/raw_data/DIANN/annotation_silac.csv",
+                                         package = "MSstatsConvert")
+input_silac = data.table::fread(input_file_path_silac)
+annot_silac = data.table::fread(annotation_file_path_silac)
+output_silac = DIANNtoMSstatsFormat(input_silac, annotation = annot_silac,
+                                    labeledAminoAcids = c("K"),
+                                    removeFewMeasurements = FALSE,
+                                    use_log_file = FALSE)
+output_silac_dt = data.table::as.data.table(output_silac)
+
+# Basic structure
+expect_equal(ncol(output_silac), 11)
+expect_equal(nrow(output_silac), 1020)
+expect_true("Run" %in% colnames(output_silac))
+expect_true("ProteinName" %in% colnames(output_silac))
+expect_true("PeptideSequence" %in% colnames(output_silac))
+expect_true("PrecursorCharge" %in% colnames(output_silac))
+expect_true("Intensity" %in% colnames(output_silac))
+expect_true("FragmentIon" %in% colnames(output_silac))
+expect_true("ProductCharge" %in% colnames(output_silac))
+expect_true("IsotopeLabelType" %in% colnames(output_silac))
+expect_true("Condition" %in% colnames(output_silac))
+expect_true("BioReplicate" %in% colnames(output_silac))
+expect_true("Fraction" %in% colnames(output_silac))
+
+# IsotopeLabelType is classified as H/L/NA — not the "Light" default from
+# the labeledAminoAcids=NULL path
+expect_false("Light" %in% output_silac$IsotopeLabelType)
+label_counts = table(output_silac$IsotopeLabelType, useNA = "ifany")
+expect_equal(unname(label_counts["H"]), 350L)
+expect_equal(unname(label_counts["L"]), 350L)
+expect_equal(sum(is.na(output_silac$IsotopeLabelType)), 320L)
+
+# SILAC modification tags are stripped from PeptideSequence
+expect_false(any(grepl("SILAC", output_silac$PeptideSequence)))
+
+# Peptides without a labeled K get NA IsotopeLabelType
+unlabeled_rows = output_silac_dt[PeptideSequence %in% c("AAAAADLANR", "AAAADGEPLHNEEER")]
+expect_true(all(is.na(unlabeled_rows$IsotopeLabelType)))
+
+# Peptides with a labeled K get only H or L
+k_pep_rows = output_silac_dt[PeptideSequence %in% c("AAAAAAAAQMHTK", "AAAAAAAK",
+                                                     "AAAAAAK", "AAAAAGGK")]
+expect_true(all(k_pep_rows$IsotopeLabelType %in% c("H", "L")))
+
+# Annotation merges correctly: run dAL_AT_Long_B1 maps to Condition 10
+cond_b1 = unique(output_silac_dt[Run == "dAL_AT_Long_B1", Condition])
+expect_equal(as.character(cond_b1), "10")
+
+# Heavy fragment intensities trace back to the heavy input rows.
+# Input: AAAAAAAAQMHTK(SILAC-K-H), Run dAL_AT_Long_B1 has
+#   Fragment.Quant.Corrected = "0;18378.38477;17024.44141;15426.27441;38014.78906;"
+#   Fragment.Info ions (after NH3 removal):
+#     y8^1/863.4499512 -> 18378.38477, y9^1/934.4870605 -> 17024.44141,
+#     y6^1/721.3757324 -> 15426.27441
+heavy_b1 = output_silac_dt[PeptideSequence == "AAAAAAAAQMHTK" &
+                            IsotopeLabelType == "H" &
+                            Run == "dAL_AT_Long_B1"]
+heavy_y8 = heavy_b1[FragmentIon == "y8^1/863.4499512", Intensity]
+expect_equal(heavy_y8, 18378.38477, tolerance = 1)
+heavy_y9 = heavy_b1[FragmentIon == "y9^1/934.4870605", Intensity]
+expect_equal(heavy_y9, 17024.44141, tolerance = 1)
+heavy_y6 = heavy_b1[FragmentIon == "y6^1/721.3757324", Intensity]
+expect_equal(heavy_y6, 15426.27441, tolerance = 1)
+
+# Light fragment intensities trace back to the light input rows.
+# Input: AAAAAAAAQMHTK(SILAC-K-L), Run dAL_AT_Long_B1 has
+#   Fragment.Quant.Corrected = "120170.8125;39879.93359;13874.50293;33449.03516;0;33788.10156;"
+#   Fragment.Info ions (after NH3 removal):
+#     y5^1/644.3184814 -> 120170.8125, y8^1/857.4298096 -> 39879.93359,
+#     y10^1/999.5040283 -> 13874.50293, y9^1/928.4669189 -> 33449.03516
+light_b1 = output_silac_dt[PeptideSequence == "AAAAAAAAQMHTK" &
+                            IsotopeLabelType == "L" &
+                            Run == "dAL_AT_Long_B1"]
+light_y5 = light_b1[FragmentIon == "y5^1/644.3184814", Intensity]
+expect_equal(light_y5, 120170.8125, tolerance = 1)
+light_y8 = light_b1[FragmentIon == "y8^1/857.4298096", Intensity]
+expect_equal(light_y8, 39879.93359, tolerance = 1)
+light_y10 = light_b1[FragmentIon == "y10^1/999.5040283", Intensity]
+expect_equal(light_y10, 13874.50293, tolerance = 1)
+light_y9 = light_b1[FragmentIon == "y9^1/928.4669189", Intensity]
+expect_equal(light_y9, 33449.03516, tolerance = 1)
+
+# Zero-intensity input fragments are converted to NA in output
+# AAAAAAAAQMHTK(SILAC-K-L) B1 has y6^1/715.3555908 = 0 in input
+light_y6_zero = light_b1[FragmentIon == "y6^1/715.3555908", Intensity]
+expect_true(is.na(light_y6_zero))
+
+# Verify cross-run consistency: B8 light intensities also trace to input
+# Input: AAAAAAAAQMHTK(SILAC-K-L), Run dAL_AT_Long_B8 has
+#   Fragment.Quant.Corrected = "27676.55078;5134.108887;4891.382324;3844.573975;3443.866699;8253.693359;"
+light_b8 = output_silac_dt[PeptideSequence == "AAAAAAAAQMHTK" &
+                            IsotopeLabelType == "L" &
+                            Run == "dAL_AT_Long_B8"]
+light_y5_b8 = light_b8[FragmentIon == "y5^1/644.3184814", Intensity]
+expect_equal(light_y5_b8, 27676.55078, tolerance = 1)
+light_y8_b8 = light_b8[FragmentIon == "y8^1/857.4298096", Intensity]
+expect_equal(light_y8_b8, 5134.108887, tolerance = 1)
+
 # Test DIANNtoMSstatsFormat ---------------------------
 input_file_path = system.file("tinytest/raw_data/DIANN/diann_input.tsv", package="MSstatsConvert")
 annotation_file_path = system.file("tinytest/raw_data/DIANN/annotation.csv", package = "MSstatsConvert")
