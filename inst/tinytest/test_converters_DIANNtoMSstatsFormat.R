@@ -1,6 +1,5 @@
 # Test DIANNtoMSstatsFormat SILAC protein turnover ---------------------------
-# Verifies E2E behavior when labeledAminoAcids = c("K") is used for protein
-# turnover experiments with SILAC-labeled lysines.
+# Dataset source: MSV000097050
 input_file_path_silac = system.file("tinytest/raw_data/DIANN/diann_input_silac.csv",
                                     package = "MSstatsConvert")
 annotation_file_path_silac = system.file("tinytest/raw_data/DIANN/annotation_silac.csv",
