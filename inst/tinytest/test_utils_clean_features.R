@@ -187,6 +187,35 @@ expect_equal(
     data.table::setkey(to_filter_channel2[!(ProteinName == "B"), ], NULL)
 )
 
+# Test .classifyIsotopeLabelType ----
+# DIANN mode: explicit SILAC-H / SILAC-L suffix tags
+dt_diann = data.table::data.table(PeptideSequence = c(
+    "PEPTIDEK(SILAC-K-H)",  # heavy
+    "PEPTIDEK(SILAC-K-L)",  # light
+    "PEPTIDEAC"             # neither -> NA
+))
+result_diann = MSstatsConvert:::.classifyIsotopeLabelType(
+    dt_diann,
+    heavy_regex = "\\(SILAC-(?:K)-H\\)",
+    light_regex = "\\(SILAC-(?:K)-L\\)"
+)
+expect_equal(result_diann$IsotopeLabelType, c("H", "L", NA_character_))
+
+# DIANN mode with multiple labeled amino acids (K and R)
+dt_multi = data.table::data.table(PeptideSequence = c(
+    "PEPTIDEK(SILAC-K-H)",  # heavy K
+    "PEPTIDER(SILAC-R-H)",  # heavy R
+    "PEPTIDEK(SILAC-K-L)",  # light K
+    "PEPTIDER(SILAC-R-L)",  # light R
+    "PEPTIDEAC"             # NA
+))
+result_multi = MSstatsConvert:::.classifyIsotopeLabelType(
+    dt_multi,
+    heavy_regex = "\\(SILAC-(?:K|R)-H\\)",
+    light_regex = "\\(SILAC-(?:K|R)-L\\)"
+)
+expect_equal(result_multi$IsotopeLabelType, c("H", "H", "L", "L", NA_character_))
+
 # Utility function ----
 expect_equal(MSstatsConvert:::.combine(c("A", "B"), c("A", "B")),
              c("A_A", "B_B"))

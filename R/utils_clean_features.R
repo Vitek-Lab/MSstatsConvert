@@ -329,10 +329,12 @@
 #' @param dt \code{data.table} with a \code{PeptideSequence} column.
 #' @param heavy_regex Perl-compatible regex matching heavy-labeled sequences.
 #' @param light_regex Perl-compatible regex explicitly matching light-labeled
-#'   sequences, or \code{NULL} (DIANN mode).
+#'   sequences.  Required for DIANN mode; must be non-\code{NULL}.
 #' @param labeled_aa_regex Perl-compatible regex for bare labeled amino acids
-#'   applied to the bracket-stripped sequence to detect light peptides
-#'   (Spectronaut mode), or \code{NULL}.
+#'   applied to the bracket-stripped sequence to detect light peptides.
+#'   Required for Spectronaut mode; must be non-\code{NULL}.
+#'   Exactly one of \code{light_regex} and \code{labeled_aa_regex} must be
+#'   supplied.
 #' @return \code{dt} with \code{IsotopeLabelType} column added or updated.
 #' @keywords internal
 #' @noRd
@@ -353,11 +355,6 @@
         dt[, IsotopeLabelType := data.table::fcase(
             grepl(heavy_regex, PeptideSequence, perl = TRUE), "H",
             grepl(light_regex, PeptideSequence, perl = TRUE), "L",
-            default = NA_character_
-        )]
-    } else {
-        dt[, IsotopeLabelType := data.table::fcase(
-            grepl(heavy_regex, PeptideSequence, perl = TRUE), "H",
             default = NA_character_
         )]
     }
