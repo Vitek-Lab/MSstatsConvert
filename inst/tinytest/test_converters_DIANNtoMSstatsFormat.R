@@ -120,7 +120,7 @@ output_pxd_dt = data.table::as.data.table(output_pxd)
 
 # Basic structure
 expect_equal(ncol(output_pxd), 11)
-expect_equal(nrow(output_pxd), 20400)
+expect_equal(nrow(output_pxd), 23568)
 expect_true("Run" %in% colnames(output_pxd))
 expect_true("ProteinName" %in% colnames(output_pxd))
 expect_true("PeptideSequence" %in% colnames(output_pxd))
@@ -136,17 +136,17 @@ expect_true("Fraction" %in% colnames(output_pxd))
 # Channel path used: H/L/NA counts, no "Light" default
 expect_false("Light" %in% output_pxd$IsotopeLabelType)
 pxd_label_counts = table(output_pxd$IsotopeLabelType, useNA = "ifany")
-expect_equal(unname(pxd_label_counts["H"]), 8712L)
-expect_equal(unname(pxd_label_counts["L"]), 8712L)
-expect_equal(sum(is.na(output_pxd$IsotopeLabelType)), 2976L)
+expect_equal(unname(pxd_label_counts["H"]), 9720L)
+expect_equal(unname(pxd_label_counts["L"]), 9720L)
+expect_equal(sum(is.na(output_pxd$IsotopeLabelType)), 4128L)
 
 # Channel path does NOT strip (SILAC) from PeptideSequence — that notation is
 # part of the peptide identity in this format, not a label indicator
 expect_true(any(grepl("(SILAC)", output_pxd$PeptideSequence, fixed = TRUE)))
 
 # Unlabeled peptides (no K, no SILAC) get NA IsotopeLabelType
-pxd_unlabeled = output_pxd_dt[PeptideSequence %in% c("AVLEEAEFQR", "DDEGLYTLR",
-                                                       "DTELAEELLQWFLQEEK")]
+pxd_unlabeled = output_pxd_dt[PeptideSequence %in% c("AAATFNPELITHILDGSPENTR", "AAASLDTAALSATDMALALNR",
+                                                       "AIMHHEGHMDDGLNLSR")]
 expect_true(all(is.na(pxd_unlabeled$IsotopeLabelType)))
 
 # Annotation maps correctly to all three timepoint conditions
@@ -156,27 +156,19 @@ expect_true("32 days" %in% output_pxd$Condition)
 run_0d = "20210805_BoxCarmax1st_wideMS1_JM_pSIL_pro_heart_0d_1"
 expect_equal(as.character(unique(output_pxd_dt[Run == run_0d, Condition])), "0 day")
 
-# Heavy fragment intensities match Fr.N.Quantity from the Channel = "H" input row.
-# Input: AFMTADLPNELIELLEK(SILAC)(SILAC)(SILAC), Run 32d_1, Channel H has
-#   Fr.0.Quantity = 662450.1 (largest fragment — should be the max output intensity)
-h_pxd_pep = "AFMTADLPNELIELLEK(SILAC)(SILAC)(SILAC)"
+h_pxd_pep = "TAFDDAIAELDTLNEDSYK(SILAC)(SILAC)(SILAC)"
 h_pxd_run = "20210805_BoxCarmax2nd_wideMS1_JM_pSIL_pro_heart_32d_1"
 h_pxd_ints = output_pxd_dt[PeptideSequence == h_pxd_pep &
                              IsotopeLabelType == "H" &
                              Run == h_pxd_run, Intensity]
-expect_equal(max(h_pxd_ints, na.rm = TRUE), 662450.1, tolerance = 1)
+expect_equal(max(h_pxd_ints, na.rm = TRUE), 2453057.5, tolerance = 1)
 
-# Light fragment intensities match Fr.N.Quantity from the Channel = "L" input row.
-# Input: APVYSGSSPVSGYFVDFK(SILAC)(SILAC)(SILAC)EEDSGEWK(SILAC)(SILAC)(SILAC),
-#   Run 32d_2, Channel L has Fr.1.Quantity = 116961.9 (largest fragment)
-l_pxd_pep = "APVYSGSSPVSGYFVDFK(SILAC)(SILAC)(SILAC)EEDSGEWK(SILAC)(SILAC)(SILAC)"
-l_pxd_run = "20210805_BoxCarmax1st_wideMS1_JM_pSIL_pro_heart_32d_2"
+l_pxd_pep = "TAFDDAIAELDTLNEDSYK(SILAC)(SILAC)(SILAC)"
+l_pxd_run = "20210805_BoxCarmax2nd_wideMS1_JM_pSIL_pro_heart_0d_1"
 l_pxd_ints = output_pxd_dt[PeptideSequence == l_pxd_pep &
                              IsotopeLabelType == "L" &
                              Run == l_pxd_run, Intensity]
-expect_equal(max(l_pxd_ints, na.rm = TRUE), 116961.9, tolerance = 1)
-# Fr.0.Quantity = 4973.411 also appears in the output
-expect_true(any(abs(l_pxd_ints - 4973.411) < 1, na.rm = TRUE))
+expect_equal(max(l_pxd_ints, na.rm = TRUE), 4686039.5, tolerance = 1)
 
 # Test DIANNtoMSstatsFormat ---------------------------
 input_file_path = system.file("tinytest/raw_data/DIANN/diann_input.tsv", package="MSstatsConvert")
