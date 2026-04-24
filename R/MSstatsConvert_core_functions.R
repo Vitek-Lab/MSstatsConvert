@@ -571,7 +571,10 @@ MSstatsAnomalyScores = function(input, quality_metrics, temporal_direction,
     
     subset_cols = subset_cols[subset_cols %in% names(input)]
     input = input[, ..subset_cols]
-    
+
+    ordered_runs = .standardizeColnames(run_order$Run[order(run_order$Order)])
+    input$Run = factor(input$Run, levels = ordered_runs)
+
     return(input)
 
 }
