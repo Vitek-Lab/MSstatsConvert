@@ -1,0 +1,6 @@
+id,compound_name,score,adduct
+1,Caffeine,0.95,[M+H]+
+2,GlucoseLow,0.72,[M+H]+
+2,GlucoseHigh,0.91,[M-H]-
+3,Lactate,0.88,[M+H]+
+6,Caffeine,0.80,[M+Na]+

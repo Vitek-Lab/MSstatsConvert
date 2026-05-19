@@ -1,0 +1,7 @@
+row ID,row m/z,row retention time,sampleA.mzML Peak area,sampleB.mzML Peak area,sampleC.mzML Peak area,sampleD.mzML Peak area
+1,123.0560,1.23,1000,1100,1200,1300
+2,245.1290,3.45,5000,4800,5200,4900
+3,367.2010,5.67,800,0,750,820
+4,489.3340,7.89,2000,2100,1900,2050
+5,555.4470,9.10,100,0,0,0
+6,123.0560,1.45,600,650,700,680

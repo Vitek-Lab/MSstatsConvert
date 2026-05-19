@@ -12,3 +12,5 @@ inst/doc
 .lintr
 .vscode
 .positai
+/doc/
+/Meta/

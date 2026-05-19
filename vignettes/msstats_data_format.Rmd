@@ -329,3 +329,53 @@ Such a `data.frame` will be recognized by statistical processing functions from
 `MSstats` and `MSstatsTMT` packages as a valid input, which will allow them to skip
 checks and transformation necessary to fit data into this format.
 
+# Metabolomics with MZMine
+
+`MZMinetoMSstatsFormat` brings untargeted metabolomics into the MSstats family.
+It takes the wide-format feature-quantification table exported by MZMine (one row
+per feature, one `<sample> Peak area` column per sample) together with a standard
+MSstats annotation and produces an MSstats-ready long-format `data.table`.
+
+Optionally, an MZMine spectral-library annotation table (with `id`, `compound_name`,
+`score` columns) can be supplied; the highest-scoring `compound_name` per feature
+is used as `ProteinName`. Features with no library match fall back to an mz_rt
+string of the form `paste0(round(mz, 4), "_", round(rt, 2))`. When no library
+annotation is supplied, every feature uses the mz_rt fallback.
+
+```{r mzmine}
+mzmine_input = data.table::fread(system.file(
+  "tinytest/raw_data/MZMine/mzmine_input.csv",
+  package = "MSstatsConvert"
+))
+mzmine_annotation = data.table::fread(system.file(
+  "tinytest/raw_data/MZMine/annotation.csv",
+  package = "MSstatsConvert"
+))
+mzmine_library = data.table::fread(system.file(
+  "tinytest/raw_data/MZMine/mzmine_annotations.csv",
+  package = "MSstatsConvert"
+))
+
+# With a spectral-library annotation: ProteinName is the matched compound name
+mzmine_with_lib = MZMinetoMSstatsFormat(
+  mzmine_input,
+  annotation = mzmine_annotation,
+  mzmine_annotations = mzmine_library,
+  use_log_file = FALSE
+)
+head(mzmine_with_lib)
+
+# Without a library: ProteinName is an mz_rt fallback string
+mzmine_no_lib = MZMinetoMSstatsFormat(
+  mzmine_input,
+  annotation = mzmine_annotation,
+  mzmine_annotations = NULL,
+  use_log_file = FALSE
+)
+head(mzmine_no_lib)
+```
+
+Since metabolomics features do not carry peptide-level identifiers, `PeptideSequence`
+holds the MZMine `row ID` (as a string), and `PrecursorCharge`, `FragmentIon`, and
+`ProductCharge` are all `NA`. `IsotopeLabelType` is set to `"Light"` for every row.
+

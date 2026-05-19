@@ -35,6 +35,7 @@ Suggests:
     rmarkdown
 LinkingTo: Rcpp
 Collate: 
+    'clean_MZMine.R'
     'clean_ProteinProspector.R'
     'clean_Metamorpheus.R'
     'clean_DIANN.R'
@@ -53,6 +54,7 @@ Collate:
     'converters_DIANNtoMSstatsFormat.R'
     'converters_DIAUmpiretoMSstatsFormat.R'
     'converters_FragPipetoMSstatsFormat.R'
+    'converters_MZMinetoMSstatsFormat.R'
     'converters_MaxQtoMSstatsFormat.R'
     'converters_MaxQtoMSstatsTMTFormat.R'
     'converters_MetamorpheusToMSstatsFormat.R'

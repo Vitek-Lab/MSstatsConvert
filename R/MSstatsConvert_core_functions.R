@@ -71,6 +71,10 @@ setClass("MSstatsMetamorpheusFiles", contains = "MSstatsInputFiles")
 #' @rdname MSstatsInputFiles
 #' @keywords internal
 setClass("MSstatsProteinProspectorFiles", contains = "MSstatsInputFiles")
+#' MSstatsMZMineFiles: class for MZMine files.
+#' @rdname MSstatsInputFiles
+#' @keywords internal
+setClass("MSstatsMZMineFiles", contains = "MSstatsInputFiles")
 
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
@@ -291,8 +295,15 @@ setMethod("MSstatsClean", signature = "MSstatsMetamorpheusFiles",
 #' @rdname MSstatsClean
 #' @inheritParams .cleanRawProteinProspector
 #' @return data.table
-setMethod("MSstatsClean", signature = "MSstatsProteinProspectorFiles", 
+setMethod("MSstatsClean", signature = "MSstatsProteinProspectorFiles",
           .cleanRawProteinProspector)
+#' Clean MZMine files
+#' @include clean_MZMine.R
+#' @rdname MSstatsClean
+#' @inheritParams .cleanRawMZMine
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsMZMineFiles",
+          .cleanRawMZMine)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats

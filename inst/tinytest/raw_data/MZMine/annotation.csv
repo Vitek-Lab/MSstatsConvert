@@ -1,0 +1,5 @@
+Run,Condition,BioReplicate
+sampleA.mzML,Control,1
+sampleB.mzML,Control,2
+sampleC.mzML,Treatment,3
+sampleD.mzML,Treatment,4
