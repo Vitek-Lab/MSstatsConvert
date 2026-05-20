@@ -97,7 +97,10 @@ expect_equal(ncol(output_nolib), 11)
 expect_equal(nrow(output_nolib), 24)
 expected_mz_rt = c("123.056_1.23", "245.129_3.45", "367.201_5.67",
                    "489.334_7.89", "555.447_9.1", "123.056_1.45")
-expect_true(all(as.character(output_nolib_dt$ProteinName) %in% expected_mz_rt))
+expect_equal(
+    sort(unique(as.character(output_nolib_dt$ProteinName))),
+    sort(expected_mz_rt)
+)
 # Compound names from the library must not leak in
 expect_false(any(as.character(output_nolib_dt$ProteinName) %in%
                  c("Caffeine", "GlucoseHigh", "GlucoseLow", "Lactate")))

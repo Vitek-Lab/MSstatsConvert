@@ -24,8 +24,11 @@ feature). Must include the metadata columns \verb{row ID}, \verb{row m/z},
 \code{"<run> Peak area"} (e.g. \code{"sampleA.mzML Peak area"}).}
 
 \item{annotation}{\code{data.frame} with columns \code{Run}, \code{Condition},
-\code{BioReplicate}. \code{Run} values must match the sample column names with the
-trailing \code{" Peak area"} stripped.}
+\code{BioReplicate}. \code{Run} values must match MSstatsConvert-standardized sample
+names (after column-name normalization removes spaces and dots) with the
+trailing \code{"Peakarea"} suffix removed. For example, a quant-file column
+\code{"sampleA.mzML Peak area"} becomes \code{"sampleAmzML"} after standardization,
+so the corresponding \code{Run} value must be \code{sampleAmzML}.}
 
 \item{mzmine_annotations}{optional \code{data.frame} of MZMine spectral-library
 annotations with columns \code{id}, \code{compound_name}, \code{score}. When supplied,

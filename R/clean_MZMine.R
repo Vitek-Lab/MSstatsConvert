@@ -52,6 +52,10 @@
             stop("mzmine_annotations is missing required column(s): ",
                  paste(missing_ann, collapse = ", "), ".")
         }
+        ann[, score := suppressWarnings(as.numeric(score))]
+        if (anyNA(ann$score)) {
+            stop("mzmine_annotations$score must be numeric (or coercible to numeric).")
+        }
         data.table::setorder(ann, id, -score)
         ann_top <- unique(ann, by = "id")
         matched <- ann_top[match(mz_input[[id_col]], ann_top[["id"]]),

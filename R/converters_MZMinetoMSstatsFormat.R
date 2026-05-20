@@ -6,8 +6,11 @@
 #'   `row retention time`, and per-sample peak-area columns named
 #'   `"<run> Peak area"` (e.g. `"sampleA.mzML Peak area"`).
 #' @param annotation `data.frame` with columns `Run`, `Condition`,
-#'   `BioReplicate`. `Run` values must match the sample column names with the
-#'   trailing `" Peak area"` stripped.
+#'   `BioReplicate`. `Run` values must match MSstatsConvert-standardized sample
+#'   names (after column-name normalization removes spaces and dots) with the
+#'   trailing `"Peakarea"` suffix removed. For example, a quant-file column
+#'   `"sampleA.mzML Peak area"` becomes `"sampleAmzML"` after standardization,
+#'   so the corresponding `Run` value must be `sampleAmzML`.
 #' @param mzmine_annotations optional `data.frame` of MZMine spectral-library
 #'   annotations with columns `id`, `compound_name`, `score`. When supplied,
 #'   the highest-scoring `compound_name` per feature is used as `ProteinName`;
@@ -52,7 +55,7 @@ MZMinetoMSstatsFormat = function(
                                         log_file_path)
 
     input = MSstatsConvert::MSstatsImport(list(input = input),
-                                          "MSstats", "MZMine")
+                                          "MSstats", "MZMine", ...)
     input = MSstatsConvert::MSstatsClean(
         input, mzmine_annotations = mzmine_annotations)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
