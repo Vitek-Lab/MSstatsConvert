@@ -52,7 +52,7 @@
             stop("mzmine_annotations is missing required column(s): ",
                  paste(missing_ann, collapse = ", "), ".")
         }
-        ann[, score := suppressWarnings(as.numeric(score))]
+        ann[, score := suppressWarnings(as.numeric(as.character(score)))]
         if (anyNA(ann$score)) {
             stop("mzmine_annotations$score must be numeric (or coercible to numeric).")
         }
