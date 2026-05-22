@@ -27,7 +27,14 @@ ProgenesistoMSstatsFormat(
 \item{useUniquePeptide}{TRUE (default) removes peptides that are assigned for more than one proteins.
 We assume to use unique peptide for each protein.}
 
-\item{summaryforMultipleRows}{max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.}
+\item{summaryforMultipleRows}{max or sum - when multiple PSMs identify
+the same feature within a single MS run (duplicate PSMs), use the
+highest (max) or sum of the duplicate intensities. Default is max for
+label-free converters and sum for TMT converters. This parameter does
+not control collapsing across fractions of the same biological mixture;
+fraction handling is performed separately by \code{MSstatsBalancedDesign()}
+(see the "Fractions and balanced design" section of the data format
+vignette).}
 
 \item{removeFewMeasurements}{TRUE (default) will remove the features that have 1 or 2 measurements across runs.}
 

@@ -23,6 +23,7 @@ signal processing tools to a format suitable for statistical analysis with the M
 
 Authors:
 \itemize{
+  \item Anthony Wu \email{wu.anthon@northeastern.edu}
   \item Mateusz Staniak \email{mtst@mstaniak.pl}
   \item Devon Kohler \email{kohler.d@northeastern.edu}
   \item Meena Choi \email{mnchoi67@gmail.com}
