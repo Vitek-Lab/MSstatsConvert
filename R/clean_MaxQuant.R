@@ -17,12 +17,12 @@
   mq_input = getInputFile(msstats_object, "evidence")
   mq_pg = getInputFile(msstats_object, "protein_groups")
   
-  filter_cols = c("Contaminant", "Potentialcontaminant", "Reverse")
-  msg = paste("** + Contaminant, + Reverse, + Potential.contaminant",
+  filter_cols = c("Contaminant", "Potentialcontaminant", "Reverse", "Decoy")
+  msg = paste("** + Contaminant, + Reverse, + Decoy, + Potential.contaminant",
               "proteins are removed.")
   if (remove_by_site) {
     filter_cols = c(filter_cols, "Onlyidentifiedbysite")
-    msg = paste("** + Contaminant, + Reverse, + Potential.contaminant,", 
+    msg = paste("** + Contaminant, + Reverse, + Decoy, + Potential.contaminant,",
                 "+ Only.identified.by.site proteins are removed.")
   }
   
