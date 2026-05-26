@@ -11,3 +11,4 @@ inst/doc
 *.dll
 .lintr
 .vscode
+.positai

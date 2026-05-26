@@ -32,6 +32,7 @@
     input = input[feature_counts, on = .(ProteinName, Fragment)]
     
     # Model at PSM level
+    run_order$Run = .standardizeColnames(run_order$Run)
     input = merge(input, run_order, by="Run", 
                   all.x=TRUE, all.y=FALSE)
     cols=c("ProteinName", "PSM", "Run", "Order", quality_metrics)
