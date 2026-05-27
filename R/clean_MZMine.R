@@ -2,20 +2,21 @@
 #'
 #' Operates on the column names produced by MZMine after MSstatsConvert's
 #' internal column-name standardization (spaces collapsed and dots removed):
-#' "row ID" becomes `rowID`, "row m/z" becomes `rowmz`, "row retention time"
-#' becomes `rowretentiontime`, and each "<sample> Peak area" becomes
+#' "row ID" becomes `rowID`, and each "<sample> Peak area" becomes
 #' `<standardized-sample>Peakarea`.
 #'
 #' @param msstats_object an object of class `MSstatsMZMineFiles`.
-#' @param mzmine_annotations optional `data.frame` of MZMine spectral-library
-#'   annotations with columns `id`, `compound_name`, `score`. When supplied,
-#'   the highest-scoring `compound_name` per feature is used as `ProteinName`.
-#'   Features without a matching annotation row fall back to an mz_rt string
-#'   `paste0(round(mz, 4), "_", round(rt, 2))`. When `NULL`, every feature
-#'   uses the mz_rt fallback.
+#' @param mzmine_annotations `data.frame` of MZMine spectral-library
+#'   annotations with columns `id`, `compound_name`, `score`. Required;
+#'   passing `NULL` raises an error. The highest-scoring `compound_name`
+#'   per feature is used as `ProteinName`, and features in the quant
+#'   table with no matching annotation row are dropped from the output.
+#'   These are MSI Level 2 annotations (putative identification via
+#'   MS/MS spectral matching). See the public `MZMinetoMSstatsFormat`
+#'   docstring for the full scope discussion.
 #' @return data.table
 #' @keywords internal
-.cleanRawMZMine <- function(msstats_object, mzmine_annotations = NULL) {
+.cleanRawMZMine <- function(msstats_object, mzmine_annotations) {
     ProteinName = PeptideSequence = Intensity = Run = NULL
     PrecursorCharge = FragmentIon = ProductCharge = NULL
     id = score = compound_name = i.compound_name = NULL
@@ -31,47 +32,45 @@
              "columns named '<run> Peak area' (e.g. 'sampleA.mzML Peak area').")
     }
     id_col <- "rowID"
-    mz_col <- "rowmz"
-    rt_col <- "rowretentiontime"
-    required_meta <- c(id_col, mz_col, rt_col)
+    required_meta <- id_col
     missing_meta <- setdiff(required_meta, colnames(mz_input))
     if (length(missing_meta) > 0) {
-        stop("Missing required MZMine metadata column(s) (expected 'row ID', ",
-             "'row m/z', 'row retention time'). After standardization, ",
-             "looked for: ", paste(missing_meta, collapse = ", "), ".")
+        stop("Missing required MZMine metadata column (expected 'row ID'). ",
+             "After standardization, looked for: ",
+             paste(missing_meta, collapse = ", "), ".")
     }
 
-    mz_rt_fallback <- paste0(round(mz_input[[mz_col]], 4), "_",
-                             round(mz_input[[rt_col]], 2))
-    mz_input[, ProteinName := mz_rt_fallback]
-
-    if (!is.null(mzmine_annotations)) {
-        feature_to_compound <- data.table::as.data.table(mzmine_annotations)
-        required_ann <- c("id", "compound_name", "score")
-        missing_ann <- setdiff(required_ann, colnames(feature_to_compound))
-        if (length(missing_ann) > 0) {
-            stop("mzmine_annotations is missing required column(s): ",
-                 paste(missing_ann, collapse = ", "), ".")
-        }
-        feature_to_compound[, score := suppressWarnings(as.numeric(score))]
-        if (anyNA(feature_to_compound$score)) {
-            stop("The 'score' column in the mzmine annotations file must contain numeric values.")
-        }
-        # Sort by id ascending and score descending so the highest-scoring
-        # annotation per id is the first row in each group.
-        data.table::setorder(feature_to_compound, id, -score)
-        # Collapse to one row per id (the highest-scoring). data.table's
-        # unique() with a 'by' arg keeps the first row per group, which after
-        # the sort above is the highest-scoring annotation.
-        feature_to_compound <- unique(feature_to_compound, by = "id")
-        # Join: unmatched mz_input rows keep the mz_rt_fallback ProteinName
-        # set above.
-        mz_input[
-            feature_to_compound,
-            ProteinName := i.compound_name,
-            on = setNames("id", id_col)
-        ]
+    if (is.null(mzmine_annotations)) {
+        stop("mzmine_annotations is required. Pass a data.frame with ",
+             "columns 'id', 'compound_name', 'score'.")
     }
+    feature_to_compound <- data.table::as.data.table(mzmine_annotations)
+    required_ann <- c("id", "compound_name", "score")
+    missing_ann <- setdiff(required_ann, colnames(feature_to_compound))
+    if (length(missing_ann) > 0) {
+        stop("mzmine_annotations is missing required column(s): ",
+             paste(missing_ann, collapse = ", "), ".")
+    }
+    feature_to_compound[, score := suppressWarnings(as.numeric(score))]
+    if (anyNA(feature_to_compound$score)) {
+        stop("The 'score' column in the mzmine annotations file must contain numeric values.")
+    }
+    data.table::setorder(feature_to_compound, id, -score)
+    feature_to_compound <- unique(feature_to_compound, by = "id")
+    # Inner-join filter: drop quant rows with no matching annotation.
+    mz_input[
+        feature_to_compound,
+        ProteinName := i.compound_name,
+        on = setNames("id", id_col)
+    ]
+    mz_input <- mz_input[!is.na(ProteinName)]
+
+    retained_ids <- feature_to_compound$id
+    retained_msg <- paste0("** MZMine: retained ", length(retained_ids),
+                           " feature(s) after annotation join: ",
+                           paste(retained_ids, collapse = ", "))
+    getOption("MSstatsLog")("INFO", retained_msg)
+    getOption("MSstatsMsg")("INFO", retained_msg)
 
     mz_input[, PeptideSequence := as.character(get(id_col))]
 

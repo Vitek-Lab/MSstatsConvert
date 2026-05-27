@@ -11,12 +11,19 @@
 #'   trailing `"Peakarea"` suffix removed. For example, a quant-file column
 #'   `"sampleA.mzML Peak area"` becomes `"sampleAmzML"` after standardization,
 #'   so the corresponding `Run` value must be `sampleAmzML`.
-#' @param mzmine_annotations optional `data.frame` of MZMine spectral-library
-#'   annotations with columns `id`, `compound_name`, `score`. When supplied,
-#'   the highest-scoring `compound_name` per feature is used as `ProteinName`;
-#'   features without a matching annotation row fall back to an mz_rt string
-#'   `paste0(round(mz, 4), "_", round(rt, 2))`. When `NULL`, every feature
-#'   uses the mz_rt fallback.
+#' @param mzmine_annotations `data.frame` of MZMine spectral-library
+#'   annotations with columns `id`, `compound_name`, `score`. Required:
+#'   the highest-scoring `compound_name` per feature is used as
+#'   `ProteinName`, and features in the quant table with no matching
+#'   annotation row are dropped from the output.
+#'
+#'   These are MSI Level 2 annotations (putative identification via
+#'   MS/MS spectral matching against a reference library). Higher-
+#'   confidence Level 1 identifications require pure reference standards
+#'   and are out of scope here. Lower-confidence annotations such as
+#'   Level 3 (SIRIUS, MS2Query) or Level 4 (molecular formula via
+#'   CANOPUS) are not currently supported -- features without a Level 2
+#'   annotation row are filtered out.
 #'
 #' @return data.table in the MSstats required format.
 #'
@@ -39,7 +46,7 @@
 MZMinetoMSstatsFormat = function(
     input,
     annotation = NULL,
-    mzmine_annotations = NULL,
+    mzmine_annotations,
     removeProtein_with1Feature = FALSE,
     summaryforMultipleRows = max,
     use_log_file = TRUE,
@@ -49,6 +56,11 @@ MZMinetoMSstatsFormat = function(
     ...) {
     MSstatsConvert::MSstatsLogsSettings(use_log_file, append, verbose,
                                         log_file_path)
+
+    if (missing(mzmine_annotations) || is.null(mzmine_annotations)) {
+        stop("mzmine_annotations is required. Pass a data.frame with ",
+             "columns 'id', 'compound_name', 'score'.")
+    }
 
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "MZMine", ...)

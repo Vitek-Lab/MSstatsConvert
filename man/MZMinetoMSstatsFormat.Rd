@@ -7,7 +7,7 @@
 MZMinetoMSstatsFormat(
   input,
   annotation = NULL,
-  mzmine_annotations = NULL,
+  mzmine_annotations,
   removeProtein_with1Feature = FALSE,
   summaryforMultipleRows = max,
   use_log_file = TRUE,
@@ -30,12 +30,19 @@ trailing \code{"Peakarea"} suffix removed. For example, a quant-file column
 \code{"sampleA.mzML Peak area"} becomes \code{"sampleAmzML"} after standardization,
 so the corresponding \code{Run} value must be \code{sampleAmzML}.}
 
-\item{mzmine_annotations}{optional \code{data.frame} of MZMine spectral-library
-annotations with columns \code{id}, \code{compound_name}, \code{score}. When supplied,
-the highest-scoring \code{compound_name} per feature is used as \code{ProteinName};
-features without a matching annotation row fall back to an mz_rt string
-\code{paste0(round(mz, 4), "_", round(rt, 2))}. When \code{NULL}, every feature
-uses the mz_rt fallback.}
+\item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
+annotations with columns \code{id}, \code{compound_name}, \code{score}. Required:
+the highest-scoring \code{compound_name} per feature is used as
+\code{ProteinName}, and features in the quant table with no matching
+annotation row are dropped from the output.
+
+These are MSI Level 2 annotations (putative identification via
+MS/MS spectral matching against a reference library). Higher-
+confidence Level 1 identifications require pure reference standards
+and are out of scope here. Lower-confidence annotations such as
+Level 3 (SIRIUS, MS2Query) or Level 4 (molecular formula via
+CANOPUS) are not currently supported -- features without a Level 2
+annotation row are filtered out.}
 
 \item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 

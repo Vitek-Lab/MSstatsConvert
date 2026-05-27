@@ -82,7 +82,7 @@ MSstatsClean(msstats_object, ...)
 
 \S4method{MSstatsClean}{MSstatsProteinProspectorFiles}(msstats_object)
 
-\S4method{MSstatsClean}{MSstatsMZMineFiles}(msstats_object, mzmine_annotations = NULL)
+\S4method{MSstatsClean}{MSstatsMZMineFiles}(msstats_object, mzmine_annotations)
 }
 \arguments{
 \item{msstats_object}{object that inherits from \code{MSstatsInputFiles} class.}
@@ -201,12 +201,14 @@ The SILAC suffix is then stripped from \code{PeptideSequence}.
 When \code{NULL} (default), protein-turnover mode is disabled and all
 peptides receive \code{IsotopeLabelType = "Light"}.}
 
-\item{mzmine_annotations}{optional \code{data.frame} of MZMine spectral-library
-annotations with columns \code{id}, \code{compound_name}, \code{score}. When supplied,
-the highest-scoring \code{compound_name} per feature is used as \code{ProteinName}.
-Features without a matching annotation row fall back to an mz_rt string
-\code{paste0(round(mz, 4), "_", round(rt, 2))}. When \code{NULL}, every feature
-uses the mz_rt fallback.}
+\item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
+annotations with columns \code{id}, \code{compound_name}, \code{score}. Required;
+passing \code{NULL} raises an error. The highest-scoring \code{compound_name}
+per feature is used as \code{ProteinName}, and features in the quant
+table with no matching annotation row are dropped from the output.
+These are MSI Level 2 annotations (putative identification via
+MS/MS spectral matching). See the public \code{MZMinetoMSstatsFormat}
+docstring for the full scope discussion.}
 }
 \value{
 data.table

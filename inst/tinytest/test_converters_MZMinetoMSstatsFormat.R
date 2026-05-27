@@ -15,9 +15,10 @@ output = MZMinetoMSstatsFormat(input, annotation = annot,
                                use_log_file = FALSE)
 output_dt = data.table::as.data.table(output)
 
-# Basic structure: 6 features x 4 runs = 24 rows, 11 standard columns
+# Basic structure: 4 annotated features x 4 runs = 16 rows, 11 standard columns
+# Features 4 and 5 have no annotation row and are dropped by the inner join.
 expect_equal(ncol(output), 11)
-expect_equal(nrow(output), 24)
+expect_equal(nrow(output), 16)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))
@@ -53,22 +54,17 @@ expect_equal(as.character(feature3_proteins), "Lactate")
 feature6_proteins = unique(output_dt[PeptideSequence == "6", ProteinName])
 expect_equal(as.character(feature6_proteins), "Caffeine")
 
-# Features without annotation rows fall back to the mz_rt string
-feature4_proteins = unique(output_dt[PeptideSequence == "4", ProteinName])
-expect_equal(as.character(feature4_proteins), "489.334_7.89")
-feature5_proteins = unique(output_dt[PeptideSequence == "5", ProteinName])
-expect_equal(as.character(feature5_proteins), "555.447_9.1")
+# Features absent from the annotations file are filtered out (no mz_rt fallback)
+expect_false("4" %in% as.character(output_dt$PeptideSequence))
+expect_false("5" %in% as.character(output_dt$PeptideSequence))
+expect_false(any(as.character(output_dt$ProteinName) %in%
+                 c("489.334_7.89", "555.447_9.1")))
 
 # Zero-intensity input cells are converted to NA in output
-# Feature 3 sampleB = 0  ->  NA
+# Feature 3 sampleB = 0  ->  NA  (feature 3 is annotated as Lactate)
 feature3_sampleB_int = output_dt[PeptideSequence == "3" & Run == "sampleBmzML",
                                   Intensity]
 expect_true(is.na(feature3_sampleB_int))
-# Feature 5 sampleB/C/D all = 0  ->  NA
-feature5_zero_ints = output_dt[PeptideSequence == "5" &
-                                   Run %in% c("sampleBmzML", "sampleCmzML", "sampleDmzML"),
-                               Intensity]
-expect_true(all(is.na(feature5_zero_ints)))
 
 # Annotation merges correctly: sampleA is Control rep 1
 sampleA_cond = unique(output_dt[Run == "sampleAmzML", Condition])
@@ -86,27 +82,24 @@ feature2_sampleC_int = output_dt[PeptideSequence == "2" & Run == "sampleCmzML",
                                   Intensity]
 expect_equal(as.numeric(feature2_sampleC_int), 5200)
 
-# Without mzmine_annotations -------------------------------------------------
-output_nolib = MZMinetoMSstatsFormat(input, annotation = annot,
-                                     mzmine_annotations = NULL,
-                                     use_log_file = FALSE)
-output_nolib_dt = data.table::as.data.table(output_nolib)
-
-# Every ProteinName is the mz_rt fallback string
-expect_equal(ncol(output_nolib), 11)
-expect_equal(nrow(output_nolib), 24)
-expected_mz_rt = c("123.056_1.23", "245.129_3.45", "367.201_5.67",
-                   "489.334_7.89", "555.447_9.1", "123.056_1.45")
-expect_equal(
-    sort(unique(as.character(output_nolib_dt$ProteinName))),
-    sort(expected_mz_rt)
+# mzmine_annotations is mandatory --------------------------------------------
+# Passing NULL must raise an error (no silent mz_rt fallback)
+expect_error(
+    MZMinetoMSstatsFormat(input, annotation = annot,
+                          mzmine_annotations = NULL,
+                          use_log_file = FALSE),
+    "mzmine_annotations is required"
 )
-# Compound names from the library must not leak in
-expect_false(any(as.character(output_nolib_dt$ProteinName) %in%
-                 c("Caffeine", "GlucoseHigh", "GlucoseLow", "Lactate")))
+# Omitting the argument entirely must also raise an error
+expect_error(
+    MZMinetoMSstatsFormat(input, annotation = annot,
+                          use_log_file = FALSE),
+    "mzmine_annotations is required"
+)
 
 # removeProtein_with1Feature filters non-Caffeine proteins -------------------
-# Caffeine has 2 features (PeptideSequence "1" and "6"); all others have 1.
+# Of the annotated features (1, 2, 3, 6), Caffeine has 2 (IDs 1 and 6);
+# Lactate and Glucose each have 1.
 output_filtered = MZMinetoMSstatsFormat(input, annotation = annot,
                                         mzmine_annotations = mzmine_ann,
                                         removeProtein_with1Feature = TRUE,
