@@ -307,7 +307,7 @@ should consists of elements named
 Finally, after preprocessing, the `MSstatsBalancedDesign` function can be
 applied to handle fractions and create a balanced design.
 
-For label-free and SRM data, fractionation or technical replicates are
+For label-free data, fractionation or technical replicates are
 detected if this information is not provided. Features that overlap
 across multiple fractions of the same sample are assigned to a single
 fraction by the following rule: for each feature, the fraction with the
@@ -319,19 +319,11 @@ then adjusted so that within each fraction, every feature has a row
 for each run. If the intensity value is missing, it is denoted by `NA`.
 
 For TMT data, a unique fraction is selected for each overlapped feature
-using a different cascade of criteria, applied in order until the
-overlap is resolved: the fraction with the **highest mean intensity**
-across channels is tried first, then the **highest sum**, then the
-**highest single intensity** (`max`). If features still overlap after
-all three passes, their intensities are averaged across fractions as a
-final fallback. After fraction selection, the data are adjusted so
+as well. After fraction selection, the data are adjusted so
 that within each run, every feature has a row for each channel. If
 the intensity is missing for a channel, it is denoted by `NA`.
 
-These two rules differ by design: the label-free path optimizes for
-the fraction with the most observations of the feature, while the TMT
-path optimizes for the fraction with the strongest signal. Note also
-that this fraction-collapsing logic is distinct from the
+Note also that this fraction-collapsing logic is distinct from the
 `summaryforMultipleRows` argument on each converter, which only
 combines duplicate PSMs identifying the same feature within a single
 MS run.

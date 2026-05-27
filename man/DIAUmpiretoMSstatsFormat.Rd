@@ -41,11 +41,8 @@ DIAUmpiretoMSstatsFormat(
 \item{summaryforMultipleRows}{max or sum - when multiple PSMs identify
 the same feature within a single MS run (duplicate PSMs), use the
 highest (max) or sum of the duplicate intensities. Default is max for
-label-free converters and sum for TMT converters. This parameter does
-not control collapsing across fractions of the same biological mixture;
-fraction handling is performed separately by \code{MSstatsBalancedDesign()}
-(see the "Fractions and balanced design" section of the data format
-vignette).}
+label-free converters and sum for TMT converters. Note that this parameter
+does NOT control collapsing across fractions of the same biological mixture.}
 
 \item{use_log_file}{logical. If TRUE, information about data processing
 will be saved to a file.}

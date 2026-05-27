@@ -8,11 +8,8 @@
 #' @param summaryforMultipleRows max or sum - when multiple PSMs identify
 #' the same feature within a single MS run (duplicate PSMs), use the
 #' highest (max) or sum of the duplicate intensities. Default is max for
-#' label-free converters and sum for TMT converters. This parameter does
-#' not control collapsing across fractions of the same biological mixture;
-#' fraction handling is performed separately by `MSstatsBalancedDesign()`
-#' (see the "Fractions and balanced design" section of the data format
-#' vignette).
+#' label-free converters and sum for TMT converters. Note that this parameter 
+#' does NOT control collapsing across fractions of the same biological mixture.
 #' @param removeProtein_with1Feature TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.
 #' @param removeProtein_with1Peptide TRUE will remove the proteins which have only 1 peptide and charge. FALSE is default.
 #' @param removeOxidationMpeptides TRUE will remove the peptides including 'oxidation (M)' in modification. FALSE is default.
