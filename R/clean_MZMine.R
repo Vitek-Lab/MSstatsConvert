@@ -17,8 +17,8 @@
 #' @keywords internal
 .cleanRawMZMine <- function(msstats_object, mzmine_annotations = NULL) {
     ProteinName = PeptideSequence = Intensity = Run = NULL
-    PrecursorCharge = FragmentIon = ProductCharge = IsotopeLabelType = NULL
-    sample_col = id = score = compound_name = NULL
+    PrecursorCharge = FragmentIon = ProductCharge = NULL
+    id = score = compound_name = i.compound_name = NULL
 
     mz_input <- getInputFile(msstats_object, "input")
     mz_input <- data.table::as.data.table(mz_input)
@@ -43,47 +43,53 @@
 
     mz_rt_fallback <- paste0(round(mz_input[[mz_col]], 4), "_",
                              round(mz_input[[rt_col]], 2))
+    mz_input[, ProteinName := mz_rt_fallback]
 
     if (!is.null(mzmine_annotations)) {
-        ann <- data.table::as.data.table(mzmine_annotations)
+        feature_to_compound <- data.table::as.data.table(mzmine_annotations)
         required_ann <- c("id", "compound_name", "score")
-        missing_ann <- setdiff(required_ann, colnames(ann))
+        missing_ann <- setdiff(required_ann, colnames(feature_to_compound))
         if (length(missing_ann) > 0) {
             stop("mzmine_annotations is missing required column(s): ",
                  paste(missing_ann, collapse = ", "), ".")
         }
-        ann[, score := suppressWarnings(as.numeric(as.character(score)))]
-        if (anyNA(ann$score)) {
-            stop("mzmine_annotations$score must be numeric (or coercible to numeric).")
+        feature_to_compound[, score := suppressWarnings(as.numeric(score))]
+        if (anyNA(feature_to_compound$score)) {
+            stop("The 'score' column in the mzmine annotations file must contain numeric values.")
         }
-        data.table::setorder(ann, id, -score)
-        ann_top <- unique(ann, by = "id")
-        matched <- ann_top[match(mz_input[[id_col]], ann_top[["id"]]),
-                           compound_name]
-        compound <- ifelse(is.na(matched), mz_rt_fallback, matched)
-    } else {
-        compound <- mz_rt_fallback
+        # Sort by id ascending and score descending so the highest-scoring
+        # annotation per id is the first row in each group.
+        data.table::setorder(feature_to_compound, id, -score)
+        # Collapse to one row per id (the highest-scoring). data.table's
+        # unique() with a 'by' arg keeps the first row per group, which after
+        # the sort above is the highest-scoring annotation.
+        feature_to_compound <- unique(feature_to_compound, by = "id")
+        # Join: unmatched mz_input rows keep the mz_rt_fallback ProteinName
+        # set above.
+        mz_input[
+            feature_to_compound,
+            ProteinName := i.compound_name,
+            on = setNames("id", id_col)
+        ]
     }
 
-    mz_input[, ProteinName := compound]
     mz_input[, PeptideSequence := as.character(get(id_col))]
 
     long <- data.table::melt(
         mz_input,
         id.vars = c("ProteinName", "PeptideSequence"),
         measure.vars = peak_area_cols,
-        variable.name = "sample_col",
+        variable.name = "Run",
         value.name = "Intensity",
         variable.factor = FALSE)
 
     long[, PrecursorCharge := NA_integer_]
     long[, FragmentIon := NA_character_]
     long[, ProductCharge := NA_integer_]
-    long[, IsotopeLabelType := "Light"]
-    long[, Run := sub(paste0(peak_area_suffix, "$"), "", sample_col)]
+    long[, Run := sub(paste0(peak_area_suffix, "$"), "", Run)]
 
     final_cols <- c("ProteinName", "PeptideSequence", "PrecursorCharge",
-                    "FragmentIon", "ProductCharge", "IsotopeLabelType",
+                    "FragmentIon", "ProductCharge",
                     "Run", "Intensity")
     long <- long[, final_cols, with = FALSE]
 

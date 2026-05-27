@@ -37,11 +37,9 @@ features without a matching annotation row fall back to an mz_rt string
 \code{paste0(round(mz, 4), "_", round(rt, 2))}. When \code{NULL}, every feature
 uses the mz_rt fallback.}
 
-\item{removeProtein_with1Feature}{\code{TRUE} will remove proteins (compounds)
-represented by a single feature. Default \code{FALSE}.}
+\item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 
-\item{summaryforMultipleRows}{\code{max} (default) or \code{sum} — used when multiple
-rows map to the same feature/run combination.}
+\item{summaryforMultipleRows}{max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.}
 
 \item{use_log_file}{logical. If TRUE, information about data processing
 will be saved to a file.}

@@ -17,10 +17,6 @@
 #'   features without a matching annotation row fall back to an mz_rt string
 #'   `paste0(round(mz, 4), "_", round(rt, 2))`. When `NULL`, every feature
 #'   uses the mz_rt fallback.
-#' @param removeProtein_with1Feature `TRUE` will remove proteins (compounds)
-#'   represented by a single feature. Default `FALSE`.
-#' @param summaryforMultipleRows `max` (default) or `sum` — used when multiple
-#'   rows map to the same feature/run combination.
 #'
 #' @return data.table in the MSstats required format.
 #'
@@ -60,10 +56,7 @@ MZMinetoMSstatsFormat = function(
         input, mzmine_annotations = mzmine_annotations)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
 
-    feature_columns = c("PeptideSequence", "PrecursorCharge",
-                        "FragmentIon", "ProductCharge")
-    fill_isotope_label_type = if ("IsotopeLabelType" %in% colnames(input))
-        list() else list("IsotopeLabelType" = "Light")
+    feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")
 
     input = MSstatsConvert::MSstatsPreprocess(
         input,
@@ -77,7 +70,7 @@ MZMinetoMSstatsFormat = function(
         feature_cleaning = list(
             remove_features_with_few_measurements = FALSE,
             summarize_multiple_psms = summaryforMultipleRows),
-        columns_to_fill = c(list(Fraction = 1), fill_isotope_label_type))
+        columns_to_fill = list(Fraction = 1, IsotopeLabelType = "Light"))
     input[, Intensity := ifelse(Intensity == 0, NA, Intensity)]
 
     input = MSstatsConvert::MSstatsBalancedDesign(input, feature_columns,
