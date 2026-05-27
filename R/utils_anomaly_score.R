@@ -6,6 +6,7 @@
                                            n_feat=100,
                                            missing_run_count=.5){
     input = as.data.table(input)
+    input$Run = .standardizeColnames(input$Run)
     
     input$Fragment = paste(input$PeptideSequence,
                            input$PrecursorCharge, 
