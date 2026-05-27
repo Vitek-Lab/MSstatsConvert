@@ -21,8 +21,8 @@
     PrecursorCharge = FragmentIon = ProductCharge = NULL
     id = score = compound_name = i.compound_name = NULL
 
-    mz_input <- getInputFile(msstats_object, "input")
-    mz_input <- data.table::as.data.table(mz_input)
+    mz_input = getInputFile(msstats_object, "input")
+    mz_input = data.table::as.data.table(mz_input)
 
     peak_area_suffix <- "Peakarea"
     peak_area_cols <- grep(paste0(peak_area_suffix, "$"),
