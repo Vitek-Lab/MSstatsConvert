@@ -9,6 +9,20 @@ output = MSstatsConvert:::.cleanRawSpectronaut(msstats_input, intensity = 'FG.MS
                                     calculateAnomalyScores = FALSE, 
                                     anomalyModelFeatures = c())
 expect_true(all(output$Intensity == 100000))
+# When R.Fraction is absent, no Fraction column is added (prior behavior)
+expect_false("Fraction" %in% colnames(output))
+
+# R.Fraction is transferred and renamed to Fraction when present
+spectronaut_frac = data.table::copy(spectronaut_raw)
+spectronaut_frac$R.Fraction = 2L
+msstats_frac = MSstatsConvert::MSstatsImport(
+    list(input = spectronaut_frac), "MSstats", "Spectronaut")
+output_frac = MSstatsConvert:::.cleanRawSpectronaut(msstats_frac, intensity = 'FG.MS1Quantity',
+                                    calculateAnomalyScores = FALSE,
+                                    anomalyModelFeatures = c())
+expect_true("Fraction" %in% colnames(output_frac))
+expect_false("RFraction" %in% colnames(output_frac))
+expect_true(all(output_frac$Fraction == 2L))
 
 expect_error(MSstatsConvert:::.cleanRawSpectronaut(msstats_input, intensity = 'invalid',
                                                    calculateAnomalyScores = FALSE,

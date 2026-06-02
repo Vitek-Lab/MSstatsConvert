@@ -29,8 +29,8 @@
 
   cols = c(protein_col, peptide_col, "FGCharge", "FFrgIon",
            f_charge_col, "RFileName", "RCondition", "RReplicate",
-           "EGQvalue", pg_qval_col, interference_col, exclude_col,
-           intensity_col)
+           "RFraction", "EGQvalue", pg_qval_col, interference_col,
+           exclude_col, intensity_col)
   if (calculateAnomalyScores){
     cols = c(cols, anomalyModelFeatures)
   }
@@ -41,9 +41,10 @@
     spec_input,
     c(protein_col, peptide_col, "FGCharge", "FFrgIon",
       f_charge_col, "RFileName", intensity_col,
-      "RCondition", "RReplicate"),
+      "RCondition", "RReplicate", "RFraction"),
     c("ProteinName", "PeptideSequence", "PrecursorCharge", "FragmentIon",
-      "ProductCharge", "Run", "Intensity", "Condition", "BioReplicate"),
+      "ProductCharge", "Run", "Intensity", "Condition", "BioReplicate",
+      "Fraction"),
     skip_absent = TRUE)
 
   spec_input = .assignSpectronautIsotopeLabelType(
