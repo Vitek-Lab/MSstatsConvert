@@ -8,7 +8,7 @@
                                 anomalyModelFeatures,
                                 peptideSequenceColumn = "EG.ModifiedSequence",
                                 heavyLabels = NULL) {
-  FFrgLossType = FExcludedFromQuantification = NULL
+  FFrgLossType = FExcludedFromQuantification = Fraction = NULL
 
   spec_input = getInputFile(msstats_object, "input")
   .validateSpectronautInput(spec_input, peptideSequenceColumn)
@@ -46,6 +46,10 @@
       "ProductCharge", "Run", "Intensity", "Condition", "BioReplicate",
       "Fraction"),
     skip_absent = TRUE)
+
+  if ("Fraction" %in% colnames(spec_input)) {
+    spec_input[is.na(Fraction), Fraction := 1]
+  }
 
   spec_input = .assignSpectronautIsotopeLabelType(
     spec_input, heavyLabels)
