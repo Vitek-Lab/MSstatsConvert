@@ -48,7 +48,15 @@
     skip_absent = TRUE)
 
   if ("Fraction" %in% colnames(spec_input)) {
-    spec_input[is.na(Fraction), Fraction := 1]
+    n_missing_fraction = sum(is.na(spec_input$Fraction))
+    if (n_missing_fraction > 0) {
+      msg = paste("**", n_missing_fraction,
+                  "row(s) have missing (NA) values in the Fraction column.",
+                  "These will be assigned to Fraction 1.")
+      getOption("MSstatsLog")("WARN", msg)
+      getOption("MSstatsMsg")("WARN", msg)
+      spec_input[is.na(Fraction), Fraction := 1]
+    }
   }
 
   spec_input = .assignSpectronautIsotopeLabelType(
