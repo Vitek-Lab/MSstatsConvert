@@ -378,11 +378,14 @@ deliberate trade-off:
 - **Con**: retaining all features increases the number of hypotheses
   tested downstream, which weakens multiple-testing correction. For
   confirmatory analyses, restrict to tier-1 features after conversion.
-- **Note**: passing `removeProtein_with1Feature = TRUE` drops every
-  mz_rt feature (and any SIRIUS-only singleton) because each mz_rt
-  name is unique to one feature, so it is by construction a
-  single-feature "protein" and gets filtered out — quietly losing the
-  tier-3 retain-all benefit.
+- **Note**: passing `removeProtein_with1Feature = TRUE` drops nearly
+  every mz_rt feature (and any SIRIUS-only singleton), because the
+  rounded `paste0(round(mz, 4), "_", round(rt, 2))` identifier is
+  almost always unique to one feature — so each mz_rt row is treated
+  as a single-feature "protein" and filtered out, quietly losing the
+  tier-3 retain-all benefit. In rare cases two features can share an
+  mz_rt name (when their rounded m/z and RT coincide); those collide
+  into a single multi-feature "protein" and survive the filter.
 
 The SIRIUS schema we depend on is `mappingFeatureId` (join key against
 MZMine `rowID`) and `name`. Score columns
