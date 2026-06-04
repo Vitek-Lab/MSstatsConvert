@@ -14,16 +14,45 @@
 #' @param mzmine_annotations `data.frame` of MZMine spectral-library
 #'   annotations with columns `id`, `compound_name`, `score`. Required:
 #'   the highest-scoring `compound_name` per feature is used as
-#'   `ProteinName`, and features in the quant table with no matching
-#'   annotation row are dropped from the output.
+#'   `ProteinName` (tier 1, MSI Level 2 putative identification via
+#'   MS/MS spectral matching).
+#' @param sirius_annotations Optional `data.frame` of SIRIUS
+#'   `structure_identifications.tsv` output, or `NULL`. Only the
+#'   `mappingFeatureId` and `name` columns are read; score columns
+#'   (`ConfidenceScoreExact`, `ConfidenceScoreApproximate`,
+#'   `SiriusScore`) are ignored in this release. When supplied, SIRIUS
+#'   `name` fills `ProteinName` for features that received no MZMine
+#'   compound (tier 2, MSI Level 3 in-silico structure prediction).
+#'   The schema is validated against SIRIUS 6 output; users on other
+#'   versions can rename columns to match. Pass `NULL` to disable.
 #'
-#'   These are MSI Level 2 annotations (putative identification via
-#'   MS/MS spectral matching against a reference library). Higher-
-#'   confidence Level 1 identifications require pure reference standards
-#'   and are out of scope here. Lower-confidence annotations such as
-#'   Level 3 (SIRIUS, MS2Query) or Level 4 (molecular formula via
-#'   CANOPUS) are not currently supported -- features without a Level 2
-#'   annotation row are filtered out.
+#' @details
+#' `ProteinName` is assigned in three tiers, in priority order:
+#'
+#' 1. **MZMine compound (mandatory)** -- the highest-scoring
+#'    `compound_name` from `mzmine_annotations`. Equivalent to MSI
+#'    Level 2 (Sumner et al. 2007, PMID 27624161): putative
+#'    identification by MS/MS spectral matching to a reference library.
+#'
+#' 2. **SIRIUS name (optional)** -- when `sirius_annotations` is
+#'    non-NULL, the `name` from SIRIUS `structure_identifications.tsv`
+#'    fills any `ProteinName` still NA after tier 1. Equivalent to MSI
+#'    Level 3: in-silico structure prediction. MZMine annotations take
+#'    precedence: SIRIUS only fills features that MZMine missed.
+#'
+#' 3. **mz_rt fallback (always)** -- features with no annotation from
+#'    either source are retained, not dropped, and assigned
+#'    `paste0(round(mz, 4), "_", round(rt, 2))` as their `ProteinName`.
+#'
+#' The tier-3 retain-all policy is a deliberate trade-off. A fuller
+#' feature set gives more stable medians and a more reliable empirical
+#' distribution for global normalization. SIRIUS extends discovery
+#' coverage to features that level-2 spectral matching misses. The
+#' cost is an increase in the number of hypotheses tested downstream
+#' (in `MSstats::groupComparison`), which weakens multiple-testing
+#' correction. Users running confirmatory analyses should restrict to
+#' tier-1 features post-conversion; users running discovery analyses
+#' benefit from the additional tiers despite the FDR burden.
 #'
 #' @return data.table in the MSstats required format.
 #'
@@ -43,10 +72,23 @@
 #'                                mzmine_annotations = lib,
 #'                                use_log_file = FALSE)
 #' head(output)
+#'
+#' # With SIRIUS annotations:
+#' sirius_path = system.file(
+#'   "tinytest/raw_data/MZMine/structure_identifications.tsv",
+#'   package = "MSstatsConvert")
+#' sirius = data.table::fread(sirius_path)
+#' output_with_sirius = MZMinetoMSstatsFormat(
+#'   input, annotation = annot,
+#'   mzmine_annotations = lib,
+#'   sirius_annotations = sirius,
+#'   use_log_file = FALSE)
+#' head(output_with_sirius)
 MZMinetoMSstatsFormat = function(
     input,
     annotation = NULL,
     mzmine_annotations,
+    sirius_annotations = NULL,
     removeProtein_with1Feature = FALSE,
     summaryforMultipleRows = max,
     use_log_file = TRUE,
@@ -62,10 +104,22 @@ MZMinetoMSstatsFormat = function(
              "columns 'id', 'compound_name', 'score'.")
     }
 
+    if (!is.null(sirius_annotations)) {
+        sirius_cols = colnames(sirius_annotations)
+        missing_sirius = setdiff(c("mappingFeatureId", "name"), sirius_cols)
+        if (length(missing_sirius) > 0) {
+            stop("sirius_annotations is missing required column(s): ",
+                 paste(missing_sirius, collapse = ", "),
+                 ". Required: 'mappingFeatureId' and 'name'.")
+        }
+    }
+
     input = MSstatsConvert::MSstatsImport(list(input = input),
                                           "MSstats", "MZMine", ...)
     input = MSstatsConvert::MSstatsClean(
-        input, mzmine_annotations = mzmine_annotations)
+        input,
+        mzmine_annotations = mzmine_annotations,
+        sirius_annotations = sirius_annotations)
     annotation = MSstatsConvert::MSstatsMakeAnnotation(input, annotation)
 
     feature_columns = c("PeptideSequence", "PrecursorCharge", "FragmentIon", "ProductCharge")

@@ -353,17 +353,47 @@ per feature, one `<sample> Peak area` column per sample) together with a standar
 MSstats annotation and produces an MSstats-ready long-format `data.table`.
 
 An MZMine spectral-library annotation table with `id`, `compound_name`, and
-`score` columns is **required**. The highest-scoring `compound_name` per feature
-is used as `ProteinName`. Features in the quant table with no matching annotation
-row are dropped from the output — there is no synthesized mz_rt fallback,
-because placeholder identifiers inflate the hypothesis count for downstream
-`groupComparison` without biological signal.
+`score` columns is **required**. All features in the quant table are retained
+in the output: see "Annotation levels and the SIRIUS option" below for how
+`ProteinName` is assigned.
 
-These are [MSI Level 2 annotations](https://pmc.ncbi.nlm.nih.gov/articles/PMC5110944/)
-(putative identification via MS/MS spectral matching against a reference library).
-Lower-confidence annotation sources — SIRIUS / MS2Query (Level 3) and CANOPUS
-(Level 4) — are out of scope for this iteration; features without a Level 2
-annotation row are filtered out.
+## Annotation levels and the SIRIUS option
+
+`ProteinName` is filled in three tiers, in priority order:
+
+| Tier | Source | MSI Level | Status |
+|------|--------|-----------|--------|
+| 1 | MZMine `compound_name` (highest-scoring) | Level 2 — MS/MS spectral match | Mandatory |
+| 2 | SIRIUS `name` from `structure_identifications.tsv` | Level 3 — in-silico structure prediction | Optional (`sirius_annotations = NULL` by default) |
+| 3 | `paste0(round(mz, 4), "_", round(rt, 2))` | — | Always, for features still unannotated |
+
+MZMine annotations (level 2) take precedence over SIRIUS (level 3).
+The mz_rt fallback retains features rather than dropping them — a
+deliberate trade-off:
+
+- **Pro**: a fuller feature set gives more stable medians and a more
+  reliable empirical distribution for global normalization.
+- **Pro**: SIRIUS extends discovery coverage to features that level-2
+  spectral matching misses.
+- **Con**: retaining all features increases the number of hypotheses
+  tested downstream, which weakens multiple-testing correction. For
+  confirmatory analyses, restrict to tier-1 features after conversion.
+- **Note**: passing `removeProtein_with1Feature = TRUE` drops every
+  mz_rt feature (and any SIRIUS-only singleton) because each mz_rt
+  name is unique to one feature, so it is by construction a
+  single-feature "protein" and gets filtered out — quietly losing the
+  tier-3 retain-all benefit.
+
+The SIRIUS schema we depend on is `mappingFeatureId` (join key against
+MZMine `rowID`) and `name`. Score columns
+(`ConfidenceScoreExact`, `ConfidenceScoreApproximate`, `SiriusScore`)
+are present in the file but not used in this release. The schema is
+validated against SIRIUS 6 output; users on different SIRIUS versions
+can rename their columns to match.
+
+The reference background is
+[MSI Level 2 / Level 3 annotations](https://pmc.ncbi.nlm.nih.gov/articles/PMC5110944/)
+(Sumner et al. 2007, PMID 27624161).
 
 ```{r mzmine}
 mzmine_input = data.table::fread(system.file(
@@ -379,7 +409,7 @@ mzmine_library = data.table::fread(system.file(
   package = "MSstatsConvert"
 ))
 
-# ProteinName comes from the matched compound_name; unannotated features are dropped
+# tier 1 fills from compound_name; tier 3 fills the remaining as mz_rt
 mzmine_converted = MZMinetoMSstatsFormat(
   mzmine_input,
   annotation = mzmine_annotation,
@@ -387,6 +417,20 @@ mzmine_converted = MZMinetoMSstatsFormat(
   use_log_file = FALSE
 )
 head(mzmine_converted)
+
+# Worked example with SIRIUS — fills tier 2 for features the MZMine library missed:
+sirius = data.table::fread(system.file(
+  "tinytest/raw_data/MZMine/structure_identifications.tsv",
+  package = "MSstatsConvert"
+))
+mzmine_with_sirius = MZMinetoMSstatsFormat(
+  mzmine_input,
+  annotation = mzmine_annotation,
+  mzmine_annotations = mzmine_library,
+  sirius_annotations = sirius,
+  use_log_file = FALSE
+)
+unique(mzmine_with_sirius[, c("PeptideSequence", "ProteinName")])
 ```
 
 Since metabolomics features do not carry peptide-level identifiers, `PeptideSequence`

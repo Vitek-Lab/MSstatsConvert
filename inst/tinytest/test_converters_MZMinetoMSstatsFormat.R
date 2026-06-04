@@ -15,10 +15,10 @@ output = MZMinetoMSstatsFormat(input, annotation = annot,
                                use_log_file = FALSE)
 output_dt = data.table::as.data.table(output)
 
-# Basic structure: 4 annotated features x 4 runs = 16 rows, 11 standard columns
-# Features 4 and 5 have no annotation row and are dropped by the inner join.
+# Basic structure: 6 features x 4 runs = 24 rows; all features retained.
+# Features 4 and 5 have no MZMine annotation and receive mz_rt fallback names.
 expect_equal(ncol(output), 11)
-expect_equal(nrow(output), 16)
+expect_equal(nrow(output), 24)
 expect_true("Run" %in% colnames(output))
 expect_true("ProteinName" %in% colnames(output))
 expect_true("PeptideSequence" %in% colnames(output))
@@ -54,11 +54,13 @@ expect_equal(as.character(feature3_proteins), "Lactate")
 feature6_proteins = unique(output_dt[PeptideSequence == "6", ProteinName])
 expect_equal(as.character(feature6_proteins), "Caffeine")
 
-# Features absent from the annotations file are filtered out (no mz_rt fallback)
-expect_false("4" %in% as.character(output_dt$PeptideSequence))
-expect_false("5" %in% as.character(output_dt$PeptideSequence))
-expect_false(any(as.character(output_dt$ProteinName) %in%
-                 c("489.334_7.89", "555.447_9.1")))
+# Features absent from the MZMine annotations file get mz_rt fallback ProteinNames.
+expect_true("4" %in% as.character(output_dt$PeptideSequence))
+expect_true("5" %in% as.character(output_dt$PeptideSequence))
+feature4_protein = unique(output_dt[PeptideSequence == "4", ProteinName])
+expect_equal(as.character(feature4_protein), "489.334_7.89")
+feature5_protein = unique(output_dt[PeptideSequence == "5", ProteinName])
+expect_equal(as.character(feature5_protein), "555.447_9.1")
 
 # Zero-intensity input cells are converted to NA in output
 # Feature 3 sampleB = 0  ->  NA  (feature 3 is annotated as Lactate)
@@ -111,3 +113,44 @@ expect_equal(unique(as.character(output_filtered_dt$ProteinName)), "Caffeine")
 expect_equal(nrow(output_filtered), 8)
 expect_equal(sort(unique(as.character(output_filtered_dt$PeptideSequence))),
              c("1", "6"))
+
+# With sirius_annotations supplied ---------------------------------------------
+sirius_path = system.file("tinytest/raw_data/MZMine/structure_identifications.tsv",
+                          package = "MSstatsConvert")
+sirius = data.table::fread(sirius_path)
+
+output_sirius = MZMinetoMSstatsFormat(input, annotation = annot,
+                                      mzmine_annotations = mzmine_ann,
+                                      sirius_annotations = sirius,
+                                      use_log_file = FALSE)
+output_sirius_dt = data.table::as.data.table(output_sirius)
+
+# All 6 features still retained
+expect_equal(nrow(output_sirius), 24)
+
+# Precedence: feature 1 hit by both MZMine (Caffeine) and SIRIUS
+# (DuplicateFromSirius). MZMine wins.
+feature1_proteins = unique(output_sirius_dt[PeptideSequence == "1", ProteinName])
+expect_equal(as.character(feature1_proteins), "Caffeine")
+
+# Tier 2: feature 4 has no MZMine annotation; SIRIUS fills "Caffeic acid"
+feature4_proteins = unique(output_sirius_dt[PeptideSequence == "4", ProteinName])
+expect_equal(as.character(feature4_proteins), "Caffeic acid")
+
+# Tier 3: feature 5 has only an empty-name SIRIUS row; falls to mz_rt
+feature5_proteins = unique(output_sirius_dt[PeptideSequence == "5", ProteinName])
+expect_equal(as.character(feature5_proteins), "555.447_9.1")
+
+# An irrelevant SIRIUS row (mappingFeatureId=99) must not introduce new features
+expect_false("99" %in% as.character(output_sirius_dt$PeptideSequence))
+expect_false("Ghost" %in% as.character(output_sirius_dt$ProteinName))
+
+# sirius_annotations missing required columns triggers stop() ------------------
+bad_sirius = data.frame(mappingFeatureId = 1, score = 0.9)  # no 'name'
+expect_error(
+    MZMinetoMSstatsFormat(input, annotation = annot,
+                          mzmine_annotations = mzmine_ann,
+                          sirius_annotations = bad_sirius,
+                          use_log_file = FALSE),
+    "missing required column"
+)

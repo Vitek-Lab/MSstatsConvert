@@ -8,6 +8,7 @@ MZMinetoMSstatsFormat(
   input,
   annotation = NULL,
   mzmine_annotations,
+  sirius_annotations = NULL,
   removeProtein_with1Feature = FALSE,
   summaryforMultipleRows = max,
   use_log_file = TRUE,
@@ -33,20 +34,26 @@ so the corresponding \code{Run} value must be \code{sampleAmzML}.}
 \item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
 annotations with columns \code{id}, \code{compound_name}, \code{score}. Required:
 the highest-scoring \code{compound_name} per feature is used as
-\code{ProteinName}, and features in the quant table with no matching
-annotation row are dropped from the output.
+\code{ProteinName} (tier 1, MSI Level 2 putative identification via
+MS/MS spectral matching).}
 
-These are MSI Level 2 annotations (putative identification via
-MS/MS spectral matching against a reference library). Higher-
-confidence Level 1 identifications require pure reference standards
-and are out of scope here. Lower-confidence annotations such as
-Level 3 (SIRIUS, MS2Query) or Level 4 (molecular formula via
-CANOPUS) are not currently supported -- features without a Level 2
-annotation row are filtered out.}
+\item{sirius_annotations}{Optional \code{data.frame} of SIRIUS
+\code{structure_identifications.tsv} output, or \code{NULL}. Only the
+\code{mappingFeatureId} and \code{name} columns are read; score columns
+(\code{ConfidenceScoreExact}, \code{ConfidenceScoreApproximate},
+\code{SiriusScore}) are ignored in this release. When supplied, SIRIUS
+\code{name} fills \code{ProteinName} for features that received no MZMine
+compound (tier 2, MSI Level 3 in-silico structure prediction).
+The schema is validated against SIRIUS 6 output; users on other
+versions can rename columns to match. Pass \code{NULL} to disable.}
 
 \item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 
-\item{summaryforMultipleRows}{max or sum - when there are multiple measurements for certain feature and certain run, use highest or sum of multiple intensities. Default is max for label-free converters and sum for TMT converters.}
+\item{summaryforMultipleRows}{max or sum - when multiple PSMs identify
+the same feature within a single MS run (duplicate PSMs), use the
+highest (max) or sum of the duplicate intensities. Default is max for
+label-free converters and sum for TMT converters. Note that this parameter
+does NOT control collapsing across fractions of the same biological mixture.}
 
 \item{use_log_file}{logical. If TRUE, information about data processing
 will be saved to a file.}
@@ -70,6 +77,33 @@ data.table in the MSstats required format.
 \description{
 Import MZMine files
 }
+\details{
+\code{ProteinName} is assigned in three tiers, in priority order:
+\enumerate{
+\item \strong{MZMine compound (mandatory)} -- the highest-scoring
+\code{compound_name} from \code{mzmine_annotations}. Equivalent to MSI
+Level 2 (Sumner et al. 2007, PMID 27624161): putative
+identification by MS/MS spectral matching to a reference library.
+\item \strong{SIRIUS name (optional)} -- when \code{sirius_annotations} is
+non-NULL, the \code{name} from SIRIUS \code{structure_identifications.tsv}
+fills any \code{ProteinName} still NA after tier 1. Equivalent to MSI
+Level 3: in-silico structure prediction. MZMine annotations take
+precedence: SIRIUS only fills features that MZMine missed.
+\item \strong{mz_rt fallback (always)} -- features with no annotation from
+either source are retained, not dropped, and assigned
+\code{paste0(round(mz, 4), "_", round(rt, 2))} as their \code{ProteinName}.
+}
+
+The tier-3 retain-all policy is a deliberate trade-off. A fuller
+feature set gives more stable medians and a more reliable empirical
+distribution for global normalization. SIRIUS extends discovery
+coverage to features that level-2 spectral matching misses. The
+cost is an increase in the number of hypotheses tested downstream
+(in \code{MSstats::groupComparison}), which weakens multiple-testing
+correction. Users running confirmatory analyses should restrict to
+tier-1 features post-conversion; users running discovery analyses
+benefit from the additional tiers despite the FDR burden.
+}
 \examples{
 input_path = system.file("tinytest/raw_data/MZMine/mzmine_input.csv",
                          package = "MSstatsConvert")
@@ -84,4 +118,16 @@ output = MZMinetoMSstatsFormat(input, annotation = annot,
                                mzmine_annotations = lib,
                                use_log_file = FALSE)
 head(output)
+
+# With SIRIUS annotations:
+sirius_path = system.file(
+  "tinytest/raw_data/MZMine/structure_identifications.tsv",
+  package = "MSstatsConvert")
+sirius = data.table::fread(sirius_path)
+output_with_sirius = MZMinetoMSstatsFormat(
+  input, annotation = annot,
+  mzmine_annotations = lib,
+  sirius_annotations = sirius,
+  use_log_file = FALSE)
+head(output_with_sirius)
 }

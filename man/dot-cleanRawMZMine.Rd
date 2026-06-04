@@ -4,7 +4,7 @@
 \alias{.cleanRawMZMine}
 \title{Clean raw MZMine files}
 \usage{
-.cleanRawMZMine(msstats_object, mzmine_annotations)
+.cleanRawMZMine(msstats_object, mzmine_annotations, sirius_annotations = NULL)
 }
 \arguments{
 \item{msstats_object}{an object of class \code{MSstatsMZMineFiles}.}
@@ -12,11 +12,15 @@
 \item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
 annotations with columns \code{id}, \code{compound_name}, \code{score}. Required;
 passing \code{NULL} raises an error. The highest-scoring \code{compound_name}
-per feature is used as \code{ProteinName}, and features in the quant
-table with no matching annotation row are dropped from the output.
-These are MSI Level 2 annotations (putative identification via
-MS/MS spectral matching). See the public \code{MZMinetoMSstatsFormat}
-docstring for the full scope discussion.}
+per feature is used as \code{ProteinName} (tier 1, MSI Level 2 putative
+identification via MS/MS spectral matching). See the public
+\code{MZMinetoMSstatsFormat} docstring for the full tier discussion.}
+
+\item{sirius_annotations}{Optional \code{data.frame} of SIRIUS
+\code{structure_identifications.tsv} output, or \code{NULL}. Only the
+\code{mappingFeatureId} and \code{name} columns are read. When supplied,
+SIRIUS \code{name} fills \code{ProteinName} for features that received no
+MZMine compound (tier 2, MSI Level 3).}
 }
 \value{
 data.table
