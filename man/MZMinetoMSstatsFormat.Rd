@@ -9,7 +9,6 @@ MZMinetoMSstatsFormat(
   annotation = NULL,
   mzmine_annotations,
   sirius_annotations = NULL,
-  removeProtein_with1Feature = FALSE,
   summaryforMultipleRows = max,
   use_log_file = TRUE,
   append = FALSE,
@@ -33,21 +32,19 @@ so the corresponding \code{Run} value must be \code{sampleAmzML}.}
 
 \item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
 annotations with columns \code{id}, \code{compound_name}, \code{score}. Required:
-the highest-scoring \code{compound_name} per feature is used as
-\code{ProteinName} (tier 1, MSI Level 2 putative identification via
-MS/MS spectral matching).}
+the highest-scoring \code{compound_name} per feature (MSI Level 2
+putative identification via MS/MS spectral matching) is used as
+\code{ProteinName}.}
 
 \item{sirius_annotations}{Optional \code{data.frame} of SIRIUS
 \code{structure_identifications.tsv} output, or \code{NULL}. Only the
 \code{mappingFeatureId} and \code{name} columns are read; score columns
 (\code{ConfidenceScoreExact}, \code{ConfidenceScoreApproximate},
-\code{SiriusScore}) are ignored in this release. When supplied, SIRIUS
-\code{name} fills \code{ProteinName} for features that received no MZMine
-compound (tier 2, MSI Level 3 in-silico structure prediction).
+\code{SiriusScore}) are ignored in this release. When supplied, the
+SIRIUS \code{name} (MSI Level 3, in-silico structure prediction) fills
+\code{ProteinName} for features that received no MZMine compound name.
 The schema is validated against SIRIUS 6 output; users on other
 versions can rename columns to match. Pass \code{NULL} to disable.}
-
-\item{removeProtein_with1Feature}{TRUE will remove the proteins which have only 1 feature, which is the combination of peptide, precursor charge, fragment and charge. FALSE is default.}
 
 \item{summaryforMultipleRows}{max or sum - when multiple PSMs identify
 the same feature within a single MS run (duplicate PSMs), use the
@@ -78,31 +75,37 @@ data.table in the MSstats required format.
 Import MZMine files
 }
 \details{
-\code{ProteinName} is assigned in three tiers, in priority order:
-\enumerate{
-\item \strong{MZMine compound (mandatory)} -- the highest-scoring
-\code{compound_name} from \code{mzmine_annotations}. Equivalent to MSI
-Level 2 (Sumner et al. 2007, PMID 27624161): putative
-identification by MS/MS spectral matching to a reference library.
-\item \strong{SIRIUS name (optional)} -- when \code{sirius_annotations} is
-non-NULL, the \code{name} from SIRIUS \code{structure_identifications.tsv}
-fills any \code{ProteinName} still NA after tier 1. Equivalent to MSI
-Level 3: in-silico structure prediction. MZMine annotations take
-precedence: SIRIUS only fills features that MZMine missed.
-\item \strong{mz_rt fallback (always)} -- features with no annotation from
-either source are retained, not dropped, and assigned
-\code{paste0(round(mz, 4), "_", round(rt, 2))} as their \code{ProteinName}.
-}
+\code{ProteinName} is assigned from one of three sources, in priority
+order: the MZMine compound name (mandatory), the SIRIUS name
+(optional), and an m/z-RT fallback (always available).
 
-The tier-3 retain-all policy is a deliberate trade-off. A fuller
-feature set gives more stable medians and a more reliable empirical
+The \strong{MZMine compound name} is the highest-scoring \code{compound_name}
+from \code{mzmine_annotations} for each feature. This corresponds to MSI
+Level 2 (Sumner et al. 2007, PMID 27624161): a putative
+identification by MS/MS spectral matching to a reference library.
+
+The \strong{SIRIUS name} comes from SIRIUS's
+\code{structure_identifications.tsv} and corresponds to MSI Level 3: an
+in-silico structure prediction. When \code{sirius_annotations} is
+non-NULL, the SIRIUS \code{name} fills \code{ProteinName} only for features
+the MZMine library missed -- the MZMine compound name takes
+precedence.
+
+The \strong{m/z-RT fallback} is an identifier built from the feature's
+m/z and retention time (for example, \verb{455.282_0.65}). Features that
+receive no MZMine or SIRIUS annotation are retained, not dropped,
+and assigned an m/z-RT identifier as their \code{ProteinName}.
+
+Retaining every feature is a deliberate trade-off. A fuller feature
+set gives more stable medians and a more reliable empirical
 distribution for global normalization. SIRIUS extends discovery
 coverage to features that level-2 spectral matching misses. The
 cost is an increase in the number of hypotheses tested downstream
 (in \code{MSstats::groupComparison}), which weakens multiple-testing
 correction. Users running confirmatory analyses should restrict to
-tier-1 features post-conversion; users running discovery analyses
-benefit from the additional tiers despite the FDR burden.
+the MZMine-annotated features post-conversion; users running
+discovery analyses benefit from the additional sources despite the
+FDR burden.
 }
 \examples{
 input_path = system.file("tinytest/raw_data/MZMine/mzmine_input.csv",

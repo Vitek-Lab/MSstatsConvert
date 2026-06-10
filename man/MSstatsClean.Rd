@@ -204,15 +204,20 @@ peptides receive \code{IsotopeLabelType = "Light"}.}
 \item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
 annotations with columns \code{id}, \code{compound_name}, \code{score}. Required;
 passing \code{NULL} raises an error. The highest-scoring \code{compound_name}
-per feature is used as \code{ProteinName} (tier 1, MSI Level 2 putative
-identification via MS/MS spectral matching). See the public
-\code{MZMinetoMSstatsFormat} docstring for the full tier discussion.}
+per feature (MSI Level 2 putative identification via MS/MS spectral
+matching) is used as \code{ProteinName}. See the public
+\code{MZMinetoMSstatsFormat} docstring for the full discussion of
+identification sources and precedence.}
 
 \item{sirius_annotations}{Optional \code{data.frame} of SIRIUS
 \code{structure_identifications.tsv} output, or \code{NULL}. Only the
-\code{mappingFeatureId} and \code{name} columns are read. When supplied,
-SIRIUS \code{name} fills \code{ProteinName} for features that received no
-MZMine compound (tier 2, MSI Level 3).}
+\code{mappingFeatureId} and \code{name} columns are read; score columns
+(\code{ConfidenceScoreExact}, \code{ConfidenceScoreApproximate},
+\code{SiriusScore}) are ignored in this release. When supplied, the
+SIRIUS \code{name} (MSI Level 3, in-silico structure prediction) fills
+\code{ProteinName} for features that received no MZMine compound name.
+The schema is validated against SIRIUS 6 output; users on other
+versions can rename columns to match. Pass \code{NULL} to disable.}
 }
 \value{
 data.table

@@ -359,16 +359,16 @@ in the output: see "Annotation levels and the SIRIUS option" below for how
 
 ## Annotation levels and the SIRIUS option
 
-`ProteinName` is filled in three tiers, in priority order:
+`ProteinName` is filled from one of three sources, in priority order:
 
-| Tier | Source | MSI Level | Status |
-|------|--------|-----------|--------|
-| 1 | MZMine `compound_name` (highest-scoring) | Level 2 — MS/MS spectral match | Mandatory |
-| 2 | SIRIUS `name` from `structure_identifications.tsv` | Level 3 — in-silico structure prediction | Optional (`sirius_annotations = NULL` by default) |
-| 3 | `paste0(round(mz, 4), "_", round(rt, 2))` | — | Always, for features still unannotated |
+| Source | MSI Level | Status |
+|--------|-----------|--------|
+| MZMine `compound_name` (highest-scoring) | Level 2 — MS/MS spectral match | Mandatory |
+| SIRIUS `name` from `structure_identifications.tsv` | Level 3 — in-silico structure prediction | Optional (`sirius_annotations = NULL` by default) |
+| m/z-RT identifier built from the feature's m/z and retention time (e.g. `455.282_0.65`) | — | Always, for features still unannotated |
 
 MZMine annotations (level 2) take precedence over SIRIUS (level 3).
-The mz_rt fallback retains features rather than dropping them — a
+The m/z-RT fallback retains features rather than dropping them — a
 deliberate trade-off:
 
 - **Pro**: a fuller feature set gives more stable medians and a more
@@ -377,15 +377,8 @@ deliberate trade-off:
   spectral matching misses.
 - **Con**: retaining all features increases the number of hypotheses
   tested downstream, which weakens multiple-testing correction. For
-  confirmatory analyses, restrict to tier-1 features after conversion.
-- **Note**: passing `removeProtein_with1Feature = TRUE` drops nearly
-  every mz_rt feature (and any SIRIUS-only singleton), because the
-  rounded `paste0(round(mz, 4), "_", round(rt, 2))` identifier is
-  almost always unique to one feature — so each mz_rt row is treated
-  as a single-feature "protein" and filtered out, quietly losing the
-  tier-3 retain-all benefit. In rare cases two features can share an
-  mz_rt name (when their rounded m/z and RT coincide); those collide
-  into a single multi-feature "protein" and survive the filter.
+  confirmatory analyses, restrict to the MZMine-annotated features
+  after conversion.
 
 The SIRIUS schema we depend on is `mappingFeatureId` (join key against
 MZMine `rowID`) and `name`. Score columns
@@ -412,7 +405,7 @@ mzmine_library = data.table::fread(system.file(
   package = "MSstatsConvert"
 ))
 
-# tier 1 fills from compound_name; tier 3 fills the remaining as mz_rt
+# MZMine compound name fills annotated features; the m/z-RT fallback fills the rest
 mzmine_converted = MZMinetoMSstatsFormat(
   mzmine_input,
   annotation = mzmine_annotation,
@@ -421,7 +414,7 @@ mzmine_converted = MZMinetoMSstatsFormat(
 )
 head(mzmine_converted)
 
-# Worked example with SIRIUS — fills tier 2 for features the MZMine library missed:
+# Worked example with SIRIUS — fills the SIRIUS name for features the MZMine library missed:
 sirius = data.table::fread(system.file(
   "tinytest/raw_data/MZMine/structure_identifications.tsv",
   package = "MSstatsConvert"

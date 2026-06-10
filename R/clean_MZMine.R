@@ -9,14 +9,19 @@
 #' @param mzmine_annotations `data.frame` of MZMine spectral-library
 #'   annotations with columns `id`, `compound_name`, `score`. Required;
 #'   passing `NULL` raises an error. The highest-scoring `compound_name`
-#'   per feature is used as `ProteinName` (tier 1, MSI Level 2 putative
-#'   identification via MS/MS spectral matching). See the public
-#'   `MZMinetoMSstatsFormat` docstring for the full tier discussion.
+#'   per feature (MSI Level 2 putative identification via MS/MS spectral
+#'   matching) is used as `ProteinName`. See the public
+#'   `MZMinetoMSstatsFormat` docstring for the full discussion of
+#'   identification sources and precedence.
 #' @param sirius_annotations Optional `data.frame` of SIRIUS
 #'   `structure_identifications.tsv` output, or `NULL`. Only the
-#'   `mappingFeatureId` and `name` columns are read. When supplied,
-#'   SIRIUS `name` fills `ProteinName` for features that received no
-#'   MZMine compound (tier 2, MSI Level 3).
+#'   `mappingFeatureId` and `name` columns are read; score columns
+#'   (`ConfidenceScoreExact`, `ConfidenceScoreApproximate`,
+#'   `SiriusScore`) are ignored in this release. When supplied, the
+#'   SIRIUS `name` (MSI Level 3, in-silico structure prediction) fills
+#'   `ProteinName` for features that received no MZMine compound name.
+#'   The schema is validated against SIRIUS 6 output; users on other
+#'   versions can rename columns to match. Pass `NULL` to disable.
 #' @return data.table
 #' @keywords internal
 .cleanRawMZMine <- function(msstats_object, mzmine_annotations,
@@ -65,50 +70,47 @@
     }
     data.table::setorder(feature_to_compound, id, -score)
     feature_to_compound <- unique(feature_to_compound, by = "id")
-    # Tier 1: MZMine compound name (left-join, no drop).
+    # MZMine compound name fill (left-join, no drop).
     mz_input[
         feature_to_compound,
         ProteinName := i.compound_name,
         on = setNames("id", id_col)
     ]
-    n_tier1 <- sum(!is.na(mz_input$ProteinName))
+    n_mzmine <- sum(!is.na(mz_input$ProteinName))
 
-    # Tier 2: SIRIUS name fills features still NA after tier 1.
-    n_tier2 <- 0L
+    # SIRIUS name fills features still NA after the MZMine compound fill.
+    n_sirius <- 0L
     if (!is.null(sirius_annotations)) {
-        sirius_dt <- data.table::as.data.table(sirius_annotations)
-        sirius_dt <- sirius_dt[, c("mappingFeatureId", "name"), with = FALSE]
+        sirius_dt <- data.table::copy(data.table::as.data.table(sirius_annotations))
+        drop_cols <- setdiff(colnames(sirius_dt), c("mappingFeatureId", "name"))
+        for (col in drop_cols) data.table::set(sirius_dt, j = col, value = NULL)
         sirius_dt[, name := ifelse(is.na(name) | name == "",
                                    NA_character_, as.character(name))]
         sirius_dt[, mappingFeatureId := as.character(mappingFeatureId)]
-        data.table::setorder(sirius_dt, mappingFeatureId)
+        data.table::setorder(sirius_dt, mappingFeatureId, name)
+        # unique() keeps the dedup 1:1 for the join and handles
+        # multiple structure candidates per feature.
         sirius_dt <- unique(sirius_dt, by = "mappingFeatureId")
-        mz_input[, ProteinName := ifelse(
-            is.na(ProteinName),
-            sirius_dt[
-                .(as.character(get(id_col))),
-                on = "mappingFeatureId",
-                name
-            ],
-            ProteinName)]
-        n_tier2 <- sum(!is.na(mz_input$ProteinName)) - n_tier1
+        mz_input[is.na(ProteinName), ProteinName :=
+            sirius_dt[.(as.character(get(id_col))), on = "mappingFeatureId", name]]
+        n_sirius <- sum(!is.na(mz_input$ProteinName)) - n_mzmine
     }
 
-    # Tier 3: mz_rt fallback for features still NA.
+    # m/z-RT fallback for features still NA.
     na_mask <- is.na(mz_input$ProteinName)
-    n_tier3 <- sum(na_mask)
-    if (n_tier3 > 0) {
+    n_fallback <- sum(na_mask)
+    if (n_fallback > 0) {
         mz_input[na_mask, ProteinName := paste0(
             round(get(mz_col), 4), "_", round(get(rt_col), 2))]
     }
 
-    tier_msg <- paste0(
+    assignment_msg <- paste0(
         "** MZMine ProteinName assignment: ",
-        "tier 1 (MZMine compound): ", n_tier1, " feature(s); ",
-        "tier 2 (SIRIUS name): ", n_tier2, " feature(s); ",
-        "tier 3 (mz_rt fallback): ", n_tier3, " feature(s).")
-    getOption("MSstatsLog")("INFO", tier_msg)
-    getOption("MSstatsMsg")("INFO", tier_msg)
+        "MZMine compound: ", n_mzmine, " feature(s); ",
+        "SIRIUS name: ", n_sirius, " feature(s); ",
+        "m/z-RT fallback: ", n_fallback, " feature(s).")
+    getOption("MSstatsLog")("INFO", assignment_msg)
+    getOption("MSstatsMsg")("INFO", assignment_msg)
 
     mz_input[, PeptideSequence := as.character(get(id_col))]
 

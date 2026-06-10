@@ -99,21 +99,6 @@ expect_error(
     "mzmine_annotations is required"
 )
 
-# removeProtein_with1Feature filters non-Caffeine proteins -------------------
-# Of the annotated features (1, 2, 3, 6), Caffeine has 2 (IDs 1 and 6);
-# Lactate and Glucose each have 1.
-output_filtered = MZMinetoMSstatsFormat(input, annotation = annot,
-                                        mzmine_annotations = mzmine_ann,
-                                        removeProtein_with1Feature = TRUE,
-                                        use_log_file = FALSE)
-output_filtered_dt = data.table::as.data.table(output_filtered)
-
-expect_equal(unique(as.character(output_filtered_dt$ProteinName)), "Caffeine")
-# 2 features x 4 runs = 8 rows
-expect_equal(nrow(output_filtered), 8)
-expect_equal(sort(unique(as.character(output_filtered_dt$PeptideSequence))),
-             c("1", "6"))
-
 # With sirius_annotations supplied ---------------------------------------------
 sirius_path = system.file("tinytest/raw_data/MZMine/structure_identifications.tsv",
                           package = "MSstatsConvert")
@@ -133,11 +118,11 @@ expect_equal(nrow(output_sirius), 24)
 feature1_proteins = unique(output_sirius_dt[PeptideSequence == "1", ProteinName])
 expect_equal(as.character(feature1_proteins), "Caffeine")
 
-# Tier 2: feature 4 has no MZMine annotation; SIRIUS fills "Caffeic acid"
+# SIRIUS fill: feature 4 has no MZMine annotation; SIRIUS fills "Caffeic acid"
 feature4_proteins = unique(output_sirius_dt[PeptideSequence == "4", ProteinName])
 expect_equal(as.character(feature4_proteins), "Caffeic acid")
 
-# Tier 3: feature 5 has only an empty-name SIRIUS row; falls to mz_rt
+# m/z-RT fallback: feature 5 has only an empty-name SIRIUS row; falls to m/z-RT
 feature5_proteins = unique(output_sirius_dt[PeptideSequence == "5", ProteinName])
 expect_equal(as.character(feature5_proteins), "555.447_9.1")
 
