@@ -12,11 +12,6 @@
 #'   trailing `"Peakarea"` suffix removed. For example, a quant-file column
 #'   `"sampleA.mzML Peak area"` becomes `"sampleAmzML"` after standardization,
 #'   so the corresponding `Run` value must be `sampleAmzML`.
-#' @param mzmine_annotations `data.frame` of MZMine spectral-library
-#'   annotations with columns `id`, `compound_name`, `score`. Required:
-#'   the highest-scoring `compound_name` per feature (MSI Level 2
-#'   putative identification via MS/MS spectral matching) is used as
-#'   `ProteinName`.
 #'
 #' @details
 #' `ProteinName` is assigned from one of three sources, in priority

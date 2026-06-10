@@ -13,9 +13,7 @@
 annotations with columns \code{id}, \code{compound_name}, \code{score}. Required;
 passing \code{NULL} raises an error. The highest-scoring \code{compound_name}
 per feature (MSI Level 2 putative identification via MS/MS spectral
-matching) is used as \code{ProteinName}. See the public
-\code{MZMinetoMSstatsFormat} docstring for the full discussion of
-identification sources and precedence.}
+matching) is used as \code{ProteinName}.}
 
 \item{sirius_annotations}{Optional \code{data.frame} of SIRIUS
 \code{structure_identifications.tsv} output, or \code{NULL}. Only the

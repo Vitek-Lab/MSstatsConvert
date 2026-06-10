@@ -10,9 +10,7 @@
 #'   annotations with columns `id`, `compound_name`, `score`. Required;
 #'   passing `NULL` raises an error. The highest-scoring `compound_name`
 #'   per feature (MSI Level 2 putative identification via MS/MS spectral
-#'   matching) is used as `ProteinName`. See the public
-#'   `MZMinetoMSstatsFormat` docstring for the full discussion of
-#'   identification sources and precedence.
+#'   matching) is used as `ProteinName`.
 #' @param sirius_annotations Optional `data.frame` of SIRIUS
 #'   `structure_identifications.tsv` output, or `NULL`. Only the
 #'   `mappingFeatureId` and `name` columns are read; score columns

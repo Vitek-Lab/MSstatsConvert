@@ -31,10 +31,10 @@ trailing \code{"Peakarea"} suffix removed. For example, a quant-file column
 so the corresponding \code{Run} value must be \code{sampleAmzML}.}
 
 \item{mzmine_annotations}{\code{data.frame} of MZMine spectral-library
-annotations with columns \code{id}, \code{compound_name}, \code{score}. Required:
-the highest-scoring \code{compound_name} per feature (MSI Level 2
-putative identification via MS/MS spectral matching) is used as
-\code{ProteinName}.}
+annotations with columns \code{id}, \code{compound_name}, \code{score}. Required;
+passing \code{NULL} raises an error. The highest-scoring \code{compound_name}
+per feature (MSI Level 2 putative identification via MS/MS spectral
+matching) is used as \code{ProteinName}.}
 
 \item{sirius_annotations}{Optional \code{data.frame} of SIRIUS
 \code{structure_identifications.tsv} output, or \code{NULL}. Only the
