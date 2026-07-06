@@ -76,3 +76,18 @@ result_null = MSstatsConvert:::.assignDIANNIsotopeLabelType(
 )
 expect_false("IsotopeLabelType" %in% colnames(result_null))
 expect_equal(nrow(result_null), 2L)
+
+# ModifiedSequence-parsing path: classification and stripping are agnostic to
+# the label token after the first parenthesis. The suffix may be (SILAC-<AA>-H)
+# or any (<label>-<AA>-H), e.g. (label-K-H).
+dt_label = data.table::data.table(
+    PeptideSequence = c("PEPTIDEK(SILAC-K-H)", "PEPTIDEK(SILAC-K-L)",
+                        "PEPTIDEK(label-K-H)", "PEPTIDEK(label-K-L)",
+                        "PEPTIDEK")
+)
+result_label = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_label, labeledAminoAcids = c("K"), has_channel = FALSE
+)
+expect_equal(result_label$IsotopeLabelType, c("H", "L", "H", "L", NA_character_))
+# Suffix is stripped regardless of the label token
+expect_equal(unique(result_label$PeptideSequence), "PEPTIDEK")

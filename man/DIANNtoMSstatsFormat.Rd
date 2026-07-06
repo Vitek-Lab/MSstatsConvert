@@ -79,11 +79,13 @@ in \code{labeledAminoAcids} are \strong{not} used to validate or filter
 \strong{ModifiedSequence-parsing path} (DIA-NN 1.x exports without a
 \code{Channel} column): when \code{labeledAminoAcids} is non-\code{NULL}
 and no \code{Channel} column is present, each \code{ModifiedSequence} is
-inspected for SILAC suffixes of the form \code{(SILAC-<AA>-H)} or
-\code{(SILAC-<AA>-L)}, where \code{<AA>} is one of the supplied amino acid
-codes.  Matching sequences are classified as \code{"H"} or \code{"L"};
-sequences carrying neither suffix receive \code{IsotopeLabelType = NA}.
-The SILAC suffix is then stripped from \code{PeptideSequence}.
+inspected for label suffixes of the form \code{(<label>-<AA>-H)} or
+\code{(<label>-<AA>-L)}, where \code{<AA>} is one of the supplied amino acid
+codes and \code{<label>} is any non-dash token (e.g. \code{SILAC} or
+\code{label}).  Matching sequences are classified as \code{"H"} or
+\code{"L"}; sequences carrying neither suffix receive
+\code{IsotopeLabelType = NA}.  The label suffix is then stripped from
+\code{PeptideSequence}.
 
 When \code{NULL} (default), protein-turnover mode is disabled and all
 peptides receive \code{IsotopeLabelType = "Light"}.}

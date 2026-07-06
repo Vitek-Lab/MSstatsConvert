@@ -232,10 +232,11 @@
 #'
 #' \strong{ModifiedSequence-parsing path} (\code{has_channel = FALSE}):
 #' \code{PeptideSequence} (the retained \code{ModifiedSequence}) is matched
-#' against SILAC suffixes of the form \code{(SILAC-<AA>-H)} or
-#' \code{(SILAC-<AA>-L)}, where \code{<AA>} is any code in
-#' \code{labeledAminoAcids}.  Sequences carrying neither suffix receive
-#' \code{IsotopeLabelType = NA}.  The SILAC suffix is stripped from
+#' against label suffixes of the form \code{(<label>-<AA>-H)} or
+#' \code{(<label>-<AA>-L)}, where \code{<AA>} is any code in
+#' \code{labeledAminoAcids} and \code{<label>} is any non-dash token (e.g.
+#' \code{SILAC} or \code{label}).  Sequences carrying neither suffix receive
+#' \code{IsotopeLabelType = NA}.  The label suffix is stripped from
 #' \code{PeptideSequence} after classification.
 #'
 #' @param dn_input \code{data.table} after column renaming.
@@ -265,9 +266,11 @@
         dn_input[, Channel := NULL]
     } else {
         aa_pattern <- paste0(labeledAminoAcids, collapse = "|")
-        heavy_regex <- paste0("\\(SILAC-(?:", aa_pattern, ")-H\\)")
-        light_regex <- paste0("\\(SILAC-(?:", aa_pattern, ")-L\\)")
-        strip_regex <- paste0("\\(SILAC-(?:", aa_pattern, ")-[HL]\\)")
+        # The label token after the first parenthesis is not always "SILAC"
+        # (e.g. "(SILAC-L-L)" vs "(label-L-L)"), so match any non-dash token there.
+        heavy_regex <- paste0("\\([^-]+-(?:", aa_pattern, ")-H\\)")
+        light_regex <- paste0("\\([^-]+-(?:", aa_pattern, ")-L\\)")
+        strip_regex <- paste0("\\([^-]+-(?:", aa_pattern, ")-[HL]\\)")
 
         dn_input <- .classifyIsotopeLabelType(dn_input, heavy_regex, light_regex)
         dn_input[, PeptideSequence := gsub(strip_regex, "", PeptideSequence, perl = TRUE)]
@@ -276,7 +279,7 @@
     if (all(is.na(dn_input[["IsotopeLabelType"]]))) {
         warning("labeledAminoAcids was provided but no rows were classified as H or L. ",
                 "Check that the input contains either a Channel column with H/L values ",
-                "or ModifiedSequence entries with (SILAC-<AA>-H)/(SILAC-<AA>-L) suffixes.")
+                "or ModifiedSequence entries with (<label>-<AA>-H)/(<label>-<AA>-L) suffixes.")
     }
 
     dn_input
