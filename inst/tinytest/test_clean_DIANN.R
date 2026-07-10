@@ -86,3 +86,16 @@ result_label = MSstatsConvert:::.assignDIANNIsotopeLabelType(
 )
 expect_equal(result_label$IsotopeLabelType, c("H", "L", "H", "L", NA_character_))
 expect_equal(unique(result_label$PeptideSequence), "PEPTIDEK")
+
+dt_multi_aa = data.table::data.table(
+    PeptideSequence = c("PEPTIDEK(SILAC-K-H)", "PEPTIDER(SILAC-R-H)",
+                        "PEPTIDEK(SILAC-K-L)", "PEPTIDER(SILAC-R-L)",
+                        "PEPTIDEAC")
+)
+result_multi_aa = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_multi_aa, labeledAminoAcids = c("K", "R"), has_channel = FALSE
+)
+expect_equal(result_multi_aa$IsotopeLabelType,
+             c("H", "H", "L", "L", NA_character_))
+expect_equal(sort(unique(result_multi_aa$PeptideSequence)),
+             c("PEPTIDEAC", "PEPTIDEK", "PEPTIDER"))
