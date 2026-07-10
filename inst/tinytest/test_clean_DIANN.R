@@ -56,7 +56,7 @@ output <- MSstatsConvert:::.cleanRawDIANN(input, MBR = FALSE, pg_qvalue_cutoff =
 expect_qvalue_cutoff(output, "GlobalPGQValue", 0.0002)
 
 # Test .assignDIANNIsotopeLabelType ---------------------------
-# Channel path: Channel column is mapped to IsotopeLabelType, then dropped
+
 dt_channel = data.table::data.table(
     PeptideSequence = c("PEPTIDEK", "PEPTIDEK", "PEPTIDEK"),
     Channel = c("H", "L", "other")
@@ -67,7 +67,6 @@ result_channel = MSstatsConvert:::.assignDIANNIsotopeLabelType(
 expect_equal(result_channel$IsotopeLabelType, c("H", "L", NA_character_))
 expect_false("Channel" %in% colnames(result_channel))
 
-# NULL path: labeledAminoAcids = NULL returns input unchanged (no IsotopeLabelType added)
 dt_null = data.table::data.table(
     PeptideSequence = c("PEPTIDEK(SILAC-K-H)", "PEPTIDEK(SILAC-K-L)")
 )
@@ -77,9 +76,6 @@ result_null = MSstatsConvert:::.assignDIANNIsotopeLabelType(
 expect_false("IsotopeLabelType" %in% colnames(result_null))
 expect_equal(nrow(result_null), 2L)
 
-# ModifiedSequence-parsing path: classification and stripping are agnostic to
-# the label token after the first parenthesis. The suffix may be (SILAC-<AA>-H)
-# or any (<label>-<AA>-H), e.g. (label-K-H).
 dt_label = data.table::data.table(
     PeptideSequence = c("PEPTIDEK(SILAC-K-H)", "PEPTIDEK(SILAC-K-L)",
                         "PEPTIDEK(label-K-H)", "PEPTIDEK(label-K-L)",
@@ -89,5 +85,4 @@ result_label = MSstatsConvert:::.assignDIANNIsotopeLabelType(
     dt_label, labeledAminoAcids = c("K"), has_channel = FALSE
 )
 expect_equal(result_label$IsotopeLabelType, c("H", "L", "H", "L", NA_character_))
-# Suffix is stripped regardless of the label token
 expect_equal(unique(result_label$PeptideSequence), "PEPTIDEK")

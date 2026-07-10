@@ -2,7 +2,6 @@
 #' @param msstats_object object that inherits from MSstatsInputFiles class.
 #' @return data.table
 #' @keywords internal
-#' @noRd
 .cleanRawProteinProspector = function(msstats_object) {
     PSM = PeptideSequence = PrecursorCharge = NULL
     protein_prospector_input = getInputFile(msstats_object, "input")

@@ -79,13 +79,17 @@ in \code{labeledAminoAcids} are \strong{not} used to validate or filter
 \strong{ModifiedSequence-parsing path} (DIA-NN 1.x exports without a
 \code{Channel} column): when \code{labeledAminoAcids} is non-\code{NULL}
 and no \code{Channel} column is present, each \code{ModifiedSequence} is
-inspected for label suffixes of the form \code{(<label>-<AA>-H)} or
-\code{(<label>-<AA>-L)}, where \code{<AA>} is one of the supplied amino acid
-codes and \code{<label>} is any non-dash token (e.g. \code{SILAC} or
-\code{label}).  Matching sequences are classified as \code{"H"} or
-\code{"L"}; sequences carrying neither suffix receive
-\code{IsotopeLabelType = NA}.  The label suffix is then stripped from
-\code{PeptideSequence}.
+scanned for isotope-labeled amino acids, which appear in parentheses
+immediately after the labeled residue,
+in the form \code{(<label>-<aminoAcid>-H)} for
+the heavy label or \code{(<label>-<aminoAcid>-L)} for the light label.
+For example, \code{K(label-K-H)} marks a heavy-labeled lysine (\code{K}).
+Here \code{<aminoAcid>} is one of the single-letter codes in
+\code{labeledAminoAcids}, and \code{<label>} is the label name (e.g.
+\code{SILAC} or \code{label}). Sequences with no such parenthetical
+tags are assigned \code{IsotopeLabelType = NA}. Once classified, the
+parenthetical annotation is stripped out of \code{PeptideSequence},
+leaving the plain amino acid sequence.
 
 When \code{NULL} (default), protein-turnover mode is disabled and all
 peptides receive \code{IsotopeLabelType = "Light"}.}
