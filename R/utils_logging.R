@@ -12,7 +12,7 @@
 }
 
 
-#' Format a log line as "LEVEL [timestamp] message"
+#' Format one log line: level, timestamp, message
 #'
 #' Message parts are joined with paste0, never sprintf, so a literal percent
 #' sign is written verbatim.
