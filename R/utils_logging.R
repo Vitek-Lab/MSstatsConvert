@@ -1,4 +1,4 @@
-#' log4r appender used not to write messages 
+#' Appender used not to write messages
 #' 
 #' A convenience function written to save time on checking if messages should
 #' be printed or logs should be written to a file.
@@ -12,9 +12,41 @@
 }
 
 
+#' Format a log line as "LEVEL [timestamp] message"
+#'
+#' Message parts are joined with paste0, never sprintf, so a literal percent
+#' sign is written verbatim.
+#' @keywords internal
+.formatLogMessage = function(level, ...) {
+    timestamp = format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+    level_field = formatC(level, width = 5L, flag = "-")
+    paste0(level_field, " [", timestamp, "] ", paste0(..., collapse = ""), "\n")
+}
+
+
+#' File appender: returns a function(level, ...) that writes one line to a file
+#' @keywords internal
+.fileAppender = function(log_file_path, append = TRUE) {
+    force(log_file_path)
+    force(append)
+    function(level, ...) {
+        cat(.formatLogMessage(level, ...), file = log_file_path, sep = "",
+            append = append)
+    }
+}
+
+
+#' Console appender: returns a function(level, ...) that writes one line to console
+#' @keywords internal
+.consoleAppender = function() {
+    function(level, ...) {
+        cat(.formatLogMessage(level, ...))
+    }
+}
+
+
 #' Set default logging object when package is loaded
 #' @param ... ignored
-#' @importFrom log4r file_appender console_appender
 #' @return none, sets options called MSstatsLog and MSstatsMsg
 #' @keywords internal
 .onLoad = function(...) {
@@ -24,11 +56,11 @@
     path = paste0("./MSstats_log_", gsub("[ :\\-]", "_", time_now), ".log")
     
     if (is.null(logs)) {
-        ms_logs = file_appender(path)
+        ms_logs = .fileAppender(path)
         options(MSstatsLog = ms_logs)
     }
     if (is.null(msgs)) {
-        ms_messages = console_appender()
+        ms_messages = .consoleAppender()
         options(MSstatsMsg = ms_messages)
     }
 }
@@ -79,24 +111,23 @@ MSstatsLogsSettings = function(use_log_file = TRUE, append = FALSE,
     
     if (use_log_file) {
         if (!is.null(log_file_path)) {
-            file_appender = log4r::file_appender(log_file_path,
-                                                 append = append)            
+            file_logger = .fileAppender(log_file_path, append = append)
         } else {
             time_now = Sys.time()
             log_file_path = paste0(base, gsub("[ :\\-]", "_", time_now), 
                                    ".log")
-            file_appender = log4r::file_appender(log_file_path)   
+            file_logger = .fileAppender(log_file_path)
         }
     } else {
-        file_appender = .nullAppender
+        file_logger = .nullAppender
     }
-    
+
     if (verbose) {
-        console_appender = console_appender()
+        console_logger = .consoleAppender()
     } else {
-        console_appender = .nullAppender
+        console_logger = .nullAppender
     }
-    loggers = list(file_appender, console_appender)
+    loggers = list(file_logger, console_logger)
     names(loggers) = paste0(pkg_name, c("Log", "Msg"))
     do.call(options, loggers)
     invisible(TRUE)

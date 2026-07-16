@@ -75,7 +75,7 @@ to store fraction labels.
 
 # Logging
   
-`MSstatsConvert` allows for flexible logging based on the `log4r` package.
+`MSstatsConvert` allows for flexible logging.
 Information about preprocessing steps can be written to a file, to a console,
 to both or to neither.
 The `MSstatsLogsSettings` function helps manage log settings.

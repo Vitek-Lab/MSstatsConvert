@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_logging.R
 \name{.nullAppender}
 \alias{.nullAppender}
-\title{log4r appender used not to write messages}
+\title{Appender used not to write messages}
 \usage{
 .nullAppender(level, ...)
 }

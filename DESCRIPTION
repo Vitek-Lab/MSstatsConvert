@@ -1,6 +1,6 @@
 Package: MSstatsConvert
 Title: Import Data from Various Mass Spectrometry Signal Processing Tools to MSstats Format
-Version: 1.23.2
+Version: 1.23.3
 Authors@R: c(
   person("Mateusz", "Staniak", email = "mtst@mstaniak.pl", role = "aut"),
   person("Devon", "Kohler", email = "kohler.d@northeastern.edu", role = "aut"),
@@ -19,7 +19,6 @@ Depends:
     R (>= 4.0)
 Imports: 
     data.table,
-    log4r,
     methods,
     checkmate,
     utils,
