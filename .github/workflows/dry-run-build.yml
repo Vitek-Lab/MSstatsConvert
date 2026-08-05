@@ -14,6 +14,14 @@ jobs:
           bioc-version: devel
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
+      # TEMPORARY: forces libstdc++ runtime assertions on, to reproduce the
+      # Linux-only isolation_forest.cpp crash from
+      # MSstatsConvert_isolation_forest_bug_report.md. Remove this step once
+      # the crash is confirmed / the fix is verified.
+      - name: Force libstdc++ assertions (reproduce Linux crash)
+        run: |
+          mkdir -p ~/.R
+          echo "CXXFLAGS += -D_GLIBCXX_ASSERTIONS" >> ~/.R/Makevars
       - name: Build, Install, Check
         uses: grimbough/bioc-actions/build-install-check@v1
 

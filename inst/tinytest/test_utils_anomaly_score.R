@@ -383,5 +383,48 @@ duplicate_metrics = run_quality_metrics(
 # The last 5 rows (with high values) should have lower mean anomaly scores
 # Since they are all clumped between 2 and 4, whereas 0.1 is by itself
 expect_true(mean(duplicate_metrics$AnomalyScores[6:10]) < mean(duplicate_metrics$AnomalyScores[1:5]),
-            info = "Rows 6-10 (values clumped 2-4) should have lower 
+            info = "Rows 6-10 (values clumped 2-4) should have lower
             anomaly scores than rows 1-5 (isolated value of 0.1)")
+
+# Test 12: Regression test for NaN-poisoned min/max in isolation_tree()
+#
+# If a quality metric's *first* row within a PSM group is NA/NaN,
+# isolation_tree() (src/isolation_forest.cpp) seeds min_val/max_val from
+# that row unconditionally. std::min/std::max never recover from a NaN
+# seed, so min_val/max_val stay NaN for the rest of the split, and
+# std::uniform_real_distribution() can end up constructed with NaN bounds.
+# That is undefined behavior: silently tolerated on libc++ (macOS), but
+# triggers a hard process abort on libstdc++ builds compiled with
+# assertions enabled (observed on Linux). See
+# MSstatsConvert_isolation_forest_bug_report.md for the full analysis.
+#
+# A single quality metric column is used so that column is always the
+# feature chosen for every split, and n_trees = 100 gives ~100 independent
+# 50/50 chances to hit the crash branch, making this reliably reproduce
+# the bug on an assertions-enabled build. On a build where it doesn't
+# crash, the second assertion below still guards against the resulting
+# degenerate/garbage split producing non-finite scores.
+nan_first_row_df = create_base_df(5)
+nan_first_row_df$QualityMetric.mean_increase = c(NA, 0.2, 0.4, 0.6, 0.8)
+
+nan_first_row_result = tryCatch({
+    MSstatsConvert:::.runAnomalyModel(
+        nan_first_row_df,
+        n_trees = 100,
+        max_depth = "auto",
+        cores = 1,
+        split_column = "PSM",
+        quality_metrics = c("QualityMetric.mean_increase"))
+}, error = function(e) e)
+
+expect_false(inherits(nan_first_row_result, "error"),
+    info = paste(
+        "Anomaly model should not crash/error when a quality metric has a",
+        "leading NA/NaN value within a PSM group.",
+        if (inherits(nan_first_row_result, "error"))
+            paste("Got error:", conditionMessage(nan_first_row_result)) else ""))
+
+if (!inherits(nan_first_row_result, "error")) {
+    expect_true(all(is.finite(nan_first_row_result$AnomalyScores)),
+        info = "Anomaly scores should be finite even when a quality metric has a leading missing value")
+}
