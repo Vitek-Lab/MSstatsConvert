@@ -78,26 +78,38 @@ std::unique_ptr<IsolationTreeNode> isolation_tree(
   std::string split_feature = features[feature_dist(gen)];
   
   // Can split on numeric or missing value
-  double min_val = data[0].at(split_feature);
-  double max_val = min_val;
+  double min_val = 0.0;
+  double max_val = 0.0;
   bool has_missing = false;
+  bool has_valid = false;
   for (const auto& row : data) {
-    if (std::isnan(row.at(split_feature))) {
+    double val = row.at(split_feature);
+    if (std::isnan(val)) {
       has_missing = true;
       continue;
     }
-    min_val = std::min(min_val, row.at(split_feature));
-    max_val = std::max(max_val, row.at(split_feature));
+    if (!has_valid) {
+      min_val = val;
+      max_val = val;
+      has_valid = true;
+    } else {
+      min_val = std::min(min_val, val);
+      max_val = std::max(max_val, val);
+    }
   }
-  
-  if (min_val == max_val && !has_missing) {
+
+  if (has_valid && min_val == max_val && !has_missing) {
     return std::make_unique<IsolationTreeNode>(n);
   }
-  
+
   // TODO: Chance to chose missing is 50/50. Could make less likely. Test
   bool is_missing_split = false;
   double split_value = 0.0;
-  if (has_missing && (std::bernoulli_distribution(0.5)(gen) || min_val == max_val)) {
+  if (!has_valid) {
+    // Every row is missing this feature: no numeric bounds exist to split
+    // on, so a missing-split is the only option.
+    is_missing_split = true;
+  } else if (has_missing && (std::bernoulli_distribution(0.5)(gen) || min_val == max_val)) {
     is_missing_split = true;
   } else {
     std::uniform_real_distribution<> split_dist(min_val, max_val);
