@@ -21,7 +21,7 @@ jobs:
       - name: Force libstdc++ assertions (reproduce Linux crash)
         run: |
           mkdir -p ~/.R
-          echo "CXXFLAGS += -D_GLIBCXX_ASSERTIONS" >> ~/.R/Makevars
+          echo "CXXFLAGS += -D_GLIBCXX_ASSERTIONS -UNDEBUG" >> ~/.R/Makevars
       - name: Build, Install, Check
         uses: grimbough/bioc-actions/build-install-check@v1
 
