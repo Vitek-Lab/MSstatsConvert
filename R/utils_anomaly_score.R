@@ -207,7 +207,11 @@
                             quality_metrics){
     
     function_environment = environment()
-    cl = parallel::makeCluster(cores)
+    # TEMPORARY: outfile = "" forwards worker stdout/stderr (including any
+    # native C++ assertion/abort messages) to the master process instead of
+    # discarding it, to confirm the exact crash text on Linux CI. Revert
+    # once confirmed.
+    cl = parallel::makeCluster(cores, outfile = "")
     
     parallel::clusterExport(cl, c(
         "calculate_anomaly_score",
