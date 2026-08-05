@@ -33,6 +33,9 @@
 .fileAppender = function(log_file_path, append = TRUE) {
     force(log_file_path)
     con = file(log_file_path, open = if (append) "a" else "w")
+    reg.finalizer(environment(), function(e) {
+        if (isOpen(e$con)) close(e$con)
+    }, onexit = TRUE)
     function(level, ...) {
         cat(.formatLogMessage(level, ...), file = con, sep = "")
         flush(con)
