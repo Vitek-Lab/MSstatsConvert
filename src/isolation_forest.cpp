@@ -98,18 +98,19 @@ std::unique_ptr<IsolationTreeNode> isolation_tree(
     }
   }
 
-  if (has_valid && min_val == max_val && !has_missing) {
+  if (!has_valid || (min_val == max_val && !has_missing)) {
+    // Either every row is missing this feature (no numeric bounds to split
+    // on, and a missing-split would put every row in the same child), or
+    // every non-missing row has the same value (no threshold could split
+    // them). Neither case can produce two non-empty children, so stop here
+    // instead of wasting a level of depth on a non-partitioning split.
     return std::make_unique<IsolationTreeNode>(n);
   }
 
   // TODO: Chance to chose missing is 50/50. Could make less likely. Test
   bool is_missing_split = false;
   double split_value = 0.0;
-  if (!has_valid) {
-    // Every row is missing this feature: no numeric bounds exist to split
-    // on, so a missing-split is the only option.
-    is_missing_split = true;
-  } else if (has_missing && (std::bernoulli_distribution(0.5)(gen) || min_val == max_val)) {
+  if (has_missing && (std::bernoulli_distribution(0.5)(gen) || min_val == max_val)) {
     is_missing_split = true;
   } else {
     std::uniform_real_distribution<> split_dist(min_val, max_val);
