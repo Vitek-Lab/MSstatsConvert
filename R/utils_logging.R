@@ -25,13 +25,17 @@
 
 
 #' File appender: returns a function(level, ...) that writes one line to a file
+#'
+#' Keeps the file connection open for the closure's lifetime instead of
+#' reopening on every call, and flushes after each write to keep lines
+#' durable for crash audits.
 #' @keywords internal
 .fileAppender = function(log_file_path, append = TRUE) {
     force(log_file_path)
-    force(append)
+    con = file(log_file_path, open = if (append) "a" else "w")
     function(level, ...) {
-        cat(.formatLogMessage(level, ...), file = log_file_path, sep = "",
-            append = append)
+        cat(.formatLogMessage(level, ...), file = con, sep = "")
+        flush(con)
     }
 }
 
