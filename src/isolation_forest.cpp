@@ -99,11 +99,6 @@ std::unique_ptr<IsolationTreeNode> isolation_tree(
   }
 
   if (!has_valid || (min_val == max_val && !has_missing)) {
-    // Either every row is missing this feature (no numeric bounds to split
-    // on, and a missing-split would put every row in the same child), or
-    // every non-missing row has the same value (no threshold could split
-    // them). Neither case can produce two non-empty children, so stop here
-    // instead of wasting a level of depth on a non-partitioning split.
     return std::make_unique<IsolationTreeNode>(n);
   }
 
