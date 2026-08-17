@@ -386,24 +386,6 @@ expect_true(mean(duplicate_metrics$AnomalyScores[6:10]) < mean(duplicate_metrics
             info = "Rows 6-10 (values clumped 2-4) should have lower
             anomaly scores than rows 1-5 (isolated value of 0.1)")
 
-# Test 12: Regression test for NaN-poisoned min/max in isolation_tree()
-#
-# If a quality metric's *first* row within a PSM group is NA/NaN,
-# isolation_tree() (src/isolation_forest.cpp) seeds min_val/max_val from
-# that row unconditionally. std::min/std::max never recover from a NaN
-# seed, so min_val/max_val stay NaN for the rest of the split, and
-# std::uniform_real_distribution() can end up constructed with NaN bounds.
-# That is undefined behavior: silently tolerated on libc++ (macOS), but
-# triggers a hard process abort on libstdc++ builds compiled with
-# assertions enabled (observed on Linux). See
-# MSstatsConvert_isolation_forest_bug_report.md for the full analysis.
-#
-# A single quality metric column is used so that column is always the
-# feature chosen for every split, and n_trees = 100 gives ~100 independent
-# 50/50 chances to hit the crash branch, making this reliably reproduce
-# the bug on an assertions-enabled build. On a build where it doesn't
-# crash, the second assertion below still guards against the resulting
-# degenerate/garbage split producing non-finite scores.
 nan_first_row_df = create_base_df(5)
 nan_first_row_df$QualityMetric.mean_increase = c(NA, 0.2, 0.4, 0.6, 0.8)
 
