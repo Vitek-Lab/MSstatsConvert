@@ -40,9 +40,9 @@ We assume to use unique peptide for each protein.}
 \item{qvalue_cutoff}{Cutoff for the \code{q_value} column. Default is 0.01.}
 
 \item{filter_with_Qvalue}{TRUE (default) replaces intensities whose \code{q_value}
-is greater than \code{qvalue_cutoff} with \code{NA} (treated as censored missing
-downstream). FALSE performs no q-value filtering. Sage does not pre-filter
-\code{lfq.tsv} on \code{lfq_settings.peptide_q_value}, so this filter is load-bearing.}
+exceeds \code{qvalue_cutoff} with \code{NA} (treated as censored missing downstream);
+FALSE performs no q-value filtering. See the "FDR filtering" section for
+why this matters.}
 
 \item{use_log_file}{logical. If TRUE, information about data processing
 will be saved to a file.}
@@ -75,6 +75,22 @@ Use \code{lfq.tsv}, which Sage writes only when \code{quant.lfq: true} is set in
 search configuration. Do \strong{not} use \code{results.sage.tsv}: its \code{ms2_intensity}
 column is the summed intensity of matched b/y fragment ions -- a PSM score
 feature -- and is not a quantitative measure of precursor abundance.
+}
+
+\section{FDR filtering}{
+
+\code{lfq.tsv} is not FDR-filtered. Sage writes every quantified peptide and
+charge row regardless of its q-value, leaving the filtering choice to
+downstream tools. The \code{lfq_settings.peptide_q_value} setting in the Sage
+configuration is an internal threshold used when building the LFQ traces;
+it does not filter what is written to the file, so a report produced with
+\code{peptide_q_value} set to \code{0.01} will still contain rows well above \code{0.01}.
+This converter applies the filter: \code{filter_with_Qvalue} defaults to \code{TRUE}
+and \code{qvalue_cutoff} defaults to \code{0.01}, so a default call returns
+FDR-filtered output. The filter is load-bearing on real data -- in two
+files from the issue author, 61 percent of rows in an eight-run file and
+23 percent in a single-run file were above \code{0.01}. Set
+\code{filter_with_Qvalue = FALSE} to return unfiltered data.
 }
 
 \section{Charge states}{

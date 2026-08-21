@@ -16,9 +16,9 @@
 #'   and replicate information must be provided separately.
 #' @param qvalue_cutoff Cutoff for the `q_value` column. Default is 0.01.
 #' @param filter_with_Qvalue TRUE (default) replaces intensities whose `q_value`
-#'   is greater than `qvalue_cutoff` with `NA` (treated as censored missing
-#'   downstream). FALSE performs no q-value filtering. Sage does not pre-filter
-#'   `lfq.tsv` on `lfq_settings.peptide_q_value`, so this filter is load-bearing.
+#'   exceeds `qvalue_cutoff` with `NA` (treated as censored missing downstream);
+#'   FALSE performs no q-value filtering. See the "FDR filtering" section for
+#'   why this matters.
 #'
 #' @return `data.frame` in the MSstats required format.
 #'
@@ -27,6 +27,20 @@
 #' search configuration. Do **not** use `results.sage.tsv`: its `ms2_intensity`
 #' column is the summed intensity of matched b/y fragment ions -- a PSM score
 #' feature -- and is not a quantitative measure of precursor abundance.
+#'
+#' @section FDR filtering:
+#' `lfq.tsv` is not FDR-filtered. Sage writes every quantified peptide and
+#' charge row regardless of its q-value, leaving the filtering choice to
+#' downstream tools. The `lfq_settings.peptide_q_value` setting in the Sage
+#' configuration is an internal threshold used when building the LFQ traces;
+#' it does not filter what is written to the file, so a report produced with
+#' `peptide_q_value` set to `0.01` will still contain rows well above `0.01`.
+#' This converter applies the filter: `filter_with_Qvalue` defaults to `TRUE`
+#' and `qvalue_cutoff` defaults to `0.01`, so a default call returns
+#' FDR-filtered output. The filter is load-bearing on real data -- in two
+#' files from the issue author, 61 percent of rows in an eight-run file and
+#' 23 percent in a single-run file were above `0.01`. Set
+#' `filter_with_Qvalue = FALSE` to return unfiltered data.
 #'
 #' @section Charge states:
 #' Sage's `combine_charge_states` option (default `true`) sums charge states and
