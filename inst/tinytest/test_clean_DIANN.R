@@ -99,3 +99,54 @@ expect_equal(result_multi_aa$IsotopeLabelType,
              c("H", "H", "L", "L", NA_character_))
 expect_equal(sort(unique(result_multi_aa$PeptideSequence)),
              c("PEPTIDEAC", "PEPTIDEK", "PEPTIDER"))
+
+# Multiply labeled peptides (2+ labelable residues) are filtered out
+dt_multi_label = data.table::data.table(
+    PeptideSequence = c(
+        "PEPTIDEK(SILAC-K-H)",                    # 1 K, heavy -> kept
+        "PEPTIDEK(SILAC-K-L)",                    # 1 K, light -> kept
+        "PEPK(SILAC-K-H)TIDEK(SILAC-K-H)",        # 2 K, heavy -> dropped
+        "PEPK(SILAC-K-H)TIDEK(SILAC-K-L)",        # 2 K, partial -> dropped
+        "PEPK(SILAC-K-L)TIDEK(SILAC-K-L)",        # 2 K, light -> dropped
+        "PEPTIDEAC"                               # 0 K -> kept as NA
+    )
+)
+result_multi_label = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_multi_label, labeledAminoAcids = c("K"), has_channel = FALSE
+)
+expect_equal(result_multi_label$PeptideSequence,
+             c("PEPTIDEK", "PEPTIDEK", "PEPTIDEAC"))
+expect_equal(result_multi_label$IsotopeLabelType, c("H", "L", NA_character_))
+
+# Count is taken across all labeled amino acids combined
+dt_kr = data.table::data.table(
+    PeptideSequence = c("PEPTIDEK(SILAC-K-H)",
+                        "PEPK(SILAC-K-H)TIDER(SILAC-R-H)",  # 1 K + 1 R -> dropped
+                        "PEPTIDER(SILAC-R-L)")
+)
+result_kr = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_kr, labeledAminoAcids = c("K", "R"), has_channel = FALSE
+)
+expect_equal(result_kr$PeptideSequence, c("PEPTIDEK", "PEPTIDER"))
+expect_equal(result_kr$IsotopeLabelType, c("H", "L"))
+
+# Residue letters inside an unrelated modification are not counted
+dt_mod = data.table::data.table(
+    PeptideSequence = c("PEPTS(Kmod)IDEK(SILAC-K-H)")
+)
+result_mod = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_mod, labeledAminoAcids = c("K"), has_channel = FALSE
+)
+expect_equal(nrow(result_mod), 1L)
+expect_equal(result_mod$IsotopeLabelType, "H")
+
+# The Channel path is exempt: labeling is not inferred from sequence content
+dt_channel_multi = data.table::data.table(
+    PeptideSequence = c("PEPKTIDEK", "PEPKTIDEK", "PEPTIDEK"),
+    Channel = c("H", "L", "H")
+)
+result_channel_multi = MSstatsConvert:::.assignDIANNIsotopeLabelType(
+    dt_channel_multi, labeledAminoAcids = c("K"), has_channel = TRUE
+)
+expect_equal(nrow(result_channel_multi), 3L)
+expect_equal(result_channel_multi$IsotopeLabelType, c("H", "L", "H"))

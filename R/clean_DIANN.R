@@ -243,6 +243,12 @@
 #' parenthetical annotation is stripped out of \code{PeptideSequence},
 #' leaving the plain amino acid sequence.
 #'
+#' Peptides with two or more labelable residues are dropped, counting across
+#' all of \code{labeledAminoAcids} combined, since partial labeling is not
+#' supported by the turnover model.  This applies only to the
+#' \code{ModifiedSequence} path; channel-based labeling is not inferred from
+#' sequence content and is left untouched.
+#'
 #' @param dn_input \code{data.table} after column renaming.
 #' @param labeledAminoAcids Character vector of single-letter amino acid codes
 #'   (e.g. \code{c("K")} or \code{c("K", "R")}), or \code{NULL} to skip
@@ -274,6 +280,8 @@
         light_regex <- paste0("\\([^-]+-(?:", aa_pattern, ")-L\\)")
         strip_regex <- paste0("\\([^-]+-(?:", aa_pattern, ")-[HL]\\)")
 
+        dn_input <- .filterMultiplyLabeledPeptides(dn_input, aa_pattern,
+                                                   "\\([^)]*\\)")
         dn_input <- .classifyIsotopeLabelType(dn_input, heavy_regex, light_regex)
         dn_input[, PeptideSequence := gsub(strip_regex, "", PeptideSequence, perl = TRUE)]
     }

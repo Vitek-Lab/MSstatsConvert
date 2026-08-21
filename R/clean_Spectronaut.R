@@ -212,9 +212,10 @@
         collapse = "|"
     )
 
+    spec_input = .filterMultiplyLabeledPeptides(spec_input, labeled_aa_regex,
+                                                "\\[.*?\\]")
     spec_input = .classifyIsotopeLabelType(spec_input, heavy_regex,
-                                            labeled_aa_regex = labeled_aa_regex,
-                                            filter_multiply_labeled = TRUE)
+                                            labeled_aa_regex = labeled_aa_regex)
 
     for (i in seq_along(heavyLabels)) {
         escaped = gsub("([\\[\\]])", "\\\\\\1", heavyLabels[i], perl = TRUE)
