@@ -73,3 +73,37 @@ expect_equal(result$PeptideSequence,
 dt = make_spec_input(c("_PEPTIDEK_", "_PEPTIDER_"))
 result = MSstatsConvert:::.assignSpectronautIsotopeLabelType(dt, heavyLabels = NULL)
 expect_equal(result, dt)
+
+# Multiply labeled peptides (2+ labelable residues) are filtered out
+dt = make_spec_input(c(
+    "_PEPTIDEK[Lys6]_",         # 1 K, heavy -> kept
+    "_PEPTIDEK_",               # 1 K, light -> kept
+    "_PEPK[Lys6]TIDEK[Lys6]_",  # 2 K, fully heavy -> dropped
+    "_PEPK[Lys6]TIDEK_",        # 2 K, partially labeled -> dropped
+    "_PEPKTIDEK_",              # 2 K, fully light -> dropped
+    "_ACDEGFHI_"                # 0 K -> kept as NA
+))
+result = MSstatsConvert:::.assignSpectronautIsotopeLabelType(
+    dt, heavyLabels = "K[Lys6]")
+expect_equal(result$PeptideSequence,
+             c("_PEPTIDEK_", "_PEPTIDEK_", "_ACDEGFHI_"))
+expect_equal(result$IsotopeLabelType, c("H", "L", NA_character_))
+
+# Count is taken across all labelable residues combined: one K plus one R is
+# doubly labelable when both labels are specified
+dt = make_spec_input(c(
+    "_PEPTIDEK_",   # 1 labelable -> kept
+    "_PEPTIDEKR_",  # 1 K + 1 R -> dropped
+    "_PEPTIDER_"    # 1 labelable -> kept
+))
+result = MSstatsConvert:::.assignSpectronautIsotopeLabelType(
+    dt, heavyLabels = c("K[Lys6]", "R[Arg10]"))
+expect_equal(result$PeptideSequence, c("_PEPTIDEK_", "_PEPTIDER_"))
+expect_equal(result$IsotopeLabelType, c("L", "L"))
+
+# Residue letters inside an unrelated modification tag are not counted
+dt = make_spec_input(c("_S[Kmodification]PEPTIDEK_"))
+result = MSstatsConvert:::.assignSpectronautIsotopeLabelType(
+    dt, heavyLabels = "K[Lys6]")
+expect_equal(nrow(result), 1L)
+expect_equal(result$IsotopeLabelType, "L")

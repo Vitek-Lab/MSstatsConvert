@@ -185,6 +185,10 @@
 #' are classified as \code{NA}.  For example, if \code{heavyLabels} is 
 #' \code{"Lys6"}, then \code{PEPTIDEZ} is classified as NA since it
 #' has no lysine residues that could be labeled.
+#'
+#' Peptides with two or more labelable residues are dropped, counting across
+#' all residues named in \code{heavyLabels} combined, since partial labeling
+#' is not supported by the turnover model.
 #' When \code{heavyLabel} is \code{NULL} the column is left untouched so
 #' that the downstream \code{columns_to_fill} default of \code{"L"} applies,
 #' preserving backwards compatibility.
@@ -209,7 +213,8 @@
     )
 
     spec_input = .classifyIsotopeLabelType(spec_input, heavy_regex,
-                                            labeled_aa_regex = labeled_aa_regex)
+                                            labeled_aa_regex = labeled_aa_regex,
+                                            filter_multiply_labeled = TRUE)
 
     for (i in seq_along(heavyLabels)) {
         escaped = gsub("([\\[\\]])", "\\\\\\1", heavyLabels[i], perl = TRUE)

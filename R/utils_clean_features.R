@@ -309,6 +309,36 @@
 }
 
 
+#' Count regex matches per element, scoring no-match and \code{NA} as 0.
+#' @param x Character vector to search.
+#' @param pattern Perl-compatible regex.
+#' @return Integer vector of match counts, the same length as \code{x}.
+#' @keywords internal
+#' @noRd
+.countRegexMatches = function(x, pattern) {
+    lengths(regmatches(x, gregexpr(pattern, x, perl = TRUE)))
+}
+
+
+#' Drop peptides carrying more than one labelable residue.
+#'
+#' Such peptides can be partially labeled, which the two-state turnover model
+#' cannot represent, so heavy and light rows are dropped together to keep the
+#' light/heavy ratio unbiased.
+#'
+#' @param dt \code{data.table} to filter.
+#' @param residue_regex Perl-compatible regex matching one labelable residue.
+#' @param sequence_column Column of sequences already stripped of label
+#'   annotations, so residues inside a modification tag are not counted.
+#' @return \code{dt} with multiply labeled rows removed.
+#' @keywords internal
+#' @noRd
+.filterMultiplyLabeledPeptides = function(dt, residue_regex, sequence_column) {
+    n_labelable = .countRegexMatches(dt[[sequence_column]], residue_regex)
+    dt[n_labelable < 2L, ]
+}
+
+
 #' Classify IsotopeLabelType from peptide sequence patterns.
 #'
 #' Shared core logic for protein turnover workflows in both Spectronaut and
@@ -335,16 +365,25 @@
 #'   Required for Spectronaut mode; must be non-\code{NULL}.
 #'   Exactly one of \code{light_regex} and \code{labeled_aa_regex} must be
 #'   supplied.
-#' @return \code{dt} with \code{IsotopeLabelType} column added or updated.
+#' @param filter_multiply_labeled Logical; when \code{TRUE}, peptides with two
+#'   or more labelable residues are dropped before classification.
+#' @return \code{dt} with \code{IsotopeLabelType} column added or updated, and
+#'   multiply labeled rows removed when \code{filter_multiply_labeled} is
+#'   \code{TRUE}.
 #' @keywords internal
 #' @noRd
 .classifyIsotopeLabelType = function(dt, heavy_regex,
                                       light_regex = NULL,
-                                      labeled_aa_regex = NULL) {
+                                      labeled_aa_regex = NULL,
+                                      filter_multiply_labeled = FALSE) {
     IsotopeLabelType = PeptideSequence = StrippedSequence = NULL
 
     if (!is.null(labeled_aa_regex)) {
         dt[, StrippedSequence := gsub("\\[.*?\\]", "", PeptideSequence)]
+        if (filter_multiply_labeled) {
+            dt = .filterMultiplyLabeledPeptides(dt, labeled_aa_regex,
+                                                "StrippedSequence")
+        }
         dt[, IsotopeLabelType := data.table::fcase(
             grepl(heavy_regex, PeptideSequence, perl = TRUE), "H",
             grepl(labeled_aa_regex, StrippedSequence, perl = TRUE), "L",
