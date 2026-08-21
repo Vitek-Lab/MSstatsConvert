@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_logging.R
 \name{.formatLogMessage}
 \alias{.formatLogMessage}
-\title{Format a log line as "LEVEL \link{timestamp} message"}
+\title{Format one log line: level, timestamp, message}
 \usage{
 .formatLogMessage(level, ...)
 }
