@@ -54,6 +54,19 @@ expect_true("IsotopeLabelType" %in% colnames(annotation))
 expect_true(all(output$IsotopeLabelType == "L"))
 expect_equal(sum(colnames(output) == "IsotopeLabelType"), 1L)
 
+# Regression: a plain Run/Condition/BioReplicate annotation (no IsotopeLabelType,
+# no Fraction) still yields a Fraction column. Fraction is supplied by
+# MSstatsBalancedDesign, not by columns_to_fill, so it must appear even when the
+# annotation carries none. The main fixture annotation deliberately includes
+# IsotopeLabelType, so the plain three-column case is otherwise untested.
+annotation_min = annotation[, list(Run, Condition, BioReplicate)]
+expect_false("Fraction" %in% colnames(annotation_min))
+expect_false("IsotopeLabelType" %in% colnames(annotation_min))
+output_min = data.table::as.data.table(
+    SagetoMSstatsFormat(sage_raw, annotation_min, use_log_file = FALSE))
+expect_true("Fraction" %in% colnames(output_min))
+expect_true(all(output_min$Fraction == 1))
+
 # FragmentIon and ProductCharge are NA
 expect_true(all(is.na(output$FragmentIon)))
 expect_true(all(is.na(output$ProductCharge)))
