@@ -147,7 +147,16 @@ classified as heavy (\code{IsotopeLabelType = "H"}), light
 (\code{IsotopeLabelType = "L"}), or unlabeled
 (\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
 \code{NULL} (default) all peptides receive \code{IsotopeLabelType = "L"}.
-Useful for protein turnover experiments.}
+Useful for protein turnover experiments.
+
+Peptides carrying more than one labelable residue are removed, and the
+number removed is reported.  Residues are counted across all labels
+supplied together, so with \code{c("Lys6", "Arg10")} a peptide containing
+one lysine and one arginine counts as two and is removed.  Such peptides
+can be only partially labeled, producing more than the two mass states
+(fully light and fully heavy) that the turnover model represents.
+Supporting them is future work; turnover analysis is currently limited to
+peptides with exactly one labelable residue.}
 
 \item{peptide_id_col}{character name of a column that identifies peptides}
 
@@ -203,6 +212,17 @@ Here \code{<aminoAcid>} is one of the single-letter codes in
 tags are assigned \code{IsotopeLabelType = NA}. Once classified, the
 parenthetical annotation is stripped out of \code{PeptideSequence},
 leaving the plain amino acid sequence.
+
+In this path only, peptides carrying more than one labelable residue are
+removed, and the number removed is reported.  Residues are counted across
+all of \code{labeledAminoAcids} together, so with \code{c("K", "R")} a
+peptide containing one lysine and one arginine counts as two and is removed.
+Such peptides can be only partially labeled, producing more than the two
+mass states (fully light and fully heavy) that the turnover model
+represents.  Supporting them is future work; turnover analysis is currently
+limited to peptides with exactly one labelable residue.  The channel-based
+path above is unaffected, since it does not infer labeling from sequence
+content.
 
 When \code{NULL} (default), protein-turnover mode is disabled and all
 peptides receive \code{IsotopeLabelType = "Light"}.}

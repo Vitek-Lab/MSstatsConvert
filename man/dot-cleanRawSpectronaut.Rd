@@ -42,7 +42,16 @@ classified as heavy (\code{IsotopeLabelType = "H"}), light
 (\code{IsotopeLabelType = "L"}), or unlabeled
 (\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
 \code{NULL} (default) all peptides receive \code{IsotopeLabelType = "L"}.
-Useful for protein turnover experiments.}
+Useful for protein turnover experiments.
+
+Peptides carrying more than one labelable residue are removed, and the
+number removed is reported.  Residues are counted across all labels
+supplied together, so with \code{c("Lys6", "Arg10")} a peptide containing
+one lysine and one arginine counts as two and is removed.  Such peptides
+can be only partially labeled, producing more than the two mass states
+(fully light and fully heavy) that the turnover model represents.
+Supporting them is future work; turnover analysis is currently limited to
+peptides with exactly one labelable residue.}
 }
 \value{
 \code{data.table}

@@ -23,6 +23,15 @@
 #'   (\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
 #'   \code{NULL} (default) all peptides receive \code{IsotopeLabelType = "L"}.
 #'   Useful for protein turnover experiments.
+#'
+#'   Peptides carrying more than one labelable residue are removed, and the
+#'   number removed is reported.  Residues are counted across all labels
+#'   supplied together, so with \code{c("Lys6", "Arg10")} a peptide containing
+#'   one lysine and one arginine counts as two and is removed.  Such peptides
+#'   can be only partially labeled, producing more than the two mass states
+#'   (fully light and fully heavy) that the turnover model represents.
+#'   Supporting them is future work; turnover analysis is currently limited to
+#'   peptides with exactly one labelable residue.
 #' @param excludedFromQuantificationFilter Remove rows with F.ExcludedFromQuantification=TRUE Default is TRUE.
 #' @param filter_with_Qvalue FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
