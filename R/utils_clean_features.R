@@ -324,7 +324,8 @@
 #'
 #' Such peptides can be partially labeled, which the two-state turnover model
 #' cannot represent, so heavy and light rows are dropped together to keep the
-#' light/heavy ratio unbiased.
+#' light/heavy ratio unbiased.  The number of peptides removed is logged, since
+#' the exclusion is otherwise invisible to the user.
 #'
 #' @param dt \code{data.table} with a \code{PeptideSequence} column.
 #' @param residue_regex Perl-compatible regex matching one labelable residue.
@@ -337,7 +338,21 @@
 .filterMultiplyLabeledPeptides = function(dt, residue_regex, strip_regex) {
     stripped = gsub(strip_regex, "", dt[["PeptideSequence"]], perl = TRUE)
     n_labelable = .countRegexMatches(stripped, residue_regex)
-    dt[n_labelable < 2L, ]
+    is_multiply_labeled = n_labelable >= 2L
+
+    if (any(is_multiply_labeled)) {
+        # Count distinct peptides on the stripped sequence, so that the heavy
+        # and light forms of one peptide are not reported as two.
+        msg = paste("**", data.table::uniqueN(stripped[is_multiply_labeled]),
+                    "peptide(s) with more than one labelable residue were",
+                    paste0("removed (", sum(is_multiply_labeled), " row(s))."),
+                    "Turnover analysis is currently limited to peptides with",
+                    "exactly one labelable residue.")
+        getOption("MSstatsLog")("INFO", msg)
+        getOption("MSstatsMsg")("INFO", msg)
+    }
+
+    dt[!is_multiply_labeled, ]
 }
 
 

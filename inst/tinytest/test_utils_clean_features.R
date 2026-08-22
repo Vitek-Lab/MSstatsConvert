@@ -216,6 +216,32 @@ result_multi = MSstatsConvert:::.classifyIsotopeLabelType(
 )
 expect_equal(result_multi$IsotopeLabelType, c("H", "H", "L", "L", NA_character_))
 
+# Test .filterMultiplyLabeledPeptides ----
+# Heavy and light forms of one peptide are reported as a single peptide, and
+# the row count is reported alongside it
+dt_report = data.table::data.table(PeptideSequence = c(
+    "_PEPKTIDEK[Lys6]_", "_PEPKTIDEK[Lys6]_", "_PEPKTIDEK_",  # 1 peptide, 3 rows
+    "_PEPTIDEK_"                                              # kept
+))
+# The appender writes with cat(), so the console output is captured directly
+log_report = capture.output(
+    kept <- MSstatsConvert:::.filterMultiplyLabeledPeptides(
+        dt_report, "K", "\\[.*?\\]")
+)
+expect_true(any(grepl(
+    "1 peptide(s) with more than one labelable residue were removed (3 row(s))",
+    log_report, fixed = TRUE)))
+expect_equal(nrow(kept), 1L)
+
+# Nothing to remove means nothing is reported
+dt_quiet = data.table::data.table(PeptideSequence = c("_PEPTIDEK_", "_ACDEG_"))
+log_quiet = capture.output(
+    all_kept <- MSstatsConvert:::.filterMultiplyLabeledPeptides(
+        dt_quiet, "K", "\\[.*?\\]")
+)
+expect_false(any(grepl("labelable residue", log_quiet, fixed = TRUE)))
+expect_equal(nrow(all_kept), 2L)
+
 # Utility function ----
 expect_equal(MSstatsConvert:::.combine(c("A", "B"), c("A", "B")),
              c("A_A", "B_B"))
