@@ -179,12 +179,15 @@
 #'
 #' In Spectronaut protein turnover reports, heavy peptides appear in
 #' \code{FG.LabeledSequence} with a bracketed modification, e.g.
-#' \code{_PEPTIDEK[Lys6]_}.  Any sequence that contains
-#' \code{[<heavyLabel>]} is classified as heavy; all others are light.
-#' Sequences that do not have amino acids that can carry the label
-#' are classified as \code{NA}.  For example, if \code{heavyLabels} is 
-#' \code{"Lys6"}, then \code{PEPTIDEZ} is classified as NA since it
-#' has no lysine residues that could be labeled.
+#' \code{_PEPTIDEK[Lys6]_}.  Each entry of \code{heavyLabels} names the
+#' labelable residue and the label together, as \code{<residue>[<label>]}, so
+#' any sequence containing that tag is classified as heavy.  The residue prefix
+#' is what identifies which unlabeled sequences are light: a sequence with no
+#' labeled tag but at least one labelable residue is light, and one with no
+#' labelable residue at all is \code{NA}.  For example, if \code{heavyLabels}
+#' is \code{"K[Lys6]"}, then \code{PEPTIDEK} is classified as light and
+#' \code{PEPTIDEZ} as NA, since it has no lysine residues that could be
+#' labeled.
 #'
 #' Peptides with two or more labelable residues are dropped, counting across
 #' all residues named in \code{heavyLabels} combined, since partial labeling
@@ -194,8 +197,9 @@
 #' preserving backwards compatibility.
 #'
 #' @param spec_input `data.table` after column renaming.
-#' @param heavyLabels Character scalar heavy label name (e.g. \code{"Lys6"}),
-#'   or \code{NULL}.
+#' @param heavyLabels Character vector of labelable residue and heavy label
+#'   pairs, written as \code{<residue>[<label>]} (e.g. \code{"K[Lys6]"}), or
+#'   \code{NULL}.
 #' @return `data.table` with \code{IsotopeLabelType} column added or updated.
 #' @keywords internal
 #' @noRd

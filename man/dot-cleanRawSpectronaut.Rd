@@ -32,12 +32,16 @@ For protein turnover workflows the recommended default is
 peptide sequence.  Defaults to \code{"EG.ModifiedSequence"}. The value is
 standardized internally (dots and spaces removed) before column lookup.}
 
-\item{heavyLabels}{Character list identifying the heavy isotope labels as it
-appears inside square brackets in the peptide sequence column, e.g.
-\code{c("Lys6")} matches peptides containing \code{[Lys6]}.
-\code{c("Lys6", "Arg10")} matches peptides containing either \code{[Lys6]} or \code{[Arg10]}.
-Supports any novel label name reported by Spectronaut (e.g. \code{"Leu6"},
-\code{"Phe10"}).  When provided, peptides are
+\item{heavyLabels}{Character vector identifying the labelable residue and the
+heavy isotope label as they appear in the peptide sequence column, written
+as the single-letter amino acid code followed by the label in square
+brackets, e.g. \code{c("K[Lys6]")} matches peptides containing
+\code{K[Lys6]}.  \code{c("K[Lys6]", "R[Arg10]")} matches peptides
+containing either \code{K[Lys6]} or \code{R[Arg10]}.  The residue prefix
+is required: it identifies which residues could carry the label, and so
+which unlabeled peptides are light rather than unlabelable.  Supports any
+novel label name reported by Spectronaut (e.g. \code{"L[Leu6]"},
+\code{"F[Phe10]"}).  When provided, peptides are
 classified as heavy (\code{IsotopeLabelType = "H"}), light
 (\code{IsotopeLabelType = "L"}), or unlabeled
 (\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
@@ -46,7 +50,7 @@ Useful for protein turnover experiments.
 
 Peptides carrying more than one labelable residue are removed, and the
 number removed is reported.  Residues are counted across all labels
-supplied together, so with \code{c("Lys6", "Arg10")} a peptide containing
+supplied together, so with \code{c("K[Lys6]", "R[Arg10]")} a peptide containing
 one lysine and one arginine counts as two and is removed.  Such peptides
 can be only partially labeled, producing more than the two mass states
 (fully light and fully heavy) that the turnover model represents.
