@@ -32,30 +32,23 @@ For protein turnover workflows the recommended default is
 peptide sequence.  Defaults to \code{"EG.ModifiedSequence"}. The value is
 standardized internally (dots and spaces removed) before column lookup.}
 
-\item{heavyLabels}{Character vector identifying the labelable residue and the
-heavy isotope label as they appear in the peptide sequence column, written
-as the single-letter amino acid code followed by the label in square
-brackets, e.g. \code{c("K[Lys6]")} matches peptides containing
-\code{K[Lys6]}.  \code{c("K[Lys6]", "R[Arg10]")} matches peptides
-containing either \code{K[Lys6]} or \code{R[Arg10]}.  The residue prefix
-is required: it identifies which residues could carry the label, and so
-which unlabeled peptides are light rather than unlabelable.  Supports any
-novel label name reported by Spectronaut (e.g. \code{"L[Leu6]"},
-\code{"F[Phe10]"}).  When provided, peptides are
-classified as heavy (\code{IsotopeLabelType = "H"}), light
-(\code{IsotopeLabelType = "L"}), or unlabeled
-(\code{IsotopeLabelType = NA}) based on its labeled sequence.  When
-\code{NULL} (default) all peptides receive \code{IsotopeLabelType = "L"}.
-Useful for protein turnover experiments.
+\item{heavyLabels}{Character vector naming each labeled residue and its
+heavy label as they appear in the peptide sequence column: the
+single-letter amino acid code, then the label in square brackets.  For
+example \code{"K[Lys6]"}, or \code{c("K[Lys6]", "R[Arg10]")} for a
+double-label experiment.  Any label name Spectronaut reports is accepted.
+The residue letter is required, because it is what tells MSstats which
+peptides could have carried a label.
 
-Peptides carrying more than one labelable residue are removed, and the
-number removed is reported.  Residues are counted across all labels
-supplied together, so with \code{c("K[Lys6]", "R[Arg10]")} a peptide containing
-one lysine and one arginine counts as two and is removed.  Such peptides
-can be only partially labeled, producing more than the two mass states
-(fully light and fully heavy) that the turnover model represents.
-Supporting them is future work; turnover analysis is currently limited to
-peptides with exactly one labelable residue.}
+Peptides carrying the label are marked heavy
+(\code{IsotopeLabelType = "H"}), those that could carry it but do not are
+light (\code{"L"}), and those with no labelable residue are \code{NA}.  A
+peptide with two or more labelable residues (counted across all labels
+supplied) may be only partially labeled, which the two-state turnover
+model cannot represent, so it is dropped and the number removed is
+reported.
+
+Defaults to \code{NULL}: turnover mode off, every peptide marked light.}
 }
 \value{
 \code{data.table}

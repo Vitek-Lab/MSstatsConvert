@@ -171,35 +171,23 @@
 }
 
 
-#' Assign IsotopeLabelType based on heavy label detection.
+#' Assign IsotopeLabelType from Spectronaut heavy label tags.
 #'
-#' When \code{heavyLabel} is provided, each row is classified as heavy
-#' (\code{"H"}), light (\code{"L"}), or unlabeled (\code{NA}) by inspecting
-#' the labeled sequence column for the presence of the label tag.
+#' In Spectronaut turnover reports a labeled residue carries its label in
+#' brackets, e.g. \code{_PEPTIDEK[Lys6]_}.  Each \code{heavyLabels} entry pairs
+#' the residue with the label (\code{"K[Lys6]"}), so the bare residue marks a
+#' peptide that could have been labeled: with \code{"K[Lys6]"},
+#' \code{PEPTIDEK[Lys6]} is heavy, \code{PEPTIDEK} is light, and
+#' \code{PEPTIDEZ} is \code{NA}.  Peptides with two or more labelable residues
+#' (counted across all labels) are dropped, since partial labeling breaks the
+#' two-state turnover model.
 #'
-#' In Spectronaut protein turnover reports, heavy peptides appear in
-#' \code{FG.LabeledSequence} with a bracketed modification, e.g.
-#' \code{_PEPTIDEK[Lys6]_}.  Each entry of \code{heavyLabels} names the
-#' labelable residue and the label together, as \code{<residue>[<label>]}, so
-#' any sequence containing that tag is classified as heavy.  The residue prefix
-#' is what identifies which unlabeled sequences are light: a sequence with no
-#' labeled tag but at least one labelable residue is light, and one with no
-#' labelable residue at all is \code{NA}.  For example, if \code{heavyLabels}
-#' is \code{"K[Lys6]"}, then \code{PEPTIDEK} is classified as light and
-#' \code{PEPTIDEZ} as NA, since it has no lysine residues that could be
-#' labeled.
-#'
-#' Peptides with two or more labelable residues are dropped, counting across
-#' all residues named in \code{heavyLabels} combined, since partial labeling
-#' is not supported by the turnover model.
-#' When \code{heavyLabel} is \code{NULL} the column is left untouched so
-#' that the downstream \code{columns_to_fill} default of \code{"L"} applies,
-#' preserving backwards compatibility.
+#' With \code{NULL} the column is left untouched so the downstream
+#' \code{columns_to_fill} default of \code{"L"} applies.
 #'
 #' @param spec_input `data.table` after column renaming.
-#' @param heavyLabels Character vector of labelable residue and heavy label
-#'   pairs, written as \code{<residue>[<label>]} (e.g. \code{"K[Lys6]"}), or
-#'   \code{NULL}.
+#' @param heavyLabels Character vector of \code{<residue>[<label>]} pairs
+#'   (e.g. \code{"K[Lys6]"}), or \code{NULL}.
 #' @return `data.table` with \code{IsotopeLabelType} column added or updated.
 #' @keywords internal
 #' @noRd

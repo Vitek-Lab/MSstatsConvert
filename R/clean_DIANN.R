@@ -221,38 +221,24 @@
 
 #' Assign IsotopeLabelType for DIANN protein turnover workflows.
 #'
-#' Dispatches to one of two classification paths depending on \code{has_channel}:
+#' Two paths, chosen by \code{has_channel}.  With a \code{Channel} column,
+#' \code{Channel} maps straight to \code{IsotopeLabelType} (\code{"H"} and
+#' \code{"L"} pass through, anything else becomes \code{NA}) and is then
+#' dropped; \code{labeledAminoAcids} acts only as the opt-in flag, and
+#' sequences are not inspected.
 #'
-#' \strong{Channel-based path} (\code{has_channel = TRUE}): \code{Channel}
-#' values are mapped directly to \code{IsotopeLabelType} (\code{"H"} →
-#' \code{"H"}, \code{"L"} → \code{"L"}, anything else → \code{NA}), and the
-#' \code{Channel} column is then dropped.  \code{labeledAminoAcids} acts solely
-#' as the opt-in flag that enables this path; the amino acid codes are
-#' \strong{not} used to validate or filter \code{ModifiedSequence}.
-#'
-#' \strong{ModifiedSequence-parsing path} (\code{has_channel = FALSE}):
-#' \code{PeptideSequence} (the retained \code{ModifiedSequence}) is scanned
-#' for isotope-labeled amino acids, which appear in parentheses immediately
-#' after the labeled residue, in the form \code{(<label>-<aminoAcid>-H)} for
-#' the heavy label or \code{(<label>-<aminoAcid>-L)} for the light label.
-#' For example, \code{K(label-K-H)} marks a heavy-labeled lysine (\code{K}).
-#' Here \code{<aminoAcid>} is one of the single-letter codes in
-#' \code{labeledAminoAcids}, and \code{<label>} is the label name (e.g.
-#' \code{SILAC} or \code{label}). Sequences with no such parenthetical
-#' tags are assigned \code{IsotopeLabelType = NA}. Once classified, the
-#' parenthetical annotation is stripped out of \code{PeptideSequence},
-#' leaving the plain amino acid sequence.
-#'
-#' Peptides with two or more labelable residues are dropped, counting across
-#' all of \code{labeledAminoAcids} combined, since partial labeling is not
-#' supported by the turnover model.  This applies only to the
-#' \code{ModifiedSequence} path; channel-based labeling is not inferred from
-#' sequence content and is left untouched.
+#' Without one, the label is read from \code{PeptideSequence} (the retained
+#' \code{ModifiedSequence}), where it follows the labeled residue in
+#' parentheses as \code{(<label>-<aminoAcid>-H)} or
+#' \code{(<label>-<aminoAcid>-L)}; \code{K(label-K-H)} is a heavy-labeled
+#' lysine.  Untagged sequences become \code{NA}, the tags are then stripped
+#' from \code{PeptideSequence}, and peptides with two or more labelable
+#' residues (counted across all of \code{labeledAminoAcids}) are dropped, since
+#' partial labeling breaks the two-state turnover model.
 #'
 #' @param dn_input \code{data.table} after column renaming.
 #' @param labeledAminoAcids Character vector of single-letter amino acid codes
-#'   (e.g. \code{c("K")} or \code{c("K", "R")}), or \code{NULL} to skip
-#'   protein-turnover mode entirely (backwards-compatible default).
+#'   (e.g. \code{c("K", "R")}), or \code{NULL} to skip protein-turnover mode.
 #' @param has_channel Logical; \code{TRUE} when the raw input contained a
 #'   \code{Channel} column that was retained through
 #'   \code{.cleanDIANNSelectRequiredColumns}.

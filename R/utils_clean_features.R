@@ -358,20 +358,14 @@
 
 #' Classify IsotopeLabelType from peptide sequence patterns.
 #'
-#' Shared core logic for protein turnover workflows in both Spectronaut and
-#' DIANN converters.  Each peptide is classified as heavy (\code{"H"}), light
-#' (\code{"L"}), or unlabeled (\code{NA}) by matching regex patterns against
-#' the \code{PeptideSequence} column.
+#' Shared by the Spectronaut and DIANN turnover workflows.  Each peptide is
+#' classified as heavy (\code{"H"}), light (\code{"L"}), or unlabeled
+#' (\code{NA}) by matching regexes against \code{PeptideSequence}.
 #'
-#' Two modes are supported:
-#' \describe{
-#'   \item{Spectronaut mode}{Pass \code{labeled_aa_regex}.  The sequence is
-#'     first stripped of all bracket modifications; light is inferred when the
-#'     bare labeled amino acid is present but the heavy bracket form is absent.}
-#'   \item{DIANN mode}{Pass \code{light_regex}.  Both heavy and light patterns
-#'     are matched directly against the modified sequence; absence of either
-#'     yields \code{NA}.}
-#' }
+#' Spectronaut mode (\code{labeled_aa_regex}) strips bracket modifications
+#' first, then infers light from a bare labelable residue with no heavy tag.
+#' DIANN mode (\code{light_regex}) matches heavy and light patterns directly
+#' against the modified sequence.
 #'
 #' @param dt \code{data.table} with a \code{PeptideSequence} column.
 #' @param heavy_regex Perl-compatible regex matching heavy-labeled sequences.
