@@ -217,7 +217,7 @@
     )
 
     spec_input = .filterMultiplyLabeledPeptides(spec_input, labeled_aa_regex,
-                                                "\\[.*?\\]")
+                                                "\\[[^\\]]*\\]")
     spec_input = .classifyIsotopeLabelType(spec_input, heavy_regex,
                                             labeled_aa_regex = labeled_aa_regex)
 
