@@ -33,6 +33,7 @@ Suggests:
     rmarkdown
 LinkingTo: Rcpp
 Collate: 
+    'clean_Sage.R'
     'clean_MZMine.R'
     'clean_ProteinProspector.R'
     'clean_Metamorpheus.R'
@@ -64,6 +65,7 @@ Collate:
     'converters_PhilosophertoMSstatsTMTFormat.R'
     'converters_ProgenesistoMSstatsFormat.R'
     'converters_ProteinProspectortoMSstatsTMTFormat.R'
+    'converters_SagetoMSstatsFormat.R'
     'converters_SkylinetoMSstatsFormat.R'
     'converters_SpectroMinetoMSstatsTMTFormat.R'
     'converters_SpectronauttoMSstatsFormat.R'
