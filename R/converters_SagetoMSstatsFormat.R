@@ -28,6 +28,20 @@
 #' column is the summed intensity of matched b/y fragment ions -- a PSM score
 #' feature -- and is not a quantitative measure of precursor abundance.
 #'
+#' @section Acquisition mode:
+#' Sage's LFQ quantification is MS1-based regardless of how the data was
+#' acquired; the `wide_window` setting changes only how spectra are searched,
+#' not how they are quantified. For DDA, MS1 precursor areas are the standard
+#' quantification approach, so this converter is appropriate. For DIA, MS1
+#' quantification is not recommended: the MS1 signal carries substantial
+#' interference from co-eluting precursors, which is why DIA workflows normally
+#' quantify at the fragment level. Sage does write per-fragment MS2 intensities
+#' to `matched_fragments.sage.tsv` when `annotate_matches` is enabled, but those
+#' are matched peaks from individual spectra and Sage does not trace them across
+#' runs, so there is no fragment-level quantification available to convert. In
+#' short, this converter is recommended for DDA experiments; DIA users should
+#' expect MS1-based quantification with the limitations above.
+#'
 #' @section FDR filtering:
 #' `lfq.tsv` is not FDR-filtered. Sage writes every quantified peptide and
 #' charge row regardless of its q-value, leaving the filtering choice to
