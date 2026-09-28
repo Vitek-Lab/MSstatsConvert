@@ -43,20 +43,27 @@ Column names are matched with punctuation removed, so \code{FG.Charge},
 \code{EG.ModifiedSequence} by default or whichever column
 \code{peptideSequenceColumn} names; and an intensity column,
 \code{F.PeakArea} by default or whichever column \code{intensity} names.
-\item Experiment design: \code{R.FileName}, \code{R.Condition} and
-\code{R.Replicate}, unless \code{annotation} supplies Run, Condition and
-BioReplicate instead. \code{R.Fraction} is optional, and recommended for
-fractionated experiments; when it is absent all runs are treated as a
-single fraction.
+\item Experiment design: \code{R.FileName} is required as the input run
+key. When supplied, an annotation with matching \code{Run}, \code{Condition}
+and \code{BioReplicate} may replace \code{R.Condition} and
+\code{R.Replicate}, but it cannot replace \code{R.FileName}.
+\code{R.Fraction} is optional, and recommended for fractionated experiments.
+When it is absent, fractionation is detected from repeated runs within a
+condition and biological replicate. Fraction 1 is assigned only when no
+fractionation is detected, and some layouts can be rejected as risky.
 \item Optional, synthesized when absent: \code{F.FrgLossType} (treated as
 "noloss", so no rows are filtered), \code{F.ExcludedFromQuantification}
 (treated as FALSE), \code{F.FrgIon} and \code{F.Charge} (both NA, since
 fragment identity is not available in precursor-level reports such as
-MS1-based protein turnover). \code{PG.Qvalue} and
-\code{F.PossibleInterference} are used if present.
-\item Used only when you ask for them: \code{EG.Qvalue}, when
-\code{filter_with_Qvalue = TRUE}; and the quality metrics named in
-\code{anomalyModelFeatures}, for which the recommended set is
+MS1-based protein turnover).
+\code{F.PossibleInterference} is used if present.
+\item Used only when you ask for them: \code{EG.Qvalue} and
+\code{PG.Qvalue}, when \code{filter_with_Qvalue = TRUE}, if present.
+\code{EG.Qvalue} is compared against \code{qvalue_cutoff} and
+\code{PG.Qvalue} against a fixed cutoff of 0.01.
+A measurement that fails either q-value cutoff has its intensity set to
+NA; q-value filtering does not delete the row. The quality metrics named
+in \code{anomalyModelFeatures} are read here too; the recommended set is
 \code{EG.DeltaRT}, \code{FG.ShapeQualityScore (MS1)} and
 \code{FG.ShapeQualityScore (MS2)}.
 \item Not read by this function, but worth keeping in the report:
