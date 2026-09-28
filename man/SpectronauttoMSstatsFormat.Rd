@@ -63,9 +63,11 @@ MS1-based protein turnover). \code{PG.Qvalue} and
 \code{R.Run Date (Formatted)}, the timestamp used to build the
 \code{runOrder} table.
 }
-Any other columns in the report are ignored. Rows with
-\code{F.ExcludedFromQuantification = True} are removed when
-\code{excludedFromQuantificationFilter = TRUE}, the default.}
+Any other columns in the report are ignored. When
+\code{excludedFromQuantificationFilter = TRUE}, the default, measurements
+flagged \code{F.ExcludedFromQuantification = True} have their intensity set
+to NA rather than their rows being deleted; a feature left with no
+measurements is then dropped by the usual feature cleaning.}
 
 \item{annotation}{name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.}
 
@@ -99,7 +101,10 @@ reported.
 
 Defaults to \code{NULL}: turnover mode off, every peptide marked light.}
 
-\item{excludedFromQuantificationFilter}{Remove rows with F.ExcludedFromQuantification=TRUE Default is TRUE.}
+\item{excludedFromQuantificationFilter}{TRUE (default) sets the intensity of
+measurements flagged \code{F.ExcludedFromQuantification = TRUE} to NA, keeping
+the rows; a feature left with no measurements is then dropped by feature
+cleaning. FALSE keeps the reported intensities.}
 
 \item{filter_with_Qvalue}{FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.}
 
