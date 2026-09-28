@@ -34,7 +34,38 @@ SpectronauttoMSstatsFormat(
 )
 }
 \arguments{
-\item{input}{name of Spectronaut output, which is long-format. ProteinName, PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, IsotopeLabelType, Condition, BioReplicate, Run, Intensity, F.ExcludedFromQuantification are required. Rows with F.ExcludedFromQuantification=True will be removed.}
+\item{input}{a Spectronaut report in long format, as a data.frame or data.table.
+Column names are matched with punctuation removed, so \code{FG.Charge},
+\code{FG Charge} and \code{FGCharge} are equivalent. Columns are used as follows.
+\itemize{
+\item Required: \code{FG.Charge}; a protein column, either
+\code{PG.ProteinGroups} or \code{PG.ProteinAccessions}; a peptide column,
+\code{EG.ModifiedSequence} by default or whichever column
+\code{peptideSequenceColumn} names; and an intensity column,
+\code{F.PeakArea} by default or whichever column \code{intensity} names.
+\item Experiment design: \code{R.FileName}, \code{R.Condition} and
+\code{R.Replicate}, unless \code{annotation} supplies Run, Condition and
+BioReplicate instead. \code{R.Fraction} is optional, and recommended for
+fractionated experiments; when it is absent all runs are treated as a
+single fraction.
+\item Optional, synthesized when absent: \code{F.FrgLossType} (treated as
+"noloss", so no rows are filtered), \code{F.ExcludedFromQuantification}
+(treated as FALSE), \code{F.FrgIon} and \code{F.Charge} (both NA, since
+fragment identity is not available in precursor-level reports such as
+MS1-based protein turnover). \code{PG.Qvalue} and
+\code{F.PossibleInterference} are used if present.
+\item Used only when you ask for them: \code{EG.Qvalue}, when
+\code{filter_with_Qvalue = TRUE}; and the quality metrics named in
+\code{anomalyModelFeatures}, for which the recommended set is
+\code{EG.DeltaRT}, \code{FG.ShapeQualityScore (MS1)} and
+\code{FG.ShapeQualityScore (MS2)}.
+\item Not read by this function, but worth keeping in the report:
+\code{R.Run Date (Formatted)}, the timestamp used to build the
+\code{runOrder} table.
+}
+Any other columns in the report are ignored. Rows with
+\code{F.ExcludedFromQuantification = True} are removed when
+\code{excludedFromQuantificationFilter = TRUE}, the default.}
 
 \item{annotation}{name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.}
 
