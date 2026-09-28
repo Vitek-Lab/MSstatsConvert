@@ -73,7 +73,10 @@
 #' measurements flagged \code{F.ExcludedFromQuantification = TRUE} to NA, keeping
 #' the rows; a feature left with no measurements is then dropped by feature
 #' cleaning. FALSE keeps the reported intensities.
-#' @param filter_with_Qvalue FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.
+#' @param filter_with_Qvalue FALSE (default) does not perform any filtering.
+#'   TRUE sets the intensity to NA for measurements that exceed qvalue_cutoff
+#'   in EG.Qvalue or 0.01 in PG.Qvalue. The rows are retained, and the NA
+#'   values are treated as censored missing values for imputation.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
 #' @param calculateAnomalyScores Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.
 #' @param anomalyModelFeatures character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.
