@@ -1,46 +1,53 @@
 #' Import Spectronaut files
 #'
-#' @param input a Spectronaut report in long format, as a data.frame or data.table.
-#' Column names are matched with punctuation removed, so \code{FG.Charge},
-#' \code{FG Charge} and \code{FGCharge} are equivalent. Columns are used as follows.
-#' \itemize{
-#'   \item Required: \code{FG.Charge}; a protein column, either
-#'     \code{PG.ProteinGroups} or \code{PG.ProteinAccessions}; a peptide column,
-#'     \code{EG.ModifiedSequence} by default or whichever column
-#'     \code{peptideSequenceColumn} names; and an intensity column,
-#'     \code{F.PeakArea} by default or whichever column \code{intensity} names.
-#'   \item Experiment design: \code{R.FileName} is required as the input run
-#'     key. When supplied, an annotation with matching \code{Run}, \code{Condition}
-#'     and \code{BioReplicate} may replace \code{R.Condition} and
-#'     \code{R.Replicate}, but it cannot replace \code{R.FileName}.
-#'     \code{R.Fraction} is optional, and recommended for fractionated experiments.
-#'     When it is absent, fractionation is detected from repeated runs within a
-#'     condition and biological replicate. Fraction 1 is assigned only when no
-#'     fractionation is detected, and some layouts can be rejected as risky.
-#'   \item Optional, synthesized when absent: \code{F.FrgLossType} (treated as
-#'     "noloss", so no rows are filtered), \code{F.ExcludedFromQuantification}
-#'     (treated as FALSE), \code{F.FrgIon} and \code{F.Charge} (both NA, since
-#'     fragment identity is not available in precursor-level reports such as
-#'     MS1-based protein turnover).
-#'     \code{F.PossibleInterference} is used if present.
-#'   \item Used only when you ask for them: \code{EG.Qvalue} and
-#'     \code{PG.Qvalue}, when \code{filter_with_Qvalue = TRUE}, if present.
-#'     \code{EG.Qvalue} is compared against \code{qvalue_cutoff} and
-#'     \code{PG.Qvalue} against a fixed cutoff of 0.01.
-#'     A measurement that fails either q-value cutoff has its intensity set to
-#'     NA; q-value filtering does not delete the row. The quality metrics named
-#'     in \code{anomalyModelFeatures} are read here too; the recommended set is
-#'     \code{EG.DeltaRT}, \code{FG.ShapeQualityScore (MS1)} and
-#'     \code{FG.ShapeQualityScore (MS2)}.
-#'   \item Not read by this function, but worth keeping in the report:
-#'     \code{R.Run Date (Formatted)}, the timestamp used to build the
-#'     \code{runOrder} table.
+#' @param input a Spectronaut report in long format, as a data.frame or
+#' data.table. Dots and spaces in column names are ignored, so
+#' \code{FG.Charge}, \code{FG Charge} and \code{FGCharge} are equivalent.
+#' \describe{
+#'   \item{\code{PG.ProteinGroups} or \code{PG.ProteinAccessions}}{The protein
+#'     identifier. Required.}
+#'   \item{\code{EG.ModifiedSequence} or \code{FG.LabeledSequence}}{The peptide
+#'     sequence including modifications. Required; \code{peptideSequenceColumn}
+#'     selects which one is read and defaults to \code{EG.ModifiedSequence}.
+#'     \code{FG.LabeledSequence} carries the heavy-label tags used by protein
+#'     turnover experiments.}
+#'   \item{\code{FG.Charge}}{Charge state of the precursor. Required.}
+#'   \item{\code{F.PeakArea}}{The measured intensity. Required;
+#'     \code{intensity} selects which column is read.}
+#'   \item{\code{R.FileName}}{Identifies the MS run. Required, and cannot be
+#'     supplied through \code{annotation}.}
+#'   \item{\code{R.Condition}, \code{R.Replicate}}{The condition and biological
+#'     replicate of each run. May be supplied through \code{annotation}
+#'     instead, matched on \code{Run}.}
+#'   \item{\code{R.Fraction}}{Which fraction of a fractionated sample the run
+#'     came from. Required for fractionated experiments.}
+#'   \item{\code{F.FrgIon}, \code{F.Charge}}{The fragment ion and its charge
+#'     state. Needed for differential abundance analysis at the MS2 level.
+#'     Precursor-level reports, such as those used for protein turnover, do not
+#'     contain them, and the analysis then proceeds at the precursor level.}
+#'   \item{\code{F.FrgLossType}}{The neutral loss carried by the fragment ion;
+#'     fragment ions that have not undergone a neutral loss are set to
+#'     \code{"noloss"}. When present, only \code{"noloss"} fragments are kept.
+#'     When absent, no filtering on loss type is done.}
+#'   \item{\code{F.ExcludedFromQuantification}}{Rows that should be excluded
+#'     from quantification are set to TRUE. When present and
+#'     \code{excludedFromQuantificationFilter = TRUE}, those measurements are
+#'     excluded: the intensity is set to NA, and a row is removed if it
+#'     corresponds to a feature with no measurements across all MS runs. When
+#'     absent, nothing is excluded on this basis.}
+#'   \item{\code{EG.Qvalue}, \code{PG.Qvalue}}{Identification confidence for the
+#'     precursor and for the protein group. Used when
+#'     \code{filter_with_Qvalue = TRUE}; measurements failing the cutoffs are
+#'     excluded. When absent, no q-value filtering is done.}
+#'   \item{\code{EG.DeltaRT}, \code{FG.ShapeQualityScore (MS1)},
+#'     \code{FG.ShapeQualityScore (MS2)}}{Quality metrics. The recommended set
+#'     to pass to \code{anomalyModelFeatures} when
+#'     \code{calculateAnomalyScores = TRUE}.}
+#'   \item{\code{R.Run Date (Formatted)}}{When each run was acquired. Not read
+#'     by this function, but it is what the \code{runOrder} table is built
+#'     from.}
 #' }
-#' Any other columns in the report are ignored. When
-#' \code{excludedFromQuantificationFilter = TRUE}, the default, measurements
-#' flagged \code{F.ExcludedFromQuantification = True} have their intensity set
-#' to NA rather than their rows being deleted; a feature left with no
-#' measurements is then dropped by the usual feature cleaning.
+#' Any other columns in the report are ignored.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.
 #' @param intensity Intensity column to use. Accepts legacy enum values
 #'   \code{'PeakArea'} (default, uses F.PeakArea), \code{'NormalizedPeakArea'}
@@ -69,10 +76,10 @@
 #'   reported.
 #'
 #'   Defaults to \code{NULL}: turnover mode off, every peptide marked light.
-#' @param excludedFromQuantificationFilter TRUE (default) sets the intensity of
-#' measurements flagged \code{F.ExcludedFromQuantification = TRUE} to NA, keeping
-#' the rows; a feature left with no measurements is then dropped by feature
-#' cleaning. FALSE keeps the reported intensities.
+#' @param excludedFromQuantificationFilter TRUE (default) excludes measurements
+#' flagged \code{F.ExcludedFromQuantification = TRUE}: the intensity is set to
+#' NA, and a row is removed if it corresponds to a feature with no measurements
+#' across all MS runs. FALSE keeps the reported intensities.
 #' @param filter_with_Qvalue FALSE (default) does not perform any filtering.
 #'   TRUE sets the intensity to NA for measurements that exceed qvalue_cutoff
 #'   in EG.Qvalue or 0.01 in PG.Qvalue. The rows are retained, and the NA
