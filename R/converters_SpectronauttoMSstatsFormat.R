@@ -37,15 +37,14 @@
 #'     absent, nothing is excluded on this basis.}
 #'   \item{\code{EG.Qvalue}, \code{PG.Qvalue}}{Identification confidence for the
 #'     precursor and for the protein group. Used when
-#'     \code{filter_with_Qvalue = TRUE}; measurements failing the cutoffs are
-#'     excluded. When absent, no q-value filtering is done.}
+#'     \code{filter_with_Qvalue = TRUE}; \code{qvalue_cutoff} applies to
+#'     \code{EG.Qvalue} only. Measurements failing either cutoff are excluded.
+#'     When absent, no q-value filtering is done.}
 #'   \item{\code{EG.DeltaRT}, \code{FG.ShapeQualityScore (MS1)},
 #'     \code{FG.ShapeQualityScore (MS2)}}{Quality metrics. The recommended set
 #'     to pass to \code{anomalyModelFeatures} when
 #'     \code{calculateAnomalyScores = TRUE}.}
-#'   \item{\code{R.Run Date (Formatted)}}{When each run was acquired. Not read
-#'     by this function, but it is what the \code{runOrder} table is built
-#'     from.}
+#'   \item{\code{R.Run Date (Formatted)}}{Date when each run was acquired.}
 #' }
 #' Any other columns in the report are ignored.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.
