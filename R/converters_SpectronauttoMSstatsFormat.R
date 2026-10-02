@@ -14,11 +14,10 @@
 #'   \item{\code{FG.Charge}}{Charge state of the precursor. Required.}
 #'   \item{\code{F.PeakArea}}{The measured intensity. Required;
 #'     \code{intensity} selects which column is read.}
-#'   \item{\code{R.FileName}}{Identifies the MS run. Required, and cannot be
-#'     supplied through \code{annotation}.}
+#'   \item{\code{R.FileName}}{Identifies the MS run. Required.}
 #'   \item{\code{R.Condition}, \code{R.Replicate}}{The condition and biological
 #'     replicate of each run. May be supplied through \code{annotation}
-#'     instead, matched on \code{Run}.}
+#'     instead, whose \code{Run} column holds the \code{R.FileName} values.}
 #'   \item{\code{R.Fraction}}{Which fraction of a fractionated sample the run
 #'     came from. Required for fractionated experiments.}
 #'   \item{\code{F.FrgIon}, \code{F.Charge}}{The fragment ion and its charge
@@ -44,7 +43,10 @@
 #'     \code{FG.ShapeQualityScore (MS2)}}{Quality metrics. The recommended set
 #'     to pass to \code{anomalyModelFeatures} when
 #'     \code{calculateAnomalyScores = TRUE}.}
-#'   \item{\code{R.Run Date (Formatted)}}{Date when each run was acquired.}
+#'   \item{\code{R.Run Date (Formatted)}}{Date when each run was acquired. Used
+#'     to build the \code{runOrder} table passed to this function, which the
+#'     temporal features in \code{anomalyModelFeatureTemporal} need when
+#'     \code{calculateAnomalyScores = TRUE}.}
 #' }
 #' Any other columns in the report are ignored.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.
