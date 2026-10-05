@@ -1,6 +1,54 @@
 #' Import Spectronaut files
 #'
-#' @param input name of Spectronaut output, which is long-format. ProteinName, PeptideSequence, PrecursorCharge, FragmentIon, ProductCharge, IsotopeLabelType, Condition, BioReplicate, Run, Intensity, F.ExcludedFromQuantification are required. Rows with F.ExcludedFromQuantification=True will be removed.
+#' @param input a Spectronaut report in long format, as a data.frame or
+#' data.table. Dots and spaces in column names are ignored, so
+#' \code{FG.Charge}, \code{FG Charge} and \code{FGCharge} are equivalent.
+#' \describe{
+#'   \item{\code{PG.ProteinGroups} or \code{PG.ProteinAccessions}}{The protein
+#'     identifier. Required.}
+#'   \item{\code{EG.ModifiedSequence} or \code{FG.LabeledSequence}}{The peptide
+#'     sequence including modifications. Required; \code{peptideSequenceColumn}
+#'     selects which one is read and defaults to \code{EG.ModifiedSequence}.
+#'     \code{FG.LabeledSequence} carries the heavy-label tags used by protein
+#'     turnover experiments.}
+#'   \item{\code{FG.Charge}}{Charge state of the precursor. Required.}
+#'   \item{\code{F.PeakArea}}{The measured intensity. Required;
+#'     \code{intensity} selects which column is read.}
+#'   \item{\code{R.FileName}}{Identifies the MS run. Required.}
+#'   \item{\code{R.Condition}, \code{R.Replicate}}{The condition and biological
+#'     replicate of each run. May be supplied through \code{annotation}
+#'     instead, whose \code{Run} column holds the \code{R.FileName} values.}
+#'   \item{\code{R.Fraction}}{Which fraction of a fractionated sample the run
+#'     came from. Required for fractionated experiments.}
+#'   \item{\code{F.FrgIon}, \code{F.Charge}}{The fragment ion and its charge
+#'     state. Needed for differential abundance analysis at the MS2 level.
+#'     Precursor-level reports, such as those used for protein turnover, do not
+#'     contain them, and the analysis then proceeds at the precursor level.}
+#'   \item{\code{F.FrgLossType}}{The neutral loss carried by the fragment ion;
+#'     fragment ions that have not undergone a neutral loss are set to
+#'     \code{"noloss"}. When present, only \code{"noloss"} fragments are kept.
+#'     When absent, no filtering on loss type is done.}
+#'   \item{\code{F.ExcludedFromQuantification}}{Rows that should be excluded
+#'     from quantification are set to TRUE. When present and
+#'     \code{excludedFromQuantificationFilter = TRUE}, those measurements are
+#'     excluded: the intensity is set to NA, and a row is removed if it
+#'     corresponds to a feature with no measurements across all MS runs. When
+#'     absent, nothing is excluded on this basis.}
+#'   \item{\code{EG.Qvalue}, \code{PG.Qvalue}}{Identification confidence for the
+#'     precursor and for the protein group. Used when
+#'     \code{filter_with_Qvalue = TRUE}; \code{qvalue_cutoff} applies to
+#'     \code{EG.Qvalue} only. Measurements failing either cutoff are excluded.
+#'     When absent, no q-value filtering is done.}
+#'   \item{\code{EG.DeltaRT}, \code{FG.ShapeQualityScore (MS1)},
+#'     \code{FG.ShapeQualityScore (MS2)}}{Quality metrics. The recommended set
+#'     to pass to \code{anomalyModelFeatures} when
+#'     \code{calculateAnomalyScores = TRUE}.}
+#'   \item{\code{R.Run Date (Formatted)}}{Date when each run was acquired. Used
+#'     to build the \code{runOrder} table passed to this function, which the
+#'     temporal features in \code{anomalyModelFeatureTemporal} need when
+#'     \code{calculateAnomalyScores = TRUE}.}
+#' }
+#' Any other columns in the report are ignored.
 #' @param annotation name of 'annotation.txt' data which includes Condition, BioReplicate, Run. If annotation is already complete in Spectronaut, use annotation=NULL (default). It will use the annotation information from input.
 #' @param intensity Intensity column to use. Accepts legacy enum values
 #'   \code{'PeakArea'} (default, uses F.PeakArea), \code{'NormalizedPeakArea'}
@@ -29,8 +77,14 @@
 #'   reported.
 #'
 #'   Defaults to \code{NULL}: turnover mode off, every peptide marked light.
-#' @param excludedFromQuantificationFilter Remove rows with F.ExcludedFromQuantification=TRUE Default is TRUE.
-#' @param filter_with_Qvalue FALSE(default) will not perform any filtering. TRUE will filter out the intensities that have greater than qvalue_cutoff in EG.Qvalue column. Those intensities will be replaced with zero and will be considered as censored missing values for imputation purpose.
+#' @param excludedFromQuantificationFilter TRUE (default) excludes measurements
+#' flagged \code{F.ExcludedFromQuantification = TRUE}: the intensity is set to
+#' NA, and a row is removed if it corresponds to a feature with no measurements
+#' across all MS runs. FALSE keeps the reported intensities.
+#' @param filter_with_Qvalue FALSE (default) does not perform any filtering.
+#'   TRUE sets the intensity to NA for measurements that exceed qvalue_cutoff
+#'   in EG.Qvalue or 0.01 in PG.Qvalue. The rows are retained, and the NA
+#'   values are treated as censored missing values for imputation.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
 #' @param calculateAnomalyScores Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.
 #' @param anomalyModelFeatures character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.
