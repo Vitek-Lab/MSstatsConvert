@@ -18,6 +18,7 @@
 \alias{MSstatsMetamorpheusFiles-class}
 \alias{MSstatsProteinProspectorFiles-class}
 \alias{MSstatsMZMineFiles-class}
+\alias{MSstatsSageFiles-class}
 \title{Class to model files that describe a single MS dataset.}
 \description{
 Class to model files that describe a single MS dataset.
@@ -51,6 +52,8 @@ MSstatsMetamorpheusFiles: class for Metamorpheus files.
 MSstatsProteinProspectorFiles: class for ProteinProspector files.
 
 MSstatsMZMineFiles: class for MZMine files.
+
+MSstatsSageFiles: class for Sage files.
 }
 \section{Slots}{
 

@@ -75,6 +75,10 @@ setClass("MSstatsProteinProspectorFiles", contains = "MSstatsInputFiles")
 #' @rdname MSstatsInputFiles
 #' @keywords internal
 setClass("MSstatsMZMineFiles", contains = "MSstatsInputFiles")
+#' MSstatsSageFiles: class for Sage files.
+#' @rdname MSstatsInputFiles
+#' @keywords internal
+setClass("MSstatsSageFiles", contains = "MSstatsInputFiles")
 
 
 #' Get one of files contained in an instance of `MSstatsInputFiles` class.
@@ -304,6 +308,13 @@ setMethod("MSstatsClean", signature = "MSstatsProteinProspectorFiles",
 #' @return data.table
 setMethod("MSstatsClean", signature = "MSstatsMZMineFiles",
           .cleanRawMZMine)
+#' Clean Sage files
+#' @include clean_Sage.R
+#' @rdname MSstatsClean
+#' @inheritParams .cleanRawSage
+#' @return data.table
+setMethod("MSstatsClean", signature = "MSstatsSageFiles",
+          .cleanRawSage)
 
 
 #' Preprocess outputs from MS signal processing tools for analysis with MSstats

@@ -1,0 +1,9 @@
+Run,Condition,BioReplicate,IsotopeLabelType
+B.naive_01steady-state.mzML.gz,B.naive,B.naive_1,L
+B.naive_02steady-state.mzML.gz,B.naive,B.naive_2,L
+B.naive_03steady-state.mzML.gz,B.naive,B.naive_3,L
+B.naive_04steady-state.mzML.gz,B.naive,B.naive_4,L
+T4.naive_01steady-state.mzML.gz,T4.naive,T4.naive_1,L
+T4.naive_02steady-state.mzML.gz,T4.naive,T4.naive_2,L
+T4.naive_03steady-state.mzML.gz,T4.naive,T4.naive_3,L
+T4.naive_04steady-state.mzML.gz,T4.naive,T4.naive_4,L
