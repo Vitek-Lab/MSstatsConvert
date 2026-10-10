@@ -485,3 +485,19 @@ expect_equal(sum(is.na(output_qval$Intensity)), 256)
 expect_equal(sum(is.na(output_loose_qval$Intensity)), 245)
 expect_true(sum(is.na(output_loose_qval$Intensity)) <
                 sum(is.na(output_qval$Intensity)))
+
+# Measurements at or below the default cutoff are left alone by the filter
+below_cutoff = spectronaut_quality[
+    EG.Qvalue <= 0.01 & F.FrgLossType == "noloss" &
+        F.ExcludedFromQuantification == FALSE,
+    .(Run = R.FileName,
+      PeptideSequence = gsub("_", "", EG.ModifiedSequence),
+      PrecursorCharge = FG.Charge, FragmentIon = F.FrgIon,
+      ProductCharge = F.Charge)]
+below_cutoff_no_qval = output_no_qval[below_cutoff, on = feature_keys,
+                                      nomatch = 0]
+below_cutoff_qval = output_qval[below_cutoff, on = feature_keys,
+                                nomatch = 0]
+
+expect_equal(nrow(below_cutoff_qval), 1089)
+expect_equal(below_cutoff_qval$Intensity, below_cutoff_no_qval$Intensity)
