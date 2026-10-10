@@ -105,13 +105,15 @@
                         with = FALSE])
     
     if (is.element("isZero", colnames(input)) & length(anomaly_metrics) == 0) {
-        input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE),
+        input = input[, list(Intensity = .aggregateIntensity(Intensity, aggregator),
                              isZero = all(isZero | is.na(Intensity)) &
                                  !all(is.na(Intensity))), 
                       by = feature_columns]
     } else if (length(anomaly_metrics) > 0){
         
         input[, row_id := .I]
+        # Not .aggregateIntensity: rows are joined back on the max value, so
+        # returning NA here could change which rows survive the join.
         max_per_group = input[, .(max_intensity = max(Intensity, na.rm = TRUE)),
                               by = feature_columns]
         
@@ -121,11 +123,27 @@
         input[, row_id := NULL]
         
     } else {
-        input = input[, list(Intensity = aggregator(Intensity, na.rm = TRUE)), 
+        input = input[, list(Intensity = .aggregateIntensity(Intensity, aggregator)),
                       by = c(feature_columns)]
     }
     merge(input, info, 
           by = intersect(colnames(input), colnames(info)), sort = FALSE)
+}
+
+
+#' Aggregate the intensities of one feature in one run
+#' @param intensity numeric vector of intensities.
+#' @param aggregator function that will be used to aggregate duplicated values.
+#' It should accept an `na.rm` parameter.
+#' @return numeric scalar. `NA` if all intensities are missing, whatever the
+#' aggregator: the intensity is unknown, so neither `-Inf` (with a warning)
+#' from `max` nor `0` from `sum` is returned.
+#' @keywords internal
+.aggregateIntensity = function(intensity, aggregator) {
+    if (all(is.na(intensity))) {
+        return(NA_real_)
+    }
+    aggregator(intensity, na.rm = TRUE)
 }
 
 
