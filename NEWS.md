@@ -1,6 +1,6 @@
 # MSstatsConvert 1.24.0
 
-* **Spectronaut**: `SpectronauttoMSstatsFormat` now filters on q-values by default (`filter_with_Qvalue = TRUE`), matching the other converters. Pipelines that rely on the default and do not set the value explicitly will produce different results.
+* **Spectronaut**: `SpectronauttoMSstatsFormat` now filters on q-values by default (`filter_with_Qvalue = TRUE`), matching the other converters. Pipelines that rely on the default and do not set the value explicitly may produce different results.
 
 # MSstatsConvert 1.22.0
 
