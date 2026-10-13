@@ -81,10 +81,13 @@
 #' flagged \code{F.ExcludedFromQuantification = TRUE}: the intensity is set to
 #' NA, and a row is removed if it corresponds to a feature with no measurements
 #' across all MS runs. FALSE keeps the reported intensities.
-#' @param filter_with_Qvalue FALSE (default) does not perform any filtering.
-#'   TRUE sets the intensity to NA for measurements that exceed qvalue_cutoff
-#'   in EG.Qvalue or 0.01 in PG.Qvalue. The rows are retained, and the NA
-#'   values are treated as censored missing values for imputation.
+#' @param filter_with_Qvalue TRUE (default) excludes measurements that exceed
+#'   qvalue_cutoff in EG.Qvalue or 0.01 in PG.Qvalue: the intensity is set to
+#'   NA, and a row is removed if it corresponds to a feature with no
+#'   measurements across all MS runs. With removeFewMeasurements = TRUE
+#'   (default), features left with only one or two measurements are removed
+#'   too. The remaining NA values are treated as censored missing values for
+#'   imputation. FALSE does not perform any filtering.
 #' @param qvalue_cutoff Cutoff for EG.Qvalue. default is 0.01.
 #' @param calculateAnomalyScores Default is FALSE. If TRUE, will run anomaly detection model and calculate anomaly scores for each feature. Used downstream to weigh measurements in differential analysis.
 #' @param anomalyModelFeatures character vector of quality metric column names to be used as features in the anomaly detection model. List must not be empty if calculateAnomalyScores=TRUE.
@@ -117,7 +120,7 @@ SpectronauttoMSstatsFormat = function(
         peptideSequenceColumn = "EG.ModifiedSequence",
         heavyLabels = NULL,
         excludedFromQuantificationFilter = TRUE,
-        filter_with_Qvalue = FALSE, qvalue_cutoff = 0.01, 
+        filter_with_Qvalue = TRUE, qvalue_cutoff = 0.01, 
         useUniquePeptide = TRUE, removeFewMeasurements=TRUE,
         removeProtein_with1Feature = FALSE,
         summaryforMultipleRows = max,

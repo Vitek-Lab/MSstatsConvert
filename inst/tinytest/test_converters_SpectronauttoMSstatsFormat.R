@@ -441,3 +441,63 @@ expect_equivalent(angyt_input_intensities, angyt_output_intensities)
 n_bioreplicates = length(unique(boxcar_raw$R.Replicate))
 angyt_rows = subset(output_heavy, grepl("ANGYTTEYSASVK", PeptideSequence, fixed = TRUE))
 expect_equal(nrow(angyt_rows), 2L * n_bioreplicates)
+
+# Test SpectronauttoMSstatsFormat Q-value Filtering ---------------------------
+spectronaut_quality = system.file(
+    "tinytest/raw_data/Spectronaut/spectronaut_quality_input.csv",
+    package = "MSstatsConvert")
+spectronaut_quality = data.table::fread(spectronaut_quality)
+
+output_qval = data.table::as.data.table(SpectronauttoMSstatsFormat(
+    data.table::copy(spectronaut_quality), use_log_file = FALSE))
+output_no_qval = data.table::as.data.table(SpectronauttoMSstatsFormat(
+    data.table::copy(spectronaut_quality), filter_with_Qvalue = FALSE,
+    use_log_file = FALSE))
+output_loose_qval = data.table::as.data.table(SpectronauttoMSstatsFormat(
+    data.table::copy(spectronaut_quality), qvalue_cutoff = 0.05,
+    use_log_file = FALSE))
+
+# Measurements above the default cutoff that no other filter removes
+feature_keys = c("Run", "PeptideSequence", "PrecursorCharge",
+                 "FragmentIon", "ProductCharge")
+above_cutoff = spectronaut_quality[
+    EG.Qvalue > 0.01 & F.FrgLossType == "noloss" &
+        F.ExcludedFromQuantification == FALSE,
+    .(Run = R.FileName,
+      PeptideSequence = gsub("_", "", EG.ModifiedSequence),
+      PrecursorCharge = FG.Charge, FragmentIon = F.FrgIon,
+      ProductCharge = F.Charge)]
+above_cutoff_no_qval = output_no_qval[above_cutoff, on = feature_keys,
+                                      nomatch = 0][!is.na(Intensity)]
+above_cutoff_qval = output_qval[above_cutoff_no_qval, on = feature_keys,
+                                nomatch = 0]
+
+# The fixture has 218 raw rows above the 0.01 cutoff, but only 13 reach the
+# output with a real intensity when filtering is off. The rest are either
+# excluded from quantification or have a peak area of 1 or less, which the
+# converter already turns into NA.
+expect_equal(nrow(above_cutoff_no_qval), 13)
+expect_equal(nrow(above_cutoff_qval), 13)
+expect_true(all(is.na(above_cutoff_qval$Intensity)))
+expect_equal(nrow(output_qval), nrow(output_no_qval))
+expect_equal(sum(is.na(output_no_qval$Intensity)), 243)
+expect_equal(sum(is.na(output_qval$Intensity)), 256)
+expect_equal(sum(is.na(output_loose_qval$Intensity)), 245)
+expect_true(sum(is.na(output_loose_qval$Intensity)) <
+                sum(is.na(output_qval$Intensity)))
+
+# Measurements at or below the default cutoff are left alone by the filter
+below_cutoff = spectronaut_quality[
+    EG.Qvalue <= 0.01 & F.FrgLossType == "noloss" &
+        F.ExcludedFromQuantification == FALSE,
+    .(Run = R.FileName,
+      PeptideSequence = gsub("_", "", EG.ModifiedSequence),
+      PrecursorCharge = FG.Charge, FragmentIon = F.FrgIon,
+      ProductCharge = F.Charge)]
+below_cutoff_no_qval = output_no_qval[below_cutoff, on = feature_keys,
+                                      nomatch = 0]
+below_cutoff_qval = output_qval[below_cutoff, on = feature_keys,
+                                nomatch = 0]
+
+expect_equal(nrow(below_cutoff_qval), 1089)
+expect_equal(below_cutoff_qval$Intensity, below_cutoff_no_qval$Intensity)

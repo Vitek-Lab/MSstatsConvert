@@ -11,7 +11,7 @@ SpectronauttoMSstatsFormat(
   peptideSequenceColumn = "EG.ModifiedSequence",
   heavyLabels = NULL,
   excludedFromQuantificationFilter = TRUE,
-  filter_with_Qvalue = FALSE,
+  filter_with_Qvalue = TRUE,
   qvalue_cutoff = 0.01,
   useUniquePeptide = TRUE,
   removeFewMeasurements = TRUE,
@@ -121,10 +121,13 @@ flagged \code{F.ExcludedFromQuantification = TRUE}: the intensity is set to
 NA, and a row is removed if it corresponds to a feature with no measurements
 across all MS runs. FALSE keeps the reported intensities.}
 
-\item{filter_with_Qvalue}{FALSE (default) does not perform any filtering.
-TRUE sets the intensity to NA for measurements that exceed qvalue_cutoff
-in EG.Qvalue or 0.01 in PG.Qvalue. The rows are retained, and the NA
-values are treated as censored missing values for imputation.}
+\item{filter_with_Qvalue}{TRUE (default) excludes measurements that exceed
+qvalue_cutoff in EG.Qvalue or 0.01 in PG.Qvalue: the intensity is set to
+NA, and a row is removed if it corresponds to a feature with no
+measurements across all MS runs. With removeFewMeasurements = TRUE
+(default), features left with only one or two measurements are removed
+too. The remaining NA values are treated as censored missing values for
+imputation. FALSE does not perform any filtering.}
 
 \item{qvalue_cutoff}{Cutoff for EG.Qvalue. default is 0.01.}
 

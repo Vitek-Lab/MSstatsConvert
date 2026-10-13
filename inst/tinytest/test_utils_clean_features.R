@@ -66,6 +66,28 @@ expect_equal(
     MSstatsConvert:::.summarizeMultipleMeasurements(to_aggregate, max, c("PeptideSequence", "Run")),
     to_aggregate[c(2, 4, 6), ]
 )
+## A feature with no measurements in a run is NA, without a warning
+all_missing = data.table::data.table(PeptideSequence = "A",
+                                     Run = rep(1:2, each = 2),
+                                     Intensity = c(1, 2, NA, NA))
+expect_silent(
+    MSstatsConvert:::.summarizeMultipleMeasurements(
+        data.table::copy(all_missing), max, c("PeptideSequence", "Run"))
+)
+expect_equal(
+    suppressWarnings(MSstatsConvert:::.summarizeMultipleMeasurements(
+        data.table::copy(all_missing), max, c("PeptideSequence", "Run")))$Intensity,
+    c(2, NA)
+)
+expect_silent(
+    MSstatsConvert:::.summarizeMultipleMeasurements(
+        data.table::copy(all_missing), sum, c("PeptideSequence", "Run"))
+)
+expect_equal(
+    MSstatsConvert:::.summarizeMultipleMeasurements(
+        data.table::copy(all_missing), sum, c("PeptideSequence", "Run"))$Intensity,
+    c(3, NA)
+)
 ## Zeros are coded correctly
 ### 
 with_zeros = data.table::data.table(
@@ -83,11 +105,13 @@ correct_result = data.table::data.table(
     FragmentIon = NA,
     ProductCharge = NA,
     Run = 1:4,
-    Intensity = c(5, 0, 0, 0),
+    Intensity = c(5, NA, 0, 0),
     isZero = c(FALSE, FALSE, TRUE, TRUE),
     ProteinName = "A"
 )
 MSstatsConvert:::.checkDDA(with_zeros)
+# Run 2 has no measurements. An all-NA group now returns NA for every
+# aggregator, sum included, because zero asserts a measurement that was not made.
 expect_equal(
     MSstatsConvert:::.summarizeMultipleMeasurements(with_zeros, sum, c("PeptideSequence", "Run")),
     correct_result[, -(2:3), with = FALSE]
