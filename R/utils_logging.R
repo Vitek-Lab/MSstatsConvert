@@ -28,10 +28,12 @@
 #' @keywords internal
 .fileAppender = function(log_file_path, append = TRUE) {
     force(log_file_path)
-    force(append)
+    if (!append) {
+        file.create(log_file_path) # clears the file/creates new if append = FALSE
+    }
     function(level, ...) {
         cat(.formatLogMessage(level, ...), file = log_file_path, sep = "",
-            append = append)
+            append = TRUE)
     }
 }
 
